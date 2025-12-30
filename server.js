@@ -12,9 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* =========================
-   BANCO DE DADOS
-========================= */
+/* BANCO DE DADOS */
 const pool = new Pool({
   user: "postgres",
   host: "localhost",
@@ -23,9 +21,7 @@ const pool = new Pool({
   port: 5432
 });
 
-/* =========================
-   SOC – SOAP
-========================= */
+/* SOC – SOAP */
 const WSDL_URL =
   "https://ws1.soc.com.br/WSSoc/FuncionarioModelo2Ws?wsdl";
 
@@ -33,9 +29,7 @@ const SOC_USUARIO = "U3403088";
 const SOC_TOKEN =
   "3e3c74848066fe9b39690a37c372a61816696e18";
 
-/* =========================
-   SOC – EXPORTA DADOS
-========================= */
+/* SOC – EXPORTA DADOS */
 const SOC_EXPORTA_URL = "https://ws1.soc.com.br/WebSoc/exportadados";
 
 const EXPORTA_EMPRESAS = {
@@ -65,16 +59,12 @@ const EXPORTA_CARGOS = {
 
 const parser = new XMLParser({ ignoreAttributes: false });
 
-/* =========================
-   TESTE
-========================= */
+/* TESTE */
 app.get("/", (req, res) => {
   res.send("🚀 API Cadastro Funcionários rodando");
 });
 
-/* =========================
-   EXPORTA EMPRESAS
-========================= */
+/* EXPORTA EMPRESAS */
 app.get("/empresas", async (req, res) => {
   try {
     const parametro = JSON.stringify(EXPORTA_EMPRESAS);
@@ -102,9 +92,7 @@ app.get("/empresas", async (req, res) => {
   }
 });
 
-/* =========================
-   EXPORTA UNIDADES
-========================= */
+/* EXPORTA UNIDADES */
 app.get("/unidades/:empresa", async (req, res) => {
   try {
     const parametro = JSON.stringify({
@@ -135,9 +123,7 @@ app.get("/unidades/:empresa", async (req, res) => {
   }
 });
 
-/* =========================
-   EXPORTA SETORES
-========================= */
+/* EXPORTA SETORES */
 app.get("/setores/:empresa/:unidade", async (req, res) => {
   try {
     const parametro = JSON.stringify({
@@ -169,9 +155,7 @@ app.get("/setores/:empresa/:unidade", async (req, res) => {
   }
 });
 
-/* =========================
-   EXPORTA CARGOS
-========================= */
+/* EXPORTA CARGOS */
 app.get("/cargos/:empresa", async (req, res) => {
   try {
     const parametro = JSON.stringify({
@@ -202,9 +186,7 @@ app.get("/cargos/:empresa", async (req, res) => {
   }
 });
 
-/* =========================
-   CADASTRO FUNCIONÁRIO
-========================= */
+/* CADASTRO FUNCIONÁRIO */
 app.post("/funcionarios", async (req, res) => {
   console.log("📥 BODY RECEBIDO:", req.body);
 
@@ -213,11 +195,11 @@ app.post("/funcionarios", async (req, res) => {
   await pool.query(
     `
     INSERT INTO funcionarios
-    (cod_empresa, nome_empresa, nome_funcionario, data_nascimento,
-    sexo, estado_civil, doc_identidade, cpf, cnh,
-    vencimento_cnh, matricula, data_admissao, tipo_contratacao, cod_categoria,
-    regime_trabalho, tipo_exame, cod_unidade, nome_unidade,
-    cod_setor, nome_setor, cod_cargo, nome_cargo)
+      (cod_empresa, nome_empresa, nome_funcionario, data_nascimento,
+      sexo, estado_civil, doc_identidade, cpf, cnh,
+      vencimento_cnh, matricula, data_admissao, tipo_contratacao, cod_categoria,
+      regime_trabalho, tipo_exame, cod_unidade, nome_unidade,
+      cod_setor, nome_setor, cod_cargo, nome_cargo)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)
     `,
     [
@@ -249,9 +231,28 @@ app.post("/funcionarios", async (req, res) => {
   res.json({ sucesso: true });
 });
 
-/* =========================
-   ENVIO AO SOC (CRIAÇÃO)
-========================= */
+/* LISTAR SOLICITAÇÕES */
+app.get("/solicitacoes", async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        id,
+        nome_empresa,
+        nome_funcionario,
+        cpf,
+        criado_em
+      FROM funcionarios
+      ORDER BY id DESC
+    `);
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao buscar solicitações" });
+  }
+});
+
+/* ENVIO AO SOC */
 app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
   try {
     const { id } = req.params;
@@ -272,6 +273,12 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
       `${String(data.getDate()).padStart(2, "0")}/` +
       `${String(data.getMonth() + 1).padStart(2, "0")}/` +
       data.getFullYear();
+
+    const dataAdm = new Date(f.data_admissao);
+    const dataAdmissao =
+      `${String(dataAdm.getDate()).padStart(2, "0")}/` +
+      `${String(dataAdm.getMonth() + 1).padStart(2, "0")}/` +
+      dataAdm.getFullYear();
 
     const cpf = f.cpf.replace(/\D/g, "");
 
@@ -307,7 +314,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
           sexo: f.sexo,
           estadoCivil: f.estado_civil,
           matricula: f.matricula,
-          dataAdmissao: f.data_admissao,
+          dataAdmissao,
           tipoContratacao: f.tipo_contratacao,
           codigoCategoriaESocial: f.cod_categoria,
           regimeTrabalho: f.regime_trabalho,

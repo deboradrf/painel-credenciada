@@ -5,14 +5,13 @@ if (!empresaCodigo) {
   alert("Empresa não informada na URL");
 }
 
+// FUNÇÃO PARA CARREGAR NOME DA EMPRESA
 async function carregarNomeEmpresa() {
   if (!empresaCodigo) return;
 
   try {
     const res = await fetch("http://localhost:3001/empresas");
     const empresas = await res.json();
-
-    console.log("empresas recebidas:", empresas);
 
     const empresaSelecionada = empresas.find(
       e => String(e.codigo) === String(empresaCodigo)
@@ -65,7 +64,6 @@ document.getElementById("unidadeSelect").addEventListener("change", function () 
 
   carregarSetores(unidadeCodigo);
 });
-
 
 // FUNÇÃO PARA CARREGAR SETORES
 async function carregarSetores(unidadeCodigo) {
