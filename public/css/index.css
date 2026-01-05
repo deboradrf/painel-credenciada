@@ -12,18 +12,115 @@ body {
     background-color: #F1F1F1;
 }
 
-.profile-text {
-    color: #4F545A;
-}
-
-/* NAVBAR */
-.navbar {
+.header-container {
     background: linear-gradient(135deg, #53A5A6 0%, #61b4b6 35%, #4A8F90 100%);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    color: #FFFFFF;
+    padding: 16px 32px;
 }
 
-.navbar .nav-item {
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.header-left i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: 18px;
+}
+
+.header-left strong {
+    line-height: 1;
+    font-weight: 700;
+}
+
+.header-center {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-link {
+    color: #FFFFFF;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.header-link:hover {
+    text-decoration: underline;
+}
+
+.btn-logout {
+    background: none;
+    border: none;
+    color: #FFFFFF;
+    font-size: 0.9rem;
     cursor: pointer;
+}
+
+.btn-logout:hover {
+    text-decoration: underline;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.avatar-container {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.user-name {
+    font-size: 14px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    margin-right: 5px;
+}
+
+.header-bottom {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+#userExtra {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 2px 8px;
+    border-radius: 16px;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+
+    color: #FFFFFF;
+    backdrop-filter: blur(4px);
+}
+
+#userExtra i {
+    font-size: 13px;
+    color: #F1AE33;
 }
 
 main {
@@ -38,6 +135,29 @@ main {
     justify-content: center;
     align-items: center;
     text-align: center;
+    padding: 16px 32px;
+}
+
+.welcome {
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.welcome-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #2B2B2F;
+}
+
+.welcome-subtitle {
+    font-size: 14px;
+    color: #5F5D6B;
+    margin-top: 4px;
 }
 
 .cards-container {
@@ -48,23 +168,6 @@ main {
     flex-wrap: wrap;
 }
 
-.navbar-brand img {
-    height: 40px;
-    margin-right: 10px;
-}
-
-.profile-text {
-    font-weight: bold;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-}
-
-
-
-
-
-
-
 .card {
     position: relative;
     height: fit-content;
@@ -72,6 +175,8 @@ main {
     box-shadow: 0px 187px 75px rgba(0, 0, 0, 0.01), 0px 105px 63px rgba(0, 0, 0, 0.05), 0px 47px 47px rgba(0, 0, 0, 0.09), 0px 12px 26px rgba(0, 0, 0, 0.1), 0px 0px 0px rgba(0, 0, 0, 0.1);
     border-radius: 13px;
     transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
     height: 300px;
     width: 450px;
 }
@@ -126,7 +231,13 @@ main {
     color: #5F5D6B;
 }
 
-button {
+.btn-actions {
+    margin-top: auto;
+    padding: 0 20px 20px;
+}
+
+.btn-form,
+.btn-solicitacoes {
     display: flex;
     flex-direction: row;
     justify-content: center;

@@ -1,0 +1,104 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+.gradient-form {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #F1F1F1;
+}
+
+.login-container {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px,
+        rgba(0, 0, 0, 0.23) 0px 6px 6px;
+}
+
+.login-side {
+    padding: 3rem 2rem;
+}
+
+.logo {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.logo img {
+    width: 190px;
+}
+
+.login-side form p {
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: #F1AE33;
+    border: none;
+    color: #FFFFFF;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.input-container label.text {
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.input-container .input {
+    font-size: 15px;
+    border: 2px solid #F1AE33;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.input-container .input:focus {
+    outline: none;
+    border-color: #000000;
+}
+
+/* BLOCO COLORIDO DAS REDES */
+.social-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #F1AE33 0%, #F1AE33 20%, #53A5A6 50%, #88A6BB 80%, #53A5A6 100%);
+    height: 100px;
+}
+
+#social-media {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+#social-media a {
+    color: #FFFFFF;
+    transition: transform 0.3s ease;
+}
+
+#social-media a:hover {
+    transform: scale(1.15);
+}
+
+/* Autofill Chrome */
+input:-webkit-autofill {
+    box-shadow: 0 0 0 1000px #fff inset !important;
+}

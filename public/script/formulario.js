@@ -1,8 +1,20 @@
-const params = new URLSearchParams(window.location.search);
-const empresaCodigo = params.get("empresa");
+// CÓDIGO E NOME DA EMPRESA LOGADA
+let empresaCodigo = localStorage.getItem("empresaCodigo");
+let nomeEmpresa = localStorage.getItem("empresaNome");
 
+// USUÁRIO LOGADO
+const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
+
+if (!usuarioLogado) {
+  alert("Sessão expirada. Faça login novamente.");
+  window.location.href = "/login.html";
+}
+
+const usuarioNome = usuarioLogado.nome;
+
+// SE NÃO TIVER CÓDIGO, DÁ ERRO
 if (!empresaCodigo) {
-  alert("Empresa não informada na URL");
+  alert("Empresa não informada");
 }
 
 // FUNÇÃO PARA CARREGAR NOME DA EMPRESA
@@ -155,13 +167,10 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     cod_setor: setorSelect.value,
     nome_setor: setorSelect.selectedOptions[0].dataset.nome,
     cod_cargo: cargoSelect.value,
-    nome_cargo: cargoSelect.selectedOptions[0].dataset.nome
-  };
+    nome_cargo: cargoSelect.selectedOptions[0].dataset.nome,
 
-  if (!dados.cod_unidade || !dados.cod_setor || !dados.cod_cargo) {
-    alert("Selecione unidade, setor e cargo");
-    return;
-  }
+    usuario_id: usuarioLogado.id
+  };
 
   try {
     const resposta = await fetch("http://localhost:3001/funcionarios", {

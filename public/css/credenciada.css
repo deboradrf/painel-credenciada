@@ -103,10 +103,21 @@ thead {
 }
 
 th {
+    position: relative;
     color: #FFFFFF;
     padding: 20px;
     text-align: center;
-    border-right: 1px solid #E5E7EB;
+    border-bottom: 5px solid #E5E7EB;
+}
+
+th:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 25%;
+    height: 50%;
+    width: 1px;
+    background-color: #E5E7EB;
 }
 
 td {
@@ -114,10 +125,6 @@ td {
     text-align: center;
     padding: 15px 20px;
     border-bottom: 1px solid #E5E7EB;
-}
-
-thead th {
-    border-bottom: 5px solid #E5E7EB;
 }
 
 /* STATUS */
@@ -138,11 +145,11 @@ thead th {
     background: #F1AE33;
 }
 
-.status-pill.enviado {
-    background: #22c55e;
+.status-pill.aprovado {
+    background: #53A5A6;
 }
 
-.status-pill.erro {
+.status-pill.reprovado {
     background: #ef4444;
 }
 

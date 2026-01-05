@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+    <script src="https://kit.fontawesome.com/4392b60e4c.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../css/cadastro.css">
+</head>
+
+<body class="bg-light">
+
+    <div class="container mt-5">
+        <div class="card p-4 shadow-sm mx-auto" style="max-width: 420px;">
+            <h5 class="mb-3 text-center">Cadastro de Usuário</h5>
+
+            <form id="cadastroForm">
+
+                <div class="mb-2">
+                    <label>Nome</label>
+                    <input id="nome" class="form-control" required>
+                </div>
+
+                <div class="mb-2">
+                    <label>Email</label>
+                    <input id="email" type="email" class="form-control" required>
+                </div>
+
+                <div class="mb-2">
+                    <label>Senha</label>
+                    <input id="senha" type="password" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Perfil</label>
+                    <select id="perfil" class="form-select" required>
+                        <option value="">Selecione</option>
+                        <option value="EMPRESA">Empresa</option>
+                        <option value="CREDENCIADA">Credenciada</option>
+                    </select>
+                </div>
+
+                <!-- EMPRESA / UNIDADE -->
+                <div id="empresaBox" class="d-none">
+
+                    <div class="mb-2">
+                        <label>Empresa</label>
+                        <select id="empresa" class="form-select"></select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Unidade</label>
+                        <select id="unidade" class="form-select"></select>
+                    </div>
+
+                </div>
+
+                <button class="btn btn-success w-100">Cadastrar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API = "http://localhost:3001";
+
+        const perfil = document.getElementById("perfil");
+        const empresaBox = document.getElementById("empresaBox");
+        const empresa = document.getElementById("empresa");
+        const unidade = document.getElementById("unidade");
+
+        // Empresa e unidade SEMPRE visíveis
+        empresaBox.classList.remove("d-none");
+
+        // Carrega empresas ao abrir a página
+        carregarEmpresas();
+
+        // (opcional) ainda pode usar o perfil para outras regras
+        perfil.addEventListener("change", () => {
+        // nenhuma lógica de exibir/esconder
+        });
+
+        async function carregarEmpresas() {
+            empresa.innerHTML = "<option value=''>Carregando...</option>";
+            unidade.innerHTML = "";
+
+            const res = await fetch(`${API}/empresas`);
+            const data = await res.json();
+
+            empresa.innerHTML = "<option value=''>Selecione</option>";
+            data.forEach(e => {
+                empresa.innerHTML += `
+          <option value="${e.codigo}">
+            ${e.nome}
+          </option>
+        `;
+            });
+        }
+
+        empresa.addEventListener("change", async () => {
+            if (!empresa.value) return;
+
+            unidade.innerHTML = "<option>Carregando...</option>";
+
+            const res = await fetch(`${API}/unidades/${empresa.value}`);
+            const data = await res.json();
+
+            unidade.innerHTML = "<option value=''>Selecione</option>";
+            data.forEach(u => {
+                unidade.innerHTML += `
+          <option value="${u.codigo}">
+            ${u.nome}
+          </option>
+        `;
+            });
+        });
+
+        document.getElementById("cadastroForm").addEventListener("submit", async e => {
+            e.preventDefault();
+
+            if (!empresa.value || !unidade.value) {
+                alert("Selecione empresa e unidade");
+                return;
+            }
+
+            const empresaNome =
+                empresa.options[empresa.selectedIndex]?.text || null;
+
+            const unidadeNome =
+                unidade.options[unidade.selectedIndex]?.text || null;
+
+            const body = {
+                nome: nome.value,
+                email: email.value,
+                senha: senha.value,
+                perfil: perfil.value,
+
+                cod_empresa: empresa.value,
+                nome_empresa: empresaNome,
+
+                cod_unidade: unidade.value,
+                nome_unidade: unidadeNome
+            };
+
+            const res = await fetch(`${API}/usuarios`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.erro || "Erro ao cadastrar");
+                return;
+            }
+
+            alert("Usuário cadastrado com sucesso!");
+            e.target.reset();
+            empresaBox.classList.add("d-none");
+        });
+    </script>
+
+</body>
+
+</html>
