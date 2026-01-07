@@ -60,17 +60,9 @@
 
                     <!-- Menu -->
                     <ul class="profile-list">
-                        <li>
-                            <i class="fa-regular fa-user"></i> Perfil
-                        </li>
-
-                        <li>
-                            <i class="fa-regular fa-bell"></i> Notificações
-                        </li>
-
-                        <li>
-                            <i class="fa-solid fa-gear"></i> Configurações
-                        </li>
+                        <li><i class="fa-regular fa-user"></i> Perfil</li>
+                        <li><i class="fa-regular fa-bell"></i> Notificações</li>
+                        <li><i class="fa-solid fa-gear"></i> Configurações</li>
                     </ul>
 
                     <hr>
@@ -89,13 +81,12 @@
                 </h1>
                 <p class="welcome-subtitle">
                     Uma plataforma centralizada para gerenciamento e envio de informações ao SOC de forma simples,
-                    segura e
-                    organizada.
+                    segura e organizada.
                 </p>
             </div>
 
             <div class="cards-container">
-                <div id="cardEmpresa" class="card p-3 border rounded shadow-sm" onclick="perfilSelecionado('Empresa')">
+                <div class="card card-empresa p-3 border rounded shadow-sm" onclick="perfilSelecionado('Empresa')">
                     <div class="card-header">
                         <div class="icon">
                             <i class="fa-solid fa-user-plus fa-xl" style="color: #53A5A6"></i>
@@ -113,9 +104,27 @@
                         </button>
                     </div>
                 </div>
+                
+                <div class="card card-empresa p-3 border rounded shadow-sm" onclick="perfilSelecionado('Empresa')">
+                    <div class="card-header">
+                        <div class="icon">
+                            <i class="fa-solid fa-clock fa-xl" style="color: #53A5A6"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <label class="title">Minhas Solicitações</label>
+                        <span class="subtitle">
+                            Veja o histórico de todos os formulários preenchidos e o status que se encontram.
+                        </span>
+                    </div>
+                    <div class="btn-actions">
+                        <button class="btn-solicitacoes my-3" onclick="window.location.href='historico-empresa.html'">
+                            Ver Histórico
+                        </button>
+                    </div>
+                </div>
 
-                <div class="card card-credenciada p-3 border rounded shadow-sm"
-                    onclick="perfilSelecionado('Credenciada')">
+                <div class="card card-credenciada p-3 border rounded shadow-sm" onclick="perfilSelecionado('Credenciada')">
                     <div class="card-header">
                         <div class="icon">
                             <i class="fa-solid fa-arrows-rotate fa-xl" style="color: #53A5A6"></i>
@@ -133,9 +142,8 @@
                         </button>
                     </div>
                 </div>
-
-                <div class="card card-credenciada p-3 border rounded shadow-sm"
-                    onclick="perfilSelecionado('Credenciada')">
+                <!--
+                <div class="card card-credenciada p-3 border rounded shadow-sm" onclick="perfilSelecionado('Credenciada')">
                     <div class="card-header">
                         <div class="icon">
                             <i class="fa-solid fa-clock fa-xl" style="color: #53A5A6"></i>
@@ -153,6 +161,7 @@
                         </button>
                     </div>
                 </div>
+                -->
             </div>
         </div>
     </main>

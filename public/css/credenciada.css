@@ -293,6 +293,10 @@ td {
     background: #F1AE33;
 }
 
+.status-pill.pendente_reavaliacao {
+    background: #F1AE33;
+}
+
 .status-pill.aprovado {
     background: #53A5A6;
 }

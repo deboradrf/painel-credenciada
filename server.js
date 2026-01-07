@@ -298,11 +298,13 @@ app.post("/funcionarios", async (req, res) => {
       `
       INSERT INTO funcionarios
         (cod_empresa, nome_empresa, nome_funcionario, data_nascimento,
-        sexo, estado_civil, doc_identidade, cpf, cnh,
-        vencimento_cnh, matricula, data_admissao, tipo_contratacao, cod_categoria,
-        regime_trabalho, tipo_exame, cod_unidade, nome_unidade,
-        cod_setor, nome_setor, cod_cargo, nome_cargo)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)
+        sexo, estado_civil, doc_identidade, cpf, matricula, data_admissao,
+        tipo_contratacao, cod_categoria, regime_trabalho, cod_unidade, nome_unidade,
+        cod_setor, nome_setor, cod_cargo, nome_cargo, tipo_exame, funcao_anterior, funcao_atual,
+        setor_atual, cnh, vencimento_cnh, nome_clinica, cidade_clinica, email_clinica, 
+        telefone_clinica, lab_toxicologico)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,
+      $23,$24,$25,$26,$27,$28,$29,$30)
       RETURNING id
       `,
       [
@@ -314,20 +316,28 @@ app.post("/funcionarios", async (req, res) => {
         f.estado_civil,
         f.doc_identidade,
         f.cpf,
-        f.cnh,
-        f.vencimento_cnh,
         f.matricula,
         f.data_admissao,
         f.tipo_contratacao,
         f.cod_categoria,
         f.regime_trabalho,
-        f.tipo_exame,
         f.cod_unidade,
         f.nome_unidade,
         f.cod_setor,
         f.nome_setor,
         f.cod_cargo,
-        f.nome_cargo
+        f.nome_cargo,
+        f.tipo_exame,
+        f.funcao_anterior,
+        f.funcao_atual,
+        f.setor_atual,
+        f.cnh,
+        f.vencimento_cnh,
+        f.nome_clinica,
+        f.cidade_clinica,
+        f.email_clinica, 
+        f.telefone_clinica,
+        f.lab_toxicologico
       ]
     );
 
@@ -384,6 +394,7 @@ app.get("/solicitacoes/:id", async (req, res) => {
 
     const { rows } = await pool.query(`
       SELECT
+        sf.id AS solicitacao_id,
         f.*,
         sf.status,
         sf.solicitado_em,
@@ -411,31 +422,134 @@ app.get("/solicitacoes/:id", async (req, res) => {
 
 // APROVAR / REPROVAR SOLICITAÇÃO
 app.put("/solicitacoes/:id/status", async (req, res) => {
+  const { id } = req.params;
+  const { status, usuario_id, motivo } = req.body;
+
+  if (status === "REPROVADO" && (!motivo || !motivo.trim())) {
+    return res.status(400).json({
+      erro: "Motivo da reprovação é obrigatório"
+    });
+  }
+
   try {
-    const { id } = req.params;
-    const { status, usuario_id } = req.body;
-
-    if (!["APROVADO", "REPROVADO"].includes(status)) {
-      return res.status(400).json({ erro: "Status inválido" });
-    }
-
-    await pool.query(
-      `
+    await pool.query(`
       UPDATE solicitacoes_funcionario
       SET
         status = $1,
         analisado_por = $2,
-        analisado_em = NOW()
-      WHERE id = $3
-      `,
-      [status, usuario_id, id]
-    );
+        analisado_em = NOW(),
+        motivo_reprovacao = $3
+      WHERE id = $4
+    `, [
+      status,
+      usuario_id,
+      status === "REPROVADO" ? motivo : null,
+      id
+    ]);
 
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao atualizar status" });
+  }
+});
+
+// SOLICITAÇÕES DO USUÁRIO LOGADO (HISTÓRICO EMPRESA)
+app.get("/minhas-solicitacoes/:usuarioId", async (req, res) => {
+  try {
+    const { usuarioId } = req.params;
+
+    const { rows } = await pool.query(`
+      SELECT
+        sf.id AS solicitacao_id,
+        sf.solicitado_em,
+        f.nome_funcionario,
+        f.cpf,
+        sf.status,
+        sf.motivo_reprovacao,
+        sf.analisado_em,
+        ua.nome AS analisado_por_nome
+      FROM solicitacoes_funcionario sf
+      JOIN funcionarios f ON f.id = sf.funcionario_id
+      LEFT JOIN usuarios ua ON ua.id = sf.analisado_por
+      WHERE sf.solicitado_por = $1
+      ORDER BY sf.solicitado_em DESC
+    `, [usuarioId]);
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao buscar histórico" });
+  }
+});
+
+// EDITAR SOLICITAÇÃO REPROVADA
+app.put("/solicitacoes/:id/editar", async (req, res) => {
+  const { id } = req.params;
+  const f = req.body;
+
+  try {
+    await pool.query("BEGIN");
+
+    // 1️⃣ Atualiza dados do funcionário
+    await pool.query(`
+      UPDATE funcionarios SET
+        nome_funcionario = $1,
+        data_nascimento = $2,
+        sexo = $3,
+        estado_civil = $4,
+        cpf = $5,
+        matricula = $6,
+        data_admissao = $7,
+        tipo_contratacao = $8,
+        cod_categoria = $9,
+        regime_trabalho = $10,
+        tipo_exame = $11,
+        cod_setor = $12,
+        nome_setor = $13,
+        cod_cargo = $14,
+        nome_cargo = $15
+      WHERE id = (
+        SELECT funcionario_id
+        FROM solicitacoes_funcionario
+        WHERE id = $16
+      )
+    `, [
+      f.nome_funcionario,
+      f.data_nascimento,
+      f.sexo,
+      f.estado_civil,
+      f.cpf,
+      f.matricula,
+      f.data_admissao,
+      f.tipo_contratacao,
+      f.cod_categoria,
+      f.regime_trabalho,
+      f.tipo_exame,
+      f.cod_setor,
+      f.nome_setor,
+      f.cod_cargo,
+      f.nome_cargo,
+      id
+    ]);
+
+    // 2️⃣ Atualiza status da solicitação
+    await pool.query(`
+      UPDATE solicitacoes_funcionario
+      SET
+        status = 'PENDENTE_REAVALIACAO',
+        analisado_por = NULL,
+        analisado_em = NULL
+      WHERE id = $1
+    `, [id]);
+
+    await pool.query("COMMIT");
     res.json({ sucesso: true });
 
   } catch (err) {
+    await pool.query("ROLLBACK");
     console.error(err);
-    res.status(500).json({ erro: "Erro ao alterar status" });
+    res.status(500).json({ erro: "Erro ao salvar edição" });
   }
 });
 

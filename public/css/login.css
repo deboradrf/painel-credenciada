@@ -5,6 +5,22 @@
     font-family: "Poppins", sans-serif;
 }
 
+.wave-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.wave-top svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
 .gradient-form {
     min-height: 100vh;
     display: flex;
@@ -22,7 +38,7 @@
 }
 
 .login-side {
-    padding: 3rem 2rem;
+    padding: 2rem 2rem;
 }
 
 .logo {
@@ -71,7 +87,7 @@
 
 .input-container .input:focus {
     outline: none;
-    border-color: #000000;
+    border-color: #8A94A6;
 }
 
 /* BLOCO COLORIDO DAS REDES */
@@ -101,4 +117,8 @@
 /* Autofill Chrome */
 input:-webkit-autofill {
     box-shadow: 0 0 0 1000px #fff inset !important;
+}
+
+.required {
+    color: red;
 }

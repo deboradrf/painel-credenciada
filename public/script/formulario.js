@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const avatarIcon = document.getElementById("avatarIcon");
   const avatarIconDropdown = document.getElementById("avatarIconDropdown");
+
   const userNameDropdown = document.getElementById("userNameDropdown");
   const dropdownUserExtra = document.getElementById("dropdownUserExtra");
 
@@ -107,19 +108,25 @@ async function carregarNomeEmpresa() {
   }
 }
 
-// MOSTRAR/ESCONDER SEÇÃO DE MUDANÇA DE FUNÇÃO
+// MOSTRAR / ESCONDER SEÇÃO
 document.getElementById("tipo_exame").addEventListener("change", function () {
   const cardMudancaFuncao = document.getElementById("cardMudancaFuncao");
+  const cardToxicologico = document.getElementById("cardToxicologico");
 
-  if (this.value === "mudanca_riscos_operacionais") {
+  // Mostrar Mudança de Função / Riscos Operacionais
+  if (this.value === "MUDANCA_RISCOS_OPERACIONAIS") {
     cardMudancaFuncao.style.display = "block";
-  } else {
+  }
+  else {
     cardMudancaFuncao.style.display = "none";
+  }
 
-    // LIMPA OS CAMPOS
-    document.getElementById("funcao_anterior").value = "";
-    document.getElementById("funcao_atual").value = "";
-    document.getElementById("setor_atual").value = "";
+  // Mostrar CNH para Toxicológico
+  if (this.value === "TOXICOLOGICO") {
+    cardToxicologico.style.display = "block";
+  }
+  else {
+    cardToxicologico.style.display = "none";
   }
 });
 
@@ -237,33 +244,33 @@ cpfInput.addEventListener("input", function () {
 const rgInput = document.getElementById("doc_identidade");
 
 rgInput.addEventListener("input", function () {
-    let value = rgInput.value.toUpperCase();
+  let value = rgInput.value.toUpperCase();
 
-    // 1. Extrair as 2 primeiras letras (UF)
-    let uf = value.slice(0, 2).replace(/[^A-Z]/g, "");
+  // 1. Extrair as 2 primeiras letras (UF)
+  let uf = value.slice(0, 2).replace(/[^A-Z]/g, "");
 
-    // 2. Extrair apenas números do restante
-    let numeros = value.slice(2).replace(/\D/g, "");
+  // 2. Extrair apenas números do restante
+  let numeros = value.slice(2).replace(/\D/g, "");
 
-    // 3. Separar os primeiros 8 números e o último dígito
-    let numerosAntesTraco = numeros.slice(0, 8);
-    let ultimoDigito = numeros.slice(8, 9);
+  // 3. Separar os primeiros 8 números e o último dígito
+  let numerosAntesTraco = numeros.slice(0, 8);
+  let ultimoDigito = numeros.slice(8, 9);
 
-    // 4. Formatar os 8 números com pontos
-    let numerosFormatados = numerosAntesTraco;
-    
-    if (numerosAntesTraco.length > 5) {
-        numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{3})(\d{1,3})/, "$1.$2.$3");
-    } else if (numerosAntesTraco.length > 2) {
-        numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{1,3})/, "$1.$2");
-    }
+  // 4. Formatar os 8 números com pontos
+  let numerosFormatados = numerosAntesTraco;
 
-    // MONTAR VALOR FINAL
-    let finalValue = uf;
-    if (numerosFormatados) finalValue += " " + numerosFormatados;
-    if (ultimoDigito) finalValue += "-" + ultimoDigito;
+  if (numerosAntesTraco.length > 5) {
+    numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{3})(\d{1,3})/, "$1.$2.$3");
+  } else if (numerosAntesTraco.length > 2) {
+    numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{1,3})/, "$1.$2");
+  }
 
-    rgInput.value = finalValue;
+  // MONTAR VALOR FINAL
+  let finalValue = uf;
+  if (numerosFormatados) finalValue += " " + numerosFormatados;
+  if (ultimoDigito) finalValue += "-" + ultimoDigito;
+
+  rgInput.value = finalValue;
 });
 
 // ENVIO DO FORMULÁRIO
@@ -284,27 +291,30 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     estado_civil: document.getElementById("estado_civil").value,
     doc_identidade: document.getElementById("doc_identidade").value,
     cpf: document.getElementById("cpf").value,
-    cnh: document.getElementById("cnh").value,
-    vencimento_cnh: document.getElementById("vencimento_cnh").value,
     matricula: document.getElementById("matricula").value,
     data_admissao: document.getElementById("data_admissao").value,
-
     tipo_contratacao: tipoContratacaoValue,
     cod_categoria: codCategoriaMap[tipoContratacaoValue],
     regime_trabalho: document.getElementById("regime_trabalho").value,
-    tipo_exame: document.getElementById("tipo_exame").value,
-
     cod_empresa: empresaCodigo,
     nome_empresa: nomeEmpresa,
-
     cod_unidade: unidadeSelect.value,
     nome_unidade: unidadeSelect.selectedOptions[0].dataset.nome,
-
     cod_setor: setorSelect.value,
     nome_setor: setorSelect.selectedOptions[0].dataset.nome,
-
     cod_cargo: cargoSelect.value,
     nome_cargo: cargoSelect.selectedOptions[0].dataset.nome,
+    tipo_exame: document.getElementById("tipo_exame").value,
+    funcao_anterior: document.getElementById("funcao_anterior").value || null,
+    funcao_atual: document.getElementById("funcao_atual").value || null,
+    setor_atual: document.getElementById("setor_atual").value || null,
+    cnh: document.getElementById("cnh").value || null,
+    vencimento_cnh: document.getElementById("vencimento_cnh").value || null,
+    nome_clinica: document.getElementById("nome_clinica").value,
+    cidade_clinica: document.getElementById("cidade_clinica").value,
+    email_clinica: document.getElementById("email_clinica").value,
+    telefone_clinica: document.getElementById("telefone_clinica").value,
+    lab_toxicologico: document.getElementById("lab_toxicologico").value,
 
     usuario_id: usuarioLogado.id
   };
@@ -329,17 +339,17 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
 
 // FUNÇÃO DE EDITAR PERFIL
 function editarPerfil() {
-    alert("Abrir tela de edição de perfil");
+  alert("Abrir tela de edição de perfil");
 }
 
 // FUNÇÃO DE CONFIGURAÇÃO
 function abrirConfiguracoes() {
-    alert("Abrir configurações");
+  alert("Abrir configurações");
 }
 
 // FUNÇÃO DE LOGOUT
 function logout() {
-    localStorage.removeItem("usuario");
-    localStorage.removeItem("empresaCodigo");
-    window.location.href = "login.html";
+  localStorage.removeItem("usuario");
+  localStorage.removeItem("empresaCodigo");
+  window.location.href = "login.html";
 }

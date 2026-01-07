@@ -125,8 +125,8 @@ function renderizarTabela(lista) {
           class="btn-primary"
           ${s.status !== "APROVADO" ? "disabled" : ""}
           ${s.status === "APROVADO"
-            ? `onclick="enviarSOC(${s.solicitacao_id})"`
-            : ""}>
+        ? `onclick="enviarSOC(${s.solicitacao_id})"`
+        : ""}>
           Enviar
         </button>
       </td>
@@ -198,8 +198,28 @@ async function verDetalhes(id) {
 
 // FUNÇÃO PARA ALTERAR STATUS DA SOLICITAÇÃO
 async function alterarStatus(status) {
-  if (!confirm(`Deseja ${status.toLowerCase()} esta solicitação?`)) return;
+  const motivoInput = document.getElementById("motivoReprovacao");
 
+  if (status === "REPROVADO") {
+    const motivo = motivoInput.value.trim();
+
+    if (!motivo) {
+      alert("Informe o motivo da reprovação.");
+      return;
+    }
+
+    if (!confirm("Deseja reprovar esta solicitação?")) return;
+
+    await enviarStatus(status, motivo);
+    return;
+  }
+
+  if (!confirm("Deseja aprovar esta solicitação?")) return;
+
+  await enviarStatus(status, null);
+}
+
+async function enviarStatus(status, motivo) {
   const res = await fetch(
     `http://localhost:3001/solicitacoes/${solicitacaoAtualId}/status`,
     {
@@ -207,7 +227,8 @@ async function alterarStatus(status) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         status,
-        usuario_id: usuario.id
+        usuario_id: usuario.id,
+        motivo
       })
     }
   );
@@ -215,9 +236,12 @@ async function alterarStatus(status) {
   if (res.ok) {
     alert(`Solicitação ${status.toLowerCase()} com sucesso`);
     carregarSolicitacoes();
+
     bootstrap.Modal.getInstance(
       document.getElementById("modalDetalhes")
     ).hide();
+
+    document.getElementById("motivoReprovacao").value = "";
   } else {
     alert("Erro ao alterar status");
   }
@@ -262,17 +286,17 @@ function formatarData(data) {
 
 // FUNÇÃO DE EDITAR PERFIL
 function editarPerfil() {
-    alert("Abrir tela de edição de perfil");
+  alert("Abrir tela de edição de perfil");
 }
 
 // FUNÇÃO DE CONFIGURAÇÃO
 function abrirConfiguracoes() {
-    alert("Abrir configurações");
+  alert("Abrir configurações");
 }
 
 // FUNÇÃO DE LOGOUT
 function logout() {
-    localStorage.removeItem("usuario");
-    localStorage.removeItem("empresaCodigo");
-    window.location.href = "login.html";
+  localStorage.removeItem("usuario");
+  localStorage.removeItem("empresaCodigo");
+  window.location.href = "login.html";
 }

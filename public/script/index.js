@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    const cardEmpresa = document.getElementById("cardEmpresa");
-    const cardCredenciadas = document.querySelectorAll(".card-credenciada");
+    const cardsEmpresa = document.querySelectorAll(".card-empresa");
+    const cardsCredenciada = document.querySelectorAll(".card-credenciada");
 
     const userNameDropdown = document.getElementById("userNameDropdown");
     const dropdownUserExtra = document.getElementById("dropdownUserExtra");
@@ -41,8 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // LÓGICA DOS PERFIS DE ACESSO
     if (usuario.perfil === "CREDENCIADA") {
-        cardEmpresa.style.display = "none";
-        cardCredenciadas.forEach(card => card.style.display = "flex");
+        cardsEmpresa.forEach(card => card.style.display = "none");
+        cardsCredenciada.forEach(card => card.style.display = "flex");
 
         avatarIcon.classList.add("fa-hospital");
         avatarIconDropdown.classList.add("fa-hospital");
@@ -52,8 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (usuario.perfil === "EMPRESA") {
-        cardEmpresa.style.display = "flex";
-        cardCredenciadas.forEach(card => card.style.display = "none");
+        cardsEmpresa.forEach(card => card.style.display = "flex");
+        cardsCredenciada.forEach(card => card.style.display = "none");
 
         avatarIcon.classList.add("fa-building");
         avatarIconDropdown.classList.add("fa-building");
