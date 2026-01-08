@@ -82,21 +82,26 @@ body.blur-main header {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background-color: #F1F1F1;
+    background-color: #F1AE33;
 }
 
-.avatar-circle.empresa i {
+.avatar-circle.large i {
+    color: #FFFFFF;
+}
+
+.avatar-circle:not(.large).empresa i {
     color: #F1AE33;
 }
 
-.avatar-circle.credenciada i {
+.avatar-circle:not(.large).credenciada i {
     color: #F1AE33;
 }
 
 .user-name {
-    font-weight: 700;
+    font-weight: 500;
     font-size: 14px;
     line-height: 1;
+    color: #000000;
 }
 
 .profile-menu {
@@ -113,13 +118,6 @@ body.blur-main header {
     align-items: center;
     gap: 12px;
     margin-bottom: 15px;
-}
-
-.user-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #000000;
-    line-height: 1.2;
 }
 
 .profile-subtitle {
@@ -341,4 +339,73 @@ td {
 .status-ok i {
     font-size: 8px;
     margin-right: 4px;
+}
+
+.modal-header {
+    background-color: #FFFFFF;
+    /*background: linear-gradient(135deg, #F1AE33 0%, #f8bc3a 40%, #F3B84A 100%);*/
+    border-bottom: none;
+    /*box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);*/
+}
+
+.modal-header h3 {
+  position: relative;
+  font-weight: 600;
+  font-size: 20px;
+  color: #000000;
+  margin-bottom: 15px;
+}
+
+.modal-header h3::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 50px;
+  height: 3px;
+  background: #000000;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    border-top: none;
+}
+
+.btn-reprovar {
+    background-color: rgb(253, 62, 62);
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 13px;
+    line-height: 29px;
+    padding: 0 10px 0 11px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    width: 100px;
+}
+
+.btn-aprovar {
+    background-color: rgb(56, 124, 65);
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 13px;
+    line-height: 29px;
+    padding: 0 10px 0 11px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    width: 100px;
+}
+
+.form-control {
+    background-color: #F1F1F1 !important;
 }

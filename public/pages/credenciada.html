@@ -17,7 +17,7 @@
 
 <body>
     <header class="header-container">
-        <div class="header-top">
+        <div class="header-top my-1">
 
             <div class="header-left">
                 <i class="fa-solid fa-users-rectangle"></i>
@@ -34,8 +34,8 @@
                     <a href="#" class="header-link">Ajuda</a>
                 </span>
                 <span>
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    <a href="#" class="header-link" onclick="logout()">Logout</a>
+                    <i class="fa-solid fa-phone"></i>
+                    <a href="#" class="header-link">Contato</a>
                 </span>
             </div>
 
@@ -60,17 +60,10 @@
 
                     <!-- Menu -->
                     <ul class="profile-list">
-                        <li>
-                            <i class="fa-regular fa-user"></i> Perfil
-                        </li>
-
-                        <li>
-                            <i class="fa-regular fa-bell"></i> Notificações
-                        </li>
-
-                        <li>
-                            <i class="fa-solid fa-gear"></i> Configurações
-                        </li>
+                        <li><i class="fa-regular fa-user"></i> Perfil</li>
+                        <li><i class="fa-regular fa-bell"></i> Notificações</li>
+                        <li><i class="fa-solid fa-gear"></i> Configurações</li>
+                        <li onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i>
                     </ul>
 
                     <hr>
@@ -155,7 +148,7 @@
             <div class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Detalhes da Solicitação</h5>
+                    <h3 class="modal-title">Detalhes da Solicitação</h3>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
@@ -229,23 +222,24 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-danger" onclick="alterarStatus('REPROVADO')">
+                    <button class="btn-reprovar" onclick="alterarStatus('REPROVADO')">
                         Reprovar
                     </button>
 
-                    <button class="btn btn-success" onclick="alterarStatus('APROVADO')">
+                    <button class="btn-aprovar" onclick="alterarStatus('APROVADO')">
                         Aprovar
                     </button>
                 </div>
 
                 <!-- Campo para justificar reprovação -->
-                <div class="col-12 mt-3">
+                <div class="col-12 p-3">
                     <label class="form-label">Motivo da reprovação</label>
-                    <textarea id="motivoReprovacao" class="form-control" rows="3"
-                        placeholder="Digite o motivo da reprovação"></textarea>
+                    <textarea id="motivoReprovacao" class="form-control" rows="2"
+                        placeholder="Digite o motivo da reprovação">
+                    </textarea>
                 </div>
 
-                <p id="linha_aprovacao" class="text-muted small mb-0"></p>
+                <p id="linha_aprovacao" class="text-muted small mx-3"></p>
             </div>
         </div>
     </div>

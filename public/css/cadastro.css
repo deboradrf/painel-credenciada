@@ -44,11 +44,29 @@
 
 .logo {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 30px;
 }
 
 .logo img {
     width: 190px;
+}
+
+h3 {
+  position: relative;
+  font-weight: 600;
+  font-size: 20px;
+  color: #F1AE33;
+  margin-bottom: 30px;
+}
+
+h3::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 50px;
+  height: 3px;
+  background: #F1AE33;
 }
 
 .cadastro-side form p {
@@ -88,7 +106,7 @@
 
 .input-container .input:focus {
     outline: none;
-    border-color: #8A94A6;
+    border-color: #555555;
 }
 
 /* BLOCO COLORIDO DAS REDES */
@@ -122,4 +140,20 @@ input:-webkit-autofill {
 
 .required {
     color: red;
+}
+
+.possui-cadastro {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.possui-cadastro span {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.possui-cadastro span a {
+    color: #53A5A6;
+    font-weight: 500;
 }

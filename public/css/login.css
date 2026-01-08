@@ -33,8 +33,7 @@
     border: none;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px,
-        rgba(0, 0, 0, 0.23) 0px 6px 6px;
+    box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
 }
 
 .login-side {
@@ -48,6 +47,24 @@
 
 .logo img {
     width: 190px;
+}
+
+h3 {
+  position: relative;
+  font-weight: 600;
+  font-size: 19px;
+  color: #F1AE33;
+  margin-bottom: 30px;
+}
+
+h3::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 50px;
+  height: 3px;
+  background: #F1AE33;
 }
 
 .login-side form p {

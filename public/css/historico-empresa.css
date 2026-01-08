@@ -82,21 +82,26 @@ body.blur-main header {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background-color: #F1F1F1;
+    background-color: #F1AE33;
 }
 
-.avatar-circle.empresa i {
+.avatar-circle.large i {
+    color: #FFFFFF;
+}
+
+.avatar-circle:not(.large).empresa i {
     color: #F1AE33;
 }
 
-.avatar-circle.credenciada i {
+.avatar-circle:not(.large).credenciada i {
     color: #F1AE33;
 }
 
 .user-name {
-    font-weight: 700;
+    font-weight: 500;
     font-size: 14px;
     line-height: 1;
+    color: #000000;
 }
 
 .profile-menu {
@@ -113,13 +118,6 @@ body.blur-main header {
     align-items: center;
     gap: 12px;
     margin-bottom: 15px;
-}
-
-.user-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #000000;
-    line-height: 1.2;
 }
 
 .profile-subtitle {
