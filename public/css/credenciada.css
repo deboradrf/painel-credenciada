@@ -22,16 +22,19 @@ body.blur-main header {
 }
 
 .header-container {
-    background: linear-gradient(135deg, #53A5A6, #61b4b6, #4A8F90);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     color: #FFFFFF;
-    padding: 16px 32px;
+    padding: 24px 24px;
+    z-index: 10;
 }
 
-.header-top {
+.header-wrapper {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: linear-gradient(135deg, #53A5A6, #61B4B6, #4A8F90);
+    border-radius: 40px;
+    padding: 14px 32px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
 }
 
 .header-left {
@@ -54,10 +57,12 @@ body.blur-main header {
     color: #fff;
     text-decoration: none;
     font-size: 14px;
+    font-weight: 500;
 }
 
 .header-link:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    opacity: 0.7;
 }
 
 .profile-trigger {
@@ -276,7 +281,6 @@ td {
     border-bottom: 1px solid #E5E7EB;
 }
 
-/* STATUS */
 .status-pill {
     padding: 4px 12px;
     color: #FFFFFF;
@@ -413,47 +417,8 @@ td {
     background-color: #F1F1F1 !important;
 }
 
-/* MENU FLUTUANTE ESTILO DA IMAGEM */
-/* MENU FLUTUANTE ESTILO DA IMAGEM */
-.header-container {
-    background: transparent;
-    box-shadow: none;
-    padding: 24px 24px;
-}
-
-/* Caixa do menu */
-.header-top {
-    background: linear-gradient(135deg, #53A5A6, #61b4b6, #4A8F90);
-    border-radius: 40px;
-    padding: 14px 32px;
-    margin: 0 auto;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-}
-
-/* Texto e ícones escuros */
-.header-left,
-.header-center i,
-.header-link {
-    color: #FFFFFF;
-}
-
-.header-link {
-    font-weight: 500;
-}
-
-.header-link:hover {
-    text-decoration: none;
-    opacity: 0.7;
-}
-
-
-
-
-
-
-
 .footer-wave {
-    margin-top: 100px;
+    margin-top: auto;
     width: 100%;
     position: relative;
     background: #53A5A6;
@@ -489,9 +454,9 @@ td {
 }
 
 .footer-wave-svg::after {
-    content: "© 2026 • Salubritá";
+    content: "© 2026 • Salubritá Saúde e Segurança no Trabalho";
     position: absolute;
-    top: 50%;
+    top: 85%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 2;
@@ -503,7 +468,7 @@ td {
 
 .footer-socials {
     position: absolute;
-    top: 65%;
+    top: 50%;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
