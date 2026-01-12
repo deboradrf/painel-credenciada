@@ -72,7 +72,8 @@
 
     <main>
         <div class="container mt-5">
-            <h4 class="text-center">Formulário de Solicitação de Exame ou Agendamento</h4>
+            <h4 class="text-center">Formulário de Solicitação de ASO</h4>
+            <p class="text-center">Confirme os dados do funcionário e selecione o tipo de ASO desejado para gerar a solicitação</p>
 
             <form id="formCadastro" class="mt-4">
                 <div class="card mb-4">
@@ -81,153 +82,56 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label>Nome do funcionário <span class="required">*</span></label>
+                            <label>Nome do funcionário</label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
                                     <i class="fa-solid fa-user"></i>
                                 </div>
-                                <input type="text" id="nome" placeholder="Ex: João Fernandes Silva" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Data de Nascimento <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-calendar"></i>
-                                </div>
-                                <input type="date" id="data-nascimento">
+                                <input type="text" id="nome" readonly>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Sexo <span class="required">*</span></label>
+                                <label>Data de Nascimento</label>
                                 <div class="input-wrapper">
                                     <div class="input-icon">
-                                        <i class="fa-solid fa-venus-mars"></i>
+                                        <i class="fa-solid fa-calendar"></i>
                                     </div>
-                                    <select id="sexo" required>
-                                        <option value="">Selecione...</option>
-                                        <option value="FEMININO">Feminino</option>
-                                        <option value="MASCULINO">Masculino</option>
-                                    </select>
+                                    <input type="date" id="data-nascimento" readonly>
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label>Estado Civil <span class="required">*</span></label>
+                                <label>CPF</label>
                                 <div class="input-wrapper">
                                     <div class="input-icon">
-                                        <i class="fa-solid fa-user-group"></i>
+                                        <i class="fa-solid fa-id-card-clip"></i>
                                     </div>
-                                    <select id="estado_civil" required>
-                                        <option value="">Selecione...</option>
-                                        <option value="SOLTEIRO">Solteiro(a)</option>
-                                        <option value="CASADO">Casado(a)</option>
-                                        <option value="SEPARADO">Separado(a)</option>
-                                        <option value="DIVORCIADO">Divorciado(a)</option>
-                                        <option value="VIUVO">Viúvo(a)</option>
-                                        <option value="DESQUITADO">Desquitado(a)</option>
-                                        <option value="UNIAO_ESTAVEL">União Estável</option>s
-                                        <option value="OUTROS">Outros</option>
-                                    </select>
+                                    <input type="text" id="cpf" readonly>
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Documento de Identidade - UF</label>
+                                <label>Matrícula eSocial</label>
                                 <div class="input-wrapper">
                                     <div class="input-icon">
-                                        <i class="fa-solid fa-id-card-clip"></i>
+                                        <i class="fa-solid fa-chalkboard-user"></i>
                                     </div>
-                                    <input type="text" id="doc_identidade" placeholder="Ex: MG 12.345-678">
+                                    <input type="text" id="matricula" readonly>
                                 </div>
                             </div>
+
                             <div class="form-group">
-                                <label>CPF <span class="required">*</span></label>
+                                <label>Data de Admissão</label>
                                 <div class="input-wrapper">
                                     <div class="input-icon">
-                                        <i class="fa-solid fa-id-card-clip"></i>
+                                        <i class="fa-solid fa-calendar"></i>
                                     </div>
-                                    <input type="text" id="cpf" placeholder="Ex: 123.456.789-01" required>
+                                    <input type="date" id="data_admissao" readonly>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Matrícula eSocial <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-chalkboard-user"></i>
-                                </div>
-                                <input type="text" id="matricula">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="p-3">
-                        <h5 class="my-2">Dados da Contratação</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label>Data de Admissão <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-calendar"></i>
-                                </div>
-                                <input type="date" id="data_admissao">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Tipo Contratação <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-briefcase"></i>
-                                </div>
-                                <select id="tipo_contratacao" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="CLT">CLT</option>
-                                    <option value="COOPERADO">Cooperado</option>
-                                    <option value="TERCEIRIZADO">Terceirizado</option>
-                                    <option value="AUTONOMO">Autônomo</option>
-                                    <option value="TEMPORARIO">Temporário</option>
-                                    <option value="PESSOA_JURIDICA">Pessoa Jurídica</option>
-                                    <option value="ESTAGIARIO">Estagiário</option>
-                                    <option value="MENOR_APRENDIZ">Menor Aprendiz</option>
-                                    <option value="ESTATUTARIO">Estatutário</option>
-                                    <option value="COMISSIONADO_INTERNO">Comissionado Interno</option>
-                                    <option value="COMISSIONADO_EXTERNO">Comissionado Externo</option>
-                                    <option value="APOSENTADO">Aposentado</option>
-                                    <option value="APOSENTADO_INATIVO_PREFEITURA">Aposentado/Inativo Prefeitura</option>
-                                    <option value="PENSIONISTA">Pensionista</option>
-                                    <option value="SERVIDOR_PUBLICO_EFETIVO">Servidor Público Efetivo</option>
-                                    <option value="EXTRANUMERARIO">Extranumerário</option>
-                                    <option value="AUTARQUICO">Autárquico</option>
-                                    <option value="INATIVO">Inativo</option>
-                                    <option value="TITULO_PRECARIO">Título Precário</option>
-                                    <option value="SERVIDOR_ADM_CENTRALIZADA_OU_DESCENTRALIZADA">Servidor Adm
-                                        Centralizada ou Descentralizada</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Regime de Trabalho <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-clock"></i>
-                                </div>
-                                <select id="regime_trabalho">
-                                    <option value="">Selecione...</option>
-                                    <option value="NORMAL">Normal</option>
-                                    <option value="TURNO">Turno</option>
-                                </select>
                             </div>
                         </div>
                     </div>
@@ -297,9 +201,9 @@
                                 </div>
                                 <select id="tipo_exame">
                                     <option value="">Selecione...</option>
-                                    <option value="ADMISSIONAL">Admissional</option>
                                     <option value="PERIODICO">Periódico</option>
-                                    <option value="MUDANCA_RISCOS_OPERACIONAIS">Mudança de Função / Riscos Operacionais</option>
+                                    <option value="MUDANCA_RISCOS_OPERACIONAIS">Mudança de Função / Riscos Operacionais
+                                    </option>
                                     <option value="TOXICOLOGICO">Toxicológico</option>
                                     <option value="CONSULTA_ASSISTENCIAL">Consulta Assistencial</option>
                                     <option value="DEMISSIONAL">Demissional</option>

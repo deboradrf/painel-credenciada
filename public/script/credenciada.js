@@ -2,6 +2,7 @@ let usuarioLogado = null;
 let solicitacoes = [];
 let solicitacaoAtualId = null;
 
+// DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
   usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
 
@@ -85,6 +86,7 @@ async function carregarSolicitacoes() {
   renderizarTabela(solicitacoes);
 }
 
+// FUNÇÃO PARA RENDERIZAR TABELA COM AS SOLICITAÇÕES
 function renderizarTabela(lista) {
   const tbody = document.querySelector("tbody");
   tbody.innerHTML = "";
@@ -106,11 +108,26 @@ function renderizarTabela(lista) {
 
     const podeEnviar = s.status === "APROVADO";
 
+    let iconeTipo = "";
+
+    if (s.tipo === "NOVO_CADASTRO") {
+      iconeTipo = `
+        <i class="fa-solid fa-user-plus" style="color: #F1AE33" title="Novo cadastro"></i>
+      `;
+    }
+
+    if (s.tipo === "ASO") {
+      iconeTipo = `
+        <i class="fa-solid fa-file-circle-plus" style="color: #F1AE33"title="ASO"></i>
+      `;
+    }
+
     tr.innerHTML = `
+      <td>${iconeTipo}</td>
+      <td>${formatarData(s.solicitado_em)}</td>
       <td>${s.nome_empresa}</td>
       <td>${s.nome_funcionario}</td>
       <td>${s.cpf}</td>
-      <td>${formatarData(s.solicitado_em)}</td>
       <td>
         <span class="status-pill ${statusClass}">
           ${s.status}

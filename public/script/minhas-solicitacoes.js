@@ -1,5 +1,6 @@
 let usuario = null;
 
+// DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
   usuario = JSON.parse(localStorage.getItem("usuario"));
 
@@ -98,8 +99,14 @@ function renderizarTabela(lista) {
   }
 
   lista.forEach(s => {
+    const iconeTipo =
+      s.tipo === "ASO"
+        ? `<i class="fa-solid fa-file-circle-plus" style="color: #F1AE33" title="ASO"></i>`
+        : `<i class="fa-solid fa-user-plus" style="color: #F1AE33" title="Novo Cadastro"></i>`;
+
     tbody.innerHTML += `
       <tr>
+        <td>${iconeTipo}</td>
         <td>${formatarData(s.solicitado_em)}</td>
         <td>${s.nome_funcionario}</td>
         <td>${s.cpf}</td>
@@ -109,27 +116,15 @@ function renderizarTabela(lista) {
           </span>
         </td>
         <td class="actions">
-          ${
-            s.status === "PENDENTE" || s.status === "PENDENTE_REAVALIACAO"
-              ? `<span class="text-muted">Solicitação em análise</span>`
-              : s.status === "REPROVADO" && s.motivo_reprovacao
-              ? `
+          ${s.status === "REPROVADO"
+          ? `
                 <button class="btn-outline"
-                  onclick="verMotivo('${s.motivo_reprovacao.replace(/'/g, "\\'")}')">
+                  onclick="verMotivo('${(s.motivo_reprovacao || "").replace(/'/g, "\\'")}')">
                   Ver motivo
                 </button>
-                <button class="btn btn-outline"
-                  onclick="abrirModalEditar(${s.solicitacao_id})">
-                  Editar
-                </button>
-                `
-              : `
-                <span class="text-muted">
-                  Atualizado por ${s.analisado_por_nome}
-                  em ${formatarData(s.analisado_em)}
-                </span>
-                `
-          }
+              `
+          : `<span class="text-muted">Solicitação em análise</span>`
+        }
         </td>
       </tr>
     `;
@@ -233,26 +228,14 @@ function dataParaInputDate(data) {
 function tratarData(valor) {
   if (!valor) return null;
 
-  // yyyy-mm-dd (input type="date")
   if (valor.includes("-")) return valor;
 
-  // dd/mm/yyyy
   const [dia, mes, ano] = valor.split("/");
   return `${ano}-${mes}-${dia}`;
 }
 
 function formatarData(data) {
   return new Date(data).toLocaleString("pt-BR");
-}
-
-// FUNÇÃO DE EDITAR PERFIL
-function editarPerfil() {
-  alert("Abrir tela de edição de perfil");
-}
-
-// FUNÇÃO DE CONFIGURAÇÃO
-function abrirConfiguracoes() {
-  alert("Abrir configurações");
 }
 
 // FUNÇÃO DE LOGOUT

@@ -1,6 +1,6 @@
 let usuario = null;
 
-// PERFIL DO USUÁRIO
+// DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
     usuario = JSON.parse(localStorage.getItem("usuario"));
 
@@ -82,7 +82,7 @@ function acessarFormulario() {
     }
 
     localStorage.setItem("empresaCodigo", usuario.cod_empresa);
-    window.location.href = "formulario.html";
+    window.location.href = "formulario-novo-cadastro.html";
 }
 
 // FUNÇÃO DE EDITAR PERFIL

@@ -57,6 +57,13 @@ const EXPORTA_CARGOS = {
   tipoSaida: "xml"
 };
 
+const EXPORTA_FUNCIONARIOS = {
+  empresa: "412429",
+  codigo: "211477",
+  chave: "2849e76b01bbb08b3467",
+  tipoSaida: "json"
+};
+
 const parser = new XMLParser({ ignoreAttributes: false });
 
 // TESTE
@@ -295,8 +302,8 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// CADASTRO FUNCIONÁRIO
-app.post("/funcionarios", async (req, res) => {
+// FORMULÁRIO DE NOVO CADASTRO
+app.post("/novo-cadastro", async (req, res) => {
   const f = req.body;
 
   try {
@@ -308,11 +315,10 @@ app.post("/funcionarios", async (req, res) => {
         (cod_empresa, nome_empresa, nome_funcionario, data_nascimento,
         sexo, estado_civil, doc_identidade, cpf, matricula, data_admissao,
         tipo_contratacao, cod_categoria, regime_trabalho, cod_unidade, nome_unidade,
-        cod_setor, nome_setor, cod_cargo, nome_cargo, tipo_exame, funcao_anterior, funcao_atual,
-        setor_atual, cnh, vencimento_cnh, nome_clinica, cidade_clinica, email_clinica, 
+        cod_setor, nome_setor, cod_cargo, nome_cargo, tipo_exame, nome_clinica, cidade_clinica, email_clinica, 
         telefone_clinica, lab_toxicologico)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,
-      $23,$24,$25,$26,$27,$28,$29,$30)
+      $23,$24,$25)
       RETURNING id
       `,
       [
@@ -336,11 +342,6 @@ app.post("/funcionarios", async (req, res) => {
         f.cod_cargo,
         f.nome_cargo,
         f.tipo_exame,
-        f.funcao_anterior,
-        f.funcao_atual,
-        f.setor_atual,
-        f.cnh,
-        f.vencimento_cnh,
         f.nome_clinica,
         f.cidade_clinica,
         f.email_clinica,
@@ -371,21 +372,39 @@ app.post("/funcionarios", async (req, res) => {
   }
 });
 
-// LISTAR SOLICITAÇÕES
+// LISTAR SOLICITAÇÕES (novo cadastro e aso)
 app.get("/solicitacoes", async (req, res) => {
   try {
     const { rows } = await pool.query(`
+      -- 🔹 NOVO CADASTRO
       SELECT
-        sf.id AS solicitacao_id,
-        f.id AS funcionario_id,
+        s.id              AS solicitacao_id,
+        f.id              AS funcionario_id,
         f.nome_empresa,
         f.nome_funcionario,
         f.cpf,
-        sf.status,
-        sf.solicitado_em
-      FROM solicitacoes_novo_cadastro sf
-      JOIN novo_cadastro f ON f.id = sf.funcionario_id
-      ORDER BY sf.solicitado_em DESC
+        s.status,
+        s.solicitado_em,
+        'NOVO_CADASTRO'    AS tipo
+      FROM solicitacoes_novo_cadastro s
+      JOIN novo_cadastro f ON f.id = s.funcionario_id
+
+      UNION ALL
+
+      -- 🔹 ASO
+      SELECT
+        s.id              AS solicitacao_id,
+        f.id              AS funcionario_id,
+        f.nome_empresa,
+        f.nome_funcionario,
+        f.cpf,
+        s.status,
+        s.solicitado_em,
+        'ASO'              AS tipo
+      FROM solicitacoes_aso s
+      JOIN novo_aso f ON f.id = s.funcionario_id
+
+      ORDER BY solicitado_em DESC
     `);
 
     res.json(rows);
@@ -461,32 +480,55 @@ app.put("/solicitacoes/:id/status", async (req, res) => {
   }
 });
 
-// SOLICITAÇÕES DO USUÁRIO LOGADO (HISTÓRICO EMPRESA)
+// SOLICITAÇÕES DO USUÁRIO LOGADO - novo cadastro e aso
 app.get("/minhas-solicitacoes/:usuarioId", async (req, res) => {
-  try {
-    const { usuarioId } = req.params;
+  const { usuarioId } = req.params;
 
+  try {
     const { rows } = await pool.query(`
+      -- 🔹 NOVO CADASTRO
       SELECT
-        sf.id AS solicitacao_id,
-        sf.solicitado_em,
+        s.id              AS solicitacao_id,
+        f.id              AS funcionario_id,
         f.nome_funcionario,
         f.cpf,
-        sf.status,
-        sf.motivo_reprovacao,
-        sf.analisado_em,
-        ua.nome AS analisado_por_nome
-      FROM solicitacoes_novo_cadastro sf
-      JOIN novo_cadastro f ON f.id = sf.funcionario_id
-      LEFT JOIN usuarios ua ON ua.id = sf.analisado_por
-      WHERE sf.solicitado_por = $1
-      ORDER BY sf.solicitado_em DESC
+        s.status,
+        s.solicitado_em,
+        s.motivo_reprovacao,
+        s.analisado_em,
+        u.nome            AS analisado_por_nome,
+        'NOVO_CADASTRO'    AS tipo
+      FROM solicitacoes_novo_cadastro s
+      JOIN novo_cadastro f ON f.id = s.funcionario_id
+      LEFT JOIN usuarios u ON u.id = s.analisado_por
+      WHERE s.solicitado_por = $1
+
+      UNION ALL
+
+      -- 🔹 ASO
+      SELECT
+        s.id              AS solicitacao_id,
+        f.id              AS funcionario_id,
+        f.nome_funcionario,
+        f.cpf,
+        s.status,
+        s.solicitado_em,
+        s.motivo_reprovacao,
+        s.analisado_em,
+        u.nome            AS analisado_por_nome,
+        'ASO'              AS tipo
+      FROM solicitacoes_aso s
+      JOIN novo_aso f ON f.id = s.funcionario_id
+      LEFT JOIN usuarios u ON u.id = s.analisado_por
+      WHERE s.solicitado_por = $1
+
+      ORDER BY solicitado_em DESC
     `, [usuarioId]);
 
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ erro: "Erro ao buscar histórico" });
+    res.status(500).json({ erro: "Erro ao buscar minhas solicitações" });
   }
 });
 
@@ -690,67 +732,104 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
 
 // VERIFICAR FUNCIONÁRIO NO SOC POR CPF DENTRO DA EMPRESA LOGADA (EXPORTA DADOS)
 app.get("/soc/funcionario-por-cpf/:cpf/:empresaUsuario", async (req, res) => {
-  const cpf = req.params.cpf.replace(/\D/g, "");
-  const empresaUsuario = req.params.empresaUsuario;
+  try {
+    const cpf = req.params.cpf.replace(/\D/g, "");
+    const empresaUsuario = String(req.params.empresaUsuario);
 
-  const parametro = JSON.stringify({
-    empresa: "412429", // empresa principal
-    codigo: "211470",
-    chave: "f25b0630015894783d19",
-    tipoSaida: "json",
-    cpf
-  });
+    const parametro = JSON.stringify({
+      ...EXPORTA_FUNCIONARIOS,
+      empresaTrabalho: empresaUsuario, // 🔥 empresa logada
+      cpf,
+      situacaoFuncionario: "S" // 🔥 somente ATIVO
+    });
 
-  const response = await axios.get(
-    "https://ws1.soc.com.br/WebSoc/exportadados",
-    { params: { parametro } }
-  );
+    const response = await axios.get(SOC_EXPORTA_URL, {
+      params: { parametro }
+    });
 
-  const registros = Array.isArray(response.data)
-    ? response.data
-    : [response.data];
+    const registros = Array.isArray(response.data)
+      ? response.data
+      : [response.data];
 
-  // 🔥 AQUI está a lógica correta
-  const funcionarioNaEmpresa = registros.find(
-    f => String(f.CODIGOEMPRESA) === String(empresaUsuario)
-  );
+    if (!registros.length) {
+      return res.json({ existe: false });
+    }
 
-  if (!funcionarioNaEmpresa) {
+    const f = registros[0]; // CPF é único por empresa
+
     return res.json({
-      existe: false,
-      mensagem: "Funcionário NÃO encontrado nesta empresa."
+      existe: true,
+      funcionario: {
+        codigo_empresa: f.CODIGOEMPRESA,
+        nome_empresa: f.NOMEEMPRESA,
+
+        nome: f.NOME,
+        cpf: f.CPFFUNCIONARIO,
+        matricula: f.MATRICULAFUNCIONARIO,
+        situacao: f.SITUACAO,
+
+        data_nascimento: f.DATA_NASCIMENTO,
+        data_admissao: f.DATA_ADMISSAO,
+        data_demissao: f.DATA_DEMISSAO || null,
+
+        unidade: {
+          codigo: f.CODIGOUNIDADE,
+          nome: f.NOMEUNIDADE
+        },
+
+        setor: {
+          codigo: f.CODIGOSETOR,
+          nome: f.NOMESETOR
+        },
+
+        cargo: {
+          codigo: f.CODIGOCARGO,
+          nome: f.NOMECARGO,
+          cbo: f.CBOCARGO
+        },
+
+        endereco: {
+          logradouro: f.ENDERECO,
+          numero: f.NUMEROENDERECO,
+          bairro: f.BAIRRO,
+          uf: f.UF
+        },
+
+        contato: {
+          email_corporativo: f.EMAILCORPORATIVO,
+          email_pessoal: f.EMAILPESSOAL,
+          celular: f.TELEFONECELULAR
+        },
+
+        data_cadastro: f.DATACADASTRO
+      }
+    });
+
+  } catch (err) {
+    console.error("Erro exporta funcionário:", err);
+    res.status(500).json({
+      erro: "Erro ao consultar funcionário no SOC",
+      detalhe: err.message
     });
   }
-
-  return res.json({
-    existe: true,
-    funcionario: {
-      nome: funcionarioNaEmpresa.NOME,
-      cpf: funcionarioNaEmpresa.CPFFUNCIONARIO,
-      empresa: funcionarioNaEmpresa.NOMEEMPRESA,
-      situacao: funcionarioNaEmpresa.SITUACAO,
-      matricula: funcionarioNaEmpresa.MATRICULAFUNCIONARIO
-    }
-  });
 });
 
-app.get("/soc/debug-funcionario/:cpf", async (req, res) => {
+// DEBUG PARA VER O DADO DO FUNCIONARIO PESQUISADO
+app.get("/soc/debug-funcionario-completo/:cpf/:empresa", async (req, res) => {
   const cpf = req.params.cpf.replace(/\D/g, "");
 
   const parametro = JSON.stringify({
-    empresa: "412429",
-    codigo: "211470",
-    chave: "f25b0630015894783d19",
-    tipoSaida: "json",
+    ...EXPORTA_FUNCIONARIOS,
+    empresaTrabalho: req.params.empresa,
     cpf
   });
 
-  const response = await axios.get(
-    "https://ws1.soc.com.br/WebSoc/exportadados",
-    { params: { parametro } }
-  );
+  const response = await axios.get(SOC_EXPORTA_URL, {
+    params: { parametro }
+  });
 
   res.json(response.data);
+  //http://localhost:3001/soc/debug-funcionario-completo/06909315650/1961619
 });
 
 // BUSCAR DADOS DO USUÁRIO PRA TELA DE PERFIL
@@ -773,6 +852,98 @@ app.get("/usuarios/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: "Erro ao buscar usuário" });
+  }
+});
+
+// FORMULÁRIO DE SOLICITAÇÃO DE ASO
+app.post("/solicitar-aso", async (req, res) => {
+  const f = req.body;
+
+  try {
+    await pool.query("BEGIN");
+
+    const { rows } = await pool.query(
+      `
+      INSERT INTO novo_aso (
+        cod_empresa,
+        nome_empresa,
+        nome_funcionario,
+        data_nascimento,
+        cpf,
+        matricula,
+        data_admissao,
+        cod_unidade,
+        nome_unidade,
+        cod_setor,
+        nome_setor,
+        cod_cargo,
+        nome_cargo,
+        tipo_exame,
+        cnh,
+        vencimento_cnh,
+        funcao_anterior,
+        funcao_atual,
+        setor_atual,
+        nome_clinica,
+        cidade_clinica,
+        email_clinica,
+        telefone_clinica,
+        lab_toxicologico
+      )
+      VALUES (
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,
+        $13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24
+      )
+      RETURNING id
+      `,
+      [
+        f.cod_empresa,
+        f.nome_empresa,
+        f.nome_funcionario,
+        f.data_nascimento,
+        f.cpf,
+        f.matricula,
+        f.data_admissao,
+        f.cod_unidade,
+        f.nome_unidade,
+        f.cod_setor,
+        f.nome_setor,
+        f.cod_cargo,
+        f.nome_cargo,
+        f.tipo_exame,
+        f.cnh,
+        f.vencimento_cnh,
+        f.funcao_anterior,
+        f.funcao_atual,
+        f.setor_atual,
+        f.nome_clinica,
+        f.cidade_clinica,
+        f.email_clinica,
+        f.telefone_clinica,
+        f.lab_toxicologico
+      ]
+    );
+
+    const funcionarioId = rows[0].id;
+
+    await pool.query(
+      `
+      INSERT INTO solicitacoes_aso (
+        funcionario_id, solicitado_por
+      )
+      VALUES ($1,$2)
+      `,
+      [funcionarioId, f.usuario_id]
+    );
+
+    await pool.query("COMMIT");
+
+    res.json({ sucesso: true });
+
+  } catch (err) {
+    await pool.query("ROLLBACK");
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao gerar solicitação de ASO" });
   }
 });
 

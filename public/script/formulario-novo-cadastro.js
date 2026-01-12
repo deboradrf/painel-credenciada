@@ -10,7 +10,7 @@ if (!usuarioLogado) {
   window.location.href = "/login.html";
 }
 
-// PERFIL DO USUÁRIO
+// DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
 
@@ -107,28 +107,6 @@ async function carregarNomeEmpresa() {
     console.error("Erro ao carregar nome da empresa:", err);
   }
 }
-
-// MOSTRAR / ESCONDER SEÇÃO
-document.getElementById("tipo_exame").addEventListener("change", function () {
-  const cardMudancaFuncao = document.getElementById("cardMudancaFuncao");
-  const cardToxicologico = document.getElementById("cardToxicologico");
-
-  // Mostrar Mudança de Função / Riscos Operacionais
-  if (this.value === "MUDANCA_RISCOS_OPERACIONAIS") {
-    cardMudancaFuncao.style.display = "block";
-  }
-  else {
-    cardMudancaFuncao.style.display = "none";
-  }
-
-  // Mostrar CNH para Toxicológico
-  if (this.value === "TOXICOLOGICO") {
-    cardToxicologico.style.display = "block";
-  }
-  else {
-    cardToxicologico.style.display = "none";
-  }
-});
 
 // CARREGAR UNIDADES (filtrado por empresa)
 async function carregarUnidades() {
@@ -245,23 +223,16 @@ const rgInput = document.getElementById("doc_identidade");
 
 rgInput.addEventListener("input", function () {
   let value = rgInput.value.toUpperCase();
-
-  // 1. Extrair as 2 primeiras letras (UF)
   let uf = value.slice(0, 2).replace(/[^A-Z]/g, "");
-
-  // 2. Extrair apenas números do restante
   let numeros = value.slice(2).replace(/\D/g, "");
-
-  // 3. Separar os primeiros 8 números e o último dígito
   let numerosAntesTraco = numeros.slice(0, 8);
   let ultimoDigito = numeros.slice(8, 9);
-
-  // 4. Formatar os 8 números com pontos
   let numerosFormatados = numerosAntesTraco;
 
   if (numerosAntesTraco.length > 5) {
     numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{3})(\d{1,3})/, "$1.$2.$3");
-  } else if (numerosAntesTraco.length > 2) {
+  }
+  else if (numerosAntesTraco.length > 2) {
     numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{1,3})/, "$1.$2");
   }
 
@@ -305,11 +276,6 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     cod_cargo: cargoSelect.value,
     nome_cargo: cargoSelect.selectedOptions[0].dataset.nome,
     tipo_exame: document.getElementById("tipo_exame").value,
-    funcao_anterior: document.getElementById("funcao_anterior").value || null,
-    funcao_atual: document.getElementById("funcao_atual").value || null,
-    setor_atual: document.getElementById("setor_atual").value || null,
-    cnh: document.getElementById("cnh").value || null,
-    vencimento_cnh: document.getElementById("vencimento_cnh").value || null,
     nome_clinica: document.getElementById("nome_clinica").value,
     cidade_clinica: document.getElementById("cidade_clinica").value,
     email_clinica: document.getElementById("email_clinica").value,
@@ -320,7 +286,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   };
 
   try {
-    await fetch("http://localhost:3001/funcionarios", {
+    await fetch("http://localhost:3001/novo-cadastro", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados)
@@ -336,16 +302,6 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
       "<div class='alert alert-danger'>Erro ao enviar cadastro</div>";
   }
 });
-
-// FUNÇÃO DE EDITAR PERFIL
-function editarPerfil() {
-  alert("Abrir tela de edição de perfil");
-}
-
-// FUNÇÃO DE CONFIGURAÇÃO
-function abrirConfiguracoes() {
-  alert("Abrir configurações");
-}
 
 // FUNÇÃO DE LOGOUT
 function logout() {
