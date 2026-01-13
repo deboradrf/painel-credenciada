@@ -2,6 +2,7 @@ let usuario = null;
 
 const API = "http://localhost:3001";
 
+// USUÁRIO LOGADO
 const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
 
 if (!usuarioLogado) {
@@ -75,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// 🔥 FUNÇÃO GLOBAL
+// FUNÇÃO PARA BUSCAR CPF NO SOC DENTRO DA MESMA EMPRESA DO USUÁRIO LOGADO
 async function buscarCPF() {
   const cpfInput = document.getElementById("cpfBusca");
   const resultado = document.getElementById("resultadoCPF");
@@ -102,6 +103,7 @@ async function buscarCPF() {
         <div class="alert alert-info">
           Funcionário NÃO encontrado nesta empresa.
         </div>
+        
         <button class="btn btn-success mt-2"
           onclick="window.location.href='formulario.html'">
           Cadastrar Funcionário
@@ -154,6 +156,21 @@ async function buscarCPF() {
     resultado.innerHTML = `<div class="alert alert-danger">Erro ao consultar CPF</div>`;
   }
 }
+
+// MÁSCARA DE CPF
+const cpfInput = document.getElementById("cpfBusca");
+
+cpfInput.addEventListener("input", function () {
+  let value = this.value.replace(/\D/g, "");
+
+  if (value.length > 11) value = value.slice(0, 11);
+
+  value = value.replace(/(\d{3})(\d)/, "$1.$2");
+  value = value.replace(/(\d{3})(\d)/, "$1.$2");
+  value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+
+  this.value = value;
+});
 
 // FUNÇÃO DE LOGOUT
 function logout() {

@@ -256,6 +256,18 @@ function preencherModal(s, tipo) {
   } else {
     linha.textContent = "Solicitação ainda não analisada";
   }
+
+  // MOSTAR MOTIVO DE REPROVAÇÃO NA REAVALIAÇÃO
+  const textareaMotivo =
+    tipo === "ASO"
+      ? document.getElementById("motivoReprovacaoASO")
+      : document.getElementById("motivoReprovacaoCadastro");
+
+  if (s.status === "PENDENTE_REAVALIACAO" || s.status === "REPROVADO") {
+    textareaMotivo.value = s.motivo_reprovacao;
+  } else {
+    textareaMotivo.value = "";
+  }
 }
 
 // FUNÇÃO PARA ENVIAR AO SOC
@@ -294,13 +306,7 @@ function formatarData(data) {
   return `${dia}/${mes}/${ano}`;
 }
 
-// FUNÇÃO DE LOGOUT
-function logout() {
-  localStorage.removeItem("usuario");
-  localStorage.removeItem("empresaCodigo");
-  window.location.href = "login.html";
-}
-
+// BOTÃO DE APROVAR / REPROVAR
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".btn-aprovar").forEach(btn => {
     btn.addEventListener("click", () => analisarSolicitacao("APROVADO"));
@@ -311,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// APROVAR / REPROVAR SOLICITAÇÃO
+// FUNÇÃO PARA APROVAR / REPROVAR SOLICITAÇÃO
 async function analisarSolicitacao(status) {
   const isASO = document.getElementById("modalDetalhesASO").classList.contains("show");
 
@@ -349,4 +355,11 @@ async function analisarSolicitacao(status) {
   } else {
     alert("Erro ao analisar solicitação");
   }
+}
+
+// FUNÇÃO DE LOGOUT
+function logout() {
+  localStorage.removeItem("usuario");
+  localStorage.removeItem("empresaCodigo");
+  window.location.href = "login.html";
 }

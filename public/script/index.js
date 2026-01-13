@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
         avatarDrop.classList.add("empresa");
     }
 
-    // BLUR DE FUNDO
+    // BLUR
     const profileBtn = document.querySelector(".profile-trigger");
 
     profileBtn.addEventListener("show.bs.dropdown", () => {
@@ -85,16 +85,6 @@ function acessarFormulario() {
 
     localStorage.setItem("empresaCodigo", usuario.cod_empresa);
     window.location.href = "formulario-novo-cadastro.html";
-}
-
-// FUNÇÃO DE EDITAR PERFIL
-function editarPerfil() {
-    alert("Abrir tela de edição de perfil");
-}
-
-// FUNÇÃO DE CONFIGURAÇÃO
-function abrirConfiguracoes() {
-    alert("Abrir configurações");
 }
 
 // FUNÇÃO DE LOGOUT

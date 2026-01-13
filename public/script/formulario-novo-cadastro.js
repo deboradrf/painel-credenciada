@@ -127,6 +127,7 @@ async function carregarUnidades() {
   });
 }
 
+// SELECT DE UNIDADES
 document.getElementById("unidadeSelect").addEventListener("change", function () {
   const unidadeCodigo = this.value;
 
@@ -303,7 +304,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   }
 });
 
-// CAMPO DE NOME SEMPRE MAIÚCULO E SEM CARACTERES ESPECIAIS
+// CAMPO DE NOME SEMPRE MAIÚSCULO E SEM CARACTERES ESPECIAIS
 const nomeInput = document.getElementById("nome");
 
 nomeInput.addEventListener("input", function () {

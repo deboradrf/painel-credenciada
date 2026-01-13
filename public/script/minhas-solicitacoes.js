@@ -85,6 +85,7 @@ async function carregarHistorico() {
   renderizarTabela(solicitacoes);
 }
 
+// FUNÇÃO PARA RENDERIZAR A TABELA E MOSTRAR OS DADOS
 function renderizarTabela(lista) {
   const tbody = document.getElementById("tabelaHistorico");
   tbody.innerHTML = "";
@@ -103,8 +104,8 @@ function renderizarTabela(lista) {
   lista.forEach(s => {
     const iconeTipo =
       s.tipo === "ASO"
-        ? `<i class="fa-solid fa-file-circle-plus" style="color: #F1AE33" title="ASO"></i>`
-        : `<i class="fa-solid fa-user-plus" style="color: #F1AE33" title="Novo Cadastro"></i>`;
+        ? `<i class="fa-solid fa-file-circle-plus fa-lg" style="color: #F1AE33" title="ASO"></i>`
+        : `<i class="fa-solid fa-user-plus fa-lg" style="color: #F1AE33" title="Novo Cadastro"></i>`;
 
     tbody.innerHTML += `
       <tr>

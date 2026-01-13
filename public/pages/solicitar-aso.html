@@ -81,16 +81,21 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label>CPF</label>
-                    <div class="input-wrapper">
-                        <div class="input-icon">
-                            <i class="fa-solid fa-address-card"></i>
+
+                    <div class="cpf-row">
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <i class="fa-solid fa-address-card"></i>
+                            </div>
+                            <input type="text" id="cpfBusca" placeholder="Ex: 123.456.789-01">
                         </div>
-                        <input type="text" id="cpfBusca" placeholder="Somente números">
+
+                        <button class="btn-verificar" onclick="buscarCPF()">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
                     </div>
+
                 </div>
-                <button class="btn btn-primary w-100" onclick="buscarCPF()">
-                    Verificar
-                </button>
             </div>
         </div>
 

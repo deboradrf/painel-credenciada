@@ -185,37 +185,31 @@ hr {
 .title-wrapper {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 10px;
 }
 
 h3 {
-  position: relative;
-  font-weight: 600;
-  font-size: 20px;
-  color: #000000;
-  margin-bottom: 15px;
+    position: relative;
+    font-weight: 600;
+    font-size: 20px;
+    color: #000000;
+    margin-bottom: 15px;
 }
 
 h3::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -5px;
-  width: 50px;
-  height: 3px;
-  background: #000000;
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #000000;
 }
 
 .subtitle {
     font-size: 14px;
     color: #6B7280;
-}
-
-.row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .form-group {
@@ -280,6 +274,37 @@ h3::after {
     background-color: #FFFFFF;
     border: none;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.cpf-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.cpf-row .input-wrapper {
+    flex: 1;
+}
+
+.btn-verificar {
+    padding: 0 24px;
+    border: 2px solid #8A94A6;
+    border-radius: 8px;
+    background: #F9FAFB;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    transition:
+        background-color 0.25s ease,
+        color 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.btn-verificar:hover {
+    background-color: #F1AE33;
+    color: #FFFFFF;
 }
 
 .footer-wave {

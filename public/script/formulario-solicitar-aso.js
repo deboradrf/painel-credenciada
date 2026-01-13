@@ -2,6 +2,7 @@ let usuario = null;
 
 const API = "http://localhost:3001";
 
+// USUÁRIO LOGADO
 const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
 
 if (!usuarioLogado) {
@@ -73,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// 🔥 INIT
+// INIT
 document.addEventListener("DOMContentLoaded", async () => {
   preencherEmpresaUsuario();
   await carregarUnidades();
@@ -82,17 +83,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   preencherFuncionarioASO();
 });
 
-// ================= EMPRESA =================
+// PREENCHER O CAMPO COM O NOME DA EMPRESA DO USUÁRIO LOGADO
 function preencherEmpresaUsuario() {
   document.getElementById("empresaNomeView").value = usuarioLogado.nome_empresa;
   document.getElementById("empresaCodigoHidden").value = usuarioLogado.cod_empresa;
 }
 
-// ================= FUNCIONÁRIO =================
+// FUNÇÃO PARA PREENCHER O FORMULÁRIO COM OS DADOS ENCONTRADOS
 function preencherFuncionarioASO() {
   const f = JSON.parse(localStorage.getItem("funcionarioASO"));
-
-  console.log("FUNCIONÁRIO ASO:", f);
 
   if (!f) {
     alert("Pesquise um funcionário primeiro");
@@ -100,11 +99,11 @@ function preencherFuncionarioASO() {
     return;
   }
 
-  document.getElementById("nome").value = f.nome || "";
-  document.getElementById("cpf").value = f.cpf || "";
-  document.getElementById("matricula").value = f.matricula || "";
+  document.getElementById("nome").value = f.nome;
+  document.getElementById("cpf").value = f.cpf;
+  document.getElementById("matricula").value = f.matricula;
 
-  // Datas DD/MM/YYYY → YYYY-MM-DD
+  // FORMATAR DATAS
   if (f.data_nascimento) {
     const [d, m, a] = f.data_nascimento.split("/");
     document.getElementById("data-nascimento").value = `${a}-${m}-${d}`;
@@ -117,15 +116,14 @@ function preencherFuncionarioASO() {
 
   document.getElementById("cpf").readOnly = true;
 
-  // Espera selects carregarem
   setTimeout(() => {
-    document.getElementById("unidadeSelect").value = f.cod_unidade || "";
-    document.getElementById("setorSelect").value = f.cod_setor || "";
-    document.getElementById("cargoSelect").value = f.cod_cargo || "";
+    document.getElementById("unidadeSelect").value = f.cod_unidade;
+    document.getElementById("setorSelect").value = f.cod_setor;
+    document.getElementById("cargoSelect").value = f.cod_cargo;
   }, 500);
 }
 
-// ================= LOADERS =================
+// FUNÇÃO PARA CARREGAR O SELECT DAS UNIDADES
 async function carregarUnidades() {
   const res = await fetch(`${API}/unidades/${usuarioLogado.cod_empresa}`);
   const dados = await res.json();
@@ -137,6 +135,7 @@ async function carregarUnidades() {
   });
 }
 
+// FUNÇÃO PARA CARREGAR O SELECT DOS SETORES
 async function carregarSetores() {
   const res = await fetch(`${API}/setores/${usuarioLogado.cod_empresa}`);
   const dados = await res.json();
@@ -148,6 +147,7 @@ async function carregarSetores() {
   });
 }
 
+// FUNÇÃO PARA CARREGAR O SELECT DOS CARGOS
 async function carregarCargos() {
   const res = await fetch(`${API}/cargos/${usuarioLogado.cod_empresa}`);
   const dados = await res.json();
@@ -159,18 +159,16 @@ async function carregarCargos() {
   });
 }
 
-// MOSTRAR / OCULTAR SEÇÃO
+// MOSTRAR / OCULTAR SEÇÃO TOXICOLÓGICO E MUDANÇA DE FUNÇÃO
 document.addEventListener("DOMContentLoaded", () => {
   const tipoExame = document.getElementById("tipo_exame");
   const cardToxicologico = document.getElementById("cardToxicologico");
   const cardMudancaFuncao = document.getElementById("cardMudancaFuncao");
 
   tipoExame.addEventListener("change", () => {
-    // Esconde tudo primeiro
     cardToxicologico.style.display = "none";
     cardMudancaFuncao.style.display = "none";
 
-    // Mostra conforme o tipo
     if (tipoExame.value === "TOXICOLOGICO") {
       cardToxicologico.style.display = "block";
     }
@@ -195,28 +193,20 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     cpf: document.getElementById("cpf").value,
     matricula: document.getElementById("matricula").value,
     data_admissao: document.getElementById("data_admissao").value,
-
     cod_empresa: usuarioLogado.cod_empresa,
     nome_empresa: document.getElementById("empresaNomeView").value,
-
     cod_unidade: unidadeSelect.value,
     nome_unidade: unidadeSelect.options[unidadeSelect.selectedIndex]?.text || null,
-
     cod_setor: setorSelect.value,
     nome_setor: setorSelect.options[setorSelect.selectedIndex]?.text || null,
-
     cod_cargo: cargoSelect.value,
     nome_cargo: cargoSelect.options[cargoSelect.selectedIndex]?.text || null,
-
     tipo_exame: document.getElementById("tipo_exame").value,
-
     cnh: document.getElementById("cnh").value || null,
     vencimento_cnh: document.getElementById("vencimento_cnh").value || null,
-
     funcao_anterior: document.getElementById("funcao_anterior")?.value || null,
     funcao_atual: document.getElementById("funcao_atual")?.value || null,
     setor_atual: document.getElementById("setor_atual")?.value || null,
-
     nome_clinica: document.getElementById("nome_clinica").value,
     cidade_clinica: document.getElementById("cidade_clinica").value,
     email_clinica: document.getElementById("email_clinica").value,

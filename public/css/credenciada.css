@@ -182,26 +182,45 @@ hr {
     color: #6B7280;
 }
 
-h1 {
-    font-size: 18px;
-    font-weight: 600;
+.title-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px;
 }
 
-.page-header p {
-    font-size: 13px;
+h3 {
+  position: relative;
+  font-weight: 600;
+  font-size: 20px;
+  color: #000000;
+  margin-bottom: 15px;
+}
+
+h3::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 50px;
+  height: 3px;
+  background: #000000;
+}
+
+.subtitle {
+    font-size: 14px;
     color: #6B7280;
-    margin-top: 4px;
 }
 
 .filters {
     display: grid;
     grid-template-columns: 160px 1fr 1fr 280px;
     gap: 16px;
-    margin: 24px 0;
     align-items: end;
     background-color: #FFFFFF;
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 20px;
+    margin-bottom: 20px;
 }
 
 .filter-group label {

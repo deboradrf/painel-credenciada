@@ -73,11 +73,13 @@
 
     <main>
         <div class="container-fluid p-4">
-            <div class="page-header">
-                <h1 class="mt-3">Gerenciamento de Solicitações</h1>
-                <p>Visualize, filtre e gerencie todas as solicitações de cadastro de funcionários</p>
+            <div class="title-wrapper">
+                <h3>Solicitações Cadastradas</h3>
+                <p class="subtitle">
+                    Visualize, filtre e gerencie todas as solicitações de ASOs e cadastro de funcionários
+                </p>
             </div>
-
+            
             <div class="filters">
                 <div class="filter-group">
                     <label>Status</label>
@@ -108,8 +110,6 @@
                     <button id="btnLimpar" class="btn-clear">Limpar filtros</button>
                 </div>
             </div>
-
-            <h1 class="mt-5">Solicitações Cadastradas</h1>
 
             <div class="table-wrapper">
                 <table>
@@ -285,7 +285,9 @@
                     <textarea id="motivoReprovacaoCadastro" class="form-control" rows="2"></textarea>
                 </div>
 
-                <p id="linha_aprovacao_cadastro" class="text-muted small"></p>
+                <div class="col-12 mx-3 text-center">
+                    <p id="linha_aprovacao_cadastro" class="text-muted small"></p>
+                </div>
             </div>
         </div>
     </div>
@@ -394,7 +396,9 @@
                     <textarea id="motivoReprovacaoASO" class="form-control" rows="2" placeholder="Digite o motivo da reprovação"></textarea>
                 </div>
 
-                <p id="linha_aprovacao_aso" class="text-muted small"></p>
+                <div class="col-12 mx-3 text-center">
+                    <p id="linha_aprovacao_aso" class="text-muted small"></p>
+                </div>
             </div>
         </div>
     </div>
