@@ -72,23 +72,29 @@
     </header>
 
     <main class="container-fluid p-4">
-        <h2>Solicitação de ASO</h2>
-        <p>Verifique se o funcionário existe na empresa antes de prosseguir.</p>
+        <div class="title-wrapper">
+            <h3>Solicitação de ASO</h3>
+            <p class="subtitle">Verifique se o funcionário já possui cadastro no SOC antes de prosseguir</p>
+        </div>
 
-        <div class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label">CPF</label>
-                <input id="cpfBusca" class="form-control" placeholder="Somente números">
-            </div>
-
-            <div class="col-md-2">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>CPF</label>
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <i class="fa-solid fa-address-card"></i>
+                        </div>
+                        <input type="text" id="cpfBusca" placeholder="Somente números">
+                    </div>
+                </div>
                 <button class="btn btn-primary w-100" onclick="buscarCPF()">
                     Verificar
                 </button>
             </div>
         </div>
 
-        <div id="resultadoCPF" class="mt-4"></div>
+        <div id="resultadoCPF" class="mt-5"></div>
     </main>
 
     <footer class="footer-wave">

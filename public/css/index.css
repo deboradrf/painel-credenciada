@@ -195,7 +195,6 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
     margin-bottom: 20px;
 }
 
@@ -227,7 +226,7 @@ main {
     display: flex;
     flex-direction: column;
     height: 300px;
-    width: 450px;
+    width: 400px;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 

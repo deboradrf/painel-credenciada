@@ -134,14 +134,11 @@ function renderizarTabela(lista) {
         </span>
       </td>
       <td class="actions">
-        <button
-          class="btn-outline"
-          onclick="verDetalhes(${s.solicitacao_id})">
+        <button class="btn-outline" onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
           Detalhes
         </button>
 
-        <button
-          class="btn-primary"
+        <button class="btn-primary"
           ${s.status !== "APROVADO" ? "disabled" : ""}
           ${s.status === "APROVADO"
         ? `onclick="enviarSOC(${s.solicitacao_id})"`
@@ -164,8 +161,7 @@ function aplicarFiltros() {
   const filtradas = solicitacoes.filter(s => {
     const matchStatus = !status || s.status === status;
     const matchEmpresa = !empresa || s.nome_empresa.toLowerCase().includes(empresa);
-    const matchFuncionario =
-      !funcionario || s.nome_funcionario.toLowerCase().includes(funcionario);
+    const matchFuncionario = !funcionario || s.nome_funcionario.toLowerCase().includes(funcionario);
 
     return matchStatus && matchEmpresa && matchFuncionario;
   });
@@ -174,44 +170,88 @@ function aplicarFiltros() {
 }
 
 // FUNÇÃO PARA VER DETALHES
-async function verDetalhes(id) {
+async function verDetalhes(id, tipo) {
   solicitacaoAtualId = id;
 
   try {
-    const res = await fetch(`http://localhost:3001/solicitacoes/${id}`);
-    if (!res.ok) throw new Error("Erro ao buscar detalhes");
+    const url =
+      tipo === "ASO"
+        ? `http://localhost:3001/solicitacoes/aso/${id}`
+        : `http://localhost:3001/solicitacoes/novo-cadastro/${id}`;
 
-    const s = await res.json();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error();
 
-    document.getElementById("show_nome_funcionario").value = s.nome_funcionario;
-    document.getElementById("show_data_nascimento").value = s.data_nascimento;
-    document.getElementById("show_sexo").value = s.sexo;
-    document.getElementById("show_estado_civil").value = s.estado_civil;
-    document.getElementById("show_doc_identidade").value = s.doc_identidade;
-    document.getElementById("show_cpf").value = s.cpf;
-    document.getElementById("show_cnh").value = s.cnh;
-    document.getElementById("show_vencimento_cnh").value = s.vencimento_cnh;
-    document.getElementById("show_matricula").value = s.matricula;
+    const { dados } = await res.json();
 
-    document.getElementById("det_nome_empresa").value = s.nome_empresa;
-    document.getElementById("det_nome_unidade").value = s.nome_unidade;
-    document.getElementById("det_nome_setor").value = s.nome_setor;
-    document.getElementById("det_nome_cargo").value = s.nome_cargo;
+    preencherModal(dados, tipo);
 
-    const linha = document.getElementById("linha_aprovacao");
+    const modalId =
+      tipo === "ASO"
+        ? "modalDetalhesASO"
+        : "modalDetalhesNovoCadastro";
 
-    if (s.status === "APROVADO" || s.status === "REPROVADO") {
-      linha.textContent =
-        `${s.status === "APROVADO" ? "Aprovado" : "Reprovado"} por ` +
-        `${s.analisado_por_nome} em ${formatarData(s.analisado_em)}`;
-    } else {
-      linha.textContent = "Solicitação ainda não analisada";
-    }
+    new bootstrap.Modal(
+      document.getElementById(modalId)
+    ).show();
 
-    new bootstrap.Modal(document.getElementById("modalDetalhes")).show();
   } catch (err) {
     console.error(err);
     alert("Erro ao carregar detalhes");
+  }
+}
+
+// FUNÇÃO PARA PREENHCER O MODAL
+function preencherModal(s, tipo) {
+  if (tipo === "NOVO_CADASTRO") {
+    document.getElementById("cadastro_nome_funcionario").value = s.nome_funcionario;
+    document.getElementById("cadastro_data_nascimento").value = formatarData(s.data_nascimento);
+    document.getElementById("cadastro_sexo").value = s.sexo;
+    document.getElementById("cadastro_estado_civil").value = s.estado_civil;
+    document.getElementById("cadastro_doc_identidade").value = s.doc_identidade;
+    document.getElementById("cadastro_cpf").value = s.cpf;
+    document.getElementById("cadastro_matricula").value = s.matricula;
+    document.getElementById("cadastro_data_admissao").value = formatarData(s.data_admissao);
+    document.getElementById("cadastro_tipo_contratacao").value = s.tipo_contratacao;
+    document.getElementById("cadastro_regime_trabalho").value = s.regime_trabalho;
+    document.getElementById("cadastro_nome_empresa").value = s.nome_empresa;
+    document.getElementById("cadastro_nome_unidade").value = s.nome_unidade;
+    document.getElementById("cadastro_nome_setor").value = s.nome_setor;
+    document.getElementById("cadastro_nome_cargo").value = s.nome_cargo;
+    document.getElementById("cadastro_tipo_exame").value = s.tipo_exame;
+    document.getElementById("cadastro_nome_clinica").value = s.nome_clinica;
+    document.getElementById("cadastro_cidade_clinica").value = s.cidade_clinica;
+    document.getElementById("cadastro_email_clinica").value = s.email_clinica;
+    document.getElementById("cadastro_telefone_clinica").value = s.telefone_clinica;
+    document.getElementById("cadastro_lab_toxicologico").value = s.lab_toxicologico;
+  }
+
+  if (tipo === "ASO") {
+    document.getElementById("aso_nome_funcionario").value = s.nome_funcionario;
+    document.getElementById("aso_data_nascimento").value = formatarData(s.data_nascimento);
+    document.getElementById("aso_cpf").value = s.cpf;
+    document.getElementById("aso_matricula").value = s.matricula;
+    document.getElementById("aso_data_admissao").value = formatarData(s.data_admissao);
+    document.getElementById("aso_nome_empresa").value = s.nome_empresa;
+    document.getElementById("aso_nome_unidade").value = s.nome_unidade;
+    document.getElementById("aso_nome_setor").value = s.nome_setor;
+    document.getElementById("aso_nome_cargo").value = s.nome_cargo;
+    document.getElementById("aso_tipo_exame").value = s.tipo_exame;
+    document.getElementById("aso_nome_clinica").value = s.nome_clinica;
+    document.getElementById("aso_cidade_clinica").value = s.cidade_clinica;
+    document.getElementById("aso_email_clinica").value = s.email_clinica;
+    document.getElementById("aso_telefone_clinica").value = s.telefone_clinica;
+    document.getElementById("aso_lab_toxicologico").value = s.lab_toxicologico;
+  }
+
+  // STATUS
+  const linha = document.getElementById("linha_aprovacao");
+
+  if (s.status === "APROVADO" || s.status === "REPROVADO") {
+    linha.textContent =
+      `${s.status} por ${s.analisado_por_nome} em ${formatarData(s.analisado_em)}`;
+  } else {
+    linha.textContent = "Solicitação ainda não analisada";
   }
 }
 
@@ -256,8 +296,13 @@ async function enviarStatus(status, motivo) {
     alert(`Solicitação ${status.toLowerCase()} com sucesso`);
     carregarSolicitacoes();
 
+    const modalId =
+      document.getElementById("modalDetalhesASO").classList.contains("show")
+        ? "modalDetalhesASO"
+        : "modalDetalhesNovoCadastro";
+
     bootstrap.Modal.getInstance(
-      document.getElementById("modalDetalhes")
+      document.getElementById(modalId)
     ).hide();
 
     document.getElementById("motivoReprovacao").value = "";
@@ -294,13 +339,12 @@ async function enviarSOC(id) {
 function formatarData(data) {
   if (!data) return "-";
 
-  return new Date(data).toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  const d = new Date(data);
+  const dia = String(d.getDate()).padStart(2, "0");
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const ano = d.getFullYear();
+
+  return `${dia}/${mes}/${ano}`;
 }
 
 // FUNÇÃO DE LOGOUT

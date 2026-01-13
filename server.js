@@ -414,8 +414,8 @@ app.get("/solicitacoes", async (req, res) => {
   }
 });
 
-// DETALHES DA SOLICITAÇÃO
-app.get("/solicitacoes/:id", async (req, res) => {
+// DETALHES DA SOLICITAÇÃO - NOVO CADASTRO
+app.get("/solicitacoes/novo-cadastro/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -439,11 +439,50 @@ app.get("/solicitacoes/:id", async (req, res) => {
       return res.status(404).json({ erro: "Solicitação não encontrada" });
     }
 
-    res.json(rows[0]);
+    res.json({
+      tipo: "NOVO_CADASTRO",
+      dados: rows[0]
+    });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ erro: "Erro ao buscar detalhes" });
+    res.status(500).json({ erro: "Erro ao buscar detalhes do cadastro" });
+  }
+});
+
+// DETALHES DA SOLICITAÇÃO - ASO
+app.get("/solicitacoes/aso/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { rows } = await pool.query(`
+      SELECT
+        sf.id AS solicitacao_id,
+        f.*,
+        sf.status,
+        sf.solicitado_em,
+        u.nome AS solicitado_por_nome,
+        ua.nome AS analisado_por_nome,
+        sf.analisado_em
+      FROM solicitacoes_aso sf
+      JOIN novo_aso f ON f.id = sf.funcionario_id
+      JOIN usuarios u ON u.id = sf.solicitado_por
+      LEFT JOIN usuarios ua ON ua.id = sf.analisado_por
+      WHERE sf.id = $1
+    `, [id]);
+
+    if (!rows.length) {
+      return res.status(404).json({ erro: "Solicitação não encontrada" });
+    }
+
+    res.json({
+      tipo: "ASO",
+      dados: rows[0]
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao buscar detalhes do ASO" });
   }
 });
 
@@ -738,9 +777,9 @@ app.get("/soc/funcionario-por-cpf/:cpf/:empresaUsuario", async (req, res) => {
 
     const parametro = JSON.stringify({
       ...EXPORTA_FUNCIONARIOS,
-      empresaTrabalho: empresaUsuario, // 🔥 empresa logada
+      empresaTrabalho: empresaUsuario, // EMPRESA LOGADA
       cpf,
-      situacaoFuncionario: "S" // 🔥 somente ATIVO
+      situacaoFuncionario: "S" // SOMENTE ATIVO
     });
 
     const response = await axios.get(SOC_EXPORTA_URL, {
@@ -755,7 +794,7 @@ app.get("/soc/funcionario-por-cpf/:cpf/:empresaUsuario", async (req, res) => {
       return res.json({ existe: false });
     }
 
-    const f = registros[0]; // CPF é único por empresa
+    const f = registros[0];
 
     return res.json({
       existe: true,
@@ -763,6 +802,7 @@ app.get("/soc/funcionario-por-cpf/:cpf/:empresaUsuario", async (req, res) => {
         codigo_empresa: f.CODIGOEMPRESA,
         nome_empresa: f.NOMEEMPRESA,
 
+        cod_funcionario: f.CODIGO,
         nome: f.NOME,
         cpf: f.CPFFUNCIONARIO,
         matricula: f.MATRICULAFUNCIONARIO,

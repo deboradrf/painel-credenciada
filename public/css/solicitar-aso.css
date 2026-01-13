@@ -182,239 +182,104 @@ hr {
     color: #6B7280;
 }
 
-h1 {
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.page-header p {
-    font-size: 13px;
-    color: #6B7280;
-    margin-top: 4px;
-}
-
-.filters {
-    display: grid;
-    grid-template-columns: 160px 1fr 1fr 280px;
-    gap: 16px;
-    margin: 24px 0;
-    align-items: end;
-    background-color: #FFFFFF;
-    border-radius: 8px;
-    padding: 20px;
-}
-
-.filter-group label {
-    font-size: 12px;
-    margin-bottom: 4px;
-}
-
-.filter-group input,
-.filter-group select {
-    width: 100%;
-    height: 36px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    padding: 0 10px;
-    font-size: 13px;
-}
-
-.filter-actions {
+.title-wrapper {
     display: flex;
-    gap: 12px;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
-.btn-search {
-    background: #F1AE33;
-    color: #FFFFFF;
-    border: none;
-    padding: 0 16px;
-    height: 36px;
-    border-radius: 8px;
-    font-size: 13px;
+h3 {
+  position: relative;
+  font-weight: 600;
+  font-size: 20px;
+  color: #000000;
+  margin-bottom: 15px;
 }
 
-.btn-clear {
-    background: none;
-    border: none;
-    color: #000000;
-    font-size: 13px;
+h3::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 50px;
+  height: 3px;
+  background: #000000;
 }
 
-.table-wrapper {
+.subtitle {
+    font-size: 14px;
+    color: #6B7280;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-group {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    color: #4F545A;
+    font-weight: 600;
+    font-size: 15px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #F9FAFB;
+    border: 2px solid #8A94A6;
     border-radius: 8px;
     overflow: hidden;
+    align-items: stretch;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-}
-
-thead {
-    background: linear-gradient(135deg, #53A5A6 0%, #61b4b6 35%, #4A8F90 100%);
-}
-
-th {
-    position: relative;
-    color: #FFFFFF;
-    padding: 20px;
-    text-align: center;
-    border-bottom: 5px solid #E5E7EB;
-}
-
-th:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    top: 25%;
-    height: 50%;
-    width: 1px;
-    background-color: #E5E7EB;
-}
-
-td {
-    background-color: #FFFFFF;
-    text-align: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid #E5E7EB;
-}
-
-.status-pill {
-    padding: 4px 12px;
-    color: #FFFFFF;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 1.2;
-    display: inline-flex;
+.input-icon {
+    background: #F9FAFB;
+    padding: 12px 14px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap;
-}
-
-.status-pill.pendente {
-    background: #F1AE33;
-}
-
-.status-pill.pendente_reavaliacao {
-    background: #F1AE33;
-}
-
-.status-pill.aprovado {
-    background: #53A5A6;
-}
-
-.status-pill.enviado_soc {
-    background: #88A6BB;
-}
-
-.status-pill.reprovado {
-    background: #ef4444;
-}
-
-.status-pill.erro {
-    background: #ef4444;
-}
-
-.actions button {
-    background-color: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
-    color: #000000;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 13px;
-    line-height: 29px;
-    padding: 0 10px 0 11px;
+    font-size: 16px;
+    color: #8A94A6;
+    min-width: 55px;
     position: relative;
-    text-align: center;
-    text-decoration: none;
-    width: 100px;
+    border-right: none;
 }
 
-.actions button:hover {
-    background-color: #F1AE33;
-}
-
-.status-ok {
-    color: #16a34a;
-}
-
-.status-ok i {
-    font-size: 8px;
-    margin-right: 4px;
-}
-
-.modal-header {
-    background-color: #FFFFFF;
-    /*background: linear-gradient(135deg, #F1AE33 0%, #f8bc3a 40%, #F3B84A 100%);*/
-    border-bottom: none;
-    /*box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);*/
-}
-
-.modal-header h3 {
-    position: relative;
-    font-weight: 600;
-    font-size: 20px;
-    color: #000000;
-    margin-bottom: 15px;
-}
-
-.modal-header h3::after {
-    content: "";
+.input-icon::after {
+    content: '';
     position: absolute;
-    left: 0;
-    bottom: -5px;
-    width: 50px;
-    height: 3px;
-    background: #000000;
+    right: 0;
+    height: 80%;
+    width: 3%;
+    background-color: #8A94A6;
 }
 
-.modal-footer {
-    display: flex;
-    justify-content: center;
-    border-top: none;
+.input-wrapper input {
+    flex: 1;
+    padding: 12px 14px;
+    border: none;
+    background: transparent;
+    color: #000000;
+    font-size: 15px;
 }
 
-.btn-reprovar {
-    background-color: rgb(253, 62, 62);
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
-    color: #FFFFFF;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 13px;
-    line-height: 29px;
-    padding: 0 10px 0 11px;
-    position: relative;
-    text-align: center;
-    text-decoration: none;
-    width: 100px;
+.input-wrapper input:focus {
+    outline: none;
 }
 
-.btn-aprovar {
-    background-color: rgb(56, 124, 65);
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
-    color: #FFFFFF;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 13px;
-    line-height: 29px;
-    padding: 0 10px 0 11px;
-    position: relative;
-    text-align: center;
-    text-decoration: none;
-    width: 100px;
-}
-
-.form-control {
-    background-color: #F1F1F1 !important;
+.card {
+    background-color: #FFFFFF;
+    border: none;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
 .footer-wave {

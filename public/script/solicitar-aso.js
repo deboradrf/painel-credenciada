@@ -123,18 +123,31 @@ async function buscarCPF() {
     };
 
     localStorage.setItem("funcionarioASO", JSON.stringify(funcionarioASO));
-
+    console.log("DATA COMPLETA:", data);
+  console.log("FUNCIONARIO:", data.funcionario);
+  console.log("CHAVES:", Object.keys(data.funcionario));
     resultado.innerHTML = `
-      <div class="alert alert-success">Funcionário encontrado</div>
-      <ul class="list-group">
-        <li class="list-group-item"><b>Nome:</b> ${f.nome}</li>
-        <li class="list-group-item"><b>Empresa:</b> ${f.nome_empresa}</li>
-        <li class="list-group-item"><b>Matrícula:</b> ${f.matricula}</li>
-      </ul>
-      <button class="btn btn-primary mt-3"
-        onclick="window.location.href='formulario-solicitar-aso.html'">
-        Solicitar ASO para este funcionário
-      </button>
+      <div class="card shadow">
+        <div class="card-body">
+
+          <div class="alert alert-success">
+            Funcionário encontrado
+          </div>
+
+          <ul class="list-group mb-3">
+            <li class="list-group-item"><b>Empresa:</b> ${f.nome_empresa}</li>
+            <li class="list-group-item"><b>Código:</b> ${f.cod_funcionario}</li>
+            <li class="list-group-item"><b>Nome:</b> ${f.nome}</li>
+            <li class="list-group-item"><b>Matrícula eSocial:</b> ${f.matricula}</li>
+          </ul>
+
+          <button class="btn btn-primary w-100"
+            onclick="window.location.href='formulario-solicitar-aso.html'">
+            Solicitar ASO para este funcionário
+          </button>
+
+        </div>
+      </div>
     `;
 
   } catch (err) {

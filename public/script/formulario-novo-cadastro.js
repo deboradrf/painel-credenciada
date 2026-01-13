@@ -303,6 +303,20 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   }
 });
 
+// CAMPO DE NOME SEMPRE MAIÚCULO E SEM CARACTERES ESPECIAIS
+const nomeInput = document.getElementById("nome");
+
+nomeInput.addEventListener("input", function () {
+  let valor = this.value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase();
+
+  valor = valor.replace(/[^A-Z\s]/g, "");
+
+  this.value = valor;
+});
+
 // FUNÇÃO DE LOGOUT
 function logout() {
   localStorage.removeItem("usuario");
