@@ -376,35 +376,37 @@ app.post("/novo-cadastro", async (req, res) => {
 app.get("/solicitacoes", async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      -- 🔹 NOVO CADASTRO
-      SELECT
-        s.id              AS solicitacao_id,
-        f.id              AS funcionario_id,
-        f.nome_empresa,
-        f.nome_funcionario,
-        f.cpf,
-        s.status,
-        s.solicitado_em,
-        'NOVO_CADASTRO'    AS tipo
-      FROM solicitacoes_novo_cadastro s
-      JOIN novo_cadastro f ON f.id = s.funcionario_id
+      SELECT *
+      FROM (
+        -- 🔹 NOVO CADASTRO
+        SELECT
+          s.id              AS solicitacao_id,
+          f.id              AS funcionario_id,
+          f.nome_empresa,
+          f.nome_funcionario,
+          f.cpf,
+          s.status,
+          s.solicitado_em,
+          'NOVO_CADASTRO'    AS tipo
+        FROM solicitacoes_novo_cadastro s
+        JOIN novo_cadastro f ON f.id = s.funcionario_id
 
-      UNION ALL
+        UNION ALL
 
-      -- 🔹 ASO
-      SELECT
-        s.id              AS solicitacao_id,
-        f.id              AS funcionario_id,
-        f.nome_empresa,
-        f.nome_funcionario,
-        f.cpf,
-        s.status,
-        s.solicitado_em,
-        'ASO'              AS tipo
-      FROM solicitacoes_aso s
-      JOIN novo_aso f ON f.id = s.funcionario_id
-
-      ORDER BY solicitado_em DESC
+        -- 🔹 ASO
+        SELECT
+          s.id              AS solicitacao_id,
+          f.id              AS funcionario_id,
+          f.nome_empresa,
+          f.nome_funcionario,
+          f.cpf,
+          s.status,
+          s.solicitado_em,
+          'ASO'              AS tipo
+        FROM solicitacoes_aso s
+        JOIN novo_aso f ON f.id = s.funcionario_id
+      ) t
+      ORDER BY t.solicitado_em DESC
     `);
 
     res.json(rows);
@@ -487,9 +489,13 @@ app.get("/solicitacoes/aso/:id", async (req, res) => {
 });
 
 // APROVAR / REPROVAR SOLICITAÇÃO
-app.put("/solicitacoes/:id/status", async (req, res) => {
-  const { id } = req.params;
-  const { status, usuario_id, motivo } = req.body;
+app.post("/solicitacoes/:tipo/:id/analisar", async (req, res) => {
+  const { tipo, id } = req.params;
+  const { status, motivo, usuario_id } = req.body;
+
+  if (!["APROVADO", "REPROVADO"].includes(status)) {
+    return res.status(400).json({ erro: "Status inválido" });
+  }
 
   if (status === "REPROVADO" && (!motivo || !motivo.trim())) {
     return res.status(400).json({
@@ -497,25 +503,34 @@ app.put("/solicitacoes/:id/status", async (req, res) => {
     });
   }
 
-  try {
-    await pool.query(`
-      UPDATE solicitacoes_novo_cadastro
-      SET status = $1,
-          analisado_por = $2,
-          analisado_em = NOW(),
-          motivo_reprovacao = $3
-      WHERE id = $4
-    `, [
-      status,
-      usuario_id,
-      status === "REPROVADO" ? motivo : null,
-      id
-    ]);
+  const tabela =
+    tipo === "ASO"
+      ? "solicitacoes_aso"
+      : "solicitacoes_novo_cadastro";
 
-    res.sendStatus(200);
+  try {
+    await pool.query(
+      `
+      UPDATE ${tabela}
+      SET
+        status = $1,
+        motivo_reprovacao = $2,
+        analisado_por = $3,
+        analisado_em = NOW()
+      WHERE id = $4
+      `,
+      [
+        status,
+        status === "REPROVADO" ? motivo : null,
+        usuario_id,
+        id
+      ]
+    );
+
+    res.json({ sucesso: true });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ erro: "Erro ao atualizar status" });
+    res.status(500).json({ erro: "Erro ao analisar solicitação" });
   }
 });
 
@@ -571,72 +586,83 @@ app.get("/minhas-solicitacoes/:usuarioId", async (req, res) => {
   }
 });
 
-// EDITAR SOLICITAÇÃO REPROVADA
-app.put("/solicitacoes/:id/editar", async (req, res) => {
+// EDITAR SOLICITAÇÃO ASO
+app.put("/solicitacoes/aso/:id/editar", async (req, res) => {
   const { id } = req.params;
   const f = req.body;
 
   try {
     await pool.query("BEGIN");
 
-    // 1️⃣ Atualiza dados do funcionário
     await pool.query(`
-      UPDATE novo_cadastro SET
+      UPDATE novo_aso
+      SET
         nome_funcionario = $1,
         data_nascimento = $2,
-        sexo = $3,
-        estado_civil = $4,
-        cpf = $5,
-        matricula = $6,
-        data_admissao = $7,
-        tipo_contratacao = $8,
-        cod_categoria = $9,
-        regime_trabalho = $10,
-        tipo_exame = $11,
-        cod_setor = $12,
-        nome_setor = $13,
-        cod_cargo = $14,
-        nome_cargo = $15
+        cpf = $3,
+        matricula = $4,
+        data_admissao = $5,
+        nome_empresa = $6,
+        nome_unidade = $7,
+        nome_setor = $8,
+        nome_cargo = $9,
+        tipo_exame = $10,
+        funcao_anterior = $11,
+        funcao_atual = $12,
+        setor_atual = $13,
+        cnh = $14,
+        vencimento_cnh = $15,
+        nome_clinica = $16,
+        cidade_clinica = $17,
+        email_clinica = $18,
+        telefone_clinica = $19,
+        lab_toxicologico = $20
       WHERE id = (
         SELECT funcionario_id
-        FROM solicitacoes_novo_cadastro
-        WHERE id = $16
+        FROM solicitacoes_aso
+        WHERE id = $21
       )
     `, [
       f.nome_funcionario,
       f.data_nascimento,
-      f.sexo,
-      f.estado_civil,
       f.cpf,
       f.matricula,
       f.data_admissao,
-      f.tipo_contratacao,
-      f.cod_categoria,
-      f.regime_trabalho,
-      f.tipo_exame,
-      f.cod_setor,
+      f.nome_empresa,
+      f.nome_unidade,
       f.nome_setor,
-      f.cod_cargo,
       f.nome_cargo,
+      f.tipo_exame,
+      f.funcao_anterior,
+      f.funcao_atual,
+      f.setor_atual,
+      f.cnh,
+      f.vencimento_cnh,
+      f.nome_clinica,
+      f.cidade_clinica,
+      f.email_clinica,
+      f.telefone_clinica,
+      f.lab_toxicologico,
       id
     ]);
 
-    // 2️⃣ Atualiza status da solicitação
     await pool.query(`
-      UPDATE solicitacoes_novo_cadastro
-      SET status = 'PENDENTE_REAVALIACAO',
-          analisado_por = NULL,
-          analisado_em = NULL
+      UPDATE solicitacoes_aso
+      SET
+        status = 'PENDENTE_REAVALIACAO',
+        analisado_por = NULL,
+        analisado_em = NULL
       WHERE id = $1
     `, [id]);
 
     await pool.query("COMMIT");
+
     res.json({ sucesso: true });
 
   } catch (err) {
     await pool.query("ROLLBACK");
     console.error(err);
-    res.status(500).json({ erro: "Erro ao salvar edição" });
+    res.status(500).json({ erro: "Erro ao editar ASO" });
   }
 });
 

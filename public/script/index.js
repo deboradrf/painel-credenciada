@@ -23,7 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getPrimeiroNomeESobrenome(nomeCompleto) {
         if (!nomeCompleto) return "";
+
         const partes = nomeCompleto.trim().split(" ");
+
         return partes.length >= 2
             ? `${partes[0]} ${partes[1]}`
             : partes[0];

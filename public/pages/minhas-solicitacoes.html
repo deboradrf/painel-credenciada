@@ -133,51 +133,86 @@
         </div>
     </div>
 
-    <!-- MODAL EDITAR SOLICITAÇÃO -->
-    <div class="modal fade" id="modalEditarSolicitacao" tabindex="-1">
+    <!-- MODAL EDITAR SOLICITAÇÃO - NOVO CADASTRO -->
+    <div class="modal fade" id="modalEditarCadastro" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
-
                 <div class="modal-header">
-                    <h5 class="modal-title">Editar Solicitação Reprovada</h5>
+                    <h5 class="modal-title">Editar Cadastro Reprovado</h5>
                     <button class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
-                    <form id="formEditarSolicitacao">
+                    <input type="hidden" id="editCadId">
 
-                        <input type="hidden" id="edit_id">
-
-                        <input type="text" id="edit_nome_funcionario" class="form-control">
-                        <input type="text" id="edit_cpf" class="form-control">
-
-                        <input type="date" id="edit_data_nascimento" class="form-control">
-                        <input type="text" id="edit_sexo" class="form-control">
-                        <input type="text" id="edit_estado_civil" class="form-control">
-                        <input type="text" id="edit_matricula" class="form-control">
-
-                        <input type="date" id="edit_data_admissao" class="form-control">
-
-                        <input type="text" id="edit_tipo_contratacao" class="form-control">
-                        <input type="text" id="edit_cod_cargo" class="form-control">
-                        <input type="text" id="edit_nome_cargo" class="form-control">
-
-                        <div class="alert alert-warning">
-                            <strong>Atenção:</strong> Após salvar, a solicitação será reenviada para análise.
-                        </div>
-
-                    </form>
+                    <input class="form-control mb-2" id="editCadNomeFuncionario">
+                    <input type="date" class="form-control mb-2" id="editCadDataNascimento">
+                    <input class="form-control mb-2" id="editCadSexo">
+                    <input class="form-control mb-2" id="editCadEstadoCivil">
+                    <input class="form-control mb-2" id="editCadDocIdentidade">
+                    <input class="form-control mb-2" id="editCadCPF">
+                    <input class="form-control mb-2" id="editCadMatricula">
+                    <input type="date" class="form-control mb-2" id="editCadDataAdmissao">
+                    <input class="form-control mb-2" id="editCadTipoContratacao">
+                    <input class="form-control mb-2" id="editCadRegimeTrabalho">
+                    <input class="form-control mb-2" id="editCadNomeEmpresa">
+                    <input class="form-control mb-2" id="editCadNomeUnidade">
+                    <input class="form-control mb-2" id="editCadNomeSetor">
+                    <input class="form-control mb-2" id="editCadNomeCargo">
+                    <input class="form-control mb-2" id="editCadTipoExame">
+                    <input class="form-control mb-2" id="editCadNomeClinica">
+                    <input class="form-control mb-2" id="editCadCidadeClinica">
+                    <input class="form-control mb-2" id="editCadEmailClinica">
+                    <input class="form-control mb-2" id="editCadTelefoneClinica">
+                    <input class="form-control mb-2" id="editCadLabToxicologico">
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="salvarEdicao()">
-                        Salvar
-                    </button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-primary" onclick="salvarEdicaoCadastro()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR SOLICITAÇÃO - ASO -->
+    <div class="modal fade" id="modalEditarASO" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar ASO Reprovado</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
+                <div class="modal-body">
+                    <input type="hidden" id="editAsoId">
+
+                    <input class="form-control mb-2" id="editAsoNomeFuncionario">
+                    <input type="date" class="form-control mb-2" id="editAsoDataNascimento">
+                    <input class="form-control mb-2" id="editAsoCPF">
+                    <input class="form-control mb-2" id="editAsoMatricula">
+                    <input type="date" class="form-control mb-2" id="editAsoDataAdmissao">
+                    <input class="form-control mb-2" id="editAsoNomeEmpresa">
+                    <input class="form-control mb-2" id="editAsoNomeUnidade">
+                    <input class="form-control mb-2" id="editAsoNomeSetor">
+                    <input class="form-control mb-2" id="editAsoNomeCargo">
+                    <input class="form-control mb-2" id="editAsoTipoExame">
+                    <input class="form-control mb-2" id="editAsoFuncaoAnterior">
+                    <input class="form-control mb-2" id="editAsoFuncaoAtual">
+                    <input class="form-control mb-2" id="editAsoSetorAtual">
+                    <input class="form-control mb-2" id="editAsoCNH">
+                    <input class="form-control mb-2" id="editAsoVencimentoCNH">
+                    <input class="form-control mb-2" id="editAsoNomeClinica">
+                    <input class="form-control mb-2" id="editAsoCidadeClinica">
+                    <input class="form-control mb-2" id="editAsoEmailClinica">
+                    <input class="form-control mb-2" id="editAsoTelefoneClinica">
+                    <input class="form-control mb-2" id="editAsoLabToxicologico">
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-primary" onclick="salvarEdicaoASO()">Salvar</button>
+                </div>
             </div>
         </div>
     </div>

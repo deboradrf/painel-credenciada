@@ -20,7 +20,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getPrimeiroNomeESobrenome(nomeCompleto) {
     if (!nomeCompleto) return "";
+
     const partes = nomeCompleto.trim().split(" ");
+    
     return partes.length >= 2
       ? `${partes[0]} ${partes[1]}`
       : partes[0];
@@ -117,14 +119,17 @@ function renderizarTabela(lista) {
         </td>
         <td class="actions">
           ${s.status === "REPROVADO"
-          ? `
-                <button class="btn-outline"
-                  onclick="verMotivo('${(s.motivo_reprovacao || "").replace(/'/g, "\\'")}')">
+        ? `
+                <button onclick="verMotivo('${(s.motivo_reprovacao).replace(/'/g, "\\'")}')">
                   Ver motivo
                 </button>
+
+                <button onclick="abrirModalEditar(${s.solicitacao_id}, '${s.tipo}')">
+                  Editar
+                </button>
               `
-          : `<span class="text-muted">Solicitação em análise</span>`
-        }
+        : `<span class="text-muted">Solicitação em análise</span>`
+      }
         </td>
       </tr>
     `;
@@ -134,87 +139,139 @@ function renderizarTabela(lista) {
 // ABRIR MODAL DO MOTIVO
 function verMotivo(motivo) {
   document.getElementById("textoMotivo").innerText = motivo;
+
   const modal = new bootstrap.Modal(
     document.getElementById("modalMotivo")
   );
+
   modal.show();
 }
 
 // ABRIR MODAL DE EDITAR
-async function abrirModalEditar(id) {
-  const res = await fetch(`http://localhost:3001/solicitacoes/${id}`);
-  const s = await res.json();
+async function abrirModalEditar(id, tipo) {
+  const url =
+    tipo === "ASO"
+      ? `http://localhost:3001/solicitacoes/aso/${id}`
+      : `http://localhost:3001/solicitacoes/novo-cadastro/${id}`;
 
-  document.getElementById("edit_id").value = s.solicitacao_id;
-  document.getElementById("edit_nome_funcionario").value = s.nome_funcionario;
-  document.getElementById("edit_cpf").value = s.cpf;
-  document.getElementById("edit_data_nascimento").value = dataParaInputDate(s.data_nascimento);
-  document.getElementById("edit_sexo").value = s.sexo;
-  document.getElementById("edit_estado_civil").value = s.estado_civil ?? "";
-  document.getElementById("edit_matricula").value = s.matricula ?? "";
-  document.getElementById("edit_data_admissao").value = dataParaInputDate(s.data_admissao);
-  document.getElementById("edit_tipo_contratacao").value = s.tipo_contratacao ?? "";
-  document.getElementById("edit_cod_cargo").value = s.cod_cargo ?? "";
-  document.getElementById("edit_nome_cargo").value = s.nome_cargo ?? "";
+  const res = await fetch(url);
+  if (!res.ok) {
+    alert("Erro ao carregar dados para edição");
+    return;
+  }
 
-  const modal = new bootstrap.Modal(
-    document.getElementById("modalEditarSolicitacao")
-  );
-  modal.show();
+  const { dados: s } = await res.json();
+
+  if (tipo === "ASO") {
+    preencherModalEditarASO(s);
+    new bootstrap.Modal(
+      document.getElementById("modalEditarASO")
+    ).show();
+  } else {
+    preencherModalEditarCadastro(s);
+    new bootstrap.Modal(
+      document.getElementById("modalEditarCadastro")
+    ).show();
+  }
 }
 
-// FUNÇÃO PARA SALVAR EDIÇÃO
-async function salvarEdicao() {
-  const id = document.getElementById("edit_id").value;
+// FUNÇÃO PARA PREENCHER OS CAMPOS DO MODAL - NOVO CADASTRO
+function preencherModalEditarCadastro(s) {
+  document.getElementById("editCadId").value = s.solicitacao_id;
+
+  document.getElementById("editCadNomeFuncionario").value = s.nome_funcionario;
+  document.getElementById("editCadDataNascimento").value = dataParaInputDate(s.data_nascimento);
+  document.getElementById("editCadSexo").value = s.sexo;
+  document.getElementById("editCadEstadoCivil").value = s.estado_civil;
+  document.getElementById("editCadDocIdentidade").value = s.doc_identidade;
+  document.getElementById("editCadCPF").value = s.cpf;
+  document.getElementById("editCadMatricula").value = s.matricula;
+  document.getElementById("editCadDataAdmissao").value = dataParaInputDate(s.data_admissao);
+  document.getElementById("editCadTipoContratacao").value = s.tipo_contratacao;
+  document.getElementById("editCadRegimeTrabalho").value = s.regime_trabalho;
+  document.getElementById("editCadNomeEmpresa").value = s.nome_empresa;
+  document.getElementById("editCadNomeUnidade").value = s.nome_unidade;
+  document.getElementById("editCadNomeSetor").value = s.nome_setor;
+  document.getElementById("editCadNomeCargo").value = s.nome_cargo;
+  document.getElementById("editCadTipoExame").value = s.tipo_exame;
+  document.getElementById("editCadNomeClinica").value = s.nome_clinica;
+  document.getElementById("editCadCidadeClinica").value = s.cidade_clinica;
+  document.getElementById("editCadEmailClinica").value = s.email_clinica;
+  document.getElementById("editCadTelefoneClinica").value = s.telefone_clinica;
+  document.getElementById("editCadLabToxicologico").value = s.lab_toxicologico;
+}
+
+// FUNÇÃO PARA PREENHCER OS CAMPOS DO MODAL - ASO
+function preencherModalEditarASO(s) {
+  document.getElementById("editAsoId").value = s.solicitacao_id;
+
+  document.getElementById("editAsoNomeFuncionario").value = s.nome_funcionario;
+  document.getElementById("editAsoDataNascimento").value = dataParaInputDate(s.data_nascimento);
+  document.getElementById("editAsoCPF").value = s.cpf;
+  document.getElementById("editAsoMatricula").value = s.matricula;
+  document.getElementById("editAsoDataAdmissao").value = dataParaInputDate(s.data_admissao);
+  document.getElementById("editAsoNomeEmpresa").value = s.nome_empresa;
+  document.getElementById("editAsoNomeUnidade").value = s.nome_unidade;
+  document.getElementById("editAsoNomeSetor").value = s.nome_setor;
+  document.getElementById("editAsoNomeCargo").value = s.nome_cargo;
+  document.getElementById("editAsoTipoExame").value = s.tipo_exame;
+  document.getElementById("editAsoFuncaoAnterior").value = s.funcao_anterior || "";
+  document.getElementById("editAsoFuncaoAtual").value = s.funcao_atual || "";
+  document.getElementById("editAsoSetorAtual").value = s.setor_atual || "";
+  document.getElementById("editAsoCNH").value = s.cnh || "";
+  document.getElementById("editAsoVencimentoCNH").value = s.vencimento_cnh || "";
+  document.getElementById("editAsoNomeClinica").value = s.nome_clinica;
+  document.getElementById("editAsoCidadeClinica").value = s.cidade_clinica;
+  document.getElementById("editAsoEmailClinica").value = s.email_clinica;
+  document.getElementById("editAsoTelefoneClinica").value = s.telefone_clinica;
+  document.getElementById("editAsoLabToxicologico").value = s.lab_toxicologico;
+}
+
+// FUNÇÃO PARA SALVAR EDIÇÃO NOVO CADASTRO
+
+// FUNÇÃO PARA SALVAR EDIÇÃO ASO
+async function salvarEdicaoASO() {
+  const id = document.getElementById("editAsoId").value;
 
   const dados = {
-    nome_funcionario: document.getElementById("edit_nome_funcionario").value,
-    cpf: document.getElementById("edit_cpf").value,
-    sexo: document.getElementById("edit_sexo").value,
-
-    data_nascimento: tratarData(
-      document.getElementById("edit_data_nascimento").value
-    ),
-
-    estado_civil: document.getElementById("edit_estado_civil").value || null,
-    matricula: document.getElementById("edit_matricula").value || null,
-
-    data_admissao: tratarData(
-      document.getElementById("edit_data_admissao").value
-    ),
-
-    tipo_contratacao:
-      document.getElementById("edit_tipo_contratacao").value || null,
-
-    cod_cargo: document.getElementById("edit_cod_cargo").value || null,
-    nome_cargo: document.getElementById("edit_nome_cargo").value || null,
-
-    // 👇 CAMPOS QUE O BACKEND ESPERA
-    cod_categoria: null,
-    regime_trabalho: null,
-    tipo_exame: null,
-    cod_setor: null,
-    nome_setor: null
+    nome_funcionario: document.getElementById("editAsoNomeFuncionario").value,
+    data_nascimento: tratarData(document.getElementById("editAsoDataNascimento").value),
+    cpf: document.getElementById("editAsoCPF").value,
+    matricula: document.getElementById("editAsoMatricula").value || null,
+    data_admissao: tratarData(document.getElementById("editAsoDataAdmissao").value),
+    nome_empresa: document.getElementById("editAsoNomeEmpresa").value,
+    nome_unidade: document.getElementById("editAsoNomeUnidade").value,
+    nome_setor: document.getElementById("editAsoNomeSetor").value,
+    nome_cargo: document.getElementById("editAsoNomeCargo").value,
+    tipo_exame: document.getElementById("editAsoTipoExame").value,
+    funcao_anterior: document.getElementById("editAsoFuncaoAnterior").value || null,
+    funcao_atual: document.getElementById("editAsoFuncaoAtual").value || null,
+    setor_atual: document.getElementById("editAsoSetorAtual").value || null,
+    cnh: document.getElementById("editAsoCNH").value || null,
+    vencimento_cnh: document.getElementById("editAsoVencimentoCNH").value || null,
+    nome_clinica: document.getElementById("editAsoNomeClinica").value,
+    cidade_clinica: document.getElementById("editAsoCidadeClinica").value,
+    email_clinica: document.getElementById("editAsoEmailClinica").value,
+    telefone_clinica: document.getElementById("editAsoTelefoneClinica").value,
+    lab_toxicologico: document.getElementById("editAsoLabToxicologico").value,
+    status: "PENDENTE"
   };
 
-  const res = await fetch(
-    `http://localhost:3001/solicitacoes/${id}/editar`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dados)
-    }
-  );
+  const res = await fetch(`http://localhost:3001/solicitacoes/aso/${id}/editar`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(dados)
+  });
+
+  const resposta = await res.json();
 
   if (!res.ok) {
-    const erro = await res.text();
-    console.error("Erro backend:", erro);
-    alert("Erro ao salvar edição");
+    alert(resposta.erro || "Erro ao salvar edição");
     return;
   }
 
   bootstrap.Modal
-    .getInstance(document.getElementById("modalEditarSolicitacao"))
+    .getInstance(document.getElementById("modalEditarASO"))
     .hide();
 
   carregarHistorico();

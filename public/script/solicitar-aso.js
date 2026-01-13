@@ -29,7 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getPrimeiroNomeESobrenome(nomeCompleto) {
     if (!nomeCompleto) return "";
+    
     const partes = nomeCompleto.trim().split(" ");
+    
     return partes.length >= 2
       ? `${partes[0]} ${partes[1]}`
       : partes[0];
@@ -110,7 +112,6 @@ async function buscarCPF() {
 
     const f = data.funcionario;
 
-    // 🔥 NORMALIZA PARA O FORMULÁRIO
     const funcionarioASO = {
       nome: f.nome,
       cpf: f.cpf,
@@ -123,9 +124,7 @@ async function buscarCPF() {
     };
 
     localStorage.setItem("funcionarioASO", JSON.stringify(funcionarioASO));
-    console.log("DATA COMPLETA:", data);
-  console.log("FUNCIONARIO:", data.funcionario);
-  console.log("CHAVES:", Object.keys(data.funcionario));
+
     resultado.innerHTML = `
       <div class="card shadow">
         <div class="card-body">

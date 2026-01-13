@@ -245,69 +245,16 @@ function preencherModal(s, tipo) {
   }
 
   // STATUS
-  const linha = document.getElementById("linha_aprovacao");
+  const linha =
+    tipo === "ASO"
+      ? document.getElementById("linha_aprovacao_aso")
+      : document.getElementById("linha_aprovacao_cadastro");
 
   if (s.status === "APROVADO" || s.status === "REPROVADO") {
     linha.textContent =
       `${s.status} por ${s.analisado_por_nome} em ${formatarData(s.analisado_em)}`;
   } else {
     linha.textContent = "Solicitação ainda não analisada";
-  }
-}
-
-// FUNÇÃO PARA ALTERAR STATUS DA SOLICITAÇÃO
-async function alterarStatus(status) {
-  const motivoInput = document.getElementById("motivoReprovacao");
-
-  if (status === "REPROVADO") {
-    const motivo = motivoInput.value.trim();
-
-    if (!motivo) {
-      alert("Informe o motivo da reprovação.");
-      return;
-    }
-
-    if (!confirm("Deseja reprovar esta solicitação?")) return;
-
-    await enviarStatus(status, motivo);
-    return;
-  }
-
-  if (!confirm("Deseja aprovar esta solicitação?")) return;
-
-  await enviarStatus(status, null);
-}
-
-async function enviarStatus(status, motivo) {
-  const res = await fetch(
-    `http://localhost:3001/solicitacoes/${solicitacaoAtualId}/status`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        status,
-        usuario_id: usuarioLogado.id,
-        motivo
-      })
-    }
-  );
-
-  if (res.ok) {
-    alert(`Solicitação ${status.toLowerCase()} com sucesso`);
-    carregarSolicitacoes();
-
-    const modalId =
-      document.getElementById("modalDetalhesASO").classList.contains("show")
-        ? "modalDetalhesASO"
-        : "modalDetalhesNovoCadastro";
-
-    bootstrap.Modal.getInstance(
-      document.getElementById(modalId)
-    ).hide();
-
-    document.getElementById("motivoReprovacao").value = "";
-  } else {
-    alert("Erro ao alterar status");
   }
 }
 
@@ -352,4 +299,54 @@ function logout() {
   localStorage.removeItem("usuario");
   localStorage.removeItem("empresaCodigo");
   window.location.href = "login.html";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".btn-aprovar").forEach(btn => {
+    btn.addEventListener("click", () => analisarSolicitacao("APROVADO"));
+  });
+
+  document.querySelectorAll(".btn-reprovar").forEach(btn => {
+    btn.addEventListener("click", () => analisarSolicitacao("REPROVADO"));
+  });
+});
+
+// APROVAR / REPROVAR SOLICITAÇÃO
+async function analisarSolicitacao(status) {
+  const isASO = document.getElementById("modalDetalhesASO").classList.contains("show");
+
+  const motivoInput = isASO
+    ? document.getElementById("motivoReprovacaoASO")
+    : document.getElementById("motivoReprovacaoCadastro");
+
+  const motivo = motivoInput.value;
+
+  if (status === "REPROVADO" && !motivo.trim()) {
+    alert("Informe o motivo da reprovação");
+    return;
+  }
+
+  const tipo = isASO ? "ASO" : "NOVO_CADASTRO";
+
+  const res = await fetch(
+    `http://localhost:3001/solicitacoes/${tipo}/${solicitacaoAtualId}/analisar`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status,
+        motivo,
+        usuario_id: usuarioLogado.id
+      })
+    }
+  );
+
+  if (res.ok) {
+    alert("Solicitação analisada com sucesso");
+    bootstrap.Modal.getInstance(document.querySelector(".modal.show")).hide();
+    motivoInput.value = "";
+    carregarSolicitacoes();
+  } else {
+    alert("Erro ao analisar solicitação");
+  }
 }
