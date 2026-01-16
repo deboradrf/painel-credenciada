@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cardToxicologico.style.display = "block";
     }
 
-    if (tipoExame.value === "MUDANCA_RISCOS_OPERACIONAIS") {
+    if (tipoExame.value === "MUDANCA_RISCOS_OCUPACIONAIS") {
       cardMudancaFuncao.style.display = "block";
     }
   });

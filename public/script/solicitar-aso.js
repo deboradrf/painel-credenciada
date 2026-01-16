@@ -102,7 +102,7 @@ async function buscarCPF() {
     if (!data.existe) {
       resultado.innerHTML = `
         <div class="alert alert-danger">
-          Funcionário NÃO encontrado nesta empresa. Solicite um cadastro.
+          Funcionário NÃO encontrado nesta empresa. Solicite um novo cadastro.
         </div>
 
         <div class="d-flex justify-content-center mt-2">
@@ -179,7 +179,7 @@ async function buscarCPF() {
           <div class="d-flex justify-content-center mt-2">
             <button class="btn-solicitar-aso"
               onclick="window.location.href='formulario-solicitar-aso.html'">
-              Solicitar ASO para este funcionário
+              Solicitar um exame para este funcionário
             </button>
           </div>
 

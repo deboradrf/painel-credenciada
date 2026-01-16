@@ -93,7 +93,7 @@
     <main>
         <div class="container mt-5">
             <div class="title">
-                <h3>Formulário de Solicitação de ASO</h3>
+                <h3>Formulário para Solicitação de Exames</h3>
                 <p class="subtitle">
                     Confirme os dados do funcionário e selecione o tipo de ASO desejado para gerar a
                     solicitação
@@ -227,13 +227,35 @@
                                 <select id="tipo_exame">
                                     <option value="">Selecione...</option>
                                     <option value="PERIODICO">Periódico</option>
-                                    <option value="MUDANCA_RISCOS_OPERACIONAIS">Mudança de Função / Riscos Operacionais
-                                    </option>
+                                    <option value="MUDANCA_RISCOS_OCUPACIONAIS">Mudança de Função / Riscos Ocupacionais</option>
                                     <option value="TOXICOLOGICO">Toxicológico</option>
                                     <option value="CONSULTA_ASSISTENCIAL">Consulta Assistencial</option>
                                     <option value="DEMISSIONAL">Demissional</option>
                                     <option value="RETORNO_TRABALHO">Retorno ao Trabalho</option>
                                 </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4" id="cardToxicologico" style="display: none;">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>CNH</label>
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-id-card"></i>
+                                </div>
+                                <input type="text" id="cnh">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Vencimento da CNH</label>
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-credit-card"></i>
+                                </div>
+                                <input type="date" id="vencimento_cnh">
                             </div>
                         </div>
                     </div>
@@ -269,29 +291,6 @@
                                     <i class="fa-solid fa-briefcase"></i>
                                 </div>
                                 <input type="text" id="setor_atual">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card mb-4" id="cardToxicologico" style="display: none;">
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label>CNH</label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-id-card"></i>
-                                </div>
-                                <input type="text" id="cnh">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Vencimento da CNH</label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-credit-card"></i>
-                                </div>
-                                <input type="date" id="vencimento_cnh">
                             </div>
                         </div>
                     </div>
