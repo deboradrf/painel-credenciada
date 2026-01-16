@@ -198,21 +198,21 @@ hr {
 }
 
 h3 {
-  position: relative;
-  font-weight: 600;
-  font-size: 22px;
-  color: #000000;
-  margin-bottom: 15px;
+    position: relative;
+    font-weight: 600;
+    font-size: 22px;
+    color: #000000;
+    margin-bottom: 15px;
 }
 
 h3::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -5px;
-  width: 50px;
-  height: 3px;
-  background: #000000;
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #000000;
 }
 
 .subtitle {
@@ -359,41 +359,25 @@ td {
     box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
     color: #000000;
     cursor: pointer;
-    display: inline-block;
     font-size: 13px;
-    line-height: 29px;
-    padding: 0 10px 0 11px;
-    position: relative;
-    text-align: center;
-    text-decoration: none;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
     width: 100px;
 }
 
-.actions button:hover {
-    background-color: #F1AE33;
-}
-
-.status-ok {
-    color: #16a34a;
-}
-
-.status-ok i {
-    font-size: 8px;
-    margin-right: 4px;
-}
-
 .modal-header {
-    background-color: #FFFFFF;
-    /*background: linear-gradient(135deg, #F1AE33 0%, #f8bc3a 40%, #F3B84A 100%);*/
+    background: linear-gradient(135deg, #53A5A6, #61B4B6, #4A8F90);
+    /*background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);*/
     border-bottom: none;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+    padding: 20px;
 }
 
 .modal-header h3 {
     position: relative;
     font-weight: 600;
-    font-size: 20px;
-    color: #000000;
+    font-size: 22px;
+    color: #FFFFFF;
     margin-bottom: 15px;
 }
 
@@ -404,53 +388,120 @@ td {
     bottom: -5px;
     width: 50px;
     height: 3px;
-    background: #000000;
+    background: #FFFFFF;
+}
+
+.modal-content {
+    border: none;
+}
+
+.detail-item {
+    background: #F9FAFB;
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.detail-value {
+    font-size: 15px;
+    font-weight: 500;
+    color: #111827;
+    word-break: break-word;
+}
+
+.alert-success {
+    margin-top: 10px;
+    background: #FFFFFF;
+    border: 1px solid #7acbcc;
+    border-left: 6px solid #53A5A6;
+    color: #4A8F90;
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(34, 197, 94, 0.08);
+}
+
+.alert-danger {
+    margin-top: 10px;
+    background: #FFFFFF;
+    border: 1px solid #FECACA;
+    border-left: 6px solid #EF4444;
+    color: #991B1B;
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.08);
 }
 
 .modal-footer {
     display: flex;
     justify-content: center;
     border-top: none;
-    box-shadow: 0 -6px 12px rgba(0, 0, 0, 0.15);
     padding: 16px;
 }
 
-.btn-reprovar {
-    background-color: rgb(253, 62, 62);
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
-    color: #FFFFFF;
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 10px;
+    border: none;
     cursor: pointer;
-    display: inline-block;
-    font-size: 13px;
-    line-height: 29px;
-    padding: 0 10px 0 11px;
-    position: relative;
-    text-align: center;
-    text-decoration: none;
-    width: 100px;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .btn-aprovar {
-    background-color: rgb(56, 124, 65);
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    background: linear-gradient(135deg, #22C55E, #16A34A);
     color: #FFFFFF;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 13px;
-    line-height: 29px;
-    padding: 0 10px 0 11px;
-    position: relative;
-    text-align: center;
-    text-decoration: none;
-    width: 100px;
+}
+
+.btn-aprovar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(34, 197, 94, 0.35);
+}
+
+.btn-reprovar {
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    color: #FFFFFF;
+}
+
+.btn-reprovar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(239, 68, 68, 0.35);
+}
+
+.btn-action i {
+    font-size: 14px;
 }
 
 .form-control {
-    background-color: #F1F1F1 !important;
+    background-color: #F9FAFB !important;
 }
 
 .footer-wave {

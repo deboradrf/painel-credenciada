@@ -30,9 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getPrimeiroNomeESobrenome(nomeCompleto) {
     if (!nomeCompleto) return "";
-    
+
     const partes = nomeCompleto.trim().split(" ");
-    
+
     return partes.length >= 2
       ? `${partes[0]} ${partes[1]}`
       : partes[0];
@@ -98,31 +98,33 @@ async function buscarCPF() {
 
     const data = await res.json();
 
-    // ❌ CPF NÃO EXISTE
+    // CPF NÃO EXISTE NA EMPRESA
     if (!data.existe) {
       resultado.innerHTML = `
-        <div class="alert alert-info">
-          Funcionário NÃO encontrado nesta empresa.
+        <div class="alert alert-danger">
+          Funcionário NÃO encontrado nesta empresa. Solicite um cadastro.
         </div>
 
-        <button class="btn btn-success mt-2"
-          onclick="window.location.href='formulario.html'">
-          Cadastrar Funcionário
-        </button>
+        <div class="d-flex justify-content-center mt-2">
+          <button class="btn-cadastrar-funcionario"
+            onclick="window.location.href='formulario-novo-cadastro.html'">
+            Cadastrar Funcionário
+          </button>
+        </div>
       `;
       return;
     }
 
     const f = data.funcionario;
 
-    // ⚠️ CPF EXISTE MAS ESTÁ INATIVO
+    // CPF EXISTE MAS ESTÁ INATIVO
     if (f.situacao?.toLowerCase() === "inativo") {
       resultado.innerHTML = `
         <div class="card shadow">
           <div class="card-body">
 
             <div class="alert alert-warning">
-              Funcionário encontrado, porém está <b>INATIVO</b> no SOC.
+              Funcionário encontrado, porém está INATIVO no SOC. Solicite um novo cadastro.
             </div>
 
             <ul class="list-group">
@@ -132,14 +134,12 @@ async function buscarCPF() {
               <li class="list-group-item"><b>Situação:</b> ${f.situacao}</li>
             </ul>
 
-            <div class="alert alert-secondary mt-3">
-              Não é possível solicitar ASO para funcionários inativos. Solicite um novo cadastro
+            <div class="d-flex justify-content-center mt-2">
+              <button class="btn-cadastrar-funcionario"
+                onclick="window.location.href='formulario-novo-cadastro.html'">
+                Cadastrar Funcionário
+              </button>
             </div>
-
-            <button class="btn btn-success mt-2"
-              onclick="window.location.href='formulario.html'">
-              Cadastrar Funcionário
-            </button>
 
           </div>
         </div>
@@ -147,7 +147,7 @@ async function buscarCPF() {
       return;
     }
 
-    // ✅ CPF EXISTE E ESTÁ ATIVO
+    // CPF EXISTE E ESTÁ ATIVO
     const funcionarioASO = {
       nome: f.nome,
       cpf: f.cpf,
@@ -176,10 +176,12 @@ async function buscarCPF() {
             <li class="list-group-item"><b>Matrícula eSocial:</b> ${f.matricula}</li>
           </ul>
 
-          <button class="btn btn-primary w-100"
-            onclick="window.location.href='formulario-solicitar-aso.html'">
-            Solicitar ASO para este funcionário
-          </button>
+          <div class="d-flex justify-content-center mt-2">
+            <button class="btn-solicitar-aso"
+              onclick="window.location.href='formulario-solicitar-aso.html'">
+              Solicitar ASO para este funcionário
+            </button>
+          </div>
 
         </div>
       </div>

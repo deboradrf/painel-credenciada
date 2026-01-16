@@ -203,21 +203,21 @@ h1 {
 }
 
 h3 {
-  position: relative;
-  font-weight: 600;
-  font-size: 22px;
-  color: #000000;
-  margin-bottom: 15px;
+    position: relative;
+    font-weight: 600;
+    font-size: 22px;
+    color: #000000;
+    margin-bottom: 15px;
 }
 
 h3::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -5px;
-  width: 50px;
-  height: 3px;
-  background: #000000;
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #000000;
 }
 
 .subtitle {
@@ -323,13 +323,173 @@ td {
     background-color: #F1AE33;
 }
 
-.status-ok {
-    color: #16a34a;
+#modalMotivo .modal-header {
+    background-color: #F9FAFB;
+    border-bottom: none;
+    padding: 10px 16px;
 }
 
-.status-ok i {
-    font-size: 8px;
-    margin-right: 4px;
+#modalMotivo .modal-header h3 {
+    position: relative;
+    font-weight: 600;
+    font-size: 18px;
+    color: #000000;
+    margin-bottom: 15px;
+}
+
+#modalMotivo .modal-header h3::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #000000;
+}
+
+#modalEditarCadastro .modal-header,
+#modalEditarASO .modal-header {
+    background: linear-gradient(135deg, #53A5A6, #61B4B6, #4A8F90);
+    border-bottom: none;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+    padding: 20px;
+}
+
+#modalEditarCadastro .modal-header h3,
+#modalEditarASO .modal-header h3 {
+    position: relative;
+    font-weight: 600;
+    font-size: 22px;
+    color: #FFFFFF;
+    margin-bottom: 15px;
+}
+
+#modalEditarCadastro .modal-header h3::after,
+#modalEditarASO .modal-header h3::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #FFFFFF;
+}
+
+.modal-content {
+    border: none;
+}
+
+.detail-item {
+    background: #F9FAFB;
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.detail-editable {
+  transition: all 0.25s ease;
+}
+
+.detail-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 4px 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.detail-input::placeholder {
+  color: #9CA3AF;
+  font-weight: 400;
+}
+
+.detail-editable:focus-within {
+  background: #FFFFFF;
+  box-shadow: 0 0 0 2px #2563EB22;
+}
+
+.detail-input {
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.detail-input:focus {
+  border-bottom-color: #F1AE33;
+}
+
+.detail-input:disabled {
+  color: #6B7280;
+  cursor: not-allowed;
+  border-bottom-style: dashed;
+}
+
+#textoMotivo {
+    margin: 0;
+    margin-top: 10px;
+    margin-bottom: 50px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    border-top: none;
+    padding: 16px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.btn-salvar {
+    background: linear-gradient(135deg, #22C55E, #16A34A);
+    color: #FFFFFF;
+}
+
+.btn-salvar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(34, 197, 94, 0.35);
+}
+
+.btn-cancelar {
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    color: #FFFFFF;
+}
+
+.btn-cancelar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(239, 68, 68, 0.35);
+}
+
+.btn-action i {
+    font-size: 14px;
 }
 
 .footer-wave {

@@ -94,7 +94,7 @@ function renderizarTabela(lista) {
   if (!lista.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" class="text-center text-muted">
+        <td colspan="12" class="text-muted text-center">
           Nenhuma solicitação encontrada
         </td>
       </tr>
@@ -112,13 +112,13 @@ function renderizarTabela(lista) {
 
     if (s.tipo === "NOVO_CADASTRO") {
       iconeTipo = `
-        <i class="fa-solid fa-user-plus fa-lg" style="color: #F1AE33" title="Novo cadastro"></i>
+        <i class="fa-solid fa-user-plus fa-lg" style="color: #6B7280" title="Novo cadastro"></i>
       `;
     }
 
     if (s.tipo === "ASO") {
       iconeTipo = `
-        <i class="fa-solid fa-file-circle-plus fa-lg" style="color: #F1AE33"title="ASO"></i>
+        <i class="fa-solid fa-file-circle-plus fa-lg" style="color: #6B7280" title="ASO"></i>
       `;
     }
 
@@ -201,44 +201,51 @@ async function verDetalhes(id, tipo) {
 // FUNÇÃO PARA PREENHCER O MODAL
 function preencherModal(s, tipo) {
   if (tipo === "NOVO_CADASTRO") {
-    document.getElementById("cadastro_nome_funcionario").value = s.nome_funcionario;
-    document.getElementById("cadastro_data_nascimento").value = formatarData(s.data_nascimento);
-    document.getElementById("cadastro_sexo").value = s.sexo;
-    document.getElementById("cadastro_estado_civil").value = s.estado_civil;
-    document.getElementById("cadastro_doc_identidade").value = s.doc_identidade;
-    document.getElementById("cadastro_cpf").value = s.cpf;
-    document.getElementById("cadastro_matricula").value = s.matricula;
-    document.getElementById("cadastro_data_admissao").value = formatarData(s.data_admissao);
-    document.getElementById("cadastro_tipo_contratacao").value = s.tipo_contratacao;
-    document.getElementById("cadastro_regime_trabalho").value = s.regime_trabalho;
-    document.getElementById("cadastro_nome_empresa").value = s.nome_empresa;
-    document.getElementById("cadastro_nome_unidade").value = s.nome_unidade;
-    document.getElementById("cadastro_nome_setor").value = s.nome_setor;
-    document.getElementById("cadastro_nome_cargo").value = s.nome_cargo;
-    document.getElementById("cadastro_tipo_exame").value = s.tipo_exame;
-    document.getElementById("cadastro_nome_clinica").value = s.nome_clinica;
-    document.getElementById("cadastro_cidade_clinica").value = s.cidade_clinica;
-    document.getElementById("cadastro_email_clinica").value = s.email_clinica;
-    document.getElementById("cadastro_telefone_clinica").value = s.telefone_clinica;
-    document.getElementById("cadastro_lab_toxicologico").value = s.lab_toxicologico;
+    document.getElementById("cadastro_nome_funcionario").innerText = s.nome_funcionario || "-";
+    document.getElementById("cadastro_data_nascimento").innerText = formatarData(s.data_nascimento) || "-";
+    document.getElementById("cadastro_sexo").innerText = s.sexo || "-";
+    document.getElementById("cadastro_estado_civil").innerText = s.estado_civil || "-";
+    document.getElementById("cadastro_doc_identidade").innerText = s.doc_identidade || "-";
+    document.getElementById("cadastro_cpf").innerText = s.cpf || "-";
+    document.getElementById("cadastro_matricula").innerText = s.matricula || "-";
+    document.getElementById("cadastro_data_admissao").innerText = formatarData(s.data_admissao) || "-";
+    document.getElementById("cadastro_tipo_contratacao").innerText = s.tipo_contratacao || "-";
+    document.getElementById("cadastro_regime_trabalho").innerText = s.regime_trabalho || "-";
+    document.getElementById("cadastro_nome_empresa").innerText = s.nome_empresa || "-";
+    document.getElementById("cadastro_nome_unidade").innerText = s.nome_unidade || "-";
+    document.getElementById("cadastro_nome_setor").innerText = s.nome_setor || "-";
+    document.getElementById("cadastro_nome_cargo").innerText = s.nome_cargo || "-";
+    document.getElementById("cadastro_tipo_exame").innerText = s.tipo_exame || "-";
+    document.getElementById("cadastro_nome_clinica").innerText = s.nome_clinica || "-";
+    document.getElementById("cadastro_cidade_clinica").innerText = s.cidade_clinica || "-";
+    document.getElementById("cadastro_email_clinica").innerText = s.email_clinica || "-";
+    document.getElementById("cadastro_telefone_clinica").innerText = s.telefone_clinica || "-";
+    document.getElementById("cadastro_lab_toxicologico").innerText = s.lab_toxicologico || "-";
+    document.getElementById("cadastro_observacao").innerText = s.observacao || "-";
   }
 
   if (tipo === "ASO") {
-    document.getElementById("aso_nome_funcionario").value = s.nome_funcionario;
-    document.getElementById("aso_data_nascimento").value = formatarData(s.data_nascimento);
-    document.getElementById("aso_cpf").value = s.cpf;
-    document.getElementById("aso_matricula").value = s.matricula;
-    document.getElementById("aso_data_admissao").value = formatarData(s.data_admissao);
-    document.getElementById("aso_nome_empresa").value = s.nome_empresa;
-    document.getElementById("aso_nome_unidade").value = s.nome_unidade;
-    document.getElementById("aso_nome_setor").value = s.nome_setor;
-    document.getElementById("aso_nome_cargo").value = s.nome_cargo;
-    document.getElementById("aso_tipo_exame").value = s.tipo_exame;
-    document.getElementById("aso_nome_clinica").value = s.nome_clinica;
-    document.getElementById("aso_cidade_clinica").value = s.cidade_clinica;
-    document.getElementById("aso_email_clinica").value = s.email_clinica;
-    document.getElementById("aso_telefone_clinica").value = s.telefone_clinica;
-    document.getElementById("aso_lab_toxicologico").value = s.lab_toxicologico;
+    document.getElementById("aso_nome_funcionario").innerText = s.nome_funcionario || "-";
+    document.getElementById("aso_data_nascimento").innerText = formatarData(s.data_nascimento) || "-";
+    document.getElementById("aso_cpf").innerText = s.cpf || "-";
+    document.getElementById("aso_matricula").innerText = s.matricula || "-";
+    document.getElementById("aso_data_admissao").innerText = formatarData(s.data_admissao) || "-";
+    document.getElementById("aso_nome_empresa").innerText = s.nome_empresa || "-";
+    document.getElementById("aso_nome_unidade").innerText = s.nome_unidade || "-";
+    document.getElementById("aso_nome_setor").innerText = s.nome_setor || "-";
+    document.getElementById("aso_nome_cargo").innerText = s.nome_cargo || "-";
+    document.getElementById("aso_tipo_exame").innerText = s.tipo_exame || "-";
+    document.getElementById("aso_cnh").innerText = s.cnh || "-";
+    document.getElementById("aso_vencimento_cnh").innerText = s.vencimento_cnh || "-";
+    document.getElementById("aso_funcao_anterior").innerText = s.funcao_anterior || "-";
+    document.getElementById("aso_funcao_atual").innerText = s.funcao_atual || "-";
+    document.getElementById("aso_setor_atual").innerText = s.setor_atual || "-";
+    document.getElementById("aso_nome_clinica").innerText = s.nome_clinica || "-";
+    document.getElementById("aso_cidade_clinica").innerText = s.cidade_clinica || "-";
+    document.getElementById("aso_email_clinica").innerText = s.email_clinica || "-";
+    document.getElementById("aso_telefone_clinica").innerText = s.telefone_clinica || "-";
+    document.getElementById("aso_lab_toxicologico").innerText = s.lab_toxicologico || "-";
+    document.getElementById("aso_observacao").innerText = s.observacao || "-";
   }
 
   // STATUS
@@ -261,7 +268,7 @@ function preencherModal(s, tipo) {
     alertStatus.textContent =
       `Reprovado por ${s.analisado_por_nome} em ${formatarData(s.analisado_em)}`;
 
-  } else if (s.status === "PENDENTE") {
+  } else if (s.status === "PENDENTE" || s.status === "PENDENTE_REAVALIACAO") {
     alertStatus.style.display = "none";
     alertStatus.textContent = "";
   }

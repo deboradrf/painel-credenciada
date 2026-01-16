@@ -212,6 +212,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     email_clinica: document.getElementById("email_clinica").value,
     telefone_clinica: document.getElementById("telefone_clinica").value,
     lab_toxicologico: document.getElementById("lab_toxicologico").value,
+    observacao: document.getElementById("observacao").value,
 
     usuario_id: usuarioLogado.id
   };

@@ -316,9 +316,9 @@ app.post("/novo-cadastro", async (req, res) => {
         sexo, estado_civil, doc_identidade, cpf, matricula, data_admissao,
         tipo_contratacao, cod_categoria, regime_trabalho, cod_unidade, nome_unidade,
         cod_setor, nome_setor, cod_cargo, nome_cargo, tipo_exame, nome_clinica, cidade_clinica, email_clinica, 
-        telefone_clinica, lab_toxicologico)
+        telefone_clinica, lab_toxicologico, observacao)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,
-      $23,$24,$25)
+      $23,$24,$25,$26)
       RETURNING id
       `,
       [
@@ -346,7 +346,8 @@ app.post("/novo-cadastro", async (req, res) => {
         f.cidade_clinica,
         f.email_clinica,
         f.telefone_clinica,
-        f.lab_toxicologico
+        f.lab_toxicologico,
+        f.observacao
       ]
     );
 
@@ -378,7 +379,7 @@ app.get("/solicitacoes", async (req, res) => {
     const { rows } = await pool.query(`
       SELECT *
       FROM (
-        -- 🔹 NOVO CADASTRO
+        -- NOVO CADASTRO
         SELECT
           s.id              AS solicitacao_id,
           f.id              AS funcionario_id,
@@ -393,7 +394,7 @@ app.get("/solicitacoes", async (req, res) => {
 
         UNION ALL
 
-        -- 🔹 ASO
+        -- ASO
         SELECT
           s.id              AS solicitacao_id,
           f.id              AS funcionario_id,
@@ -542,7 +543,7 @@ app.get("/minhas-solicitacoes/:usuarioId", async (req, res) => {
 
   try {
     const { rows } = await pool.query(`
-      -- 🔹 NOVO CADASTRO
+      -- NOVO CADASTRO
       SELECT
         s.id              AS solicitacao_id,
         f.id              AS funcionario_id,
@@ -561,7 +562,7 @@ app.get("/minhas-solicitacoes/:usuarioId", async (req, res) => {
 
       UNION ALL
 
-      -- 🔹 ASO
+      -- ASO
       SELECT
         s.id              AS solicitacao_id,
         f.id              AS funcionario_id,
@@ -618,11 +619,12 @@ app.put("/solicitacoes/cadastro/:id/editar", async (req, res) => {
         cidade_clinica = $17,
         email_clinica = $18,
         telefone_clinica = $19,
-        lab_toxicologico = $20
+        lab_toxicologico = $20,
+        observacao = $21
       WHERE id = (
         SELECT funcionario_id
         FROM solicitacoes_novo_cadastro
-        WHERE id = $21
+        WHERE id = $22
       )
     `, [
       f.nome_funcionario,
@@ -645,6 +647,8 @@ app.put("/solicitacoes/cadastro/:id/editar", async (req, res) => {
       f.email_clinica,
       f.telefone_clinica,
       f.lab_toxicologico,
+      f.observacao,
+
       id
     ]);
 
@@ -689,20 +693,21 @@ app.put("/solicitacoes/aso/:id/editar", async (req, res) => {
         nome_setor = $8,
         nome_cargo = $9,
         tipo_exame = $10,
-        funcao_anterior = $11,
-        funcao_atual = $12,
-        setor_atual = $13,
-        cnh = $14,
-        vencimento_cnh = $15,
+        cnh = $11,
+        vencimento_cnh = $12,
+        funcao_anterior = $13,
+        funcao_atual = $14,
+        setor_atual = $15,
         nome_clinica = $16,
         cidade_clinica = $17,
         email_clinica = $18,
         telefone_clinica = $19,
-        lab_toxicologico = $20
+        lab_toxicologico = $20,
+        observacao = $21
       WHERE id = (
         SELECT funcionario_id
         FROM solicitacoes_aso
-        WHERE id = $21
+        WHERE id = $22
       )
     `, [
       f.nome_funcionario,
@@ -725,6 +730,8 @@ app.put("/solicitacoes/aso/:id/editar", async (req, res) => {
       f.email_clinica,
       f.telefone_clinica,
       f.lab_toxicologico,
+      f.observacao,
+
       id
     ]);
 
@@ -1039,11 +1046,12 @@ app.post("/solicitar-aso", async (req, res) => {
         cidade_clinica,
         email_clinica,
         telefone_clinica,
-        lab_toxicologico
+        lab_toxicologico,
+        observacao
       )
       VALUES (
         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,
-        $13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24
+        $13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25
       )
       RETURNING id
       `,
@@ -1071,7 +1079,8 @@ app.post("/solicitar-aso", async (req, res) => {
         f.cidade_clinica,
         f.email_clinica,
         f.telefone_clinica,
-        f.lab_toxicologico
+        f.lab_toxicologico,
+        f.observacao
       ]
     );
 

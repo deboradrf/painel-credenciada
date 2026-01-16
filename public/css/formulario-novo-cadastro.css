@@ -334,6 +334,23 @@ h5::after {
     outline: none;
 }
 
+.input-wrapper textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  resize: vertical;
+  font-size: 14px;
+  color: #111827;
+  font-family: inherit;
+  min-height: 70px;
+  padding: 12px 14px;
+}
+
+.input-wrapper textarea::placeholder {
+  color: #9CA3AF;
+}
+
 .btn-enviar {
     background-color: #F1AE33;
     border: 1px solid #E5E7EB;

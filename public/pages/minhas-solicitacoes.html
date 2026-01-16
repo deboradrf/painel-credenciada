@@ -139,11 +139,13 @@
 
     <!-- MODAL MOTIVO DA REPROVAÇÃO -->
     <div class="modal fade" id="modalMotivo" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Motivo da Reprovação</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                    <h3 class="modal-title">Motivo da Reprovação</h3>
+                    <a data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark fa-lg" style="color: #000000; cursor: pointer"></i>
+                    </a>
                 </div>
 
                 <div class="modal-body">
@@ -155,41 +157,222 @@
 
     <!-- MODAL EDITAR SOLICITAÇÃO - NOVO CADASTRO -->
     <div class="modal fade" id="modalEditarCadastro" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Editar Cadastro Reprovado</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                    <h3 class="modal-title">Editar Cadastro Reprovado</h3>
+                    <a data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
+                    </a>
                 </div>
 
                 <div class="modal-body">
                     <input type="hidden" id="editCadId">
 
-                    <input class="form-control mb-2" id="editCadNomeFuncionario">
-                    <input type="date" class="form-control mb-2" id="editCadDataNascimento">
-                    <input class="form-control mb-2" id="editCadSexo">
-                    <input class="form-control mb-2" id="editCadEstadoCivil">
-                    <input class="form-control mb-2" id="editCadDocIdentidade">
-                    <input class="form-control mb-2" id="editCadCPF">
-                    <input class="form-control mb-2" id="editCadMatricula">
-                    <input type="date" class="form-control mb-2" id="editCadDataAdmissao">
-                    <input class="form-control mb-2" id="editCadTipoContratacao">
-                    <input class="form-control mb-2" id="editCadRegimeTrabalho">
-                    <input class="form-control mb-2" id="editCadNomeEmpresa">
-                    <input class="form-control mb-2" id="editCadNomeUnidade">
-                    <input class="form-control mb-2" id="editCadNomeSetor">
-                    <input class="form-control mb-2" id="editCadNomeCargo">
-                    <input class="form-control mb-2" id="editCadTipoExame">
-                    <input class="form-control mb-2" id="editCadNomeClinica">
-                    <input class="form-control mb-2" id="editCadCidadeClinica">
-                    <input class="form-control mb-2" id="editCadEmailClinica">
-                    <input class="form-control mb-2" id="editCadTelefoneClinica">
-                    <input class="form-control mb-2" id="editCadLabToxicologico">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome completo</span>
+                                </div>
+                                <input id="editCadNomeFuncionario" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Data de Nascimento</span>
+                                </div>
+                                <input type="date" id="editCadDataNascimento" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Sexo</span>
+                                </div>
+                                <input id="editCadSexo" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Estado Civil</span>
+                                </div>
+                                <input id="editCadEstadoCivil" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Documento de Identidade - UF</span>
+                                </div>
+                                <input id="editCadDocIdentidade" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>CPF</span>
+                                </div>
+                                <input id="editCadCPF" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Matrícula eSocial</span>
+                                </div>
+                                <input id="editCadMatricula" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Data de Admissão</span>
+                                </div>
+                                <input type="date" id="editCadDataAdmissao" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Tipo de Contratação</span>
+                                </div>
+                                <input id="editCadTipoContratacao" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Regime de Trabalho</span>
+                                </div>
+                                <input id="editCadRegimeTrabalho" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Empresa do Funcionário</span>
+                                </div>
+                                <input id="editCadNomeEmpresa" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Unidade do Funcionário</span>
+                                </div>
+                                <input id="editCadNomeUnidade" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Setor do Funcionário</span>
+                                </div>
+                                <input id="editCadNomeSetor" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Cargo do Funcionário</span>
+                                </div>
+                                <input id="editCadNomeCargo" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Tipo de Exame</span>
+                                </div>
+                                <input id="editCadTipoExame" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome da Clínica</span>
+                                </div>
+                                <input id="editCadNomeClinica" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Cidade da Clínica</span>
+                                </div>
+                                <input id="editCadCidadeClinica" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>E-mail da Clínica</span>
+                                </div>
+                                <input id="editCadEmailClinica" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Telefone da Clínica</span>
+                                </div>
+                                <input id="editCadTelefoneClinica" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome do laboratório ou município para realização do exame toxicológico</span>
+                                </div>
+                                <input id="editCadLabToxicologico" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Observações</span>
+                                </div>
+                                <input id="editCadObservacao" class="detail-input" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-primary" onclick="salvarEdicaoCadastro()">Salvar</button>
+                    <div class="action-buttons">
+                        <button class="btn-action btn-cancelar" data-bs-dismiss="modal">
+                            <i class="fa-solid fa-xmark"></i>
+                            Cancelar
+                        </button>
+
+                        <button class="btn-action btn-salvar" onclick="salvarEdicaoCadastro()">
+                            <i class="fa-solid fa-check"></i>
+                            Salvar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -197,41 +380,222 @@
 
     <!-- MODAL EDITAR SOLICITAÇÃO - ASO -->
     <div class="modal fade" id="modalEditarASO" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Editar ASO Reprovado</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                    <h3 class="modal-title">Editar ASO Reprovado</h3>
+                    <a data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
+                    </a>
                 </div>
 
                 <div class="modal-body">
                     <input type="hidden" id="editAsoId">
 
-                    <input class="form-control mb-2" id="editAsoNomeFuncionario">
-                    <input type="date" class="form-control mb-2" id="editAsoDataNascimento">
-                    <input class="form-control mb-2" id="editAsoCPF">
-                    <input class="form-control mb-2" id="editAsoMatricula">
-                    <input type="date" class="form-control mb-2" id="editAsoDataAdmissao">
-                    <input class="form-control mb-2" id="editAsoNomeEmpresa">
-                    <input class="form-control mb-2" id="editAsoNomeUnidade">
-                    <input class="form-control mb-2" id="editAsoNomeSetor">
-                    <input class="form-control mb-2" id="editAsoNomeCargo">
-                    <input class="form-control mb-2" id="editAsoTipoExame">
-                    <input class="form-control mb-2" id="editAsoFuncaoAnterior">
-                    <input class="form-control mb-2" id="editAsoFuncaoAtual">
-                    <input class="form-control mb-2" id="editAsoSetorAtual">
-                    <input class="form-control mb-2" id="editAsoCNH">
-                    <input class="form-control mb-2" id="editAsoVencimentoCNH">
-                    <input class="form-control mb-2" id="editAsoNomeClinica">
-                    <input class="form-control mb-2" id="editAsoCidadeClinica">
-                    <input class="form-control mb-2" id="editAsoEmailClinica">
-                    <input class="form-control mb-2" id="editAsoTelefoneClinica">
-                    <input class="form-control mb-2" id="editAsoLabToxicologico">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome completo</span>
+                                </div>
+                                <input id="editAsoNomeFuncionario" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Data de Nascimento</span>
+                                </div>
+                                <input type="date" id="editAsoDataNascimento" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>CPF</span>
+                                </div>
+                                <input id="editAsoCPF" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Matrícula eSocial</span>
+                                </div>
+                                <input id="editAsoMatricula" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Data de Admissão</span>
+                                </div>
+                                <input type="date" id="editAsoDataAdmissao" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Empresa do Funcionário</span>
+                                </div>
+                                <input id="editAsoNomeEmpresa" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Unidade do Funcionário</span>
+                                </div>
+                                <input id="editAsoNomeUnidade" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Setor do Funcionário</span>
+                                </div>
+                                <input id="editAsoNomeSetor" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Cargo do Funcionário</span>
+                                </div>
+                                <input id="editAsoNomeCargo" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Tipo de Exame</span>
+                                </div>
+                                <input id="editAsoTipoExame" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>CNH</span>
+                                </div>
+                                <input id="editAsoCNH" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Vencimento CNH</span>
+                                </div>
+                                <input id="editAsoVencimentoCNH" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Função Anterior</span>
+                                </div>
+                                <input id="editAsoFuncaoAnterior" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Função Atual</span>
+                                </div>
+                                <input id="editAsoFuncaoAtual" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Setor Atual</span>
+                                </div>
+                                <input id="editAsoSetorAtual" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome da Clínica</span>
+                                </div>
+                                <input id="editAsoNomeClinica" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Cidade da Clínica</span>
+                                </div>
+                                <input id="editAsoCidadeClinica" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>E-mail da Clínica</span>
+                                </div>
+                                <input id="editAsoEmailClinica" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Telefone da Clínica</span>
+                                </div>
+                                <input id="editAsoTelefoneClinica" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome do laboratório ou município para realização do exame toxicológico</span>
+                                </div>
+                                <input id="editAsoLabToxicologico" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Observações</span>
+                                </div>
+                                <input id="editAsoObservacao" class="detail-input" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-primary" onclick="salvarEdicaoASO()">Salvar</button>
+                    <div class="action-buttons">
+                        <button class="btn-action btn-cancelar" data-bs-dismiss="modal">
+                            <i class="fa-solid fa-xmark"></i>
+                            Cancelar
+                        </button>
+
+                        <button class="btn-action btn-salvar" onclick="salvarEdicaoASO()">
+                            <i class="fa-solid fa-check"></i>
+                            Salvar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

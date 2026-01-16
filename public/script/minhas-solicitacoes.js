@@ -93,7 +93,7 @@ function renderizarTabela(lista) {
   if (!lista.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="5" class="text-muted text-center">
+        <td colspan="12" class="text-muted text-center">
           Nenhuma solicitação encontrada
         </td>
       </tr>
@@ -200,6 +200,7 @@ function preencherModalEditarCadastro(s) {
   document.getElementById("editCadEmailClinica").value = s.email_clinica;
   document.getElementById("editCadTelefoneClinica").value = s.telefone_clinica;
   document.getElementById("editCadLabToxicologico").value = s.lab_toxicologico;
+  document.getElementById("editCadObservacao").value = s.observacao;
 }
 
 // FUNÇÃO PARA PREENHCER OS CAMPOS DO MODAL - ASO
@@ -226,6 +227,7 @@ function preencherModalEditarASO(s) {
   document.getElementById("editAsoEmailClinica").value = s.email_clinica;
   document.getElementById("editAsoTelefoneClinica").value = s.telefone_clinica;
   document.getElementById("editAsoLabToxicologico").value = s.lab_toxicologico;
+  document.getElementById("editAsoObservacao").value = s.observacao;
 }
 
 // FUNÇÃO PARA SALVAR EDIÇÃO NOVO CADASTRO
@@ -253,6 +255,7 @@ async function salvarEdicaoCadastro() {
     email_clinica: document.getElementById("editCadEmailClinica").value,
     telefone_clinica: document.getElementById("editCadTelefoneClinica").value,
     lab_toxicologico: document.getElementById("editCadLabToxicologico").value,
+    observacao: document.getElementById("editCadObservacao").value,
     status: "PENDENTE"
   };
 
@@ -301,6 +304,7 @@ async function salvarEdicaoASO() {
     email_clinica: document.getElementById("editAsoEmailClinica").value,
     telefone_clinica: document.getElementById("editAsoTelefoneClinica").value,
     lab_toxicologico: document.getElementById("editAsoLabToxicologico").value,
+    observacao: document.getElementById("editAsoObservacao").value,
     status: "PENDENTE"
   };
 

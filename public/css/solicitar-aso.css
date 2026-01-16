@@ -314,6 +314,89 @@ h3::after {
 .btn-verificar:hover {
     background-color: #F1AE33;
     color: #FFFFFF;
+}   
+
+.alert-danger {
+    margin-top: 10px;
+    background: #FFFFFF;
+    border: 1px solid #FECACA;
+    border-left: 6px solid #EF4444;
+    color: #991B1B;
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.08);
+}
+
+.alert-warning {
+    margin-top: 10px;
+    background: #FFFFFF;
+    border: 1px solid #F1AE33;
+    border-left: 6px solid #F1AE33;
+    color: rgb(173, 163, 21);
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.08);
+}
+
+.alert-success {
+    margin-top: 10px;
+    background: #FFFFFF;
+    border: 1px solid #7acbcc;
+    border-left: 6px solid #53A5A6;
+    color: #4A8F90;
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(34, 197, 94, 0.08);
+}
+
+.btn-cadastrar-funcionario {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #000000;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
+    width: 200px;
+    height: 40px;
+    transition: all 0.25s ease;
+}
+
+.btn-cadastrar-funcionario:hover {
+    transform: translateY(-2px);
+}
+
+.btn-solicitar-aso {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #000000;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
+    width: 250px;
+    height: 40px;
+    transition: all 0.25s ease;
+}
+
+.btn-solicitar-aso:hover {
+    transform: translateY(-2px);
 }
 
 .footer-wave {
