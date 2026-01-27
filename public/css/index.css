@@ -397,7 +397,7 @@ h3::after {
     justify-content: center;
     color: #FFFFFF;
     font-size: 16px;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease;
 }
 
 .footer-socials a:hover {

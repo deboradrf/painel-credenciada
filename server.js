@@ -8,6 +8,8 @@ const iconv = require("iconv-lite");
 const soap = require("soap");
 const CryptoJS = require("crypto-js");
 
+const nodemailer = require("nodemailer");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -22,12 +24,9 @@ const pool = new Pool({
 });
 
 // SOC – SOAP
-const WSDL_URL =
-  "https://ws1.soc.com.br/WSSoc/FuncionarioModelo2Ws?wsdl";
-
+const WSDL_URL = "https://ws1.soc.com.br/WSSoc/FuncionarioModelo2Ws?wsdl";
 const SOC_USUARIO = "U3403088";
-const SOC_TOKEN =
-  "3e3c74848066fe9b39690a37c372a61816696e18";
+const SOC_TOKEN = "3e3c74848066fe9b39690a37c372a61816696e18";
 
 // SOC – EXPORTA DADOS
 const SOC_EXPORTA_URL = "https://ws1.soc.com.br/WebSoc/exportadados";
@@ -64,6 +63,14 @@ const EXPORTA_FUNCIONARIOS = {
   tipoSaida: "json"
 };
 
+const EXPORTA_PRESTADORES = {
+  empresa: "412429",
+  codigo: "211713",
+  chave: "edc76dff447196a109fe",
+  tipoSaida: "xml",
+  codigoPrestador: ""
+};
+
 const parser = new XMLParser({ ignoreAttributes: false });
 
 // TESTE
@@ -71,7 +78,7 @@ app.get("/", (req, res) => {
   res.send("🚀 API Cadastro Funcionários rodando");
 });
 
-// EXPORTA EMPRESAS
+// EXPORTA EMPRESAS - (apenas ativos)
 app.get("/empresas", async (req, res) => {
   try {
     const parametro = JSON.stringify(EXPORTA_EMPRESAS);
@@ -101,7 +108,7 @@ app.get("/empresas", async (req, res) => {
   }
 });
 
-// EXPORTA UNIDADES
+// EXPORTA UNIDADES - (apenas ativos)
 app.get("/unidades/:empresa", async (req, res) => {
   try {
     const parametro = JSON.stringify({
@@ -134,7 +141,7 @@ app.get("/unidades/:empresa", async (req, res) => {
   }
 });
 
-// EXPORTA SETORES
+// EXPORTA SETORES - (apenas ativos)
 app.get("/setores/:empresa", async (req, res) => {
   try {
     const parametro = JSON.stringify({
@@ -155,7 +162,7 @@ app.get("/setores/:empresa", async (req, res) => {
 
     res.json(
       (Array.isArray(registros) ? registros : [registros])
-        .filter(s => s.ATIVO == 1) // ✅ setores ativos da empresa
+        .filter(s => s.ATIVO == 1)
         .map(s => ({
           codigo: s.CODIGO,
           nome: s.NOME,
@@ -168,7 +175,7 @@ app.get("/setores/:empresa", async (req, res) => {
   }
 });
 
-// EXPORTA CARGOS
+// EXPORTA CARGOS - (apenas ativos)
 app.get("/cargos/:empresa", async (req, res) => {
   try {
     const parametro = JSON.stringify({
@@ -189,7 +196,7 @@ app.get("/cargos/:empresa", async (req, res) => {
 
     res.json(
       (Array.isArray(registros) ? registros : [registros])
-        .filter(c => c.ATIVO == 1) // ✅ só precisa estar ativo
+        .filter(c => c.ATIVO == 1)
         .map(c => ({
           codigo: c.CODIGO,
           nome: c.NOME,
@@ -198,6 +205,102 @@ app.get("/cargos/:empresa", async (req, res) => {
     );
   } catch {
     res.status(500).json({ erro: "Erro cargos" });
+  }
+});
+
+// EXPORTA DADOS - PRESTADORES POR EMPRESA - (apenas ativos)
+app.get("/prestadores/:empresa", async (req, res) => {
+  try {
+    const parametro = JSON.stringify({
+      empresa: req.params.empresa,
+      ...EXPORTA_PRESTADORES,
+      codigoDaEmpresa: req.params.empresa,
+      empresaTrabalho: req.params.empresa
+    });
+
+    const response = await axios.get(SOC_EXPORTA_URL, {
+      params: { parametro },
+      responseType: "arraybuffer"
+    });
+
+    let xml = iconv.decode(response.data, "ISO-8859-1");
+    xml = xml.replace(/&(?!(amp|lt|gt|quot|apos);)/g, "&amp;");
+
+    const parser = new XMLParser({ ignoreAttributes: false });
+    const json = parser.parse(xml);
+
+    const registros = json?.root?.record
+      ? Array.isArray(json.root.record)
+        ? json.root.record
+        : [json.root.record]
+      : [];
+
+    // APENAS PRESTADORES ATIVOS
+    const prestadores = registros
+      .filter(p => p.statusPrestador === "Ativo")
+      .map(p => ({
+        codigo: p.codigoPrestador,
+        nome: p.nomePrestador,
+        cnpj: p.cnpjPrestador,
+        cpf: p.cpfPrestador,
+        status: p.statusPrestador
+      }));
+
+    res.json(prestadores);
+
+  } catch (err) {
+    console.error("Erro ao buscar prestadores:", err);
+    res.status(500).json({ erro: "Erro ao buscar prestadores" });
+  }
+  /*http://localhost:3001/prestadores/2046368*/
+});
+
+// DETALHES DO PRESTADOR (filtrado pelo codigo)
+app.get("/prestador/:empresa/:codigoPrestador", async (req, res) => {
+  try {
+    const { codigoPrestador } = req.params;
+
+    const payload = new URLSearchParams({
+      parametro: JSON.stringify({
+        empresa: "412429",
+        codigo: "211707",
+        chave: "d7e76b1761998e246d37",
+        tipoSaida: "json"
+      })
+    });
+
+    const socResponse = await axios.post(
+      "https://ws1.soc.com.br/WebSoc/exportadados",
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        responseType: "arraybuffer"
+      }
+    );
+
+    const decoded = iconv.decode(socResponse.data, "ISO-8859-1");
+
+    const data = JSON.parse(decoded);
+
+    const lista = Array.isArray(data) ? data : [];
+
+    const prestador = lista.find(
+      p => String(p.codigoPrestador) === String(codigoPrestador)
+    );
+
+    if (!prestador) {
+      return res.status(404).json({
+        erro: "Prestador não encontrado"
+      });
+    }
+
+    res.json(prestador);
+
+  } catch (err) {
+    console.error("Erro SOC:", err.response?.data || err.message);
+    res.status(500).json({ erro: "Erro ao consultar SOC" });
   }
 });
 
@@ -311,14 +414,43 @@ app.post("/novo-cadastro", async (req, res) => {
 
     const { rows } = await pool.query(
       `
-      INSERT INTO novo_cadastro
-        (cod_empresa, nome_empresa, nome_funcionario, data_nascimento,
-        sexo, estado_civil, doc_identidade, cpf, matricula, data_admissao,
-        tipo_contratacao, cod_categoria, regime_trabalho, cod_unidade, nome_unidade,
-        cod_setor, nome_setor, cod_cargo, nome_cargo, tipo_exame, nome_clinica, cidade_clinica, email_clinica, 
-        telefone_clinica, lab_toxicologico, observacao)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,
-      $23,$24,$25,$26)
+      INSERT INTO novo_cadastro (
+        cod_empresa,
+        nome_empresa,
+        nome_funcionario,
+        data_nascimento,
+        sexo,
+        estado_civil,
+        doc_identidade,
+        cpf,
+        matricula,
+        nao_possui_matricula,
+        data_admissao,
+        tipo_contratacao,
+        cod_categoria,
+        regime_trabalho,
+        cod_unidade,
+        nome_unidade,
+        cod_setor,
+        nome_setor,
+        solicitar_novo_setor,
+        nome_novo_setor,
+        cod_cargo,
+        nome_cargo,
+        solicitar_novo_cargo,
+        nome_novo_cargo,
+        tipo_exame,
+        cnh,
+        vencimento_cnh,
+        lab_toxicologico,
+        estado_clinica,
+        cidade_clinica,
+        nome_clinica,
+        solicitar_credenciamento,
+        estado_credenciamento,
+        cidade_credenciamento,
+        observacao)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35)
       RETURNING id
       `,
       [
@@ -331,6 +463,7 @@ app.post("/novo-cadastro", async (req, res) => {
         f.doc_identidade,
         f.cpf,
         f.matricula,
+        f.nao_possui_matricula === true,
         f.data_admissao,
         f.tipo_contratacao,
         f.cod_categoria,
@@ -339,14 +472,22 @@ app.post("/novo-cadastro", async (req, res) => {
         f.nome_unidade,
         f.cod_setor,
         f.nome_setor,
+        f.solicitar_novo_setor === true,
+        f.nome_novo_setor,
         f.cod_cargo,
         f.nome_cargo,
+        f.solicitar_novo_cargo === true,
+        f.nome_novo_cargo,
         f.tipo_exame,
-        f.nome_clinica,
-        f.cidade_clinica,
-        f.email_clinica,
-        f.telefone_clinica,
+        f.cnh,
+        f.vencimento_cnh || null,
         f.lab_toxicologico,
+        f.estado_clinica,
+        f.cidade_clinica,
+        f.nome_clinica,
+        f.solicitar_credenciamento === true,
+        f.estado_credenciamento,
+        f.cidade_credenciamento,
         f.observacao
       ]
     );
@@ -373,41 +514,146 @@ app.post("/novo-cadastro", async (req, res) => {
   }
 });
 
+// FORMULÁRIO PARA SOLICITAR EXAMES
+app.post("/solicitar-exame", async (req, res) => {
+  const f = req.body;
+
+  try {
+    await pool.query("BEGIN");
+
+    const { rows } = await pool.query(
+      `
+      INSERT INTO novo_aso (
+        cod_empresa,
+        nome_empresa,
+        nome_funcionario,
+        data_nascimento,
+        cpf,
+        matricula,
+        data_admissao,
+        cod_unidade,
+        nome_unidade,
+        cod_setor,
+        nome_setor,
+        cod_cargo,
+        nome_cargo,
+        tipo_exame,
+        funcao_anterior,
+        funcao_atual,
+        solicitar_nova_funcao,
+        nome_nova_funcao,
+        setor_atual,
+        solicitar_novo_setor,
+        nome_novo_setor,
+        cnh,
+        vencimento_cnh,
+        lab_toxicologico,
+        estado_clinica,
+        cidade_clinica,
+        nome_clinica,
+        solicitar_credenciamento,
+        estado_credenciamento,
+        cidade_credenciamento,
+        observacao
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31)
+      RETURNING id
+      `,
+      [
+        f.cod_empresa,
+        f.nome_empresa,
+        f.nome_funcionario,
+        f.data_nascimento,
+        f.cpf,
+        f.matricula,
+        f.data_admissao,
+        f.cod_unidade,
+        f.nome_unidade,
+        f.cod_setor,
+        f.nome_setor,
+        f.cod_cargo,
+        f.nome_cargo,
+        f.tipo_exame,
+        f.funcao_anterior,
+        f.funcao_atual,
+        f.solicitar_nova_funcao,
+        f.nome_nova_funcao,
+        f.setor_atual,
+        f.solicitar_novo_setor,
+        f.nome_novo_setor,
+        f.cnh,
+        f.vencimento_cnh,
+        f.lab_toxicologico,
+        f.estado_clinica,
+        f.cidade_clinica,
+        f.nome_clinica,
+        f.solicitar_credenciamento === true,
+        f.estado_credenciamento,
+        f.cidade_credenciamento,
+        f.observacao
+      ]
+    );
+
+    const funcionarioId = rows[0].id;
+
+    await pool.query(
+      `
+      INSERT INTO solicitacoes_aso (funcionario_id, solicitado_por)
+      VALUES ($1,$2)
+      `,
+      [funcionarioId, f.usuario_id]
+    );
+
+    await pool.query("COMMIT");
+
+    res.json({ sucesso: true });
+
+  } catch (err) {
+    await pool.query("ROLLBACK");
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao gerar solicitação de ASO" });
+  }
+});
+
 // LISTAR SOLICITAÇÕES (novo cadastro e aso)
 app.get("/solicitacoes", async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT *
       FROM (
-        -- NOVO CADASTRO
         SELECT
-          s.id              AS solicitacao_id,
-          f.id              AS funcionario_id,
+          s.id AS solicitacao_id,
+          f.id AS funcionario_id,
           f.nome_empresa,
           f.nome_funcionario,
           f.cpf,
           s.status,
           s.solicitado_em,
-          'NOVO_CADASTRO'    AS tipo
+          f.solicitar_novo_setor,
+          f.solicitar_novo_cargo,
+          f.solicitar_credenciamento,
+          'NOVO_CADASTRO' AS tipo
         FROM solicitacoes_novo_cadastro s
         JOIN novo_cadastro f ON f.id = s.funcionario_id
 
         UNION ALL
 
-        -- ASO
         SELECT
-          s.id              AS solicitacao_id,
-          f.id              AS funcionario_id,
+          s.id AS solicitacao_id,
+          f.id AS funcionario_id,
           f.nome_empresa,
           f.nome_funcionario,
           f.cpf,
           s.status,
           s.solicitado_em,
-          'ASO'              AS tipo
+          f.solicitar_nova_funcao,
+          f.solicitar_novo_setor,
+          f.solicitar_credenciamento,
+          'ASO' AS tipo
         FROM solicitacoes_aso s
         JOIN novo_aso f ON f.id = s.funcionario_id
       ) t
-      ORDER BY t.solicitado_em DESC
+      ORDER BY t.solicitado_em DESC;
     `);
 
     res.json(rows);
@@ -428,14 +674,18 @@ app.get("/solicitacoes/novo-cadastro/:id", async (req, res) => {
         f.*,
         sf.status,
         sf.motivo_reprovacao,
+        sf.retorno_soc_erro,
         sf.solicitado_em,
         u.nome AS solicitado_por_nome,
         ua.nome AS analisado_por_nome,
-        sf.analisado_em
+        ue.nome AS enviado_soc_por_nome,
+        sf.analisado_em,
+        sf.enviado_soc_em
       FROM solicitacoes_novo_cadastro sf
       JOIN novo_cadastro f ON f.id = sf.funcionario_id
       JOIN usuarios u ON u.id = sf.solicitado_por
       LEFT JOIN usuarios ua ON ua.id = sf.analisado_por
+      LEFT JOIN usuarios ue ON ue.id = sf.enviado_soc_por
       WHERE sf.id = $1
     `, [id]);
 
@@ -615,16 +865,19 @@ app.put("/solicitacoes/cadastro/:id/editar", async (req, res) => {
         nome_setor = $13,
         nome_cargo = $14,
         tipo_exame = $15,
-        nome_clinica = $16,
-        cidade_clinica = $17,
-        email_clinica = $18,
-        telefone_clinica = $19,
-        lab_toxicologico = $20,
-        observacao = $21
+        cnh = $16,
+        vencimento_cnh = $17,
+        lab_toxicologico = $18,
+        estado_clinica = $19,
+        cidade_clinica = $20,
+        nome_clinica = $21,
+        estado_credenciamento = $22,
+        cidade_credenciamento = $23,
+        observacao = $24
       WHERE id = (
         SELECT funcionario_id
         FROM solicitacoes_novo_cadastro
-        WHERE id = $22
+        WHERE id = $25
       )
     `, [
       f.nome_funcionario,
@@ -642,11 +895,14 @@ app.put("/solicitacoes/cadastro/:id/editar", async (req, res) => {
       f.nome_setor,
       f.nome_cargo,
       f.tipo_exame,
-      f.nome_clinica,
-      f.cidade_clinica,
-      f.email_clinica,
-      f.telefone_clinica,
+      f.cnh,
+      f.vencimento_cnh || null,
       f.lab_toxicologico,
+      f.estado_clinica,
+      f.cidade_clinica,
+      f.nome_clinica,
+      f.estado_credenciamento,
+      f.cidade_credenciamento,
       f.observacao,
 
       id
@@ -669,6 +925,67 @@ app.put("/solicitacoes/cadastro/:id/editar", async (req, res) => {
     await pool.query("ROLLBACK");
     console.error(err);
     res.status(500).json({ erro: "Erro ao editar cadastro" });
+  }
+});
+
+// EDITAR SOMENTE SETOR E CARGO DE UMA SOLICITAÇÃO DE CADASTRO
+app.put("/solicitacoes/cadastro/:id/editar-setor-cargo", async (req, res) => {
+  const { id } = req.params; // id da solicitação
+  const { cod_setor, nome_setor, cod_cargo, nome_cargo } = req.body;
+
+  try {
+    await pool.query("BEGIN");
+
+    // Pega o funcionário e as flags na tabela novo_cadastro via solicitação
+    const { rows } = await pool.query(`
+      SELECT nc.id AS funcionario_id, nc.solicitar_novo_setor, nc.solicitar_novo_cargo
+      FROM solicitacoes_novo_cadastro s
+      JOIN novo_cadastro nc ON nc.id = s.funcionario_id
+      WHERE s.id = $1
+    `, [id]);
+
+    if (rows.length === 0) {
+      await pool.query("ROLLBACK");
+      return res.status(404).json({ erro: "Solicitação não encontrada" });
+    }
+
+    const { funcionario_id, solicitar_novo_setor, solicitar_novo_cargo } = rows[0];
+    const updates = [];
+    const values = [];
+
+    if (solicitar_novo_setor) {
+      updates.push(`cod_setor = $${updates.length + 1}`);
+      values.push(cod_setor);
+
+      updates.push(`nome_setor = $${updates.length + 1}`);
+      values.push(nome_setor);
+    }
+
+    if (solicitar_novo_cargo) {
+      updates.push(`cod_cargo = $${updates.length + 1}`);
+      values.push(cod_cargo);
+
+      updates.push(`nome_cargo = $${updates.length + 1}`);
+      values.push(nome_cargo);
+    }
+
+    if (updates.length > 0) {
+      const sql = `
+        UPDATE novo_cadastro
+        SET ${updates.join(", ")}
+        WHERE id = $${updates.length + 1}
+      `;
+      values.push(funcionario_id);
+
+      await pool.query(sql, values);
+    }
+
+    await pool.query("COMMIT");
+    res.json({ sucesso: true });
+  } catch (err) {
+    await pool.query("ROLLBACK");
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao editar setor/cargo" });
   }
 });
 
@@ -695,19 +1012,20 @@ app.put("/solicitacoes/aso/:id/editar", async (req, res) => {
         tipo_exame = $10,
         cnh = $11,
         vencimento_cnh = $12,
-        funcao_anterior = $13,
-        funcao_atual = $14,
-        setor_atual = $15,
-        nome_clinica = $16,
-        cidade_clinica = $17,
-        email_clinica = $18,
-        telefone_clinica = $19,
-        lab_toxicologico = $20,
-        observacao = $21
+        lab_toxicologico = $13,
+        funcao_anterior = $14,
+        funcao_atual = $15,
+        setor_atual = $16,
+        estado_clinica = $17,
+        nome_clinica = $18,
+        cidade_clinica = $19,
+        estado_credenciamento = $20,
+        cidade_credenciamento = $21,
+        observacao = $22
       WHERE id = (
         SELECT funcionario_id
         FROM solicitacoes_aso
-        WHERE id = $22
+        WHERE id = $23
       )
     `, [
       f.nome_funcionario,
@@ -720,16 +1038,17 @@ app.put("/solicitacoes/aso/:id/editar", async (req, res) => {
       f.nome_setor,
       f.nome_cargo,
       f.tipo_exame,
+      f.cnh,
+      f.vencimento_cnh || null,
+      f.lab_toxicologico,
       f.funcao_anterior,
       f.funcao_atual,
       f.setor_atual,
-      f.cnh,
-      f.vencimento_cnh,
-      f.nome_clinica,
+      f.estado_clinica,
       f.cidade_clinica,
-      f.email_clinica,
-      f.telefone_clinica,
-      f.lab_toxicologico,
+      f.nome_clinica,
+      f.estado_credenciamento,
+      f.cidade_credenciamento,
       f.observacao,
 
       id
@@ -755,10 +1074,53 @@ app.put("/solicitacoes/aso/:id/editar", async (req, res) => {
   }
 });
 
+function interpretarRetornoSOC(retorno) {
+  if (!retorno) {
+    return {
+      tipo: "INCONSISTENCIA",
+      mensagem: "SOC não retornou resposta válida"
+    };
+  }
+
+  if (retorno.encontrouErro === true) {
+    return {
+      tipo: "INCONSISTENCIA",
+      mensagem: retorno.descricaoErro || "Erro de inconsistência retornado pelo SOC"
+    };
+  }
+
+  if (
+    retorno.encontrouFuncionario === true &&
+    retorno.incluiuFuncionario === false
+  ) {
+    return {
+      tipo: "CPF_DUPLICADO",
+      mensagem: "CPF já existente no SOC"
+    };
+  }
+
+  if (retorno.incluiuFuncionario !== true) {
+    return {
+      tipo: "INCONSISTENCIA",
+      mensagem: "SOC não confirmou a inclusão do funcionário"
+    };
+  }
+
+  return {
+    tipo: "SUCESSO",
+    mensagem: null
+  };
+}
+
 // ENVIO AO SOC
 app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
   try {
     const { id } = req.params;
+    const { usuario_id } = req.body;
+
+    if (!usuario_id) {
+      return res.status(400).json({ erro: "Usuário não informado" });
+    }
 
     const { rows } = await pool.query(
       `
@@ -821,7 +1183,12 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
           dataNascimento,
           sexo: f.sexo,
           estadoCivil: f.estado_civil,
-          matricula: f.matricula,
+
+          ...(f.nao_possui_matricula || !f.matricula || !String(f.matricula).trim()
+            ? { naoPossuiMatricula: true }
+            : { matricula: String(f.matricula).trim() }
+          ),
+
           dataAdmissao,
           tipoContratacao: f.tipo_contratacao,
           codigoCategoriaESocial: f.cod_categoria,
@@ -848,37 +1215,62 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
       }
     };
 
-    const { status } = await pool.query(
-      `SELECT status FROM solicitacoes_novo_cadastro WHERE id = $1`,
-      [id]
-    ).then(r => r.rows[0]);
+    const [result] = await client.importacaoFuncionarioAsync(dataBody);
+    const retorno = result?.FuncionarioRetorno;
 
-    if (status !== "APROVADO") {
+    const resultadoSOC = interpretarRetornoSOC(retorno);
+
+    // ❌ ERRO DE NEGÓCIO (CPF duplicado etc)
+    if (resultadoSOC.tipo !== "SUCESSO") {
+      await pool.query(
+        `
+        UPDATE solicitacoes_novo_cadastro
+        SET status = 'ERRO_SOC',
+            retorno_soc_erro = $1
+        WHERE id = $2
+        `,
+        [resultadoSOC.mensagem, id]
+      );
+
       return res.status(400).json({
-        erro: "Apenas solicitações aprovadas podem ser enviadas ao SOC"
+        erro: "Falha no envio ao SOC",
+        detalhe: resultadoSOC.mensagem
       });
     }
 
-    const [result] =
-      await client.importacaoFuncionarioAsync(dataBody);
-
+    // ✅ SUCESSO
     await pool.query(
       `
       UPDATE solicitacoes_novo_cadastro
-      SET status = 'ENVIADO_SOC',
-          enviado_soc_por = $1,
-          enviado_soc_em = NOW()
+      SET
+        status = 'ENVIADO_SOC',
+        retorno_soc_erro = NULL,
+        enviado_soc_por = $1,
+        enviado_soc_em = NOW()
       WHERE id = $2
       `,
-      [req.body.usuario_id, id]
+      [usuario_id, id]
     );
 
-    res.json({ sucesso: true, retornoSOC: result });
+    return res.json({
+      sucesso: true,
+      retornoSOC: retorno
+    });
 
   } catch (err) {
-    console.error("Erro SOC:", err);
-    res.status(500).json({
-      erro: "Erro ao enviar funcionário ao SOC",
+    // ❌ ERRO TÉCNICO (SOAP, DB, JS)
+    await pool.query(
+      `
+      UPDATE solicitacoes_novo_cadastro
+      SET status = 'ERRO_SOC',
+          retorno_soc_erro = $1
+      WHERE id = $2
+      `,
+      [err.message, id]
+    );
+
+    return res.status(500).json({
+      erro: "Erro técnico ao enviar funcionário ao SOC",
       detalhe: err.message
     });
   }
@@ -897,18 +1289,16 @@ app.get("/soc/funcionario-por-cpf/:cpf/:empresaUsuario", async (req, res) => {
     });
 
     const response = await axios.get(SOC_EXPORTA_URL, {
-      params: { parametro }
+      params: { parametro },
+      responseType: "arraybuffer"
     });
 
-    const registros = Array.isArray(response.data)
-      ? response.data
-      : [response.data];
+    const decoded = iconv.decode(response.data, "ISO-8859-1");
+    const parsed = JSON.parse(decoded);
 
-    if (
-      !registros.length ||
-      !registros[0] ||
-      !registros[0].CPFFUNCIONARIO
-    ) {
+    const registros = Array.isArray(parsed) ? parsed : [parsed];
+
+    if (!registros.length || !registros[0] || !registros[0].CPFFUNCIONARIO) {
       return res.json({ existe: false });
     }
 
@@ -920,7 +1310,6 @@ app.get("/soc/funcionario-por-cpf/:cpf/:empresaUsuario", async (req, res) => {
         codigo_empresa: f.CODIGOEMPRESA,
         nome_empresa: f.NOMEEMPRESA,
 
-        cod_funcionario: f.CODIGO,
         nome: f.NOME,
         cpf: f.CPFFUNCIONARIO,
         matricula: f.MATRICULAFUNCIONARIO,
@@ -944,22 +1333,7 @@ app.get("/soc/funcionario-por-cpf/:cpf/:empresaUsuario", async (req, res) => {
           codigo: f.CODIGOCARGO,
           nome: f.NOMECARGO,
           cbo: f.CBOCARGO
-        },
-
-        endereco: {
-          logradouro: f.ENDERECO,
-          numero: f.NUMEROENDERECO,
-          bairro: f.BAIRRO,
-          uf: f.UF
-        },
-
-        contato: {
-          email_corporativo: f.EMAILCORPORATIVO,
-          email_pessoal: f.EMAILPESSOAL,
-          celular: f.TELEFONECELULAR
-        },
-
-        data_cadastro: f.DATACADASTRO
+        }
       }
     });
 
@@ -970,24 +1344,6 @@ app.get("/soc/funcionario-por-cpf/:cpf/:empresaUsuario", async (req, res) => {
       detalhe: err.message
     });
   }
-});
-
-// DEBUG PARA VER O DADO DO FUNCIONARIO PESQUISADO
-app.get("/soc/debug-funcionario-completo/:cpf/:empresa", async (req, res) => {
-  const cpf = req.params.cpf.replace(/\D/g, "");
-
-  const parametro = JSON.stringify({
-    ...EXPORTA_FUNCIONARIOS,
-    empresaTrabalho: req.params.empresa,
-    cpf
-  });
-
-  const response = await axios.get(SOC_EXPORTA_URL, {
-    params: { parametro }
-  });
-
-  res.json(response.data);
-  //http://localhost:3001/soc/debug-funcionario-completo/06909315650/1961619
 });
 
 // BUSCAR DADOS DO USUÁRIO PRA TELA DE PERFIL
@@ -1010,100 +1366,6 @@ app.get("/usuarios/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: "Erro ao buscar usuário" });
-  }
-});
-
-// FORMULÁRIO DE SOLICITAÇÃO DE ASO
-app.post("/solicitar-aso", async (req, res) => {
-  const f = req.body;
-
-  try {
-    await pool.query("BEGIN");
-
-    const { rows } = await pool.query(
-      `
-      INSERT INTO novo_aso (
-        cod_empresa,
-        nome_empresa,
-        nome_funcionario,
-        data_nascimento,
-        cpf,
-        matricula,
-        data_admissao,
-        cod_unidade,
-        nome_unidade,
-        cod_setor,
-        nome_setor,
-        cod_cargo,
-        nome_cargo,
-        tipo_exame,
-        cnh,
-        vencimento_cnh,
-        funcao_anterior,
-        funcao_atual,
-        setor_atual,
-        nome_clinica,
-        cidade_clinica,
-        email_clinica,
-        telefone_clinica,
-        lab_toxicologico,
-        observacao
-      )
-      VALUES (
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,
-        $13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25
-      )
-      RETURNING id
-      `,
-      [
-        f.cod_empresa,
-        f.nome_empresa,
-        f.nome_funcionario,
-        f.data_nascimento,
-        f.cpf,
-        f.matricula,
-        f.data_admissao,
-        f.cod_unidade,
-        f.nome_unidade,
-        f.cod_setor,
-        f.nome_setor,
-        f.cod_cargo,
-        f.nome_cargo,
-        f.tipo_exame,
-        f.cnh,
-        f.vencimento_cnh,
-        f.funcao_anterior,
-        f.funcao_atual,
-        f.setor_atual,
-        f.nome_clinica,
-        f.cidade_clinica,
-        f.email_clinica,
-        f.telefone_clinica,
-        f.lab_toxicologico,
-        f.observacao
-      ]
-    );
-
-    const funcionarioId = rows[0].id;
-
-    await pool.query(
-      `
-      INSERT INTO solicitacoes_aso (
-        funcionario_id, solicitado_por
-      )
-      VALUES ($1,$2)
-      `,
-      [funcionarioId, f.usuario_id]
-    );
-
-    await pool.query("COMMIT");
-
-    res.json({ sucesso: true });
-
-  } catch (err) {
-    await pool.query("ROLLBACK");
-    console.error(err);
-    res.status(500).json({ erro: "Erro ao gerar solicitação de ASO" });
   }
 });
 

@@ -25,15 +25,15 @@
             <div class="header-center">
                 <span>
                     <i class="fa-solid fa-house"></i>
-                    <a href="../pages/index.html" class="header-link"> Início</a>
-                </span>
-                <span>
-                    <i class="fa-solid fa-circle-info"></i>
-                    <a href="#" class="header-link">Ajuda</a>
+                    <a href="index.html" class="header-link"> Início</a>
                 </span>
                 <span>
                     <i class="fa-solid fa-phone"></i>
-                    <a href="#" class="header-link">Contato</a>
+                    <a href="contato.html" class="header-link"> Contato</a>
+                </span>
+                <span>
+                    <i class="fa-solid fa-circle-info"></i>
+                    <a href="faq.html" class="header-link"> Perguntas Frequentes</a>
                 </span>
             </div>
 
@@ -94,6 +94,7 @@
         <div class="container mt-5">
             <div class="title">
                 <h3>Formulário para Novo Cadastro</h3>
+                <p class="subtitle">Preencha o formulário com os dados do funcionário para novo cadastro</p>
             </div>
 
             <form id="formCadastro" class="mt-4">
@@ -118,7 +119,7 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-calendar"></i>
                                 </div>
-                                <input type="date" id="data-nascimento">
+                                <input type="date" id="data_nascimento">
                             </div>
                         </div>
 
@@ -185,7 +186,13 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-chalkboard-user"></i>
                                 </div>
-                                <input type="text" id="matricula">
+                                <input type="text" id="matricula" required>
+                            </div>
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" id="naoPossuiMatricula">
+                                <label class="form-check-label label-nao-possui-matricula" for="naoPossuiMatricula">
+                                    FUNCIONÁRIO NÃO POSSUI MATRÍCULA
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -245,7 +252,7 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-clock"></i>
                                 </div>
-                                <select id="regime_trabalho">
+                                <select id="regime_trabalho" required>
                                     <option value="">Selecione...</option>
                                     <option value="NORMAL">Normal</option>
                                     <option value="TURNO">Turno</option>
@@ -266,10 +273,7 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-building"></i>
                                 </div>
-                                <!-- VISUAL -->
                                 <input type="text" id="empresaNomeView" disabled>
-
-                                <!-- DADO REAL (enviado) -->
                                 <input type="hidden" id="empresaCodigoHidden">
                             </div>
                         </div>
@@ -284,26 +288,58 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Setor do Funcionário <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-building"></i>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Setor do Funcionário <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-building"></i>
+                                    </div>
+                                    <select id="setorSelect" required>
+                                        <option value="">Selecione...</option>
+                                    </select>
                                 </div>
-                                <select id="setorSelect" required>
-                                    <option value="">Selecione...</option>
-                                </select>
+                                <div class="form-check my-3">
+                                    <input class="form-check-input" type="checkbox" id="solicitarNovoSetor">
+                                    <label class="form-check-label label-solicitar-setor" for="solicitarNovoSetor">
+                                        SOLICITAR CRIAÇÃO DE NOVO SETOR
+                                    </label>
+                                </div>
+                                <div id="novoSetorWrapper" class="novo-campo" style="display: none;">
+                                    <label>Nome do Novo Setor <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-building"></i>
+                                        </div>
+                                        <input type="text" id="novoSetor" placeholder="Ex: Financeiro">
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Cargo do Funcionário <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-briefcase"></i>
+                            <div class="form-group">
+                                <label>Cargo do Funcionário <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-briefcase"></i>
+                                    </div>
+                                    <select id="cargoSelect" required>
+                                        <option value="">Selecione...</option>
+                                    </select>
                                 </div>
-                                <select id="cargoSelect" required>
-                                    <option value="">Selecione...</option>
-                                </select>
+                                <div class="form-check my-3">
+                                    <input class="form-check-input" type="checkbox" id="solicitarNovoCargo">
+                                    <label class="form-check-label label-solicitar-cargo" for="solicitarNovoCargo">
+                                        SOLICITAR CRIAÇÃO DE NOVO CARGO
+                                    </label>
+                                </div>
+                                <div id="novoCargoWrapper" class="novo-campo" style="display: none;">
+                                    <label>Nome do Novo Cargo <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-briefcase"></i>
+                                        </div>
+                                        <input type="text" id="novoCargo" placeholder="Ex: Analista Administrativo">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -318,7 +354,6 @@
                                     <i class="fa-solid fa-file"></i>
                                 </div>
                                 <select id="tipo_exame">
-                                    <option value="">Selecione...</option>
                                     <option value="ADMISSIONAL">Admissional</option>
                                 </select>
                             </div>
@@ -327,44 +362,33 @@
                 </div>
 
                 <div class="card mb-4">
-                    <div class="p-3">
-                        <h5 class="my-2">Dados da Clínica Credenciada ou cidade a ser realizado o exame</h5>
-                    </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label>Nome da Clínica</label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-house-medical"></i>
+                            <div class="alerts-container mb-2">
+                                <div class="alert alert-warning">
+                                    <i class="fa-solid fa-circle-info fa-lg" style="color: #F1AE33"></i>
+                                    <p class="alert-text">Em caso de exame toxicológico, preencha os campos abaixo:</p>
                                 </div>
-                                <input type="text" id="nome_clinica">
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Cidade da Clínica</label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-building"></i>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>CNH</label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-id-card"></i>
+                                    </div>
+                                    <input type="text" id="cnh">
                                 </div>
-                                <input type="text" id="cidade_clinica">
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label>E-mail da Clínica</label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-envelope"></i>
+                            <div class="form-group">
+                                <label>Vencimento da CNH</label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-credit-card"></i>
+                                    </div>
+                                    <input type="date" id="vencimento_cnh">
                                 </div>
-                                <input type="text" id="email_clinica">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Telefone da Clínica</label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-phone"></i>
-                                </div>
-                                <input type="text" id="telefone_clinica">
                             </div>
                         </div>
                         <div class="form-group">
@@ -374,6 +398,89 @@
                                     <i class="fa-solid fa-vial"></i>
                                 </div>
                                 <input type="text" id="lab_toxicologico">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="p-3">
+                        <h5 class="my-2">Dados da Clínica Credenciada para a realização do exame</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Estado da Clínica <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-building"></i>
+                                </div>
+                                <select id="estado_clinica" required>
+                                    <option value="">Carregando...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Cidade da Clínica <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-building"></i>
+                                </div>
+                                <select id="cidade_clinica" required>
+                                    <option value="">Carregando...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Nome da Clínica <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-house-medical"></i>
+                                </div>
+                                <select id="nome_clinica" required>
+                                    <option value="">Carregando...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="alerts-container mb-2">
+                                <div class="alert alert-warning">
+                                    <i class="fa-solid fa-circle-info fa-lg" style="color: #F1AE33"></i>
+                                    <p class="alert-text">Caso não encontre a clínica desejada, selecione o campo abaixo
+                                        para solicitar um credenciamento:</p>
+                                </div>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="solicitarCredenciamento">
+                                <label class="form-check-label label-solicitar-credenciamento"
+                                    for="solicitarCredenciamento">
+                                    SOLICITAR CREDENCIAMENTO
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4" id="cardCredenciamento" style="display: none;">
+                    <div class="p-3">
+                        <h5 class="my-2">Dados para Credenciamento</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Estado da Clínica <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-building"></i>
+                                </div>
+                                <input type="text" id="estado_credenciamento">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Cidade da Clínica <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-building"></i>
+                                </div>
+                                <input type="text" id="cidade_credenciamento">
                             </div>
                         </div>
                     </div>
@@ -414,14 +521,19 @@
                 </path>
             </svg>
             <div class="footer-socials">
-                <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-                <a href="#" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://www.instagram.com/salubritasso/" target="_blank"><i
+                        class="fa-brands fa-instagram"></i></a>
+                <a href="https://salubrita.com.br/" target="_blank"><i class="fa-solid fa-globe"></i></a>
+                <a href="https://wa.me/553131669006" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
             </div>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script>
+        emailjs.init("1pr-7ed79IA57qLnM");
+    </script>
     <script src="../script/formulario-novo-cadastro.js"></script>
 </body>
 

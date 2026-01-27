@@ -240,7 +240,7 @@ h3::after {
 .filter-group select {
     width: 100%;
     height: 36px;
-    border: 1px solid #d1d5db;
+    border: 1px solid #D1D5DB;
     border-radius: 8px;
     padding: 0 10px;
     font-size: 13px;
@@ -252,7 +252,7 @@ h3::after {
 }
 
 .btn-search {
-    background: #F1AE33;
+    background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
     color: #FFFFFF;
     border: none;
     padding: 0 16px;
@@ -321,28 +321,23 @@ td {
     white-space: nowrap;
 }
 
-.status-pill.pendente {
-    background: #F1AE33;
-}
-
-.status-pill.pendente_reavaliacao {
-    background: #F1AE33;
+.status-pill.pendente,
+.status-pill.pendente_reavaliacao,
+.status-pill.pendente_credenciamento {
+    background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
 }
 
 .status-pill.aprovado {
-    background: #53A5A6;
+    background: linear-gradient(135deg, #53A5A6, #61B4B6, #4A8F90);
 }
 
 .status-pill.enviado_soc {
     background: #88A6BB;
 }
 
-.status-pill.reprovado {
-    background: #ef4444;
-}
-
-.status-pill.erro {
-    background: #ef4444;
+.status-pill.reprovado,
+.status-pill.erro_soc {
+    background: #EF4444;
 }
 
 .actions-wrapper {
@@ -366,8 +361,7 @@ td {
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #53A5A6, #61B4B6, #4A8F90);
-    /*background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);*/
+    background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
     border-bottom: none;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
     padding: 20px;
@@ -404,6 +398,16 @@ td {
     gap: 4px;
 }
 
+#blocoCadCredenciamento .detail-item,
+#blocoAsoCredenciamento .detail-item,
+#divNovoSetor .detail-item,
+#divNovoCargo .detail-item,
+#divNovaFuncao .detail-item,
+#divAsoNovoSetor .detail-item {
+    background-color: #F9FAFB;
+    border: 2px dotted #F1AE33;
+}
+
 .detail-label {
     font-size: 12px;
     font-weight: 500;
@@ -419,34 +423,63 @@ td {
     word-break: break-word;
 }
 
-.alert-success {
-    margin-top: 10px;
-    background: #FFFFFF;
-    border: 1px solid #7acbcc;
-    border-left: 6px solid #53A5A6;
-    color: #4A8F90;
-    border-radius: 12px;
-    padding: 16px 18px;
+.alert {
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    font-size: 14px;
-    box-shadow: 0 10px 30px rgba(34, 197, 94, 0.08);
+    align-items: center;
+}
+
+.alert p {
+    margin-left: 8px;
+}
+
+.alert-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.alert-success {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem;
+    border: 1px solid #53A5A6;
+    border-left: 5px solid #53A5A6;
+    border-radius: 0.6rem;
+    background-color: #E3F2F4;
+    color: #17575B;
+}
+
+.alert-warning {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem;
+    border: 1px solid #F1AE33;
+    border-left: 5px solid #F1AE33;
+    border-radius: 0.6rem;
+    background-color: #FFF8E6;
+    color: #7A5A1A;
 }
 
 .alert-danger {
-    margin-top: 10px;
-    background: #FFFFFF;
-    border: 1px solid #FECACA;
-    border-left: 6px solid #EF4444;
-    color: #991B1B;
-    border-radius: 12px;
-    padding: 16px 18px;
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    font-size: 14px;
-    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.08);
+    align-items: center;
+    padding: 0.8rem;
+    border: 1px solid #F05252;
+    border-left: 5px solid #F05252;
+    border-radius: 0.6rem;
+    background-color: #FFE6E6;
+    color: #992525;
+}
+
+.alert-enviado {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem;
+    border: 1px solid #88A6BB;
+    border-left: 6px solid #88A6BB;
+    border-radius: 0.6rem;
+    background-color: #E3F2F4;
+    color: #374151;
 }
 
 .modal-footer {
@@ -575,7 +608,7 @@ td {
     justify-content: center;
     color: #FFFFFF;
     font-size: 16px;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease;
 }
 
 .footer-socials a:hover {

@@ -27,15 +27,15 @@
             <div class="header-center">
                 <span>
                     <i class="fa-solid fa-house"></i>
-                    <a href="../pages/index.html" class="header-link"> Início</a>
-                </span>
-                <span>
-                    <i class="fa-solid fa-circle-info"></i>
-                    <a href="#" class="header-link">Ajuda</a>
+                    <a href="index.html" class="header-link"> Início</a>
                 </span>
                 <span>
                     <i class="fa-solid fa-phone"></i>
-                    <a href="#" class="header-link">Contato</a>
+                    <a href="contato.html" class="header-link"> Contato</a>
+                </span>
+                <span>
+                    <i class="fa-solid fa-circle-info"></i>
+                    <a href="faq.html" class="header-link"> Perguntas Frequentes</a>
                 </span>
             </div>
 
@@ -130,9 +130,9 @@
                 </path>
             </svg>
             <div class="footer-socials">
-                <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-                <a href="#" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://www.instagram.com/salubritasso/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://salubrita.com.br/" target="_blank"><i class="fa-solid fa-globe"></i></a>
+                <a href="https://wa.me/553131669006" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
             </div>
         </div>
     </footer>
@@ -144,7 +144,7 @@
                 <div class="modal-header">
                     <h3 class="modal-title">Motivo da Reprovação</h3>
                     <a data-bs-dismiss="modal">
-                        <i class="fa-solid fa-xmark fa-lg" style="color: #000000; cursor: pointer"></i>
+                        <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
                     </a>
                 </div>
 
@@ -160,7 +160,7 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Editar Cadastro Reprovado</h3>
+                    <h3 class="modal-title">Editar Solicitação</h3>
                     <a data-bs-dismiss="modal">
                         <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
                     </a>
@@ -173,7 +173,7 @@
                         <div class="col-12">
                             <div class="detail-item">
                                 <div class="detail-label">
-                                    <span>Nome completo</span>
+                                    <span>Nome Completo</span>
                                 </div>
                                 <input id="editCadNomeFuncionario" class="detail-input" />
                             </div>
@@ -308,36 +308,18 @@
                         <div class="col-6">
                             <div class="detail-item">
                                 <div class="detail-label">
-                                    <span>Nome da Clínica</span>
+                                    <span>CNH</span>
                                 </div>
-                                <input id="editCadNomeClinica" class="detail-input" />
+                                <input id="editCadCNH" class="detail-input" />
                             </div>
                         </div>
 
                         <div class="col-6">
                             <div class="detail-item">
                                 <div class="detail-label">
-                                    <span>Cidade da Clínica</span>
+                                    <span>Vencimento CNH</span>
                                 </div>
-                                <input id="editCadCidadeClinica" class="detail-input" />
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>E-mail da Clínica</span>
-                                </div>
-                                <input id="editCadEmailClinica" class="detail-input" />
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Telefone da Clínica</span>
-                                </div>
-                                <input id="editCadTelefoneClinica" class="detail-input" />
+                                <input type="date" id="editCadVencimentoCNH" class="detail-input" />
                             </div>
                         </div>
 
@@ -347,6 +329,59 @@
                                     <span>Nome do laboratório ou município para realização do exame toxicológico</span>
                                 </div>
                                 <input id="editCadLabToxicologico" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div id="blocoCadClinica" class="d-none">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Estado da Clínica</span>
+                                        </div>
+                                        <span id="editCadEstadoClinica" class="detail-value"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Cidade da Clínica</span>
+                                        </div>
+                                        <span id="editCadCidadeClinica" class="detail-value"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Nome da Clínica</span>
+                                        </div>
+                                        <span id="editCadNomeClinica" class="detail-value"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="blocoCadCredenciamento" class="d-none">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Estado para Credenciamento</span>
+                                        </div>
+                                        <span id="editCadEstadoCredenciamento" class="detail-value"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Cidade para Credenciamento</span>
+                                        </div>
+                                        <span id="editCadCidadeCredenciamento" class="detail-value"></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -383,7 +418,7 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Editar ASO Reprovado</h3>
+                    <h3 class="modal-title">Editar Solicitação</h3>
                     <a data-bs-dismiss="modal">
                         <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
                     </a>
@@ -396,7 +431,7 @@
                         <div class="col-12">
                             <div class="detail-item">
                                 <div class="detail-label">
-                                    <span>Nome completo</span>
+                                    <span>Nome Completo</span>
                                 </div>
                                 <input id="editAsoNomeFuncionario" class="detail-input" />
                             </div>
@@ -492,12 +527,21 @@
                             </div>
                         </div>
 
-                        <div class="col-6">
+                        <div class="col-12">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Vencimento CNH</span>
                                 </div>
-                                <input id="editAsoVencimentoCNH" class="detail-input" />
+                                <input type="date" id="editAsoVencimentoCNH" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome do laboratório ou município para realização do exame toxicológico</span>
+                                </div>
+                                <input id="editAsoLabToxicologico" class="detail-input" />
                             </div>
                         </div>
 
@@ -528,48 +572,56 @@
                             </div>
                         </div>
 
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Nome da Clínica</span>
+                        <div id="blocoAsoClinica" class="d-none">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Estado da Clínica</span>
+                                        </div>
+                                        <span id="editAsoEstadoClinica" class="detail-value"></span>
+                                    </div>
                                 </div>
-                                <input id="editAsoNomeClinica" class="detail-input" />
+
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Cidade da Clínica</span>
+                                        </div>
+                                        <span id="editAsoCidadeClinica" class="detail-value"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Nome da Clínica</span>
+                                        </div>
+                                        <span id="editAsoNomeClinica" class="detail-value"></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Cidade da Clínica</span>
+                        <div id="blocoAsoCredenciamento" class="d-none">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Estado para Credenciamento</span>
+                                        </div>
+                                        <span id="editAsoEstadoCredenciamento" class="detail-value"></span>
+                                    </div>
                                 </div>
-                                <input id="editAsoCidadeClinica" class="detail-input" />
-                            </div>
-                        </div>
 
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>E-mail da Clínica</span>
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Cidade para Credenciamento</span>
+                                        </div>
+                                        <span id="editAsoCidadeCredenciamento" class="detail-value"></span>
+                                    </div>
                                 </div>
-                                <input id="editAsoEmailClinica" class="detail-input" />
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Telefone da Clínica</span>
-                                </div>
-                                <input id="editAsoTelefoneClinica" class="detail-input" />
-                            </div>
-                        </div>
-
-                        <div class="col-12">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Nome do laboratório ou município para realização do exame toxicológico</span>
-                                </div>
-                                <input id="editAsoLabToxicologico" class="detail-input" />
                             </div>
                         </div>
 

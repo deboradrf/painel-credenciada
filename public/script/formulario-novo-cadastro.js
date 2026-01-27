@@ -2,6 +2,8 @@
 let empresaCodigo = localStorage.getItem("empresaCodigo");
 let nomeEmpresa = localStorage.getItem("empresaNome");
 
+let prestadoresCache = [];
+
 // USUÁRIO LOGADO
 const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
 
@@ -76,16 +78,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-async function init() {
+// INIT
+document.addEventListener("DOMContentLoaded", async () => {
   await carregarNomeEmpresa();
   await carregarUnidades();
   await carregarCargos();
-
-  const cardMudancaFuncao = document.getElementById("cardMudancaFuncao");
-  cardMudancaFuncao.style.display = "none";
-}
-
-document.addEventListener("DOMContentLoaded", init);
+  await carregarPrestadores();
+});
 
 // FUNÇÃO DE CARREGAMENTO INICIAL
 async function carregarNomeEmpresa() {
@@ -180,6 +179,221 @@ async function carregarCargos() {
   });
 }
 
+// CARREGAR PRESTADORES
+async function carregarPrestadores() {
+  if (!empresaCodigo) return;
+
+  const select = document.getElementById("nome_clinica");
+  if (!select) return;
+
+  try {
+    await fetch(`http://localhost:3001/prestadores/${empresaCodigo}`);
+
+    await listarPrestadores();
+
+  } catch (err) {
+    console.error("Erro ao carregar prestadores:", err);
+  }
+}
+
+// LISTAR OS PRESTADORES
+async function listarPrestadores() {
+  const res = await fetch(`http://localhost:3001/prestadores/${empresaCodigo}`);
+  const prestadoresBase = await res.json();
+
+  const detalhes = [];
+
+  for (const p of prestadoresBase) {
+    const prestador = await buscarDetalhesPrestador(p.codigo);
+    if (prestador) detalhes.push(prestador);
+  }
+
+  prestadoresCache = detalhes;
+
+  console.table(
+    prestadoresCache.map(p => ({
+      codigo: p.codigo,
+      estado: p.estado,
+      cidade: p.cidade
+    }))
+  );
+
+  popularSelectEstados(extrairEstados(prestadoresCache));
+}
+
+// PEGAR OS DETALHES DO PRESTADOR
+async function buscarDetalhesPrestador(codigo) {
+  try {
+    const res = await fetch(`http://localhost:3001/prestador/${empresaCodigo}/${codigo}`);
+    if (!res.ok) throw new Error();
+
+    const dados = await res.json();
+
+    return {
+      codigo,
+      nome: dados.nomePrestador || dados.nome || "",
+      cidade: dados.cidade || "",
+      estado: dados.estado || ""
+    };
+  } catch {
+    return null;
+  }
+}
+
+// EXTRAÍR TODOS OS ESTADOS DAS CLÍNICAS
+function extrairEstados(prestadores) {
+  return [...new Set(
+    prestadores
+      .map(p => p.estado)
+      .filter(estado => estado)
+  )].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+}
+
+// POPULAR O SELECT DE ESTADOS
+function popularSelectEstados(estados) {
+  const select = document.getElementById("estado_clinica");
+  if (!select) return;
+
+  select.innerHTML = '<option value="">Selecione...</option>';
+
+  estados.forEach(estado => {
+    const opt = document.createElement("option");
+    opt.value = estado;
+    opt.textContent = estado;
+    select.appendChild(opt);
+  });
+}
+
+// QUANDO SELECIONAR O ESTADO, FILTRAR POR CIDADES
+document.getElementById("estado_clinica").addEventListener("change", function () {
+  const estadoSelecionado = this.value;
+  const selectCidade = document.getElementById("cidade_clinica");
+
+  selectCidade.innerHTML = '<option value="">Selecione...</option>';
+
+  if (!estadoSelecionado) return;
+
+  const cidadesUnicas = [...new Set(
+    prestadoresCache
+      .filter(p => p.estado === estadoSelecionado)
+      .map(p => p.cidade)
+      .filter(cidade => cidade)
+  )].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+  cidadesUnicas.forEach(cidade => {
+    const opt = document.createElement("option");
+    opt.value = cidade;
+    opt.textContent = cidade;
+    selectCidade.appendChild(opt);
+  });
+});
+
+// QUANDO SELECIONAR A CIDADE, FILTRAR AS CLÍNICAS
+document.getElementById("cidade_clinica").addEventListener("change", function () {
+  const estadoSelecionado = document.getElementById("estado_clinica").value;
+  const cidadeSelecionada = this.value;
+
+  const selectClinica = document.getElementById("nome_clinica");
+  selectClinica.innerHTML = '<option value="">Selecione...</option>';
+
+  if (!estadoSelecionado || !cidadeSelecionada) return;
+
+  const clinicasFiltradas = prestadoresCache
+    .filter(p =>
+      p.estado === estadoSelecionado &&
+      p.cidade === cidadeSelecionada)
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+
+  clinicasFiltradas.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.codigo;
+    opt.textContent = p.nome;
+    opt.dataset.nome = p.nome;
+    selectClinica.appendChild(opt);
+  });
+});
+
+// MOSTRAR SEÇÃO DE NOVO SETOR
+document.getElementById("solicitarNovoSetor").addEventListener("change", function () {
+  const wrapper = document.getElementById("novoSetorWrapper");
+  wrapper.style.display = this.checked ? "block" : "none";
+});
+
+// MOSTRAR SEÇÃO DE NOVO CARGO
+document.getElementById("solicitarNovoCargo").addEventListener("change", function () {
+  const wrapper = document.getElementById("novoCargoWrapper");
+  wrapper.style.display = this.checked ? "block" : "none";
+});
+
+// MOSTRAR SEÇÃO DE NOVO CREDENCIAMENTO
+document.addEventListener("DOMContentLoaded", () => {
+  const chkCredenciamento = document.getElementById("solicitarCredenciamento");
+
+  const selectEstado = document.getElementById("estado_clinica");
+  const selectCidade = document.getElementById("cidade_clinica");
+  const selectClinica = document.getElementById("nome_clinica");
+
+  const cardCredenciamento = document.getElementById("cardCredenciamento");
+  const estadoCredenciamento = document.getElementById("estado_credenciamento");
+  const cidadeCredenciamento = document.getElementById("cidade_credenciamento");
+
+  if (!chkCredenciamento) return;
+
+  function resetarSelect(select, texto = "Selecione...") {
+    if (!select) return;
+    select.innerHTML = `<option value="">${texto}</option>`;
+    select.value = "";
+  }
+
+  function limparCampos() {
+    estadoCredenciamento.value = "";
+    cidadeCredenciamento.value = "";
+  }
+
+  chkCredenciamento.addEventListener("change", () => {
+    if (chkCredenciamento.checked) {
+      resetarSelect(selectEstado);
+      resetarSelect(selectCidade);
+      resetarSelect(selectClinica);
+
+      selectEstado.disabled = true;
+      selectCidade.disabled = true;
+      selectClinica.disabled = true;
+
+      cardCredenciamento.style.display = "block";
+    }
+    else {
+      selectEstado.disabled = false;
+      selectCidade.disabled = false;
+      selectClinica.disabled = false;
+
+      cardCredenciamento.style.display = "none";
+
+      limparCampos();
+    }
+  });
+});
+
+// CHECKBOX DE NÃO POSSUI MATRICULA
+document.addEventListener("DOMContentLoaded", () => {
+  const chkNaoPossuiMatricula = document.getElementById("naoPossuiMatricula");
+  const inputMatricula = document.getElementById("matricula");
+
+  if (!chkNaoPossuiMatricula || !inputMatricula) return;
+
+  chkNaoPossuiMatricula.addEventListener("change", () => {
+    if (chkNaoPossuiMatricula.checked) {
+      inputMatricula.value = "";
+      inputMatricula.disabled = true;
+      inputMatricula.removeAttribute("required");
+    }
+    else {
+      inputMatricula.disabled = false;
+      inputMatricula.setAttribute("required", "required");
+    }
+  });
+});
+
 // MAPA DAS CATEGORIAS DO ESOCIAL
 const codCategoriaMap = {
   CLT: "101",
@@ -245,6 +459,155 @@ rgInput.addEventListener("input", function () {
   rgInput.value = finalValue;
 });
 
+// COLOCAR REQUIRED NO CAMPO DE NOVO SETOR
+document.addEventListener("DOMContentLoaded", () => {
+  const chkSolicitarNovoSetor = document.getElementById("solicitarNovoSetor");
+  const selectSetor = document.getElementById("setorSelect");
+
+  if (!chkSolicitarNovoSetor || !selectSetor) return;
+
+  chkSolicitarNovoSetor.addEventListener("change", () => {
+    if (chkSolicitarNovoSetor.checked) {
+      selectSetor.value = "";
+      selectSetor.disabled = true;
+      selectSetor.removeAttribute("required");
+    } else {
+      selectSetor.disabled = false;
+      selectSetor.setAttribute("required", "required");
+    }
+  });
+});
+
+// COLOCAR REQUIRED NO CAMPO DE NOVO CARGO
+document.addEventListener("DOMContentLoaded", () => {
+  const chkSolicitarNovoCargo = document.getElementById("solicitarNovoCargo");
+  const selectCargo = document.getElementById("cargoSelect");
+
+  if (!chkSolicitarNovoCargo || !selectCargo) return;
+
+  chkSolicitarNovoCargo.addEventListener("change", () => {
+    if (chkSolicitarNovoCargo.checked) {
+      selectCargo.value = "";
+      selectCargo.disabled = true;
+      selectCargo.removeAttribute("required");
+    } else {
+      selectCargo.disabled = false;
+      selectCargo.setAttribute("required", "required");
+    }
+  });
+});
+
+// COLOCAR REQUIRED NO CAMPO DE ESTADO CLÍNICA E CIDADE CLÍNICA PARA CREDENCIAMENTO
+document.getElementById("solicitarCredenciamento").addEventListener("change", function () {
+  const estadoSelect = document.getElementById("estado_clinica");
+  const estadoCredenciamentoInput = document.getElementById("estado_credenciamento");
+
+  const cidadeSelect = document.getElementById("cidade_clinica");
+  const cidadeCredenciamentoInput = document.getElementById("cidade_credenciamento");
+
+  if (this.checked) {
+    estadoSelect.removeAttribute("required");
+    cidadeSelect.removeAttribute("required");
+    estadoSelect.value = "";
+    cidadeSelect.value = "";
+
+    estadoCredenciamentoInput.setAttribute("required", "required");
+    cidadeCredenciamentoInput.setAttribute("required", "required");
+  } else {
+    estadoSelect.setAttribute("required", "required");
+    cidadeSelect.setAttribute("required", "required");
+
+    estadoCredenciamentoInput.removeAttribute("required");
+    cidadeCredenciamentoInput.removeAttribute("required");
+    estadoCredenciamentoInput.value = "";
+    cidadeCredenciamentoInput.value = "";
+  }
+});
+
+// NÃO PERMITIR DATAS MANUAIS COM MAIS DE 4 DÍGITOS NO ANO
+document.addEventListener("DOMContentLoaded", function () {
+  const inputDataNascimento = document.getElementById("data_nascimento");
+  const inputDataAdmissao = document.getElementById("data_admissao");
+  const inputVencimentoCNH = document.getElementById("vencimento_cnh");
+
+  if (inputDataNascimento) {
+    inputDataNascimento.addEventListener("input", function () {
+      let valor = inputDataNascimento.value;
+      const partes = valor.split("-");
+
+      if (partes[0]) partes[0] = partes[0].slice(0, 4);
+
+      inputDataNascimento.value = partes.join("-");
+    });
+  }
+
+  if (inputDataAdmissao) {
+    inputDataAdmissao.addEventListener("input", function () {
+      let valor = inputDataAdmissao.value;
+      const partes = valor.split("-");
+
+      if (partes[0]) partes[0] = partes[0].slice(0, 4);
+
+      inputDataAdmissao.value = partes.join("-");
+    });
+  }
+
+  if (inputVencimentoCNH) {
+    inputVencimentoCNH.addEventListener("input", function () {
+      let valor = inputVencimentoCNH.value;
+      const partes = valor.split("-");
+
+      if (partes[0]) partes[0] = partes[0].slice(0, 4);
+
+      inputVencimentoCNH.value = partes.join("-");
+    });
+  }
+});
+
+// FUNÇÃO PARA ENVIAR EMAIL AUTOMATICO PRA ENGENHARIA QUANDO PRECISAR CRIAR SETOR/CARGO
+async function enviarEmailSolicitacao(dados) {
+  if (!dados.solicitar_novo_setor && !dados.solicitar_novo_cargo) return;
+
+  let solicitacao = "";
+
+  if (dados.solicitar_novo_setor) {
+    solicitacao += `• Setor: ${dados.nome_novo_setor}\n`;
+  }
+
+  if (dados.solicitar_novo_cargo) {
+    solicitacao += `• Cargo: ${dados.nome_novo_cargo}\n`;
+  }
+
+  const mensagem = `
+    Prezados,
+
+    Gentileza seguir com a criação do(s) item(ns) abaixo solicitado(s):
+
+    ${solicitacao}
+    Empresa: ${dados.nome_empresa}
+    Unidade: ${dados.nome_unidade}
+
+    Atenciosamente,
+    Débora
+  `;
+
+  try {
+    await emailjs.send(
+      "service_8ebe4kr",
+      "template_vktvl1g",
+      {
+        assunto: "Solicitação de criação de cargo/setor",
+        mensagem
+      }
+    );
+
+    alert("📧 E-mail enviado com sucesso!");
+  } catch (erro) {
+    console.error("Erro ao enviar e-mail:", erro);
+    alert("❌ Não foi possível enviar o e-mail.");
+  }
+}
+
 // ENVIO DO FORMULÁRIO
 document.getElementById("formCadastro").addEventListener("submit", async function (e) {
   e.preventDefault();
@@ -253,17 +616,39 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   const setorSelect = document.getElementById("setorSelect");
   const cargoSelect = document.getElementById("cargoSelect");
 
-  const tipoContratacaoValue =
-    document.getElementById("tipo_contratacao").value;
+  const tipoContratacaoValue = document.getElementById("tipo_contratacao").value;
+
+  const naoPossuiMatricula = document.getElementById("naoPossuiMatricula")?.checked === true;
+
+  const solicitarNovoSetor = document.getElementById("solicitarNovoSetor")?.checked === true;
+  const solicitarNovoCargo = document.getElementById("solicitarNovoCargo")?.checked === true;
+
+  const nomeNovoSetor = document.getElementById("novoSetor")?.value || null;
+  const nomeNovoCargo = document.getElementById("novoCargo")?.value || null;
+
+  const solicitarCredenciamento = document.getElementById("solicitarCredenciamento")?.checked === true;
+
+  if (solicitarNovoSetor || solicitarNovoCargo) {
+    console.log("⚠️ Existe solicitação de novo setor ou cargo");
+
+    if (solicitarNovoSetor) {
+      console.log("Novo setor solicitado:", document.getElementById("novoSetor").value);
+    }
+
+    if (solicitarNovoCargo) {
+      console.log("Novo cargo solicitado:", document.getElementById("novoCargo").value);
+    }
+  }
 
   const dados = {
     nome_funcionario: document.getElementById("nome").value,
-    data_nascimento: document.getElementById("data-nascimento").value,
+    data_nascimento: document.getElementById("data_nascimento").value,
     sexo: document.getElementById("sexo").value,
     estado_civil: document.getElementById("estado_civil").value,
     doc_identidade: document.getElementById("doc_identidade").value,
     cpf: document.getElementById("cpf").value,
-    matricula: document.getElementById("matricula").value,
+    matricula: naoPossuiMatricula ? null : document.getElementById("matricula").value,
+    nao_possui_matricula: naoPossuiMatricula,
     data_admissao: document.getElementById("data_admissao").value,
     tipo_contratacao: tipoContratacaoValue,
     cod_categoria: codCategoriaMap[tipoContratacaoValue],
@@ -272,36 +657,68 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     nome_empresa: nomeEmpresa,
     cod_unidade: unidadeSelect.value,
     nome_unidade: unidadeSelect.selectedOptions[0].dataset.nome,
-    cod_setor: setorSelect.value,
-    nome_setor: setorSelect.selectedOptions[0].dataset.nome,
-    cod_cargo: cargoSelect.value,
-    nome_cargo: cargoSelect.selectedOptions[0].dataset.nome,
+
+    cod_setor: solicitarNovoSetor ? null : setorSelect.value,
+    nome_setor: solicitarNovoSetor ? null : setorSelect.selectedOptions[0].dataset.nome,
+
+    solicitar_novo_setor: solicitarNovoSetor,
+    nome_novo_setor: solicitarNovoSetor ? nomeNovoSetor : null,
+
+    cod_cargo: solicitarNovoCargo ? null : cargoSelect.value,
+    nome_cargo: solicitarNovoCargo ? null : cargoSelect.selectedOptions[0].dataset.nome,
+
+    solicitar_novo_cargo: solicitarNovoCargo,
+    nome_novo_cargo: solicitarNovoCargo ? nomeNovoCargo : null,
+
     tipo_exame: document.getElementById("tipo_exame").value,
-    nome_clinica: document.getElementById("nome_clinica").value,
-    cidade_clinica: document.getElementById("cidade_clinica").value,
-    email_clinica: document.getElementById("email_clinica").value,
-    telefone_clinica: document.getElementById("telefone_clinica").value,
+    cnh: document.getElementById("cnh").value,
+    vencimento_cnh: document.getElementById("vencimento_cnh").value,
     lab_toxicologico: document.getElementById("lab_toxicologico").value,
+    solicitar_credenciamento: solicitarCredenciamento,
     observacao: document.getElementById("observacao").value,
 
     usuario_id: usuarioLogado.id
   };
 
+  if (solicitarCredenciamento) {
+    dados.estado_credenciamento = document.getElementById("estado_credenciamento").value;
+    dados.cidade_credenciamento = document.getElementById("cidade_credenciamento").value;
+  }
+  else {
+    dados.estado_clinica = document.getElementById("estado_clinica").value;
+    dados.cidade_clinica = document.getElementById("cidade_clinica").value;
+
+    const clinicaSelect = document.getElementById("nome_clinica");
+
+    dados.cod_clinica = clinicaSelect.value;
+    dados.nome_clinica = clinicaSelect.selectedOptions[0]?.dataset.nome || null;
+  }
+
   try {
-    await fetch("http://localhost:3001/novo-cadastro", {
+    const res = await fetch("http://localhost:3001/novo-cadastro", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados)
     });
 
-    document.getElementById("mensagem").innerHTML =
-    "<div class='alert alert-success'>Cadastro enviado com sucesso!</div>";
+    if (!res.ok) {
+      throw new Error("Erro no envio");
+    }
+    else {
+      alert("Solicitação enviada com sucesso!");
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+    await enviarEmailSolicitacao(dados);
 
     document.getElementById("formCadastro").reset();
-
   } catch (erro) {
-    document.getElementById("mensagem").innerHTML =
-      "<div class='alert alert-danger'>Erro ao enviar cadastro</div>";
+    console.error(erro);
+    alert("Erro ao enviar solicitação");
   }
 });
 

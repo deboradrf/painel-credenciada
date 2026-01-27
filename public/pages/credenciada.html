@@ -27,15 +27,15 @@
             <div class="header-center">
                 <span>
                     <i class="fa-solid fa-house"></i>
-                    <a href="../pages/index.html" class="header-link"> Início</a>
-                </span>
-                <span>
-                    <i class="fa-solid fa-circle-info"></i>
-                    <a href="#" class="header-link">Ajuda</a>
+                    <a href="index.html" class="header-link"> Início</a>
                 </span>
                 <span>
                     <i class="fa-solid fa-phone"></i>
-                    <a href="#" class="header-link">Contato</a>
+                    <a href="contato.html" class="header-link"> Contato</a>
+                </span>
+                <span>
+                    <i class="fa-solid fa-circle-info"></i>
+                    <a href="faq.html" class="header-link"> Perguntas Frequentes</a>
                 </span>
             </div>
 
@@ -92,7 +92,7 @@
     </header>
 
     <main>
-        <div class="container-fluid mt-5 px-4">
+        <div class="container-fluid mt-5 px-4 mb-5">
             <div class="title">
                 <h3>Solicitações Cadastradas</h3>
                 <p class="subtitle">
@@ -110,7 +110,7 @@
                         <option value="REPROVADO">Reprovado</option>
                         <option value="PENDENTE_REAVALIACAO">Pendente Reavaliação</option>
                         <option value="ENVIADO_SOC">Enviado ao SOC</option>
-                        <option value="ERRO">Erro</option>
+                        <option value="ERRO_SOC">Erro</option>
                     </select>
                 </div>
 
@@ -170,9 +170,10 @@
                 </path>
             </svg>
             <div class="footer-socials">
-                <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-                <a href="#" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://www.instagram.com/salubritasso/" target="_blank"><i
+                        class="fa-brands fa-instagram"></i></a>
+                <a href="https://salubrita.com.br/" target="_blank"><i class="fa-solid fa-globe"></i></a>
+                <a href="https://wa.me/553131669006" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
             </div>
         </div>
     </footer>
@@ -308,6 +309,7 @@
                                     <span>Setor do Funcionário</span>
                                 </div>
                                 <span id="cadastro_nome_setor" class="detail-value"></span>
+                                <select id="setorSelect" class="form-select" style="display:none;"></select>
                             </div>
                         </div>
 
@@ -317,6 +319,25 @@
                                     <span>Cargo do Funcionário</span>
                                 </div>
                                 <span id="cadastro_nome_cargo" class="detail-value"></span>
+                                <select id="cargoSelect" class="form-select" style="display:none;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divNovoSetor">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome do novo Setor</span>
+                                </div>
+                                <span id="cadastro_novo_setor" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divNovoCargo">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome do novo Cargo</span>
+                                </div>
+                                <span id="cadastro_novo_cargo" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -332,36 +353,18 @@
                         <div class="col-6">
                             <div class="detail-item">
                                 <div class="detail-label">
-                                    <span>Nome da Clínica</span>
+                                    <span>CNH</span>
                                 </div>
-                                <span id="cadastro_nome_clinica" class="detail-value"></span>
+                                <span id="cadastro_cnh" class="detail-value"></span>
                             </div>
                         </div>
 
                         <div class="col-6">
                             <div class="detail-item">
                                 <div class="detail-label">
-                                    <span>Cidade da Clínica</span>
+                                    <span>Vencimento CNH</span>
                                 </div>
-                                <span id="cadastro_cidade_clinica" class="detail-value"></span>
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>E-mail da Clínica</span>
-                                </div>
-                                <span id="cadastro_email_clinica" class="detail-value"></span>
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Telefone da Clínica</span>
-                                </div>
-                                <span id="cadastro_telefone_clinica" class="detail-value"></span>
+                                <span id="cadastro_vencimento_cnh" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -371,6 +374,59 @@
                                     <span>Nome do laboratório ou município para realização do exame toxicológico</span>
                                 </div>
                                 <span id="cadastro_lab_toxicologico" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div id="blocoCadClinica" class="d-none">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Estado da Clínica</span>
+                                        </div>
+                                        <span id="cadastro_estado_clinica" class="detail-value"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Cidade da Clínica</span>
+                                        </div>
+                                        <span id="cadastro_cidade_clinica" class="detail-value"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Nome da Clínica</span>
+                                        </div>
+                                        <span id="cadastro_nome_clinica" class="detail-value"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="blocoCadCredenciamento" class="d-none">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Estado para Credenciamento</span>
+                                        </div>
+                                        <span id="cadastro_estado_credenciamento" class="detail-value"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Cidade para Credenciamento</span>
+                                        </div>
+                                        <span id="cadastro_cidade_credenciamento" class="detail-value"></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -387,12 +443,12 @@
 
                 <div class="modal-footer">
                     <div class="action-buttons">
-                        <button class="btn-action btn-aprovar">
+                        <button type="button" class="btn-action btn-aprovar" onclick="analisarSolicitacao('APROVADO')">
                             <i class="fa-solid fa-check"></i>
                             Aprovar
                         </button>
-
-                        <button class="btn-action btn-reprovar">
+                        <button type="button" class="btn-action btn-reprovar"
+                            onclick="analisarSolicitacao('REPROVADO')">
                             <i class="fa-solid fa-xmark"></i>
                             Reprovar
                         </button>
@@ -519,81 +575,63 @@
                         <div class="col-6">
                             <div class="detail-item">
                                 <div class="detail-label">
+                                    <span>Função exercida atualmente</span>
+                                </div>
+                                <span id="aso_funcao_anterior" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divFuncaoAtual">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Função que irá exercer</span>
+                                </div>
+                                <span id="aso_funcao_atual" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divNovaFuncao">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome da Nova Função</span>
+                                </div>
+                                <span id="aso_nova_funcao" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="divSetorAtual">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Setor que irá atuar</span>
+                                </div>
+                                <span id="aso_setor_atual" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divAsoNovoSetor">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome do Novo Setor</span>
+                                </div>
+                                <span id="aso_novo_setor" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
                                     <span>CNH</span>
                                 </div>
                                 <span id="aso_cnh" class="detail-value"></span>
                             </div>
                         </div>
 
-                        <div class="col-6">
+                        <div class="col-12">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Vencimento CNH</span>
                                 </div>
                                 <span id="aso_vencimento_cnh" class="detail-value"></span>
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Função Anterior</span>
-                                </div>
-                                <span id="aso_funcao_anterior" class="detail-value"></span>
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Função Atual</span>
-                                </div>
-                                <span id="aso_funcao_atual" class="detail-value"></span>
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Setor Atual</span>
-                                </div>
-                                <span id="aso_setor_atual" class="detail-value"></span>
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Nome da Clínica</span>
-                                </div>
-                                <span id="aso_nome_clinica" class="detail-value"></span>
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Cidade da Clínica</span>
-                                </div>
-                                <span id="aso_cidade_clinica" class="detail-value"></span>
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>E-mail da Clínica</span>
-                                </div>
-                                <span id="aso_email_clinica" class="detail-value"></span>
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Telefone da Clínica</span>
-                                </div>
-                                <span id="aso_telefone_clinica" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -603,6 +641,59 @@
                                     <span>Nome do laboratório ou município para realização do exame toxicológico</span>
                                 </div>
                                 <span id="aso_lab_toxicologico" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div id="blocoAsoClinica" class="d-none">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Estado da Clínica</span>
+                                        </div>
+                                        <span id="aso_estado_clinica" class="detail-value"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Cidade da Clínica</span>
+                                        </div>
+                                        <span id="aso_cidade_clinica" class="detail-value"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Nome da Clínica</span>
+                                        </div>
+                                        <span id="aso_nome_clinica" class="detail-value"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="blocoAsoCredenciamento" class="d-none">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Estado para Credenciamento</span>
+                                        </div>
+                                        <span id="aso_estado_credenciamento" class="detail-value"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">
+                                            <span>Cidade para Credenciamento</span>
+                                        </div>
+                                        <span id="aso_cidade_credenciamento" class="detail-value"></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -619,12 +710,13 @@
 
                 <div class="modal-footer">
                     <div class="action-buttons">
-                        <button class="btn-action btn-aprovar">
+                        <button type="button" class="btn-action btn-aprovar" onclick="analisarSolicitacao('APROVADO')">
                             <i class="fa-solid fa-check"></i>
                             Aprovar
                         </button>
 
-                        <button class="btn-action btn-reprovar">
+                        <button type="button" class="btn-action btn-reprovar"
+                            onclick="analisarSolicitacao('REPROVADO')">
                             <i class="fa-solid fa-xmark"></i>
                             Reprovar
                         </button>

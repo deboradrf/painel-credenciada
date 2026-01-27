@@ -7,7 +7,7 @@ const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
 
 if (!usuarioLogado) {
   alert("Usuário não logado");
-  window.location.href = "../pages/login.html";
+  window.location.href = "login.html";
 }
 
 // DROPDOWN DO PERFIL
@@ -101,12 +101,15 @@ async function buscarCPF() {
     // CPF NÃO EXISTE NA EMPRESA
     if (!data.existe) {
       resultado.innerHTML = `
-        <div class="alert alert-danger">
-          Funcionário NÃO encontrado nesta empresa. Solicite um novo cadastro.
+        <div class="alerts-container mb-4">
+          <div class="alert alert-danger">
+            <i class="fa-solid fa-circle-check fa-lg" style="color: #F05252"></i>
+            <p class="alert-text">Funcionário não encontrado. Solicite um novo cadastro</p>
+          </div>
         </div>
 
-        <div class="d-flex justify-content-center mt-2">
-          <button class="btn-cadastrar-funcionario"
+        <div class="d-flex justify-content-center my-3">
+          <button class="btn"
             onclick="window.location.href='formulario-novo-cadastro.html'">
             Cadastrar Funcionário
           </button>
@@ -120,28 +123,64 @@ async function buscarCPF() {
     // CPF EXISTE MAS ESTÁ INATIVO
     if (f.situacao?.toLowerCase() === "inativo") {
       resultado.innerHTML = `
-        <div class="card shadow">
-          <div class="card-body">
-
-            <div class="alert alert-warning">
-              Funcionário encontrado, porém está INATIVO no SOC. Solicite um novo cadastro.
-            </div>
-
-            <ul class="list-group">
-              <li class="list-group-item"><b>Nome:</b> ${f.nome}</li>
-              <li class="list-group-item"><b>CPF:</b> ${f.cpf}</li>
-              <li class="list-group-item"><b>Matrícula:</b> ${f.matricula}</li>
-              <li class="list-group-item"><b>Situação:</b> ${f.situacao}</li>
-            </ul>
-
-            <div class="d-flex justify-content-center mt-2">
-              <button class="btn-cadastrar-funcionario"
-                onclick="window.location.href='formulario-novo-cadastro.html'">
-                Cadastrar Funcionário
-              </button>
-            </div>
-
+        <div class="alerts-container mb-2">
+          <div class="alert alert-warning">
+            <i class="fa-solid fa-circle-check fa-lg" style="color: #F1AE33"></i>
+            <p class="alert-text">Funcionário encontrado, porém está INATIVO. Solicite um novo cadastro</p>
           </div>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-12">
+            <div class="detail-item horizontal">
+              <div class="detail-label">
+                <span>Nome</span>
+              </div>
+              <div class="detail-value">
+                ${f.nome}
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="detail-item horizontal">
+              <div class="detail-label">
+                <span>Matrícula eSocial</span>
+              </div>
+              <div class="detail-value">
+                ${f.matricula || "-"}
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="detail-item horizontal">
+              <div class="detail-label">
+                <span>Data de Demissão</span>
+              </div>
+              <div class="detail-value">
+                ${f.data_demissao || "-"}
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="detail-item horizontal">
+              <div class="detail-label">
+                <span>Situação</span>
+              </div>
+              <div class="detail-value">
+                ${f.situacao}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-center my-3">
+          <button class="btn-cadastrar-funcionario"
+            onclick="window.location.href='formulario-novo-cadastro.html'">
+            Cadastrar Funcionário
+          </button>
         </div>
       `;
       return;
@@ -161,29 +200,65 @@ async function buscarCPF() {
 
     localStorage.setItem("funcionarioASO", JSON.stringify(funcionarioASO));
 
-    resultado.innerHTML = `
-      <div class="card shadow">
-        <div class="card-body">
-
-          <div class="alert alert-success">
-            Funcionário ATIVO encontrado
-          </div>
-
-          <ul class="list-group mb-3">
-            <li class="list-group-item"><b>Empresa:</b> ${f.nome_empresa}</li>
-            <li class="list-group-item"><b>Código:</b> ${f.cod_funcionario}</li>
-            <li class="list-group-item"><b>Nome:</b> ${f.nome}</li>
-            <li class="list-group-item"><b>Matrícula eSocial:</b> ${f.matricula}</li>
-          </ul>
-
-          <div class="d-flex justify-content-center mt-2">
-            <button class="btn-solicitar-aso"
-              onclick="window.location.href='formulario-solicitar-aso.html'">
-              Solicitar um exame para este funcionário
-            </button>
-          </div>
-
+    resultado.innerHTML = `      
+      <div class="alerts-container mb-2">
+        <div class="alert alert-success">
+          <i class="fa-solid fa-circle-check fa-lg" style="color: #53A5A6"></i>
+          <p class="alert-text">Funcionário encontrado</p>
         </div>
+      </div>
+        
+      <div class="row g-2">
+        <div class="col-12">
+          <div class="detail-item horizontal">
+            <div class="detail-label">
+              <span>Nome</span>
+            </div>
+            <div class="detail-value">
+              ${f.nome}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="detail-item horizontal">
+            <div class="detail-label">
+              <span>Matrícula eSocial</span>
+            </div>
+            <div class="detail-value">
+              ${f.matricula || "-"}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="detail-item horizontal">
+            <div class="detail-label">
+              <span>Data de Admissão</span>
+            </div>
+            <div class="detail-value">
+              ${f.data_admissao || "-"}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="detail-item horizontal">
+            <div class="detail-label">
+              <span>Situação</span>
+            </div>
+            <div class="detail-value">
+              ${f.situacao}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-center my-3">
+        <button class="btn-solicitar-aso"
+          onclick="window.location.href='formulario-solicitar-aso.html'">
+          Solicitar exame para este funcionário
+        </button>
       </div>
     `;
 

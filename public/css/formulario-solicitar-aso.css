@@ -197,21 +197,21 @@ main {
 }
 
 h3 {
-  position: relative;
-  font-weight: 600;
-  font-size: 23px;
-  color: #000000;
-  margin-bottom: 15px;
+    position: relative;
+    font-weight: 600;
+    font-size: 23px;
+    color: #000000;
+    margin-bottom: 15px;
 }
 
 h3::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -5px;
-  width: 50px;
-  height: 3px;
-  background: #000000;
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #000000;
 }
 
 .subtitle {
@@ -242,6 +242,32 @@ h5::after {
     background: #53A5A6;
 }
 
+.alert {
+    display: flex;
+    align-items: center;
+}
+
+.alert p {
+    margin-left: 8px;
+}
+
+.alert-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.alert-warning {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #F1AE33;
+    border-left: 5px solid #F1AE33;
+    border-radius: 0.6rem;
+    background-color: #FFF8E6;
+    color: #7A5A1A;
+}
+
 .form-row {
     display: flex;
     gap: 16px;
@@ -249,6 +275,19 @@ h5::after {
 
 .form-row>div {
     flex: 1;
+}
+
+.form-row .form-group {
+    flex: 1;
+    min-width: 0;
+}
+
+.form-row .input-wrapper {
+    width: 100%;
+}
+
+.form-row select {
+    width: 100%;
 }
 
 .required {
@@ -341,24 +380,58 @@ h5::after {
 }
 
 .input-wrapper textarea {
-  width: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-  resize: vertical;
-  font-size: 14px;
-  color: #111827;
-  font-family: inherit;
-  min-height: 70px;
-  padding: 12px 14px;
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    resize: vertical;
+    font-size: 14px;
+    color: #111827;
+    font-family: inherit;
+    min-height: 70px;
+    padding: 12px 14px;
 }
 
 .input-wrapper textarea::placeholder {
-  color: #9CA3AF;
+    color: #9CA3AF;
+}
+
+#nome,
+#cpf,
+#matricula,
+#unidadeSelect,
+#setorSelect,
+#cargoSelect {
+    cursor: default;
+}
+
+#unidadeSelect, #setorSelect, #cargoSelect {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: none;
+}
+
+.label-solicitar-funcao,
+.label-solicitar-setor,
+.label-solicitar-credenciamento {
+    color: #F1AE33 !important;
+    font-weight: bold;
+}
+
+.form-check-input:checked {
+    background-color: #F1AE33 !important;
+    border-color: #F1AE33 !important;
+}
+
+.form-check-input:focus {
+    outline: none;
+    box-shadow: none !important;
+    border-color: #F1AE33;
 }
 
 .btn-enviar {
-    background-color: #F1AE33;
+    background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
     border: 1px solid #E5E7EB;
     border-radius: 8px;
     box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
@@ -448,10 +521,19 @@ h5::after {
     justify-content: center;
     color: #FFFFFF;
     font-size: 16px;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease;
 }
 
 .footer-socials a:hover {
     transform: translateY(-3px) scale(1.05);
     background: rgba(255, 255, 255, 0.3);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+    box-shadow: 0 0 0 1000px #fff inset !important;
+    -webkit-text-fill-color: #000 !important;
+    transition: background-color 9999s ease-in-out 0s;
 }

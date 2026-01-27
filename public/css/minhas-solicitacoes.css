@@ -278,12 +278,10 @@ td {
     white-space: nowrap;
 }
 
-.status-pill.pendente {
-    background: #F1AE33;
-}
-
-.status-pill.pendente_reavaliacao {
-    background: #F1AE33;
+.status-pill.pendente,
+.status-pill.pendente_reavaliacao,
+.status-pill.pendente_credenciamento {
+    background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
 }
 
 .status-pill.aprovado {
@@ -294,12 +292,9 @@ td {
     background: #88A6BB;
 }
 
-.status-pill.reprovado {
-    background: #ef4444;
-}
-
-.status-pill.erro {
-    background: #ef4444;
+.status-pill.reprovado,
+.status-pill.erro_soc {
+    background: #EF4444;
 }
 
 .actions button {
@@ -323,40 +318,18 @@ td {
     background-color: #F1AE33;
 }
 
-#modalMotivo .modal-header {
-    background-color: #F9FAFB;
-    border-bottom: none;
-    padding: 10px 16px;
-}
-
-#modalMotivo .modal-header h3 {
-    position: relative;
-    font-weight: 600;
-    font-size: 18px;
-    color: #000000;
-    margin-bottom: 15px;
-}
-
-#modalMotivo .modal-header h3::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -5px;
-    width: 50px;
-    height: 3px;
-    background: #000000;
-}
-
 #modalEditarCadastro .modal-header,
-#modalEditarASO .modal-header {
-    background: linear-gradient(135deg, #53A5A6, #61B4B6, #4A8F90);
+#modalEditarASO .modal-header,
+#modalMotivo .modal-header {
+    background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
     border-bottom: none;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
     padding: 20px;
 }
 
 #modalEditarCadastro .modal-header h3,
-#modalEditarASO .modal-header h3 {
+#modalEditarASO .modal-header h3,
+#modalMotivo .modal-header h3 {
     position: relative;
     font-weight: 600;
     font-size: 22px;
@@ -365,7 +338,8 @@ td {
 }
 
 #modalEditarCadastro .modal-header h3::after,
-#modalEditarASO .modal-header h3::after {
+#modalEditarASO .modal-header h3::after,
+#modalMotivo .modal-header h3::after {
     content: "";
     position: absolute;
     left: 0;
@@ -397,42 +371,42 @@ td {
 }
 
 .detail-editable {
-  transition: all 0.25s ease;
+    transition: all 0.25s ease;
 }
 
 .detail-input {
-  width: 100%;
-  background: transparent;
-  border: none;
-  outline: none;
-  padding: 4px 0;
-  font-size: 15px;
-  font-weight: 500;
-  color: #111827;
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 4px 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: #111827;
 }
 
 .detail-input::placeholder {
-  color: #9CA3AF;
-  font-weight: 400;
+    color: #9CA3AF;
+    font-weight: 400;
 }
 
 .detail-editable:focus-within {
-  background: #FFFFFF;
-  box-shadow: 0 0 0 2px #2563EB22;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 2px #2563EB22;
 }
 
 .detail-input {
-  border-bottom: 1px solid #E5E7EB;
+    border-bottom: 1px solid #E5E7EB;
 }
 
 .detail-input:focus {
-  border-bottom-color: #F1AE33;
+    border-bottom-color: #F1AE33;
 }
 
 .detail-input:disabled {
-  color: #6B7280;
-  cursor: not-allowed;
-  border-bottom-style: dashed;
+    color: #6B7280;
+    cursor: not-allowed;
+    border-bottom-style: dashed;
 }
 
 #textoMotivo {
@@ -563,10 +537,19 @@ td {
     justify-content: center;
     color: #FFFFFF;
     font-size: 16px;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease;
 }
 
 .footer-socials a:hover {
     transform: translateY(-3px) scale(1.05);
     background: rgba(255, 255, 255, 0.3);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #F9FAFB inset !important;
+    box-shadow: 0 0 0 1000px #F9FAFB inset !important;
+    -webkit-text-fill-color: #000 !important;
+    transition: background-color 9999s ease-in-out 0s;
 }
