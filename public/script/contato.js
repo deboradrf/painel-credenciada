@@ -75,3 +75,10 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.classList.remove("blur-main");
     });
 });
+
+// FUNÇÃO DE LOGOUT
+function logout() {
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("empresaCodigo");
+    window.location.href = "login.html";
+}

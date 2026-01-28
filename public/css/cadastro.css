@@ -21,6 +21,16 @@
     display: block;
 }
 
+.mascote {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 200px;
+    height: auto;
+    z-index: 1000;
+    /*filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));*/
+}
+
 .gradient-form {
     min-height: 100vh;
     display: flex;
@@ -52,26 +62,166 @@
 }
 
 h3 {
-  position: relative;
-  font-weight: 600;
-  font-size: 20px;
-  color: #F1AE33;
-  margin-bottom: 30px;
+    position: relative;
+    font-weight: 600;
+    font-size: 20px;
+    color: #F1AE33;
+    margin-bottom: 30px;
 }
 
 h3::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -5px;
-  width: 50px;
-  height: 3px;
-  background: #F1AE33;
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #F1AE33;
 }
 
 .cadastro-side form p {
     margin-bottom: 1.5rem;
     font-weight: 500;
+}
+
+.required {
+    color: red;
+}
+
+.form-group {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    color: #000000;
+    font-weight: 400;
+    font-size: 15px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    border: 2px solid #8A94A6;
+    border-radius: 8px;
+    overflow: hidden;
+    align-items: stretch;
+}
+
+.input-icon {
+    background: #FFFFFF;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #8A94A6;
+    min-width: 55px;
+    position: relative;
+    border-right: none;
+}
+
+.input-icon::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    height: 80%;
+    width: 3%;
+    background-color: #8A94A6;
+}
+
+.input-wrapper input {
+    flex: 1;
+    padding: 12px 14px;
+    border: none;
+    background: transparent;
+    color: #000000;
+    font-size: 15px;
+}
+
+.input-wrapper input:focus {
+    outline: none;
+}
+
+.input-wrapper select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: transparent;
+    border: none;
+    flex: 1;
+    padding: 12px 14px;
+    font-size: 16px;
+    color: #000000;
+    cursor: pointer;
+
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%236B7280' height='14' viewBox='0 0 20 20' width='14' xmlns='http://www.w3.org/2000/svg'><polygon points='0,0 20,0 10,10'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 10px;
+}
+
+.input-wrapper select:focus {
+    outline: none;
+}
+
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert-warning {
+    padding: 1rem;
+    border: 1px solid #F1AE33;
+    border-left: 5px solid #F1AE33;
+    border-radius: 0.6rem;
+    background-color: #FFF8E6;
+    color: #7A5A1A;
+}
+
+.alert-icon {
+    font-size: 1.1rem;
+    color: #F1AE33;
+    margin-top: 2px;
+}
+
+.alert-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.senha-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.senha-row .input-wrapper {
+    flex: 1;
+}
+
+.btn-gerar-senha,
+.btn-copiar-senha {
+    border: 2px solid #8A94A6;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: #8A94A6;
+    color: #FFFFFF;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    width: 50px;
+}
+
+.btn-gerar-senha:hover,
+.btn-copiar-senha:hover {
+    transform: translateY(-2px);
 }
 
 .btn-cadastrar {
@@ -82,7 +232,15 @@ h3::after {
     border: none;
     color: #FFFFFF;
     font-size: 1rem;
+    font-weight: 500;
+    margin-top: 10px;
     cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-cadastrar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(241, 174, 51, 0.35);
 }
 
 .input-container {
@@ -136,10 +294,10 @@ h3::after {
 input:-webkit-autofill,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
-  box-shadow: 0 0 0 1000px #fff inset !important;
-  -webkit-text-fill-color: #000 !important;
-  transition: background-color 9999s ease-in-out 0s;
+    -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+    box-shadow: 0 0 0 1000px #fff inset !important;
+    -webkit-text-fill-color: #000 !important;
+    transition: background-color 9999s ease-in-out 0s;
 }
 
 .required {

@@ -25,6 +25,7 @@
     </div>
     <main class="gradient-form">
         <div class="container">
+            <img src="../images/mascote.png" class="mascote">
             <div class="row justify-content-center">
                 <div class="col-lg-6 col-md-8">
                     <div class="card cadastro-container">
@@ -37,55 +38,103 @@
                             <h3>Crie sua conta</h3>
 
                             <form id="cadastroForm">
-                                <div class="input-container mb-3">
-                                    <label for="nome" class="text">Nome Completo <span class="required">*</span></label>
-                                    <input class="input" type="text" id="nome" placeholder="Ex: João Fernandes Silva" required>
+                                <div class="form-group">
+                                    <label>Nome Completo <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-venus-mars"></i>
+                                        </div>
+                                        <input type="text" id="nome" placeholder="Ex: João Fernandes Silva" required>
+                                    </div>
                                 </div>
 
-                                <div class="input-container mb-3">
-                                    <label for="cpf" class="text">CPF <span class="required">*</span></label>
-                                    <input class="input" type="text" id="cpf" placeholder="Ex: 123.456.789-01" required>
+                                <div class="form-group">
+                                    <label>CPF <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-venus-mars"></i>
+                                        </div>
+                                        <input type="text" id="cpf" placeholder="Ex: 123.456.789-01" required>
+                                    </div>
                                 </div>
 
-                                <div class="input-container mb-3">
-                                    <label for="email" class="text">E-mail <span class="required">*</span></label>
-                                    <input class="input" type="email" id="email" placeholder="Ex: joao@exemplo.com" required>
+                                <div class="form-group">
+                                    <label>E-mail <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-venus-mars"></i>
+                                        </div>
+                                        <input type="text" id="email" placeholder="Ex: joao@exemplo.com" required>
+                                    </div>
                                 </div>
 
-                                <div class="input-container mb-3">
-                                    <label for="senha" class="text">Senha <span class="required">*</span></label>
-                                    <div class="d-flex gap-2">
-                                        <input class="input flex-fill" type="text" id="senha" required readonly>
-                                        <button type="button" class="btn btn-outline-secondary"
-                                            onclick="gerarSenhaNoInput()">
-                                            Gerar
+                                <div class="form-group">
+                                    <div class="alerts-container my-2">
+                                        <div class="alert alert-warning">
+                                            <i class="fa-solid fa-circle-info alert-icon"></i>
+                                            <span class="alert-text">
+                                                Gere uma senha aleatória e COPIE! Ela será usada pelo
+                                                usuário no primeiro acesso.
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Senha <span class="required">*</span></label>
+                                    <div class="senha-row">
+                                        <div class="input-wrapper">
+                                            <div class="input-icon">
+                                                <i class="fa-solid fa-venus-mars"></i>
+                                            </div>
+                                            <input class="input" type="text" id="senha" required readonly>
+                                        </div>
+
+                                        <button type="button" class="btn-gerar-senha" onclick="gerarSenhaNoInput()">
+                                            <i class="fa-solid fa-dice fa-lg"></i>
+                                        </button>
+
+                                        <button type="button" class="btn-copiar-senha" onclick="copiarSenha()">
+                                            <i class="fa-regular fa-copy fa-lg"></i>
                                         </button>
                                     </div>
                                 </div>
 
-                                <div class="alert alert-warning">
-                                    COPIE A SENHA! Ela será usada pelo usuário no primeiro acesso. Ele poderá alterá-la posteriormente.
-                                </div>
-
-                                <div class="input-container mb-3">
-                                    <label for="perfil" class="text">Perfil <span class="required">*</span></label>
-                                    <select class="input" id="perfil" required>
-                                        <option value="">Selecione</option>
-                                        <option value="EMPRESA">Empresa</option>
-                                        <option value="CREDENCIADA">Credenciada</option>
-                                    </select>
-                                </div>
-
-                                <!-- EMPRESA / UNIDADE -->
-                                <div id="empresaBox" class="d-none">
-                                    <div class="input-container mb-3">
-                                        <label for="empresa" class="text">Empresa</label>
-                                        <select class="input" id="empresa"></select>
+                                <div class="form-group">
+                                    <label>Perfil <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-venus-mars"></i>
+                                        </div>
+                                        <select class="input" id="perfil" required>
+                                            <option value="">Selecione...</option>
+                                            <option value="EMPRESA">Empresa</option>
+                                            <option value="CREDENCIADA">Credenciada</option>
+                                        </select>
                                     </div>
+                                </div>
 
-                                    <div class="input-container mb-4">
-                                        <label for="unidade" class="text">Unidade</label>
-                                        <select class="input" id="unidade"></select>
+                                <div class="form-group">
+                                    <label>Empresa <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-venus-mars"></i>
+                                        </div>
+                                        <select id="empresa" required>
+                                            <option value="">Carregando...</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Unidade <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-venus-mars"></i>
+                                        </div>
+                                        <select id="unidade" required>
+                                            <option value="">Carregando...</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -123,146 +172,7 @@
         </div>
     </main>
 
-    <script>
-        const API = "http://localhost:3001";
-
-        const perfil = document.getElementById("perfil");
-        const empresaBox = document.getElementById("empresaBox");
-        const empresa = document.getElementById("empresa");
-        const unidade = document.getElementById("unidade");
-
-        empresaBox.classList.remove("d-none");
-
-        carregarEmpresas();
-
-        async function carregarEmpresas() {
-            empresa.innerHTML = "<option value=''>Carregando...</option>";
-            unidade.innerHTML = "";
-
-            const res = await fetch(`${API}/empresas`);
-            const data = await res.json();
-
-            empresa.innerHTML = "<option value=''>Selecione</option>";
-            data.forEach(e => {
-                empresa.innerHTML += `<option value="${e.codigo}">${e.nome}</option>`;
-            });
-        }
-
-        // LISTENER DE PERFIL
-        perfil.addEventListener("change", async () => {
-            const perfilSelecionado = perfil.value;
-
-            if (perfilSelecionado === "CREDENCIADA") {
-                empresaBox.classList.remove("d-none");
-
-                // Pega todas as empresas do servidor
-                const res = await fetch(`${API}/empresas`);
-                const data = await res.json();
-
-                // Filtra apenas as que começam com "Salubrita"
-                const credenciadas = data.filter(e => e.nome.toLowerCase().startsWith("salubrita"));
-
-                empresa.innerHTML = "<option value=''>Selecione</option>";
-                credenciadas.forEach(e => {
-                    empresa.innerHTML += `<option value="${e.codigo}">${e.nome}</option>`;
-                });
-
-                unidade.innerHTML = "<option value=''>Selecione</option>";
-            } else if (perfilSelecionado === "EMPRESA") {
-                empresaBox.classList.remove("d-none");
-                carregarEmpresas();
-            } else {
-                empresaBox.classList.add("d-none");
-                empresa.innerHTML = "";
-                unidade.innerHTML = "";
-            }
-        });
-
-        empresa.addEventListener("change", async () => {
-            if (!empresa.value) return;
-
-            unidade.innerHTML = "<option>Carregando...</option>";
-
-            const res = await fetch(`${API}/unidades/${empresa.value}`);
-            const data = await res.json();
-
-            unidade.innerHTML = "<option value=''>Selecione</option>";
-            data.forEach(u => {
-                unidade.innerHTML += ` <option value="${u.codigo}"> ${u.nome}</option> `;
-            });
-        });
-
-        // MÁSCARA DE CPF
-        const cpfInput = document.getElementById("cpf");
-
-        cpfInput.addEventListener("input", function () {
-            let value = this.value.replace(/\D/g, "");
-
-            if (value.length > 11) value = value.slice(0, 11);
-
-            value = value.replace(/(\d{3})(\d)/, "$1.$2");
-            value = value.replace(/(\d{3})(\d)/, "$1.$2");
-            value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-
-            this.value = value;
-        });
-
-        document.getElementById("cadastroForm").addEventListener("submit", async e => {
-            e.preventDefault();
-
-            const empresaNome =
-                empresa.options[empresa.selectedIndex]?.text || null;
-
-            const unidadeNome =
-                unidade.options[unidade.selectedIndex]?.text || null;
-
-            const body = {
-                nome: nome.value,
-                cpf: cpf.value,
-                email: email.value,
-                senha: senha.value,
-                perfil: perfil.value,
-                cod_empresa: empresa.value,
-                nome_empresa: empresaNome,
-                cod_unidade: unidade.value,
-                nome_unidade: unidadeNome
-            };
-
-            const res = await fetch(`${API}/cadastro`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                alert(data.erro || "Erro ao cadastrar");
-                return;
-            }
-
-            alert("Usuário cadastrado com sucesso!");
-            e.target.reset();
-            empresaBox.classList.add("d-none");
-        });
-
-        function gerarSenha(tamanho = 10) {
-            const chars =
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%!&*";
-            let senha = "";
-
-            for (let i = 0; i < tamanho; i++) {
-                senha += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-
-            return senha;
-        }
-
-        function gerarSenhaNoInput() {
-            const senhaGerada = gerarSenha(10);
-            document.getElementById("senha").value = senhaGerada;
-        }
-    </script>
+    <script src="../script/cadastro.js"></script>
 
 </body>
 

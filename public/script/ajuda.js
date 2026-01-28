@@ -77,14 +77,28 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    const faqs = document.querySelectorAll(".faq-item");
+  const rd1 = document.getElementById("rd-1");
+  const rd2 = document.getElementById("rd-2");
 
-    faqs.forEach(faq => {
-        const question = faq.querySelector(".faq-question");
-        question.addEventListener("click", () => {
-            faq.classList.toggle("active");
-        });
-    });
+  const empresaTab = document.getElementById("empresa");
+  const credenciadaTab = document.getElementById("credenciada");
+
+  function mostrarAba() {
+    if (rd1.checked) {
+      empresaTab.classList.add("show", "active");
+      credenciadaTab.classList.remove("show", "active");
+    } else if (rd2.checked) {
+      credenciadaTab.classList.add("show", "active");
+      empresaTab.classList.remove("show", "active");
+    }
+  }
+
+  // Inicial
+  mostrarAba();
+
+  // Quando mudar radio
+  rd1.addEventListener("change", mostrarAba);
+  rd2.addEventListener("change", mostrarAba);
 });
 
 // FUNÇÃO DE LOGOUT

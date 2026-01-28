@@ -25,6 +25,7 @@
     </div>
     <main class="gradient-form">
         <div class="container">
+            <img src="../images/mascote.png" class="mascote">
             <div class="row justify-content-center">
                 <div class="col-xl-5 col-lg-6 col-md-8">
                     <div class="card login-container">
@@ -36,17 +37,28 @@
                             <h3>Acesse sua conta</h3>
 
                             <form method="POST" action="/login" id="loginForm">
-                                <div class="input-container mb-3">
-                                    <label for="email" class="text">E-mail <span class="required">*</span></label>
-                                    <input class="input" type="email" id="email" required>
+                                <div class="form-group">
+                                    <label>E-mail <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-envelope"></i>
+                                        </div>
+                                        <input type="email" id="email" required>
+                                    </div>
                                 </div>
 
-                                <div class="input-container mb-4">
-                                    <label for="senha" class="text">Senha <span class="required">*</span></label>
-                                    <input class="input" type="password" id="senha"required>
+                                <div class="form-group">
+                                    <label>Senha <span class="required">*</span></label>
+                                    <div class="input-wrapper input-senha">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-lock"></i>
+                                        </div>
+                                        <input type="password" id="senha" required>
+                                        <i class="fa-solid fa-eye toggle-senha" id="toggleSenha" onclick="toggleSenha()"></i>
+                                    </div>
                                 </div>
 
-                                <div class="text-center mb-3">
+                                <div class="text-center mt-4">
                                     <button type="submit" class="btn-login">Entrar</button>
                                 </div>
                             </form>
@@ -76,33 +88,7 @@
         </div>
     </main>
 
-    <script>
-        const API = "http://localhost:3001";
-
-        document.getElementById("loginForm").onsubmit = async e => {
-            e.preventDefault();
-
-            const res = await fetch(`${API}/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: email.value,
-                    senha: senha.value
-                })
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                alert(data.erro);
-                return;
-            }
-
-            localStorage.setItem("usuario", JSON.stringify(data));
-
-            window.location.href = "index.html";
-        };
-    </script>
+    <script src="../script/login.js"></script>
 
 </body>
 

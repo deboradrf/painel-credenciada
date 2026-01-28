@@ -82,6 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", async () => {
   await carregarNomeEmpresa();
   await carregarUnidades();
+  await carregarSetores();
   await carregarCargos();
   await carregarPrestadores();
 });
@@ -107,7 +108,7 @@ async function carregarNomeEmpresa() {
   }
 }
 
-// CARREGAR UNIDADES (filtrado por empresa)
+// CARREGAR UNIDADES
 async function carregarUnidades() {
   if (!empresaCodigo) return;
 
@@ -120,26 +121,13 @@ async function carregarUnidades() {
   unidades.forEach(u => {
     const opt = document.createElement("option");
     opt.value = u.codigo;
-    opt.textContent = u.ativo ? u.nome : `${u.nome} (inativa)`;
+    opt.textContent = u.ativo ? u.nome : `${u.nome} (inativo)`;
     opt.dataset.nome = u.nome;
     select.appendChild(opt);
   });
 }
 
-// SELECT DE UNIDADES
-document.getElementById("unidadeSelect").addEventListener("change", function () {
-  const unidadeCodigo = this.value;
-
-  if (!unidadeCodigo) {
-    document.getElementById("setorSelect").innerHTML =
-      '<option value="">Selecione...</option>';
-    return;
-  }
-
-  carregarSetores(unidadeCodigo);
-});
-
-// CARREGAR SETORES (filtrado por empresa)
+// CARREGAR SETORES
 async function carregarSetores() {
   if (!empresaCodigo) return;
 
@@ -162,7 +150,7 @@ async function carregarSetores() {
   }
 }
 
-// CARREGAR CARGOS (TODAS AS EMPRESAS - não tem filtro por empresa)
+// CARREGAR CARGOS
 async function carregarCargos() {
   const res = await fetch(`http://localhost:3001/cargos/${empresaCodigo}`);
   const cargos = await res.json();
