@@ -44,8 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (usuarioLogado.perfil === "EMPRESA") {
-        avatarIcon.classList.add("fa-building");
-        avatarIconDropdown.classList.add("fa-building");
+        avatarIcon.classList.add("fa-city");
+        avatarIconDropdown.classList.add("fa-city");
 
         avatarBtn.classList.add("empresa");
         avatarDrop.classList.add("empresa");
@@ -112,7 +112,7 @@ function ajustarIcone(perfil) {
     avatarCard.classList.remove("empresa", "credenciada");
 
     if (perfil === "EMPRESA") {
-        iconCard.classList.add("fa-building");
+        iconCard.classList.add("fa-city");
         avatarCard.classList.add("empresa");
     }
 

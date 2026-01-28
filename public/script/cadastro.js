@@ -27,34 +27,72 @@ function gerarSenhaNoInput(tamanho = 10) {
     document.getElementById("senha").value = senha;
 }
 
+// FUNÇÃO PARA COPIAR SENHA GERADA
+function copiarSenha() {
+    const input = document.getElementById("senha");
+
+    if (!input.value) {
+        alert("Nenhuma senha para copiar");
+        return;
+    }
+
+    input.select();
+    input.setSelectionRange(0, 99999);
+
+    navigator.clipboard.writeText(input.value)
+        .then(() => {
+            alert("Senha copiada!");
+        })
+        .catch(() => {
+            // Fallback caso clipboard API falhe
+            document.execCommand("copy");
+            alert("Senha copiada!");
+        });
+
+    window.getSelection().removeAllRanges();
+}
+
 // LISTENER PARA QUANDO SELECIONAR O PERFIL
 document.getElementById("perfil").addEventListener("change", function () {
     const perfil = this.value;
     const selectEmpresa = document.getElementById("empresa");
 
-    if (perfil === "EMPRESA") {
-        carregarEmpresas();
+    if (perfil === "EMPRESA" || perfil === "CREDENCIADA") {
+        carregarEmpresas(perfil);
     } else {
         selectEmpresa.disabled = true;
     }
 });
 
 // FUNÇÃO PARA CARREGAR EMPRESAS
-async function carregarEmpresas() {
+async function carregarEmpresas(perfil) {
     const select = document.getElementById("empresa");
     if (!select) return;
 
     try {
         const res = await fetch("http://localhost:3001/empresas");
-        const empresas = await res.json();
+        let empresas = await res.json();
+
+        // SE O PERFIL FOR CREDENCIADA, CARREGAR EMPRESAS DA SALUBRITA APENAS
+        if (perfil === "CREDENCIADA") {
+            empresas = empresas.filter(e =>
+                e.nome &&
+                e.nome.toLowerCase().startsWith("salubrita")
+            );
+        }
 
         select.innerHTML = '<option value="">Selecione...</option>';
+
+        if (empresas.length === 0) {
+            select.innerHTML = '<option value="">Nenhuma empresa disponível</option>';
+            select.disabled = true;
+            return;
+        }
 
         empresas.forEach(e => {
             const opt = document.createElement("option");
             opt.value = e.codigo;
             opt.textContent = e.nome;
-            opt.dataset.nome = e.nome;
             select.appendChild(opt);
         });
 
@@ -62,6 +100,7 @@ async function carregarEmpresas() {
     } catch (err) {
         console.error("Erro ao carregar empresas:", err);
         select.innerHTML = '<option value="">Erro ao carregar</option>';
+        select.disabled = true;
     }
 }
 

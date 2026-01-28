@@ -57,8 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (usuario.perfil === "EMPRESA") {
-    avatarIcon.classList.add("fa-building");
-    avatarIconDropdown.classList.add("fa-building");
+    avatarIcon.classList.add("fa-city");
+    avatarIconDropdown.classList.add("fa-city");
 
     avatarBtn.classList.add("empresa");
     avatarDrop.classList.add("empresa");
@@ -256,7 +256,7 @@ async function buscarCPF() {
 
       <div class="d-flex justify-content-center my-3">
         <button class="btn-solicitar-aso"
-          onclick="window.location.href='formulario-solicitar-aso.html'">
+          onclick="window.location.href='formulario-solicitar-exames.html'">
           Solicitar exame para este funcionário
         </button>
       </div>

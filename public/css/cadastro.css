@@ -207,10 +207,10 @@ h3::after {
 
 .btn-gerar-senha,
 .btn-copiar-senha {
-    border: 2px solid #8A94A6;
+    border: none;
     padding: 8px;
     border-radius: 8px;
-    background-color: #8A94A6;
+    background-color: #F1AE33;
     color: #FFFFFF;
     font-size: 1rem;
     font-weight: 500;

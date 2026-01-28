@@ -57,8 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cardsEmpresa.forEach(card => card.style.display = "flex");
         cardsCredenciada.forEach(card => card.style.display = "none");
 
-        avatarIcon.classList.add("fa-building");
-        avatarIconDropdown.classList.add("fa-building");
+        avatarIcon.classList.add("fa-city");
+        avatarIconDropdown.classList.add("fa-city");
 
         avatarBtn.classList.add("empresa");
         avatarDrop.classList.add("empresa");
