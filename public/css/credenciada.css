@@ -357,7 +357,7 @@ td {
     font-size: 13px;
     line-height: 28px;
     padding: 0 10px 0 10px;
-    width: 100px;
+    width: 60px;
 }
 
 .modal-header {
@@ -405,7 +405,7 @@ td {
 #divNovaFuncao .detail-item,
 #divAsoNovoSetor .detail-item {
     background-color: #F9FAFB;
-    border: 2px dotted #F1AE33;
+    border: 2px solid #F1AE33;
 }
 
 .detail-label {

@@ -104,8 +104,8 @@ function renderizarTabela(lista) {
   lista.forEach(s => {
     const iconeTipo =
       s.tipo === "ASO"
-        ? `<i class="fa-solid fa-file-circle-plus fa-lg" style="color: #F1AE33" title="ASO"></i>`
-        : `<i class="fa-solid fa-user-plus fa-lg" style="color: #F1AE33" title="Novo Cadastro"></i>`;
+        ? `<i class="fa-solid fa-file-circle-plus fa-lg" style="color: #F1AE33"></i>`
+        : `<i class="fa-solid fa-user-plus fa-lg" style="color: #F1AE33"></i>`;
 
     tbody.innerHTML += `
       <tr>

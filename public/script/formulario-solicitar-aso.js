@@ -393,30 +393,126 @@ async function carregarCargos() {
   });
 }
 
-// MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE FUNÇÃO
+// MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE FUNÇÃO E COLOCAR REQUIRED NOS CAMPOS
 document.addEventListener("DOMContentLoaded", () => {
   const tipoExame = document.getElementById("tipo_exame");
   const cardMudancaFuncao = document.getElementById("cardMudancaFuncao");
 
-  tipoExame.addEventListener("change", () => {
-    cardMudancaFuncao.style.display = "none";
+  const funcaoAtual = document.getElementById("funcao_atual");
+  const setorAtual = document.getElementById("setor_atual");
 
+  const solicitarNovaFuncao = document.getElementById("solicitarNovaFuncao");
+  const novaFuncaoWrapper = document.getElementById("novaFuncaoWrapper");
+  const novaFuncao = document.getElementById("novaFuncao");
+
+  const solicitarNovoSetor = document.getElementById("solicitarNovoSetor");
+  const novoSetorWrapper = document.getElementById("novoSetorWrapper");
+  const novoSetor = document.getElementById("novoSetor");
+
+  // MOSTRA / OCULTAR SEÇÃO DE MUDANÇA DE FUNÇÃO
+  tipoExame.addEventListener("change", () => {
     if (tipoExame.value === "MUDANCA_RISCOS_OCUPACIONAIS") {
       cardMudancaFuncao.style.display = "block";
+
+      funcaoAtual.required = true;
+      setorAtual.required = true;
+    } else {
+      cardMudancaFuncao.style.display = "none";
+
+      funcaoAtual.required = false;
+      setorAtual.required = false;
+
+      solicitarNovaFuncao.checked = false;
+      solicitarNovoSetor.checked = false;
+
+      novaFuncaoWrapper.style.display = "none";
+      novoSetorWrapper.style.display = "none";
+
+      funcaoAtual.disabled = false;
+      setorAtual.disabled = false;
+
+      novaFuncao.required = false;
+      novoSetor.required = false;
+
+      novaFuncao.value = "";
+      novoSetor.value = "";
     }
   });
-});
 
-// MOSTRAR SEÇÃO DE NOVA FUNCÃO
-document.getElementById("solicitarNovaFuncao").addEventListener("change", function () {
-  const wrapper = document.getElementById("novaFuncaoWrapper");
-  wrapper.style.display = this.checked ? "block" : "none";
+  // MOSTAR INPUT DE NOVA FUNÇÃO E COLOCAR REQUIRED
+  solicitarNovaFuncao.addEventListener("change", function () {
+    if (this.checked) {
+      novaFuncaoWrapper.style.display = "block";
+
+      funcaoAtual.value = "";
+      funcaoAtual.disabled = true;
+      funcaoAtual.required = false;
+
+      novaFuncao.required = true;
+    } else {
+      novaFuncaoWrapper.style.display = "none";
+
+      funcaoAtual.disabled = false;
+      funcaoAtual.required = true;
+
+      novaFuncao.required = false;
+      novaFuncao.value = "";
+    }
+  });
+
+  // MOSTRAR INPUT DE NOVO SETOR E COLOCAR REQUIRED
+  solicitarNovoSetor.addEventListener("change", function () {
+    if (this.checked) {
+      novoSetorWrapper.style.display = "block";
+
+      setorAtual.value = "";
+      setorAtual.disabled = true;
+      setorAtual.required = false;
+
+      novoSetor.required = true;
+    } else {
+      novoSetorWrapper.style.display = "none";
+
+      setorAtual.disabled = false;
+      setorAtual.required = true;
+
+      novoSetor.required = false;
+      novoSetor.value = "";
+    }
+  });
 });
 
 // MOSTRAR SEÇÃO DE NOVO SETOR
 document.getElementById("solicitarNovoSetor").addEventListener("change", function () {
   const wrapper = document.getElementById("novoSetorWrapper");
   wrapper.style.display = this.checked ? "block" : "none";
+});
+
+// COLOCAR REQUIRED NO CAMPO DE ESTADO CLÍNICA E CIDADE CLÍNICA PARA CREDENCIAMENTO
+document.getElementById("solicitarCredenciamento").addEventListener("change", function () {
+  const estadoSelect = document.getElementById("estado_clinica");
+  const estadoCredenciamentoInput = document.getElementById("estado_credenciamento");
+
+  const cidadeSelect = document.getElementById("cidade_clinica");
+  const cidadeCredenciamentoInput = document.getElementById("cidade_credenciamento");
+
+  if (this.checked) {
+    estadoSelect.removeAttribute("required");
+    cidadeSelect.removeAttribute("required");
+    estadoSelect.value = "";
+    cidadeSelect.value = "";
+
+    estadoCredenciamentoInput.setAttribute("required", "required");
+    cidadeCredenciamentoInput.setAttribute("required", "required");
+  } else {
+    estadoSelect.setAttribute("required", "required");
+    cidadeSelect.setAttribute("required", "required");
+
+    estadoCredenciamentoInput.removeAttribute("required");
+    cidadeCredenciamentoInput.removeAttribute("required");
+    estadoCredenciamentoInput.value = "";
+    cidadeCredenciamentoInput.value = "";
+  }
 });
 
 // FUNÇÃO PARA FORMATAR CPF

@@ -134,13 +134,13 @@ function renderizarTabela(lista) {
       <td class="actions">
         <div class="actions-wrapper">
           <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
-            Analisar
+            <i class="fa-solid fa-magnifying-glass"></i> 
           </button>
 
           ${s.tipo === "NOVO_CADASTRO" ? `
             <button type="button" onclick="enviarSOC(${s.solicitacao_id})"
               ${bloqueiaEnvioSOC ? "disabled" : ""}>
-              Enviar SOC
+              <i class="fa-regular fa-paper-plane"></i>
             </button>
           ` : ""}
         </div>
@@ -246,7 +246,7 @@ async function carregarCargos(empresaCodigo, selecionadoNome = "") {
   }
 }
 
-// função para pegar os valores selecionados do modal
+// função para pegar os valores selecionados do modal de cargo e setor
 function pegarDadosEdicaoCadastro() {
   const setorSelect = document.getElementById("setorSelect");
   const cargoSelect = document.getElementById("cargoSelect");
@@ -285,26 +285,6 @@ function preencherModal(s, tipo) {
     document.getElementById("cadastro_nome_clinica").innerText = s.nome_clinica || "-";
     document.getElementById("cadastro_cidade_clinica").innerText = s.cidade_clinica || "-";
     document.getElementById("cadastro_observacao").innerText = s.observacao || "-";
-
-    // MOSTRAR / ESCONDER BLOCO DE NOVO CREDENCIAMENTO
-    const blocoClinica = document.getElementById("blocoCadClinica");
-    const blocoCredenciamento = document.getElementById("blocoCadCredenciamento");
-
-    if (s.solicitar_credenciamento === true) {
-      blocoClinica.classList.add("d-none");
-      blocoCredenciamento.classList.remove("d-none");
-
-      document.getElementById("cadastro_estado_credenciamento").innerText = s.estado_credenciamento;
-      document.getElementById("cadastro_cidade_credenciamento").innerText = s.cidade_credenciamento;
-
-    } else {
-      blocoClinica.classList.remove("d-none");
-      blocoCredenciamento.classList.add("d-none");
-
-      document.getElementById("cadastro_estado_clinica").innerText = s.estado_clinica;
-      document.getElementById("cadastro_cidade_clinica").innerText = s.cidade_clinica;
-      document.getElementById("cadastro_nome_clinica").innerText = s.nome_clinica;
-    }
 
     // MOSTRAR / ESCONDER BLOCO DE NOVO SETOR / NOVO CARGO
     const blocoNovoSetor = document.getElementById("divNovoSetor");
@@ -353,6 +333,26 @@ function preencherModal(s, tipo) {
       spanCargo.style.display = "block";
       selectCargo.style.display = "none";
     }
+
+    // MOSTRAR / ESCONDER BLOCO DE NOVO CREDENCIAMENTO
+    const blocoClinica = document.getElementById("blocoCadClinica");
+    const blocoCredenciamento = document.getElementById("blocoCadCredenciamento");
+
+    if (s.solicitar_credenciamento === true) {
+      blocoClinica.classList.add("d-none");
+      blocoCredenciamento.classList.remove("d-none");
+
+      document.getElementById("cadastro_estado_credenciamento").innerText = s.estado_credenciamento;
+      document.getElementById("cadastro_cidade_credenciamento").innerText = s.cidade_credenciamento;
+
+    } else {
+      blocoClinica.classList.remove("d-none");
+      blocoCredenciamento.classList.add("d-none");
+
+      document.getElementById("cadastro_estado_clinica").innerText = s.estado_clinica;
+      document.getElementById("cadastro_cidade_clinica").innerText = s.cidade_clinica;
+      document.getElementById("cadastro_nome_clinica").innerText = s.nome_clinica;
+    }
   }
 
   if (tipo === "ASO") {
@@ -381,6 +381,56 @@ function preencherModal(s, tipo) {
     document.getElementById("aso_cidade_credenciamento").innerText = s.cidade_credenciamento || "-";
     document.getElementById("aso_observacao").innerText = s.observacao || "-";
 
+    // MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE RISCOS OCUPACIONAIS
+    const blocoFuncaoAnterior = document.getElementById("divFuncaoAnterior");
+    const blocoFuncaoAtual = document.getElementById("divFuncaoAtual");
+    const blocoNovaFuncao = document.getElementById("divNovaFuncao");
+    const blocoSetorAtual = document.getElementById("divSetorAtual");
+    const blocoNovoSetor = document.getElementById("divAsoNovoSetor");
+
+    // OCULTAR CAMPOS DE FUNÇÃO E SETOR QUANDO NÃO FOR MUDANÇA DE RISCOS OCUPACIONAIS
+    if (s.tipo_exame !== "MUDANCA_RISCOS_OCUPACIONAIS") {
+      blocoFuncaoAnterior.classList.add("d-none");
+      blocoFuncaoAtual.classList.add("d-none");
+      blocoNovaFuncao.classList.add("d-none");
+      blocoSetorAtual.classList.add("d-none");
+      blocoNovoSetor.classList.add("d-none");
+    } else {
+      // MOSTRAR OS BLOCOS DE FUNÇÃO E SETOR
+      blocoFuncaoAnterior.classList.remove("d-none");
+      blocoFuncaoAtual.classList.remove("d-none");
+      blocoSetorAtual.classList.remove("d-none");
+
+      // SE FOR SOLICITAR CRIAÇÃO DE NOVA FUNÇÃO, MOSTRAR CAMPO
+      if (s.solicitar_nova_funcao === true) {
+        blocoFuncaoAtual.classList.add("d-none");
+        blocoNovaFuncao.classList.remove("d-none");
+
+        document.getElementById("aso_funcao_atual").innerText = "";
+        document.getElementById("aso_nova_funcao").innerText = s.nome_nova_funcao || "-";
+      } else {
+        blocoFuncaoAtual.classList.remove("d-none");
+        blocoNovaFuncao.classList.add("d-none");
+
+        document.getElementById("aso_funcao_atual").innerText = s.funcao_atual || "-";
+      }
+
+      // SE FOR SOLICITAR CRIAÇÃO DE NOVO SETOR, MOSTRAR CAMPO
+      if (s.solicitar_novo_setor === true) {
+        blocoSetorAtual.classList.add("d-none");
+        blocoNovoSetor.classList.remove("d-none");
+
+        document.getElementById("aso_setor_atual").innerText = "";
+        document.getElementById("aso_novo_setor").innerText = s.nome_novo_setor || "-";
+      } else {
+        blocoSetorAtual.classList.remove("d-none");
+        blocoNovoSetor.classList.add("d-none");
+
+        document.getElementById("aso_setor_atual").innerText = s.setor_atual || "-";
+      }
+    }
+
+    // MOSTRAR / ESCONDER SEÇÃO DE NOVO CREDENCIAMENTO
     const blocoClinica = document.getElementById("blocoAsoClinica");
     const blocoCredenciamento = document.getElementById("blocoAsoCredenciamento");
 
@@ -398,34 +448,6 @@ function preencherModal(s, tipo) {
       document.getElementById("aso_estado_clinica").innerText = s.estado_clinica;
       document.getElementById("aso_cidade_clinica").innerText = s.cidade_clinica;
       document.getElementById("aso_nome_clinica").innerText = s.nome_clinica;
-    }
-
-    const blocoFuncaoAtual = document.getElementById("divFuncaoAtual");
-    const blocoSetorAtual = document.getElementById("divSetorAtual");
-
-    const blocoNovaFuncao = document.getElementById("divNovaFuncao");
-    const blocoNovoSetor = document.getElementById("divAsoNovoSetor");
-
-    if (s.solicitar_nova_funcao === true) {
-      blocoFuncaoAtual.classList.add("d-none");
-      blocoNovaFuncao.classList.remove("d-none");
-      document.getElementById("aso_nova_funcao").innerText = s.nome_nova_funcao || "-";
-    }
-    else {
-      blocoFuncaoAtual.classList.remove("d-none");
-      blocoNovaFuncao.classList.add("d-none");
-      document.getElementById("aso_nova_funcao").innerText = s.nome_nova_funcao || "-";
-    }
-
-    if (s.solicitar_novo_setor === true) {
-      blocoSetorAtual.classList.add("d-none");
-      blocoNovoSetor.classList.remove("d-none");
-      document.getElementById("aso_novo_setor").innerText = s.nome_novo_setor || "-";
-    }
-    else {
-      blocoSetorAtual.classList.remove("d-none");
-      blocoNovoSetor.classList.add("d-none");
-      document.getElementById("aso_novo_setor").innerText = s.nome_novo_setor || "-";
     }
   }
 

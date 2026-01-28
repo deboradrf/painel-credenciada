@@ -645,7 +645,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     data_nascimento: document.getElementById("data_nascimento").value,
     sexo: document.getElementById("sexo").value,
     estado_civil: document.getElementById("estado_civil").value,
-    doc_identidade: document.getElementById("doc_identidade").value,
+    doc_identidade: document.getElementById("doc_identidade").value || null,
     cpf: document.getElementById("cpf").value,
     matricula: naoPossuiMatricula ? null : document.getElementById("matricula").value,
     nao_possui_matricula: naoPossuiMatricula,
@@ -671,11 +671,11 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     nome_novo_cargo: solicitarNovoCargo ? nomeNovoCargo : null,
 
     tipo_exame: document.getElementById("tipo_exame").value,
-    cnh: document.getElementById("cnh").value,
-    vencimento_cnh: document.getElementById("vencimento_cnh").value,
-    lab_toxicologico: document.getElementById("lab_toxicologico").value,
+    cnh: document.getElementById("cnh").value || null,
+    vencimento_cnh: document.getElementById("vencimento_cnh").value || null,
+    lab_toxicologico: document.getElementById("lab_toxicologico").value || null,
     solicitar_credenciamento: solicitarCredenciamento,
-    observacao: document.getElementById("observacao").value,
+    observacao: document.getElementById("observacao").value || null,
 
     usuario_id: usuarioLogado.id
   };
