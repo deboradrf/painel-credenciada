@@ -1,27 +1,14 @@
+const pool = require("./db/pool");
 const express = require("express");
 const cors = require("cors");
-const { Pool } = require("pg");
 const axios = require("axios");
 const { XMLParser } = require("fast-xml-parser");
 const iconv = require("iconv-lite");
-
 const soap = require("soap");
-const CryptoJS = require("crypto-js");
-
-const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// BANCO DE DADOS
-const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "cadastro_funcionarios",
-  password: "salubrita",
-  port: 5432
-});
 
 // SOC – SOAP
 const WSDL_URL = "https://ws1.soc.com.br/WSSoc/FuncionarioModelo2Ws?wsdl";
@@ -71,6 +58,13 @@ const EXPORTA_PRESTADORES = {
   codigoPrestador: ""
 };
 
+const EXPORTA_DETALHES_PRESTADOR = {
+  empresa: "412429",
+  codigo: "211707",
+  chave: "d7e76b1761998e246d37",
+  tipoSaida: "json"
+}
+
 const parser = new XMLParser({ ignoreAttributes: false });
 
 // TESTE
@@ -78,7 +72,7 @@ app.get("/", (req, res) => {
   res.send("🚀 API Cadastro Funcionários rodando");
 });
 
-// EXPORTA EMPRESAS - (apenas ativos)
+// EXPORTA DADOS - TODAS EMPRESAS - (apenas ativos)
 app.get("/empresas", async (req, res) => {
   try {
     const parametro = JSON.stringify(EXPORTA_EMPRESAS);
@@ -108,7 +102,7 @@ app.get("/empresas", async (req, res) => {
   }
 });
 
-// EXPORTA UNIDADES - (apenas ativos)
+// EXPORTA DADOS - UNIDADES DE UMA EMPRESA - (apenas ativos)
 app.get("/unidades/:empresa", async (req, res) => {
   try {
     const parametro = JSON.stringify({
@@ -141,7 +135,7 @@ app.get("/unidades/:empresa", async (req, res) => {
   }
 });
 
-// EXPORTA SETORES - (apenas ativos)
+// EXPORTA DADOS - SETORES DE UMA EMPRESA - (apenas ativos)
 app.get("/setores/:empresa", async (req, res) => {
   try {
     const parametro = JSON.stringify({
@@ -175,7 +169,7 @@ app.get("/setores/:empresa", async (req, res) => {
   }
 });
 
-// EXPORTA CARGOS - (apenas ativos)
+// EXPORTA DADOS - CARGOS DE UMA EMPRESA - (apenas ativos)
 app.get("/cargos/:empresa", async (req, res) => {
   try {
     const parametro = JSON.stringify({
@@ -255,19 +249,17 @@ app.get("/prestadores/:empresa", async (req, res) => {
   /*http://localhost:3001/prestadores/2046368*/
 });
 
-// DETALHES DO PRESTADOR (filtrado pelo codigo)
+// EXPORTA DADOS - DETALHES DO PRESTADOR - (filtrado pelo codigo)
 app.get("/prestador/:empresa/:codigoPrestador", async (req, res) => {
   try {
     const { codigoPrestador } = req.params;
 
-    const payload = new URLSearchParams({
-      parametro: JSON.stringify({
-        empresa: "412429",
-        codigo: "211707",
-        chave: "d7e76b1761998e246d37",
-        tipoSaida: "json"
-      })
+    const parametro = JSON.stringify({
+      ...EXPORTA_DETALHES_PRESTADOR,
+      codigoPrestador
     });
+
+    const payload = new URLSearchParams({ parametro });
 
     const socResponse = await axios.post(
       "https://ws1.soc.com.br/WebSoc/exportadados",
@@ -304,52 +296,20 @@ app.get("/prestador/:empresa/:codigoPrestador", async (req, res) => {
   }
 });
 
-// CADASTRO DE USUÁRIOS 
+// ROTA DE CADASTRO DE USUÁRIO
 app.post("/cadastro", async (req, res) => {
   try {
-    const {
-      nome,
-      cpf,
-      email,
-      senha,
-      perfil,
-      cod_empresa,
-      nome_empresa,
-      cod_unidade,
-      nome_unidade
-    } = req.body;
+    const { nome, cpf, email, senha, perfil, cod_empresa, nome_empresa, cod_unidade, nome_unidade } = req.body;
 
-    if (!nome || !cpf | !email || !senha || !perfil) {
-      return res.status(400).json({ erro: "Dados obrigatórios ausentes" });
-    }
-
-    if (!cod_empresa || !cod_unidade) {
-      return res.status(400).json({
-        erro: "Empresa e unidade são obrigatórias"
-      });
-    }
-
-    const { rowCount } = await pool.query(
-      `
-      INSERT INTO usuarios
+    await pool.query(
+      ` INSERT INTO usuarios
         (nome, cpf, email, senha, perfil, cod_empresa, nome_empresa, cod_unidade, nome_unidade)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       `,
-      [
-        nome,
-        cpf,
-        email,
-        senha,
-        perfil,
-        cod_empresa,
-        nome_empresa,
-        cod_unidade,
-        nome_unidade
-      ]
+      [nome, cpf, email, senha, perfil, cod_empresa, nome_empresa, cod_unidade, nome_unidade]
     );
 
     res.json({ sucesso: true });
-
   }
   catch (err) {
     if (err.code === "23505") {
@@ -370,7 +330,7 @@ app.post("/cadastro", async (req, res) => {
   }
 });
 
-// LOGIN DE USUÁRIO
+// ROTA DE LOGIN DE USUÁRIO
 app.post("/login", async (req, res) => {
   try {
     const { email, senha } = req.body;
@@ -679,13 +639,16 @@ app.get("/solicitacoes/novo-cadastro/:id", async (req, res) => {
         u.nome AS solicitado_por_nome,
         ua.nome AS analisado_por_nome,
         ue.nome AS enviado_soc_por_nome,
+        uc.nome AS cancelado_por_nome,
         sf.analisado_em,
-        sf.enviado_soc_em
+        sf.enviado_soc_em,
+        sf.cancelado_em
       FROM solicitacoes_novo_cadastro sf
       JOIN novo_cadastro f ON f.id = sf.funcionario_id
       JOIN usuarios u ON u.id = sf.solicitado_por
       LEFT JOIN usuarios ua ON ua.id = sf.analisado_por
       LEFT JOIN usuarios ue ON ue.id = sf.enviado_soc_por
+      LEFT JOIN usuarios uc ON uc.id = sf.cancelado_por
       WHERE sf.id = $1
     `, [id]);
 
@@ -718,11 +681,14 @@ app.get("/solicitacoes/aso/:id", async (req, res) => {
         sf.solicitado_em,
         u.nome AS solicitado_por_nome,
         ua.nome AS analisado_por_nome,
-        sf.analisado_em
+        uc.nome AS cancelado_por_nome,
+        sf.analisado_em,
+        sf.cancelado_em 
       FROM solicitacoes_aso sf
       JOIN novo_aso f ON f.id = sf.funcionario_id
       JOIN usuarios u ON u.id = sf.solicitado_por
       LEFT JOIN usuarios ua ON ua.id = sf.analisado_por
+      LEFT JOIN usuarios uc ON uc.id = sf.cancelado_por
       WHERE sf.id = $1
     `, [id]);
 
@@ -787,8 +753,42 @@ app.post("/solicitacoes/:tipo/:id/analisar", async (req, res) => {
   }
 });
 
+// CANCELAR SOLICITAÇÃO
+app.post("/solicitacoes/:tipo/:id/cancelar", async (req, res) => {
+  const { tipo, id } = req.params;
+  const { usuario_id } = req.body; // precisa enviar do frontend
+
+  if (!["ASO", "NOVO_CADASTRO"].includes(tipo)) {
+    return res.status(400).json({ erro: "Tipo de solicitação inválido" });
+  }
+
+  const tabela =
+    tipo === "ASO"
+      ? "solicitacoes_aso"
+      : "solicitacoes_novo_cadastro";
+
+  try {
+    await pool.query(
+      `
+      UPDATE ${tabela}
+      SET
+        status = $1,
+        cancelado_por = $2,
+        cancelado_em = NOW()
+      WHERE id = $3
+      `,
+      ["CANCELADO", usuario_id, id]
+    );
+
+    res.json({ sucesso: true, message: "Solicitação cancelada" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao cancelar solicitação" });
+  }
+});
+
 // SOLICITAÇÕES DO USUÁRIO LOGADO - novo cadastro e aso
-app.get("/minhas-solicitacoes/:usuarioId", async (req, res) => {
+app.get("/solicitacoes-empresa/:usuarioId", async (req, res) => {
   const { usuarioId } = req.params;
 
   try {

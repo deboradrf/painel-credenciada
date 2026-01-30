@@ -297,6 +297,10 @@ td {
     background: #EF4444;
 }
 
+.status-pill.cancelado {
+    background: #616161;
+}
+
 .actions button {
     background-color: #FFFFFF;
     border: 1px solid #E5E7EB;

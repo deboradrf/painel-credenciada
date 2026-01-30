@@ -78,7 +78,7 @@ async function carregarHistorico() {
   }
 
   const res = await fetch(
-    `http://localhost:3001/minhas-solicitacoes/${usuario.id}`
+    `http://localhost:3001/solicitacoes-empresa/${usuario.id}`
   );
 
   const solicitacoes = await res.json();
@@ -119,23 +119,74 @@ function renderizarTabela(lista) {
           </span>
         </td>
         <td class="actions">
-          ${s.status === "REPROVADO"
-          ? `
-            <button onclick="verMotivo('${(s.motivo_reprovacao || s.retorno_soc_erro || "Erro no envio ao SOC").replace(/'/g, "\\'")}')">
-              Ver motivo
-            </button>
-            <button onclick="abrirModalEditar(${s.solicitacao_id}, '${s.tipo}')">
-              Editar
-            </button>
-            `
-          : s.status === "ENVIADO_SOC"
-            ? `<span class="text-muted">Solicitação finalizada</span>`
-            : `<span class="text-muted">Solicitação em análise</span>`
+          ${
+            (() => {
+              if (s.status === "REPROVADO") {
+                return `
+                  <button onclick="verMotivo('${(s.motivo_reprovacao || s.retorno_soc_erro || "Erro no envio ao SOC").replace(/'/g, "\\'")}')">
+                    Ver motivo
+                  </button>
+                  <button onclick="abrirModalEditar(${s.solicitacao_id}, '${s.tipo}')">
+                    Editar
+                  </button>
+                `;
+              } 
+              if (s.status === "ENVIADO_SOC" || (s.status === "APROVADO" && s.tipo === "ASO")) {
+                return `<span class="text-muted">Solicitação finalizada</span>`;
+              }
+              if (s.status === "APROVADO" && s.tipo === "NOVO_CADASTRO") {
+                return `<span class="text-muted">Solicitação aprovada</span>`;
+              }
+              if (s.status === "PENDENTE") {
+                return `
+                  <div id="solicitacao-${s.solicitacao_id}" style="position: relative; text-align: center;">
+                    <span class="texto-status text-muted">Solicitação em análise</span>
+                    <span 
+                      onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuario.id})" 
+                      style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); cursor: pointer; color: red;">
+                      Cancelar
+                    </span>
+                  </div>
+                `;
+              }
+              if (s.status === "CANCELADO") {
+                return `<span class="text-muted">Solicitação cancelada</span>`;
+              }
+              return `<span class="text-muted" style="display: block; text-align: center;">Solicitação em análise</span>`;
+            })()
           }
         </td>
       </tr>
     `;
   });
+}
+
+// FUNÇÃO PARA CANCELAR SOLICITAÇÃO PENDENTE
+async function cancelarSolicitacao(id, tipo, usuarioId) {
+  const confirmar = confirm("Tem certeza que deseja cancelar esta solicitação?");
+  if (!confirmar) return;
+
+  try {
+    const response = await fetch(`http://localhost:3001/solicitacoes/${tipo}/${id}/cancelar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuario_id: usuarioId })
+    });
+
+    if (!response.ok) throw new Error("Erro na comunicação com o servidor");
+
+    const data = await response.json();
+
+    if (data.sucesso) {
+      alert("Solicitação cancelada com sucesso!");
+      carregarHistorico();
+    } else {
+      alert(data.erro || "Não foi possível cancelar a solicitação.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erro na comunicação com o servidor.");
+  }
 }
 
 // ABRIR MODAL DO MOTIVO

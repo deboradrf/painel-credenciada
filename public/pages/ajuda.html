@@ -70,14 +70,8 @@
                         </li>
                         <li>
                             <a href="#">
-                                <i class="fa-regular fa-bell"></i>
+                                <i class="fa-solid fa-bell"></i>
                                 Notificações
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <i class="fa-solid fa-gear"></i>
-                                Configurações
                             </a>
                         </li>
                         <li onclick="logout()">
@@ -96,94 +90,9 @@
         </div>
     </header>
 
-    <main class="container-fluid">
-
-        <div class="welcome">
-            <h3 class="welcome-title">Fluxo da solicitação de Novo Cadastro</h3>
-        </div>
-        <div class="flow-wrapper">
-            <div class="flow-step">
-                <i class="fa-solid fa-user-plus"></i>
-                <span>Empresa solicita</span>
-            </div>
-
-            <div class="arrow">
-                <i class="fa-solid fa-arrow-right"></i>
-            </div>
-
-            <div class="flow-step">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <span>Credenciada analisa</span>
-            </div>
-
-            <div class="arrow">
-                <i class="fa-solid fa-arrow-right"></i>
-            </div>
-
-            <div class="flow-step">
-                <i class="fa-solid fa-pen-to-square"></i>
-                <span>Correção (se necessário)</span>
-            </div>
-
-            <div class="arrow">
-                <i class="fa-solid fa-arrow-right"></i>
-            </div>
-
-            <div class="flow-step">
-                <i class="fa-solid fa-check-circle"></i>
-                <span>Aprovação</span>
-            </div>
-
-            <div class="arrow">
-                <i class="fa-solid fa-arrow-right"></i>
-            </div>
-
-            <div class="flow-step">
-                <i class="fa-regular fa-paper-plane"></i>
-                <span>Envio ao SOC</span>
-            </div>
-        </div>
-
-        <div class="welcome mt-5">
-            <h3 class="welcome-title">Fluxo da solicitação de Exames</h3>
-        </div>
-        <div class="flow-wrapper">
-            <div class="flow-step">
-                <i class="fa-solid fa-file-circle-plus"></i>
-                <span>Empresa solicita</span>
-            </div>
-
-            <div class="arrow">
-                <i class="fa-solid fa-arrow-right"></i>
-            </div>
-
-            <div class="flow-step">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <span>Credenciada analisa</span>
-            </div>
-
-            <div class="arrow">
-                <i class="fa-solid fa-arrow-right"></i>
-            </div>
-
-            <div class="flow-step">
-                <i class="fa-solid fa-pen-to-square"></i>
-                <span>Correção (se necessário)</span>
-            </div>
-
-            <div class="arrow">
-                <i class="fa-solid fa-arrow-right"></i>
-            </div>
-
-            <div class="flow-step">
-                <i class="fa-solid fa-check-circle"></i>
-                <span>Aprovação</span>
-            </div>
-        </div>
-
-        <!-- ABAS -->
+    <main class="container-fluid p-5">
         <input type="checkbox" id="theme-mode" class="mode" hidden="" />
-        <div class="container">
+        <div class="container shadow">
             <div class="wrap">
                 <input checked="" type="radio" id="rd-1" name="radio" class="rd-1" hidden="" />
                 <label for="rd-1" class="label" style="--index: 0;">
@@ -202,87 +111,346 @@
             </div>
         </div>
 
-        <div class="tab-content shadow">
+        <div class="tab-content">
             <div class="tab-pane fade show active" id="empresa">
-                <h3>O que a empresa pode fazer</h3>
-                <ul>
-                    <li>Solicitar cadastro admissional no SOC</li>
-                    <li>Solicitar exames ocupacionais</li>
-                    <li>Acompanhar status das solicitações</li>
-                    <li>Corrigir solicitações reprovadas</li>
-                </ul>
+                <h5 class="title mt-5 mb-4">
+                    <i class="fa-solid fa-circle-question"></i>
+                    O que a empresa pode fazer
+                </h5>
+                <div class="row g-3">
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="action-card">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <h6>Cadastro admissional</h6>
+                            <p>Solicitar cadastro de funcionário no SOC</p>
+                        </div>
+                    </div>
 
-                <div class="card mt-5 shadow-sm">
-                    <div class="card-body">
-                        <h6 class="mb-3">🎯 Significado dos status</h6>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="action-card">
+                            <i class="fa-solid fa-stethoscope"></i>
+                            <h6>Exames ocupacionais</h6>
+                            <p>Solicitar e gerenciar exames obrigatórios</p>
+                        </div>
+                    </div>
 
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <div class="status-card status-pendente">
-                                    <span>PENDENTE</span>
-                                    <small>Aguardando ação da credenciada</small>
-                                </div>
-                            </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="action-card">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <h6>Acompanhar solicitações</h6>
+                            <p>Visualizar o andamento em tempo real</p>
+                        </div>
+                    </div>
 
-                            <div class="col-md-3">
-                                <div class="status-card status-reprovado">
-                                    <span>REPROVADO</span>
-                                    <small>Ajustes necessários</small>
-                                </div>
-                            </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="action-card">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <h6>Corrigir reprovações</h6>
+                            <p>Ajustar solicitações com pendências</p>
+                        </div>
+                    </div>
 
-                            <div class="col-md-3">
-                                <div class="status-card status-reavaliacao">
-                                    <span>REAVALIAÇÃO</span>
-                                    <small>Correção enviada</small>
-                                </div>
-                            </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="action-card">
+                            <i class="fa-solid fa-ban"></i>
+                            <h6>Cancelar solicitações</h6>
+                            <p>Cancelar pedidos ainda não processados</p>
+                        </div>
+                    </div>
+                </div>
 
-                            <div class="col-md-3">
-                                <div class="status-card status-aprovado">
-                                    <span>APROVADO</span>
-                                    <small>Solicitação concluída</small>
-                                </div>
-                            </div>
+                <br>
+                <br>
+                <hr>
+
+                <h5 class="title mt-5 mb-4">
+                    <i class="fa-solid fa-chart-diagram"></i>
+                    Fluxo da solicitação de Novo Cadastro
+                </h5>
+                <div class="flow">
+                    <div class="flow-card">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <h6>Empresa solicita</h6>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-down"></i>
+
+                    <div class="flow-card">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <h6>Credenciada analisa</h6>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-down"></i>
+
+                    <div class="flow-card">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <h6>Correção (se necessário)</h6>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-down"></i>
+
+                    <div class="flow-card">
+                        <i class="fa-regular fa-paper-plane"></i>
+                        <h6>Envio ao SOC</h6>
+                    </div>
+                </div>
+
+                <br>
+                <br>
+                <hr>
+
+                <h5 class="title mt-5 mb-4">
+                    <i class="fa-solid fa-chart-diagram"></i>
+                    Fluxo da solicitação de Exames
+                </h5>
+                <div class="flow">
+                    <div class="flow-card">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <h6>Empresa solicita</h6>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-down"></i>
+
+                    <div class="flow-card">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <h6>Credenciada analisa</h6>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-down"></i>
+
+                    <div class="flow-card">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <h6>Correção (se necessário)</h6>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-down"></i>
+
+                    <div class="flow-card">
+                        <i class="fa-solid fa-check-circle"></i>
+                        <h6>Aprovação</h6>
+                    </div>
+                </div>
+
+                <br>
+                <br>
+                <hr>
+
+                <h5 class="title mt-5 mb-4">
+                    <i class="fa-solid fa-bullseye"></i>
+                    Significado dos status
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="status-item pendente">
+                            <span class="badge bg-pendente">PENDENTE</span>
+                            <p>Aguardando ação da credenciada</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="status-item reprovado">
+                            <span class="badge bg-reprovado">REPROVADO</span>
+                            <p>Ajustes necessários</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="status-item pendente">
+                            <span class="badge bg-pendente">PENDENTE_REAVALIACAO</span>
+                            <p>Correção enviada para credenciada</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="status-item aprovado">
+                            <span class="badge bg-aprovado">APROVADO</span>
+                            <p>Solicitação concluída</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="status-item cancelado">
+                            <span class="badge bg-cancelado">CANCELADO</span>
+                            <p>Solicitação cancelada</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="status-item enviado">
+                            <span class="badge bg-enviado">ENVIADO_SOC</span>
+                            <p>Funcionário cadastrado no SOC</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="tab-pane fade" id="credenciada">
-                <h3>O que a credenciada faz</h3>
-                <ul>
-                    <li>Recebe solicitações</li>
-                    <li>Analisa dados enviados</li>
-                    <li>Aprova ou reprova</li>
-                    <li>Envia dados ao SOC</li>
-                </ul>
+                <h5 class="title mt-5 mb-4">
+                    <i class="fa-solid fa-circle-question"></i>
+                    O que a credenciada faz
+                </h5>
+                <div class="row g-3">
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="action-card">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <h6>Recebe solicitações</h6>
+                            <p>Visualiza pedidos enviados pelas empresas</p>
+                        </div>
+                    </div>
 
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h6 class="mb-3">🎯 Status gerenciados</h6>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="action-card">
+                            <i class="fa-solid fa-stethoscope"></i>
+                            <h6>Analisa formulários</h6>
+                            <p>Confere dados enviados</p>
+                        </div>
+                    </div>
 
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <div class="status-card status-pendente">
-                                    <span>PENDENTE</span>
-                                    <small>Aguardando análise</small>
-                                </div>
-                            </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="action-card">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <h6>Aprova ou reprova</h6>
+                            <p>Valida ou solicita ajustes nas informações</p>
+                        </div>
+                    </div>
 
-                            <div class="col-md-4">
-                                <div class="status-card status-aprovado">
-                                    <span>APROVADO</span>
-                                    <small>Validado pela credenciada</small>
-                                </div>
-                            </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="action-card">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <h6>Cancela uma solicitação</h6>
+                            <p>Interrompe pedidos quando necessário</p>
+                        </div>
+                    </div>
 
-                            <div class="col-md-4">
-                                <div class="status-card status-enviado">
-                                    <span>ENVIADO_SOC</span>
-                                    <small>Cadastro enviado ao SOC</small>
-                                </div>
-                            </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="action-card">
+                            <i class="fa-solid fa-ban"></i>
+                            <h6>Envia dados ao SOC</h6>
+                            <p>Realiza o cadastro do funcionário no SOC</p>
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+                <br>
+                <hr>
+
+                <h5 class="title mt-5 mb-4">
+                    <i class="fa-solid fa-chart-diagram"></i>
+                    Fluxo da Solicitação de Novo Cadastro
+                </h5>
+                <div class="flow">
+                    <div class="flow-card">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <h6>Empresa solicita</h6>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-down"></i>
+
+                    <div class="flow-card">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <h6>Credenciada analisa</h6>
+
+                        <div class="toggle-question" data-type="create-setor-cargo">Precisa criar setor/cargo?</div>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-down"></i>
+
+                    <div class="flow-card" id="envia-soc-card">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <h6>Envio ao SOC</h6>
+
+                        <div class="toggle-question" data-type="erro-soc">Erro SOC?</div>
+                    </div>
+                </div>
+
+                <br>
+                <br>
+                <hr>
+
+                <h5 class="title mt-5 mb-4">
+                    <i class="fa-solid fa-chart-diagram"></i>
+                    Fluxo da Solicitação de Exames
+                </h5>
+                <div class="flow">
+                    <div class="flow-card">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <h6>Empresa solicita</h6>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-down"></i>
+
+                    <div class="flow-card">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <h6>Credenciada analisa</h6>
+
+                        <div class="toggle-question" data-type="correcao">Necessário correção?</div>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-down"></i>
+
+                    <div class="flow-card">
+                        <i class="fa-solid fa-check-circle"></i>
+                        <h6>Aprovação</h6>
+                    </div>
+                </div>
+
+                <br>
+                <br>
+                <hr>
+
+                <h5 class="title mt-5 mb-4">
+                    <i class="fa-solid fa-bullseye"></i>
+                    Significado dos status
+                </h5>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="status-item pendente">
+                            <span class="badge bg-pendente">PENDENTE</span>
+                            <p>Aguardando análise</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="status-item reprovado">
+                            <span class="badge bg-reprovado">REPROVADO</span>
+                            <p>Ajustes enviados para correção</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="status-item pendente">
+                            <span class="badge bg-pendente">PENDENTE_REAVALIACAO</span>
+                            <p>Correção realizada. Aguardando análise</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="status-item aprovado">
+                            <span class="badge bg-aprovado">APROVADO</span>
+                            <p>Solicitação concluída</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="status-item cancelado">
+                            <span class="badge bg-cancelado">CANCELADO</span>
+                            <p>Solicitação cancelada</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="status-item enviado">
+                            <span class="badge bg-enviado">ENVIADO_SOC</span>
+                            <p>Cadastro enviado ao SOC</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="status-item erro">
+                            <span class="badge bg-erro">ERRO_SOC</span>
+                            <p>Erro ao ser enviado ao SOC</p>
                         </div>
                     </div>
                 </div>

@@ -322,8 +322,7 @@ td {
 }
 
 .status-pill.pendente,
-.status-pill.pendente_reavaliacao,
-.status-pill.pendente_credenciamento {
+.status-pill.pendente_reavaliacao {
     background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
 }
 
@@ -333,6 +332,10 @@ td {
 
 .status-pill.enviado_soc {
     background: #88A6BB;
+}
+
+.status-pill.cancelado {
+    background: #616161;
 }
 
 .status-pill.reprovado,
@@ -357,7 +360,7 @@ td {
     font-size: 13px;
     line-height: 28px;
     padding: 0 10px 0 10px;
-    width: 60px;
+    width: 100px;
 }
 
 .modal-header {
@@ -438,7 +441,7 @@ td {
     margin: 0;
 }
 
-.alert-success {
+.alert-aprovado {
     display: flex;
     align-items: center;
     padding: 0.8rem;
@@ -449,18 +452,8 @@ td {
     color: #17575B;
 }
 
-.alert-warning {
-    display: flex;
-    align-items: center;
-    padding: 0.8rem;
-    border: 1px solid #F1AE33;
-    border-left: 5px solid #F1AE33;
-    border-radius: 0.6rem;
-    background-color: #FFF8E6;
-    color: #7A5A1A;
-}
-
-.alert-danger {
+.alert-reprovado,
+.alert-erro {
     display: flex;
     align-items: center;
     padding: 0.8rem;
@@ -480,6 +473,17 @@ td {
     border-radius: 0.6rem;
     background-color: #E3F2F4;
     color: #374151;
+}
+
+.alert-cancelado {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem;
+  border: 1px solid #A0AEC0;
+  border-left: 6px solid #A0AEC0;
+  border-radius: 0.6rem;
+  background-color: #EBEBEB;
+  color: #4A5568;
 }
 
 .modal-footer {

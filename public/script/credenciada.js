@@ -121,6 +121,7 @@ function renderizarTabela(lista) {
     }
 
     const bloqueiaEnvioSOC = (s.solicitar_novo_setor === true || s.solicitar_novo_cargo === true) && s.status !== "APROVADO";
+    const podeEnviarSOC = s.tipo === "NOVO_CADASTRO" && s.status !== "CANCELADO";
 
     tr.innerHTML = `
       <td>${iconeTipo}</td>
@@ -134,13 +135,19 @@ function renderizarTabela(lista) {
       <td class="actions">
         <div class="actions-wrapper">
           <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
-            <i class="fa-solid fa-magnifying-glass"></i> 
+            Analisar 
           </button>
 
-          ${s.tipo === "NOVO_CADASTRO" ? `
+          ${podeEnviarSOC ? `
             <button type="button" onclick="enviarSOC(${s.solicitacao_id})"
               ${bloqueiaEnvioSOC ? "disabled" : ""}>
-              <i class="fa-regular fa-paper-plane"></i>
+              Enviar SOC
+            </button>
+          ` : ""}
+
+          ${s.status === "PENDENTE" ? `
+            <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})" >
+              Cancelar
             </button>
           ` : ""}
         </div>
@@ -149,6 +156,34 @@ function renderizarTabela(lista) {
 
     tbody.appendChild(tr);
   });
+}
+
+// FUNÇÃO PARA CANCELAR SOLICITAÇÃO PENDENTE
+async function cancelarSolicitacao(id, tipo, usuarioLogadoId) {
+  const confirmar = confirm("Tem certeza que deseja cancelar esta solicitação?");
+  if (!confirmar) return;
+
+  try {
+    const response = await fetch(`http://localhost:3001/solicitacoes/${tipo}/${id}/cancelar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuario_id: usuarioLogadoId })
+    });
+
+    if (!response.ok) throw new Error("Erro na comunicação com o servidor");
+
+    const data = await response.json();
+
+    if (data.sucesso) {
+      alert("Solicitação cancelada com sucesso!");
+      carregarSolicitacoes();
+    } else {
+      alert(data.erro || "Não foi possível cancelar a solicitação.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erro na comunicação com o servidor.");
+  }
 }
 
 // FUNÇÃO PARA APLICAR FILTROS
@@ -476,7 +511,7 @@ function preencherModal(s, tipo) {
     alertStatus.style.display = "block";
     alertStatus.innerHTML = `
       <div class="alerts-container mb-2">
-        <div class="alert alert-danger">
+        <div class="alert alert-erro">
           <i class="fa-solid fa-circle-check fa-lg" style="color: #F05252"></i>
           <p class="alert-text">
             Erro retornado pelo SOC: ${s.retorno_soc_erro}
@@ -492,7 +527,7 @@ function preencherModal(s, tipo) {
     alertStatus.style.display = "block";
     alertStatus.innerHTML = `
       <div class="alerts-container mb-2">
-        <div class="alert alert-success">
+        <div class="alert alert-aprovado">
           <i class="fa-solid fa-circle-check fa-lg" style="color: #53A5A6"></i>
           <p class="alert-text">
             Aprovado por ${s.analisado_por_nome} em ${formatarDataHora(s.analisado_em)}
@@ -508,10 +543,26 @@ function preencherModal(s, tipo) {
     alertStatus.style.display = "block";
     alertStatus.innerHTML = `
       <div class="alerts-container mb-2">
-        <div class="alert alert-danger">
+        <div class="alert alert-reprovado">
           <i class="fa-solid fa-circle-xmark fa-lg" style="color: #DC3545"></i>
           <p class="alert-text">
             Reprovado por ${s.analisado_por_nome} em ${formatarDataHora(s.analisado_em)}
+          </p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // CANCELADO
+  if (s.status === "CANCELADO") {
+    alertStatus.style.display = "block";
+    alertStatus.innerHTML = `
+      <div class="alerts-container mb-2">
+        <div class="alert alert-cancelado">
+          <i class="fa-solid fa-ban fa-lg" style="color: #6C757D"></i>
+          <p class="alert-text">
+            Cancelado por ${s.cancelado_por_nome} em ${formatarDataHora(s.cancelado_em)}
           </p>
         </div>
       </div>
@@ -618,7 +669,7 @@ async function analisarSolicitacao(status) {
     const solicitarNovoCargo = selectCargo && selectCargo.style.display !== "none";
 
     if (solicitarNovoSetor || solicitarNovoCargo) {
-      const dadosEdicao = pegarDadosEdicaoCadastro(); // ✅ pega os dados
+      const dadosEdicao = pegarDadosEdicaoCadastro();
       await fetch(`http://localhost:3001/solicitacoes/cadastro/${solicitacaoAtualId}/editar-setor-cargo`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
