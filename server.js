@@ -8,7 +8,6 @@ const iconv = require("iconv-lite");
 const soap = require("soap");
 
 const app = express();
-const PORT = 3003;
 
 app.use(cors());
 app.use(express.json());
@@ -1435,6 +1434,8 @@ app.put("/usuarios/:id", async (req, res) => {
     res.status(500).json({ erro: "Erro ao atualizar perfil" });
   }
 });
+
+const PORT = process.env.NODE_ENV === 'development' ? 3000 : (process.env.PORT || 80);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
