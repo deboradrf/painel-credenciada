@@ -75,7 +75,7 @@ const parser = new XMLParser({ ignoreAttributes: false });
 
 // ROTA PRINCIPAL
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/pages/index.html"));
+  res.sendFile(path.join(__dirname, "public/pages/login.html"));
 });
 
 // TESTE API
