@@ -1,5 +1,3 @@
-const API = "http://localhost:3001";
-
 // MÁSCARA DE CPF
 const cpfInput = document.getElementById("cpf");
 
@@ -70,7 +68,7 @@ async function carregarEmpresas(perfil) {
     if (!select) return;
 
     try {
-        const res = await fetch("http://localhost:3001/empresas");
+        const res = await fetch("/empresas");
         let empresas = await res.json();
 
         // SE O PERFIL FOR CREDENCIADA, CARREGAR EMPRESAS DA SALUBRITA APENAS
@@ -122,7 +120,7 @@ async function carregarUnidades(empresaCodigo) {
     select.disabled = true;
 
     try {
-        const res = await fetch(`http://localhost:3001/unidades/${empresaCodigo}`);
+        const res = await fetch(`/unidades/${empresaCodigo}`);
         const unidades = await res.json();
 
         if (!unidades || unidades.length === 0) {
@@ -186,7 +184,7 @@ document.getElementById("cadastroForm").addEventListener("submit", async e => {
         nome_unidade: unidadeNome
     };
 
-    const res = await fetch(`${API}/cadastro`, {
+    const res = await fetch(`/cadastro`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)

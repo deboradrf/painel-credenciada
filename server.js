@@ -13,8 +13,17 @@ const PORT = 3003;
 app.use(cors());
 app.use(express.json());
 
-// ✅ SERVIR ARQUIVOS ESTÁTICOS
 app.use(express.static(path.join(__dirname, "public")));
+
+// ROTA PRINCIPAL
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public/pages/login.html"));
+});
+
+// TESTE API
+app.get("/api/status", (req, res) => {
+  res.json({ ok: true });
+});
 
 // SOC – SOAP
 const WSDL_URL = "https://ws1.soc.com.br/WSSoc/FuncionarioModelo2Ws?wsdl";
@@ -72,26 +81,6 @@ const EXPORTA_DETALHES_PRESTADOR = {
 }
 
 const parser = new XMLParser({ ignoreAttributes: false });
-
-// ROTA PRINCIPAL
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/pages/login.html"));
-});
-
-// TESTE API
-app.get("/api/status", (req, res) => {
-  res.json({ ok: true });
-});
-
-app.get("/api/db-test", async (req, res) => {
-  try {
-    const { rows } = await pool.query("SELECT NOW()");
-    res.json(rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ erro: "Erro no banco" });
-  }
-});
 
 // EXPORTA DADOS - TODAS EMPRESAS - (apenas ativos)
 app.get("/empresas", async (req, res) => {
