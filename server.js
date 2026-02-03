@@ -83,6 +83,16 @@ app.get("/api/status", (req, res) => {
   res.json({ ok: true });
 });
 
+app.get("/api/db-test", async (req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT NOW()");
+    res.json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro no banco" });
+  }
+});
+
 // EXPORTA DADOS - TODAS EMPRESAS - (apenas ativos)
 app.get("/empresas", async (req, res) => {
   try {
