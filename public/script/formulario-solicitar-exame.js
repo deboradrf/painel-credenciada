@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await carregarUnidades();
   await carregarSetores();
   await carregarCargos();
-  preencherFuncionarioASO();
+  preencherFuncionario();
   await carregarPrestadores();
 });
 
@@ -295,12 +295,12 @@ function preencherEmpresaUsuario() {
 }
 
 // FUNÇÃO PARA PREENCHER O FORMULÁRIO COM OS DADOS ENCONTRADOS NO SOC
-function preencherFuncionarioASO() {
-  const f = JSON.parse(localStorage.getItem("funcionarioASO"));
+function preencherFuncionario() {
+  const f = JSON.parse(localStorage.getItem("funcionario"));
 
   if (!f) {
     alert("Pesquise um funcionário primeiro");
-    window.location.href = "solicitar-aso.html";
+    window.location.href = "solicitar-exame.html";
     return;
   }
 
@@ -488,6 +488,42 @@ document.getElementById("solicitarNovoSetor").addEventListener("change", functio
   wrapper.style.display = this.checked ? "block" : "none";
 });
 
+// MOSTRAR / OCULTAR TEXTAREA DE MOTIVO DA CONSULTA E COLOCAR REQUIRED NO CAMPO
+document.addEventListener("DOMContentLoaded", () => {
+  const tipoExame = document.getElementById("tipo_exame");
+  const cardMotivoConsulta = document.getElementById("cardMotivoConsulta");
+  
+  const textAreaMotivoConsulta = document.getElementById("motivo_consulta");
+
+  // MOSTRA / OCULTAR TEXTAREA DE MOTIVO DA CONSULTA
+  tipoExame.addEventListener("change", () => {
+    if (tipoExame.value === "CONSULTA_ASSISTENCIAL") {
+      cardMotivoConsulta.style.display = "block";
+
+      textAreaMotivoConsulta.required = true;
+    } else {
+      cardMotivoConsulta.style.display = "none";
+
+      textAreaMotivoConsulta.required = false;
+    }
+  });
+});
+
+// MOSTRAR / OCULTAR AVISO DE RETORNO AO TRABALHo
+document.addEventListener("DOMContentLoaded", () => {
+  const tipoExame = document.getElementById("tipo_exame");
+  const cardRetornoTrabalho = document.getElementById("cardRetornoTrabalho");
+
+  // MOSTRA / OCULTAR TEXTAREA DE MOTIVO DA CONSULTA
+  tipoExame.addEventListener("change", () => {
+    if (tipoExame.value === "RETORNO_TRABALHO") {
+      cardRetornoTrabalho.style.display = "block";
+    } else {
+      cardRetornoTrabalho.style.display = "none";
+    }
+  });
+});
+
 // COLOCAR REQUIRED NO CAMPO DE ESTADO CLÍNICA E CIDADE CLÍNICA PARA CREDENCIAMENTO
 document.getElementById("solicitarCredenciamento").addEventListener("change", function () {
   const estadoSelect = document.getElementById("estado_clinica");
@@ -512,6 +548,34 @@ document.getElementById("solicitarCredenciamento").addEventListener("change", fu
     cidadeCredenciamentoInput.removeAttribute("required");
     estadoCredenciamentoInput.value = "";
     cidadeCredenciamentoInput.value = "";
+  }
+});
+
+// MOSTRAR / OCULTAR TIPO RAC
+const racSelect = document.getElementById("racSelect");
+const divRacValeOpcoes = document.getElementById("divRacValeOpcoes");
+
+racSelect.addEventListener("change", () => {
+  if (racSelect.value === "FORMULARIO_RAC_VALE") {
+    divRacValeOpcoes.classList.remove("d-none");
+  } else {
+    divRacValeOpcoes.classList.add("d-none");
+
+    document.getElementById("racValeOpcao").value = "";
+  }
+});
+
+// TORNAR OBRIGATÓRICO QUANDO A OPÇÃO SELECIONADA FOR VALE
+const racValeOpcao = document.getElementById("racValeOpcao");
+
+racSelect.addEventListener("change", () => {
+  const isVale = racSelect.value === "FORMULARIO_RAC_VALE";
+
+  divRacValeOpcoes.classList.toggle("d-none", !isVale);
+  racValeOpcao.required = isVale;
+
+  if (!isVale) {
+    racValeOpcao.value = "";
   }
 });
 
@@ -561,7 +625,11 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     nome_setor: setorSelect.options[setorSelect.selectedIndex]?.text || null,
     cod_cargo: cargoSelect.value,
     nome_cargo: cargoSelect.options[cargoSelect.selectedIndex]?.text || null,
+    rac: document.getElementById("racSelect").value || null,
+    tipo_rac: document.getElementById("racValeOpcao").value || null,
     tipo_exame: document.getElementById("tipo_exame").value,
+    data_exame: document.getElementById("data_exame").value,
+    hora_exame: document.getElementById("hora_exame").value,
     funcao_anterior: document.getElementById("funcao_anterior")?.value || null,
     funcao_atual: funcaoSelect.value ? funcaoSelect.options[funcaoSelect.selectedIndex].text : null,
     solicitar_nova_funcao: solicitarNovaFuncao,
@@ -569,11 +637,12 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     setor_atual: setorAtualSelect.value ? setorAtualSelect.options[setorAtualSelect.selectedIndex].text : null,
     solicitar_novo_setor: solicitarNovoSetor,
     nome_novo_setor: solicitarNovoSetor ? nomeNovoSetor : null,
+    motivo_consulta: document.getElementById("motivo_consulta").value || null,
     cnh: document.getElementById("cnh").value || null,
     vencimento_cnh: document.getElementById("vencimento_cnh").value || null,
-    lab_toxicologico: document.getElementById("lab_toxicologico").value,
+    lab_toxicologico: document.getElementById("lab_toxicologico").value || null,
     solicitar_credenciamento: solicitarCredenciamento,
-    observacao: document.getElementById("observacao").value,
+    observacao: document.getElementById("observacao").value || null,
 
     usuario_id: usuarioLogado.id
   };
@@ -611,6 +680,53 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     console.error(erro);
     alert("Erro ao enviar solicitação");
   }
+});
+
+// LISTENER DOS CAMPOS DE DATA/HORA DO EXAME (SÓ PERMITIR MAIS DE 24H DA SOLICITAÇÃO)
+const dataInput = document.getElementById("data_exame");
+const horaInput = document.getElementById("hora_exame");
+
+dataInput.addEventListener("change", validarDataHoraExame);
+horaInput.addEventListener("change", validarDataHoraExame);
+
+function validarDataHoraExame() {
+    const data = dataInput.value;
+    const hora = horaInput.value;
+
+    if (!data || !hora) return;
+
+    const [ano, mes, dia] = data.split("-").map(Number);
+    const [horaNum, minNum] = hora.split(":").map(Number);
+
+    const dataHoraSelecionada = new Date(
+        ano,
+        mes - 1,
+        dia,
+        horaNum,
+        minNum,
+        0,
+        0
+    );
+
+    const agora = new Date();
+    const dataMinima = new Date(agora.getTime() + 24 * 60 * 60 * 1000);
+
+    if (dataHoraSelecionada < dataMinima) {
+        alert(
+          "Atenção: o período para realização do exame deve ser, preferencialmente, no mínimo 24 horas da solicitação."
+        );
+    }
+}
+
+// FORMATAR A HORA PARA HH:MM QUANDO É DIGITADA
+document.getElementById("hora_exame").addEventListener("input", function() {
+    let valor = this.value.replace(/\D/g, "");
+
+    if (valor.length > 2) {
+        valor = valor.slice(0,2) + ":" + valor.slice(2,4);
+    }
+
+    this.value = valor;
 });
 
 // FUNÇÃO DE LOGOUT

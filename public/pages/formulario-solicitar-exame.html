@@ -10,7 +10,7 @@
         href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
     <script src="https://kit.fontawesome.com/4392b60e4c.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="../css/formulario-solicitar-exames.css">
+    <link rel="stylesheet" href="../css/formulario-solicitar-exame.css">
 </head>
 
 <body>
@@ -151,7 +151,7 @@
                                 <label>Data de Admissão</label>
                                 <div class="input-wrapper">
                                     <div class="input-icon">
-                                        <i class="fa-solid fa-calendar"></i>
+                                        <i class="fa-solid fa-calendar-plus"></i>
                                     </div>
                                     <input type="date" id="data_admissao" readonly>
                                 </div>
@@ -169,7 +169,7 @@
                             <label>Empresa do Funcionário</label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
-                                    <i class="fa-solid fa-building"></i>
+                                    <i class="fa-solid fa-city"></i>
                                 </div>
                                 <input type="text" id="empresaNomeView" disabled>
                                 <input type="hidden" id="empresaCodigoHidden">
@@ -179,7 +179,7 @@
                             <label>Unidade do Funcionário</label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
-                                    <i class="fa-solid fa-city"></i>
+                                    <i class="fa-solid fa-building"></i>
                                 </div>
                                 <select id="unidadeSelect"></select>
                             </div>
@@ -188,7 +188,7 @@
                             <label>Setor do Funcionário</label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
-                                    <i class="fa-solid fa-building"></i>
+                                    <i class="fa-solid fa-sitemap"></i>
                                 </div>
                                 <select id="setorSelect"></select>
                             </div>
@@ -197,7 +197,7 @@
                             <label>Cargo do Funcionário</label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
-                                    <i class="fa-solid fa-briefcase"></i>
+                                    <i class="fa-solid fa-user-tie"></i>
                                 </div>
                                 <select id="cargoSelect"></select>
                             </div>
@@ -207,7 +207,57 @@
 
                 <div class="card mb-4">
                     <div class="card-body">
-                        <div class="form-group mt-2">
+                        <div class="form-group">
+                            <div class="alerts-container mb-2">
+                                <div class="alert alert-warning">
+                                    <i class="fa-solid fa-circle-info fa-lg" style="color: #F1AE33"></i>
+                                    <p class="alert-text">Em caso de colaborador mapeado em Atividades Críticas,
+                                        selecione o campo abaixo:</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3" id="divRac">
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-diagram-project"></i>
+                                </div>
+                                <select id="racSelect">
+                                    <option value="">Selecione...</option>
+                                    <option value="FORMULARIO_RAC_VALE">Formulário RAC Vale</option>
+                                    <option value="FORMULARIO_UNIDADE_CSN">Formulário unidade CSN</option>
+                                    <option value="FORMULARIO_UNIDADE_VALLOUREC">Formulário unidade Vallourec</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3 d-none" id="divRacValeOpcoes">
+                            <label>Tipo de RAC <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </div>
+                                <select id="racValeOpcao">
+                                    <option value="">Selecione...</option>
+                                    <option value="RAC_1">RAC 1 - Trabalhos em Altura</option>
+                                    <option value="RAC_2">RAC 2 - Veículos Automotores</option>
+                                    <option value="RAC_3">RAC 3 - Equipamentos Móveis</option>
+                                    <option value="RAC_5">RAC 5 - Içamento de Cargas</option>
+                                    <option value="RAC_6">RAC 6 - Espaço Confinado</option>
+                                    <option value="RAC_10">RAC 10 - Trabalhos em Eletricidade</option>
+                                    <option value="RAC_11">RAC 11 - Metal Líquido</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="p-3">
+                        <h5 class="my-2">Informações sobre os Exames</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
                             <label>Tipo de Exame <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
@@ -216,11 +266,54 @@
                                 <select id="tipo_exame" required>
                                     <option value="">Selecione...</option>
                                     <option value="PERIODICO">Periódico</option>
-                                    <option value="MUDANCA_RISCOS_OCUPACIONAIS">Mudança de Função / Riscos Ocupacionais</option>
+                                    <option value="MUDANCA_RISCOS_OCUPACIONAIS">Mudança de Função / Riscos Ocupacionais
+                                    </option>
                                     <option value="CONSULTA_ASSISTENCIAL">Consulta Assistencial</option>
                                     <option value="DEMISSIONAL">Demissional</option>
                                     <option value="RETORNO_TRABALHO">Retorno ao Trabalho</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Data para realização do exame <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-calendar"></i>
+                                    </div>
+                                    <input type="date" id="data_exame">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Hora para realização do exame <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-clock"></i>
+                                    </div>
+                                    <input type="text" id="hora_exame" placeholder="HH:MM" maxlength="5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="cardMotivoConsulta" style="display: none;">
+                            <label>Informe o motivo da consulta <span class="required">*</span></label>
+                            <div class="input-wrapper textarea-wrapper">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-comment-dots"></i>
+                                </div>
+
+                                <textarea id="motivo_consulta" rows="2"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="cardRetornoTrabalho" style="display: none;">
+                            <div class="alerts-container mb-2">
+                                <div class="alert alert-warning">
+                                    <i class="fa-solid fa-circle-info fa-lg" style="color: #F1AE33"></i>
+                                    <p class="alert-text">Aviso de envio de documento</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -228,14 +321,14 @@
 
                 <div class="card mb-4" id="cardMudancaFuncao" style="display: none;">
                     <div class="p-3">
-                        <h5 class="my-2">Dados para Mudança de Função</h5>
+                        <h5 class="my-2">Informações para Mudança de Função</h5>
                     </div>
                     <div class="card-body">
                         <div class="form-group">
                             <label>Função exercida atualmente</label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
-                                    <i class="fa-solid fa-briefcase"></i>
+                                    <i class="fa-solid fa-user-tie"></i>
                                 </div>
                                 <input type="text" id="funcao_anterior" readonly>
                             </div>
@@ -245,7 +338,7 @@
                                 <label>Função que irá exercer <span class="required">*</span></label>
                                 <div class="input-wrapper">
                                     <div class="input-icon">
-                                        <i class="fa-solid fa-briefcase"></i>
+                                        <i class="fa-solid fa-user-tie"></i>
                                     </div>
                                     <select id="funcao_atual"></select>
                                 </div>
@@ -259,7 +352,7 @@
                                     <label>Nome da Nova Função</label>
                                     <div class="input-wrapper">
                                         <div class="input-icon">
-                                            <i class="fa-solid fa-briefcase"></i>
+                                            <i class="fa-solid fa-user-tie"></i>
                                         </div>
                                         <input type="text" id="novaFuncao" placeholder="Ex: Analista Administrativo">
                                     </div>
@@ -269,7 +362,7 @@
                                 <label>Setor que irá atuar <span class="required">*</span></label>
                                 <div class="input-wrapper">
                                     <div class="input-icon">
-                                        <i class="fa-solid fa-briefcase"></i>
+                                        <i class="fa-solid fa-sitemap"></i>
                                     </div>
                                     <select id="setor_atual"></select>
                                 </div>
@@ -283,9 +376,9 @@
                                     <label>Nome do Novo Setor</label>
                                     <div class="input-wrapper">
                                         <div class="input-icon">
-                                            <i class="fa-solid fa-briefcase"></i>
+                                            <i class="fa-solid fa-sitemap"></i>
                                         </div>
-                                        <input type="text" id="novoSetor" placeholder="Ex: Analista Administrativo">
+                                        <input type="text" id="novoSetor" placeholder="Ex: Financeiro">
                                     </div>
                                 </div>
                             </div>
@@ -344,7 +437,7 @@
                             <label>Estado da Clínica <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
-                                    <i class="fa-solid fa-building"></i>
+                                    <i class="fa-solid fa-location-dot"></i>
                                 </div>
                                 <select id="estado_clinica" required>
                                     <option value="">Carregando...</option>
@@ -355,7 +448,7 @@
                             <label>Cidade da Clínica <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
-                                    <i class="fa-solid fa-building"></i>
+                                    <i class="fa-solid fa-location-dot"></i>
                                 </div>
                                 <select id="cidade_clinica" required>
                                     <option value="">Carregando...</option>
@@ -398,19 +491,19 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label>Estado da Clínica <span class="required">*</span></label>
+                            <label>Estado para Credenciamento <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
-                                    <i class="fa-solid fa-building"></i>
+                                    <i class="fa-solid fa-location-dot"></i>
                                 </div>
                                 <input type="text" id="estado_credenciamento">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>Cidade da Clínica <span class="required">*</span></label>
+                            <label>Cidade para Credenciamento <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
-                                    <i class="fa-solid fa-building"></i>
+                                    <i class="fa-solid fa-location-dot"></i>
                                 </div>
                                 <input type="text" id="cidade_credenciamento">
                             </div>
@@ -462,7 +555,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../script/formulario-solicitar-exames.js"></script>
+    <script src="../script/formulario-solicitar-exame.js"></script>
 </body>
 
 </html>

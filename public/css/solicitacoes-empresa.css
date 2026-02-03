@@ -225,8 +225,56 @@ h3::after {
     color: #6B7280;
 }
 
+.filters {
+    display: grid;
+    grid-template-columns: 280px 1fr 1fr auto;
+    gap: 16px;
+    align-items: end;
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.filter-group label {
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.filter-group input,
+.filter-group select {
+    width: 100%;
+    height: 36px;
+    border: 1px solid #D1D5DB;
+    border-radius: 10px;
+    padding: 0 10px;
+    font-size: 13px;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-search {
+    background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
+    color: #FFFFFF;
+    border: none;
+    padding: 0 16px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.btn-clear {
+    background: none;
+    border: none;
+    color: #000000;
+    font-size: 13px;
+}
+
 .table-wrapper {
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
 }
 
@@ -308,22 +356,19 @@ td {
     box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
     color: #000000;
     cursor: pointer;
-    display: inline-block;
     font-size: 13px;
-    line-height: 29px;
-    padding: 0 10px 0 11px;
-    position: relative;
-    text-align: center;
-    text-decoration: none;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
     width: 100px;
+    transition: all 0.25s ease;
 }
 
 .actions button:hover {
-    background-color: #F1AE33;
+    transform: translateY(-2px);
 }
 
 #modalEditarCadastro .modal-header,
-#modalEditarASO .modal-header {
+#modalEditarExame .modal-header {
     background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
     border-bottom: none;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
@@ -338,7 +383,7 @@ td {
 }
 
 #modalEditarCadastro .modal-header h3,
-#modalEditarASO .modal-header h3 {
+#modalEditarExame .modal-header h3 {
     position: relative;
     font-weight: 600;
     font-size: 22px;
@@ -355,7 +400,7 @@ td {
 }
 
 #modalEditarCadastro .modal-header h3::after,
-#modalEditarASO .modal-header h3::after {
+#modalEditarExame .modal-header h3::after {
     content: "";
     position: absolute;
     left: 0;
@@ -430,7 +475,7 @@ td {
 }
 
 .detail-input:disabled {
-    color: #6B7280;
+    color: #000000;
     cursor: not-allowed;
     border-bottom-style: dashed;
 }

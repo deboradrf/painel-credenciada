@@ -365,7 +365,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// FORMULÁRIO DE NOVO CADASTRO
+// FORMULÁRIO PARA SOLICITAR NOVO CADASTRO
 app.post("/novo-cadastro", async (req, res) => {
   const f = req.body;
 
@@ -399,6 +399,8 @@ app.post("/novo-cadastro", async (req, res) => {
         nome_cargo,
         solicitar_novo_cargo,
         nome_novo_cargo,
+        rac,
+        tipo_rac,
         tipo_exame,
         cnh,
         vencimento_cnh,
@@ -410,7 +412,7 @@ app.post("/novo-cadastro", async (req, res) => {
         estado_credenciamento,
         cidade_credenciamento,
         observacao)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37)
       RETURNING id
       `,
       [
@@ -438,6 +440,8 @@ app.post("/novo-cadastro", async (req, res) => {
         f.nome_cargo,
         f.solicitar_novo_cargo,
         f.nome_novo_cargo,
+        f.rac,
+        f.tipo_rac,
         f.tipo_exame,
         f.cnh,
         f.vencimento_cnh,
@@ -457,7 +461,7 @@ app.post("/novo-cadastro", async (req, res) => {
     await pool.query(
       `
       INSERT INTO solicitacoes_novo_cadastro
-        (funcionario_id, solicitado_por)
+        (novo_cadastro_id, solicitado_por)
       VALUES ($1, $2)
       `,
       [funcionarioId, f.usuario_id]
@@ -483,7 +487,7 @@ app.post("/solicitar-exame", async (req, res) => {
 
     const { rows } = await pool.query(
       `
-      INSERT INTO novo_aso (
+      INSERT INTO novo_exame (
         cod_empresa,
         nome_empresa,
         nome_funcionario,
@@ -497,7 +501,11 @@ app.post("/solicitar-exame", async (req, res) => {
         nome_setor,
         cod_cargo,
         nome_cargo,
+        rac,
+        tipo_rac,
         tipo_exame,
+        data_exame,
+        hora_exame,
         funcao_anterior,
         funcao_atual,
         solicitar_nova_funcao,
@@ -505,6 +513,7 @@ app.post("/solicitar-exame", async (req, res) => {
         setor_atual,
         solicitar_novo_setor,
         nome_novo_setor,
+        motivo_consulta,
         cnh,
         vencimento_cnh,
         lab_toxicologico,
@@ -516,7 +525,7 @@ app.post("/solicitar-exame", async (req, res) => {
         cidade_credenciamento,
         observacao
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36)
       RETURNING id
       `,
       [
@@ -533,7 +542,11 @@ app.post("/solicitar-exame", async (req, res) => {
         f.nome_setor,
         f.cod_cargo,
         f.nome_cargo,
+        f.rac,
+        f.tipo_rac,
         f.tipo_exame,
+        f.data_exame,
+        f.hora_exame,
         f.funcao_anterior,
         f.funcao_atual,
         f.solicitar_nova_funcao,
@@ -541,6 +554,7 @@ app.post("/solicitar-exame", async (req, res) => {
         f.setor_atual,
         f.solicitar_novo_setor,
         f.nome_novo_setor,
+        f.motivo_consulta,
         f.cnh,
         f.vencimento_cnh,
         f.lab_toxicologico,
@@ -558,7 +572,7 @@ app.post("/solicitar-exame", async (req, res) => {
 
     await pool.query(
       `
-      INSERT INTO solicitacoes_aso (funcionario_id, solicitado_por)
+      INSERT INTO solicitacoes_novo_exame (novo_exame_id, solicitado_por)
       VALUES ($1,$2)
       `,
       [funcionarioId, f.usuario_id]
@@ -571,11 +585,11 @@ app.post("/solicitar-exame", async (req, res) => {
   } catch (err) {
     await pool.query("ROLLBACK");
     console.error(err);
-    res.status(500).json({ erro: "Erro ao gerar solicitação de ASO" });
+    res.status(500).json({ erro: "Erro ao gerar solicitação de exame" });
   }
 });
 
-// LISTAR SOLICITAÇÕES (novo cadastro e aso)
+// LISTAR SOLICITAÇÕES (novo cadastro e exame)
 app.get("/solicitacoes", async (req, res) => {
   try {
     const { rows } = await pool.query(`
@@ -583,7 +597,7 @@ app.get("/solicitacoes", async (req, res) => {
       FROM (
         SELECT
           s.id AS solicitacao_id,
-          f.id AS funcionario_id,
+          f.id AS novo_cadastro_id,
           f.nome_empresa,
           f.nome_funcionario,
           f.cpf,
@@ -594,13 +608,13 @@ app.get("/solicitacoes", async (req, res) => {
           f.solicitar_credenciamento,
           'NOVO_CADASTRO' AS tipo
         FROM solicitacoes_novo_cadastro s
-        JOIN novo_cadastro f ON f.id = s.funcionario_id
+        JOIN novo_cadastro f ON f.id = s.novo_cadastro_id
 
         UNION ALL
 
         SELECT
           s.id AS solicitacao_id,
-          f.id AS funcionario_id,
+          f.id AS novo_exame_id,
           f.nome_empresa,
           f.nome_funcionario,
           f.cpf,
@@ -609,9 +623,9 @@ app.get("/solicitacoes", async (req, res) => {
           f.solicitar_nova_funcao,
           f.solicitar_novo_setor,
           f.solicitar_credenciamento,
-          'ASO' AS tipo
-        FROM solicitacoes_aso s
-        JOIN novo_aso f ON f.id = s.funcionario_id
+          'NOVO_EXAME' AS tipo
+        FROM solicitacoes_novo_exame s
+        JOIN novo_exame f ON f.id = s.novo_exame_id
       ) t
       ORDER BY t.solicitado_em DESC;
     `);
@@ -644,7 +658,7 @@ app.get("/solicitacoes/novo-cadastro/:id", async (req, res) => {
         sf.enviado_soc_em,
         sf.cancelado_em
       FROM solicitacoes_novo_cadastro sf
-      JOIN novo_cadastro f ON f.id = sf.funcionario_id
+      JOIN novo_cadastro f ON f.id = sf.novo_cadastro_id
       JOIN usuarios u ON u.id = sf.solicitado_por
       LEFT JOIN usuarios ua ON ua.id = sf.analisado_por
       LEFT JOIN usuarios ue ON ue.id = sf.enviado_soc_por
@@ -667,8 +681,8 @@ app.get("/solicitacoes/novo-cadastro/:id", async (req, res) => {
   }
 });
 
-// DETALHES DA SOLICITAÇÃO - ASO
-app.get("/solicitacoes/aso/:id", async (req, res) => {
+// DETALHES DA SOLICITAÇÃO - NOVO EXAME
+app.get("/solicitacoes/novo-exame/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -684,8 +698,8 @@ app.get("/solicitacoes/aso/:id", async (req, res) => {
         uc.nome AS cancelado_por_nome,
         sf.analisado_em,
         sf.cancelado_em 
-      FROM solicitacoes_aso sf
-      JOIN novo_aso f ON f.id = sf.funcionario_id
+      FROM solicitacoes_novo_exame sf
+      JOIN novo_exame f ON f.id = sf.novo_exame_id
       JOIN usuarios u ON u.id = sf.solicitado_por
       LEFT JOIN usuarios ua ON ua.id = sf.analisado_por
       LEFT JOIN usuarios uc ON uc.id = sf.cancelado_por
@@ -697,13 +711,13 @@ app.get("/solicitacoes/aso/:id", async (req, res) => {
     }
 
     res.json({
-      tipo: "ASO",
+      tipo: "NOVO_EXAME",
       dados: rows[0]
     });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ erro: "Erro ao buscar detalhes do ASO" });
+    res.status(500).json({ erro: "Erro ao buscar detalhes do exame" });
   }
 });
 
@@ -723,8 +737,8 @@ app.post("/solicitacoes/:tipo/:id/analisar", async (req, res) => {
   }
 
   const tabela =
-    tipo === "ASO"
-      ? "solicitacoes_aso"
+    tipo === "NOVO_EXAME"
+      ? "solicitacoes_novo_exame"
       : "solicitacoes_novo_cadastro";
 
   try {
@@ -756,15 +770,15 @@ app.post("/solicitacoes/:tipo/:id/analisar", async (req, res) => {
 // CANCELAR SOLICITAÇÃO
 app.post("/solicitacoes/:tipo/:id/cancelar", async (req, res) => {
   const { tipo, id } = req.params;
-  const { usuario_id } = req.body; // precisa enviar do frontend
+  const { usuario_id } = req.body;
 
-  if (!["ASO", "NOVO_CADASTRO"].includes(tipo)) {
+  if (!["NOVO_EXAME", "NOVO_CADASTRO"].includes(tipo)) {
     return res.status(400).json({ erro: "Tipo de solicitação inválido" });
   }
 
   const tabela =
-    tipo === "ASO"
-      ? "solicitacoes_aso"
+    tipo === "NOVO_EXAME"
+      ? "solicitacoes_novo_exame"
       : "solicitacoes_novo_cadastro";
 
   try {
@@ -787,16 +801,15 @@ app.post("/solicitacoes/:tipo/:id/cancelar", async (req, res) => {
   }
 });
 
-// SOLICITAÇÕES DO USUÁRIO LOGADO - novo cadastro e aso
+// SOLICITAÇÕES DO USUÁRIO LOGADO - novo cadastro e novo exame
 app.get("/solicitacoes-empresa/:usuarioId", async (req, res) => {
   const { usuarioId } = req.params;
 
   try {
     const { rows } = await pool.query(`
-      -- NOVO CADASTRO
       SELECT
         s.id              AS solicitacao_id,
-        f.id              AS funcionario_id,
+        f.id              AS novo_cadastro_id,
         f.nome_funcionario,
         f.cpf,
         s.status,
@@ -806,26 +819,25 @@ app.get("/solicitacoes-empresa/:usuarioId", async (req, res) => {
         u.nome            AS analisado_por_nome,
         'NOVO_CADASTRO'    AS tipo
       FROM solicitacoes_novo_cadastro s
-      JOIN novo_cadastro f ON f.id = s.funcionario_id
+      JOIN novo_cadastro f ON f.id = s.novo_cadastro_id
       LEFT JOIN usuarios u ON u.id = s.analisado_por
       WHERE s.solicitado_por = $1
 
       UNION ALL
 
-      -- ASO
       SELECT
-        s.id              AS solicitacao_id,
-        f.id              AS funcionario_id,
+        s.id AS solicitacao_id,
+        f.id AS novo_exame_id,
         f.nome_funcionario,
         f.cpf,
         s.status,
         s.solicitado_em,
         s.motivo_reprovacao,
         s.analisado_em,
-        u.nome            AS analisado_por_nome,
-        'ASO'              AS tipo
-      FROM solicitacoes_aso s
-      JOIN novo_aso f ON f.id = s.funcionario_id
+        u.nome AS analisado_por_nome,
+        'NOVO_EXAME' AS tipo
+      FROM solicitacoes_novo_exame s
+      JOIN novo_exame f ON f.id = s.novo_exame_id
       LEFT JOIN usuarios u ON u.id = s.analisado_por
       WHERE s.solicitado_por = $1
 
@@ -839,8 +851,8 @@ app.get("/solicitacoes-empresa/:usuarioId", async (req, res) => {
   }
 });
 
-// EDITAR SOLICITAÇÃO CADASTRO
-app.put("/solicitacoes/cadastro/:id/editar", async (req, res) => {
+// EDITAR SOLICITAÇÃO - NOVO CADASTRO
+app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
   const { id } = req.params;
   const f = req.body;
 
@@ -864,20 +876,22 @@ app.put("/solicitacoes/cadastro/:id/editar", async (req, res) => {
         nome_unidade = $12,
         nome_setor = $13,
         nome_cargo = $14,
-        tipo_exame = $15,
-        cnh = $16,
-        vencimento_cnh = $17,
-        lab_toxicologico = $18,
-        estado_clinica = $19,
-        cidade_clinica = $20,
-        nome_clinica = $21,
-        estado_credenciamento = $22,
-        cidade_credenciamento = $23,
-        observacao = $24
+        rac = $15,
+        tipo_rac = $16,
+        tipo_exame = $17,
+        cnh = $18,
+        vencimento_cnh = $19,
+        lab_toxicologico = $20,
+        estado_clinica = $21,
+        cidade_clinica = $22,
+        nome_clinica = $23,
+        estado_credenciamento = $24,
+        cidade_credenciamento = $25,
+        observacao = $26
       WHERE id = (
-        SELECT funcionario_id
+        SELECT novo_cadastro_id
         FROM solicitacoes_novo_cadastro
-        WHERE id = $25
+        WHERE id = $27
       )
     `, [
       f.nome_funcionario,
@@ -894,6 +908,8 @@ app.put("/solicitacoes/cadastro/:id/editar", async (req, res) => {
       f.nome_unidade,
       f.nome_setor,
       f.nome_cargo,
+      f.rac,
+      f.tipo_rac,
       f.tipo_exame,
       f.cnh,
       f.vencimento_cnh || null,
@@ -929,7 +945,7 @@ app.put("/solicitacoes/cadastro/:id/editar", async (req, res) => {
 });
 
 // EDITAR SOMENTE SETOR E CARGO DE UMA SOLICITAÇÃO DE CADASTRO
-app.put("/solicitacoes/cadastro/:id/editar-setor-cargo", async (req, res) => {
+app.put("/solicitacoes/novo-cadastro/:id/editar-setor-cargo", async (req, res) => {
   const { id } = req.params; // id da solicitação
   const { cod_setor, nome_setor, cod_cargo, nome_cargo } = req.body;
 
@@ -938,9 +954,9 @@ app.put("/solicitacoes/cadastro/:id/editar-setor-cargo", async (req, res) => {
 
     // Pega o funcionário e as flags na tabela novo_cadastro via solicitação
     const { rows } = await pool.query(`
-      SELECT nc.id AS funcionario_id, nc.solicitar_novo_setor, nc.solicitar_novo_cargo
+      SELECT nc.id AS novo_cadastro_id, nc.solicitar_novo_setor, nc.solicitar_novo_cargo
       FROM solicitacoes_novo_cadastro s
-      JOIN novo_cadastro nc ON nc.id = s.funcionario_id
+      JOIN novo_cadastro nc ON nc.id = s.novo_cadastro_id
       WHERE s.id = $1
     `, [id]);
 
@@ -949,7 +965,7 @@ app.put("/solicitacoes/cadastro/:id/editar-setor-cargo", async (req, res) => {
       return res.status(404).json({ erro: "Solicitação não encontrada" });
     }
 
-    const { funcionario_id, solicitar_novo_setor, solicitar_novo_cargo } = rows[0];
+    const { novo_cadastro_id, solicitar_novo_setor, solicitar_novo_cargo } = rows[0];
     const updates = [];
     const values = [];
 
@@ -975,7 +991,7 @@ app.put("/solicitacoes/cadastro/:id/editar-setor-cargo", async (req, res) => {
         SET ${updates.join(", ")}
         WHERE id = $${updates.length + 1}
       `;
-      values.push(funcionario_id);
+      values.push(novo_cadastro_id);
 
       await pool.query(sql, values);
     }
@@ -989,8 +1005,8 @@ app.put("/solicitacoes/cadastro/:id/editar-setor-cargo", async (req, res) => {
   }
 });
 
-// EDITAR SOLICITAÇÃO ASO
-app.put("/solicitacoes/aso/:id/editar", async (req, res) => {
+// EDITAR SOLICITAÇÃO - NOVO EXAME
+app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
   const { id } = req.params;
   const f = req.body;
 
@@ -998,7 +1014,7 @@ app.put("/solicitacoes/aso/:id/editar", async (req, res) => {
     await pool.query("BEGIN");
 
     await pool.query(`
-      UPDATE novo_aso
+      UPDATE novo_exame
       SET
         nome_funcionario = $1,
         data_nascimento = $2,
@@ -1009,23 +1025,30 @@ app.put("/solicitacoes/aso/:id/editar", async (req, res) => {
         nome_unidade = $7,
         nome_setor = $8,
         nome_cargo = $9,
-        tipo_exame = $10,
-        cnh = $11,
-        vencimento_cnh = $12,
-        lab_toxicologico = $13,
-        funcao_anterior = $14,
-        funcao_atual = $15,
-        setor_atual = $16,
-        estado_clinica = $17,
-        nome_clinica = $18,
-        cidade_clinica = $19,
-        estado_credenciamento = $20,
-        cidade_credenciamento = $21,
-        observacao = $22
+        rac = $10,
+        tipo_rac = $11,
+        tipo_exame = $12,
+        data_exame = $13,
+        hora_exame = $14,
+        funcao_anterior = $15,
+        funcao_atual = $16,
+        nome_nova_funcao = $17,
+        setor_atual = $18,
+        nome_novo_setor = $19,
+        motivo_consulta = $20,
+        cnh = $21,
+        vencimento_cnh = $22,
+        lab_toxicologico = $23,
+        estado_clinica = $24,
+        nome_clinica = $25,
+        cidade_clinica = $26,
+        estado_credenciamento = $27,
+        cidade_credenciamento = $28,
+        observacao = $29
       WHERE id = (
-        SELECT funcionario_id
-        FROM solicitacoes_aso
-        WHERE id = $23
+        SELECT novo_exame_id
+        FROM solicitacoes_novo_exame
+        WHERE id = $30
       )
     `, [
       f.nome_funcionario,
@@ -1037,13 +1060,20 @@ app.put("/solicitacoes/aso/:id/editar", async (req, res) => {
       f.nome_unidade,
       f.nome_setor,
       f.nome_cargo,
+      f.rac,
+      f.tipo_rac,
       f.tipo_exame,
+      f.data_exame,
+      f.hora_exame,
+      f.funcao_anterior,
+      f.funcao_atual,
+      f.nome_nova_funcao,
+      f.setor_atual,
+      f.nome_novo_setor,
+      f.motivo_consulta,
       f.cnh,
       f.vencimento_cnh || null,
       f.lab_toxicologico,
-      f.funcao_anterior,
-      f.funcao_atual,
-      f.setor_atual,
       f.estado_clinica,
       f.cidade_clinica,
       f.nome_clinica,
@@ -1055,7 +1085,7 @@ app.put("/solicitacoes/aso/:id/editar", async (req, res) => {
     ]);
 
     await pool.query(`
-      UPDATE solicitacoes_aso
+      UPDATE solicitacoes_novo_exame
       SET
         status = 'PENDENTE_REAVALIACAO',
         analisado_por = NULL,
@@ -1070,7 +1100,7 @@ app.put("/solicitacoes/aso/:id/editar", async (req, res) => {
   } catch (err) {
     await pool.query("ROLLBACK");
     console.error(err);
-    res.status(500).json({ erro: "Erro ao editar ASO" });
+    res.status(500).json({ erro: "Erro ao editar exame" });
   }
 });
 
@@ -1126,7 +1156,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
       `
       SELECT f.*
       FROM solicitacoes_novo_cadastro sf
-      JOIN novo_cadastro f ON f.id = sf.funcionario_id
+      JOIN novo_cadastro f ON f.id = sf.novo_cadastro_id
       WHERE sf.id = $1
       `,
       [id]

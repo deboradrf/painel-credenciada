@@ -144,7 +144,7 @@ toggleQuestions.forEach(toggle => {
     items.forEach(item => {
       // seta ↓
       const arrow = document.createElement('i');
-      arrow.className = 'fa-solid fa-arrow-down flow-arrow';
+      arrow.className = 'fa-solid fa-arrow-right flow-arrow';
       referenceNode.insertAdjacentElement('afterend', arrow);
 
       // card
@@ -180,7 +180,7 @@ socToggle.addEventListener('click', () => {
   }
 
   parentCard.insertAdjacentHTML('afterend', `
-    <i class="fa-solid fa-arrow-down flow-arrow"></i>
+    <i class="fa-solid fa-arrow-right flow-arrow"></i>
     <div class="flow-card soc-options-card">
       <div class="soc-option" data-result="duplicado">CPF duplicado</div>
       <div class="soc-option" data-result="invalido">CPF inválido</div>
@@ -224,7 +224,7 @@ document.addEventListener('click', (e) => {
 
   items.forEach(item => {
     const arrow = document.createElement('i');
-    arrow.className = 'fa-solid fa-arrow-down flow-arrow';
+    arrow.className = 'fa-solid fa-arrow-right flow-arrow';
     referenceNode.insertAdjacentElement('afterend', arrow);
 
     const card = document.createElement('div');

@@ -99,6 +99,42 @@
                 </p>
             </div>
 
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Tipo</label>
+                    <select id="filterTipo">
+                        <option value="">Todos</option>
+                        <option value="NOVO_CADASTRO">Solicitação de Cadastro</option>
+                        <option value="NOVO_EXAME">Solicitação de Exame</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>CPF Funcionário</label>
+                    <input id="filterCPF" type="text" placeholder="Buscar funcionário pelo CPF">
+                </div>
+
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select id="filterStatus">
+                        <option value="">Todos</option>
+                        <option value="PENDENTE">Pendente</option>
+                        <option value="PENDENTE_REAVALIACAO">Pendente Reavaliação</option>
+                        <option value="APROVADO">Aprovado</option>
+                        <option value="REPROVADO">Reprovado</option>
+                        <option value="CANCELADO">Cancelado</option>
+                        <option value="ENVIADO_SOC">Enviado ao SOC</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button id="btnBuscar" class="btn-search">
+                        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                    </button>
+                    <button id="btnLimpar" class="btn-clear">Limpar filtros</button>
+                </div>
+            </div>
+
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -108,19 +144,20 @@
                             <th>FUNCIONÁRIO</th>
                             <th>CPF</th>
                             <th>STATUS</th>
+                            <th>SITUAÇÃO</th>
                             <th>AÇÕES</th>
                         </tr>
                     </thead>
 
                     <tbody id="tabelaHistorico">
-                        <!-- JS preenche aqui -->
+                        <!-- PREENCHIDO NO JS -->
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
 
-    <footer class="footer-wave">
+    <footer class="footer-wave mt-5">
         <div class="footer-wave-svg">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
                 <path fill="#53A5A6" stroke="none"
@@ -128,7 +165,8 @@
                 </path>
             </svg>
             <div class="footer-socials">
-                <a href="https://www.instagram.com/salubritasso/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.instagram.com/salubritasso/" target="_blank"><i
+                        class="fa-brands fa-instagram"></i></a>
                 <a href="https://salubrita.com.br/" target="_blank"><i class="fa-solid fa-globe"></i></a>
                 <a href="https://wa.me/553131669006" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
             </div>
@@ -182,7 +220,7 @@
                                 <div class="detail-label">
                                     <span>Data de Nascimento</span>
                                 </div>
-                                <input type="date" id="editCadDataNascimento" class="detail-input" />
+                                <input id="editCadDataNascimento" class="detail-input" />
                             </div>
                         </div>
 
@@ -236,7 +274,7 @@
                                 <div class="detail-label">
                                     <span>Data de Admissão</span>
                                 </div>
-                                <input type="date" id="editCadDataAdmissao" class="detail-input" />
+                                <input id="editCadDataAdmissao" class="detail-input" />
                             </div>
                         </div>
 
@@ -276,7 +314,7 @@
                             </div>
                         </div>
 
-                        <div class="col-6">
+                        <div class="col-6" id="divCadSetorAtual">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Setor do Funcionário</span>
@@ -285,12 +323,48 @@
                             </div>
                         </div>
 
-                        <div class="col-6">
+                        <div class="col-6" id="divCargoAtual">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Cargo do Funcionário</span>
                                 </div>
                                 <input id="editCadNomeCargo" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divNovoSetor">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome do novo Setor</span>
+                                </div>
+                                <input id="editCadNovoSetor" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divNovoCargo">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome do novo Cargo</span>
+                                </div>
+                                <input id="editCadNovoCargo" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>RAC</span>
+                                </div>
+                                <input id="editCadRac" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Tipo de RAC</span>
+                                </div>
+                                <input id="editCadTipoRac" class="detail-input" />
                             </div>
                         </div>
 
@@ -317,7 +391,7 @@
                                 <div class="detail-label">
                                     <span>Vencimento CNH</span>
                                 </div>
-                                <input type="date" id="editCadVencimentoCNH" class="detail-input" />
+                                <input id="editCadVencimentoCNH" class="detail-input" />
                             </div>
                         </div>
 
@@ -337,7 +411,7 @@
                                         <div class="detail-label">
                                             <span>Estado da Clínica</span>
                                         </div>
-                                        <span id="editCadEstadoClinica" class="detail-value"></span>
+                                        <input id="editCadEstadoClinica" class="detail-input" />
                                     </div>
                                 </div>
 
@@ -346,16 +420,16 @@
                                         <div class="detail-label">
                                             <span>Cidade da Clínica</span>
                                         </div>
-                                        <span id="editCadCidadeClinica" class="detail-value"></span>
+                                        <input id="editCadCidadeClinica" class="detail-input" />
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-12">
                                     <div class="detail-item">
                                         <div class="detail-label">
                                             <span>Nome da Clínica</span>
                                         </div>
-                                        <span id="editCadNomeClinica" class="detail-value"></span>
+                                        <input id="editCadNomeClinica" class="detail-input" />
                                     </div>
                                 </div>
                             </div>
@@ -368,7 +442,7 @@
                                         <div class="detail-label">
                                             <span>Estado para Credenciamento</span>
                                         </div>
-                                        <span id="editCadEstadoCredenciamento" class="detail-value"></span>
+                                        <input id="editCadEstadoCredenciamento" class="detail-input" />
                                     </div>
                                 </div>
 
@@ -377,7 +451,7 @@
                                         <div class="detail-label">
                                             <span>Cidade para Credenciamento</span>
                                         </div>
-                                        <span id="editCadCidadeCredenciamento" class="detail-value"></span>
+                                        <input id="editCadCidadeCredenciamento" class="detail-input" />
                                     </div>
                                 </div>
                             </div>
@@ -411,8 +485,8 @@
         </div>
     </div>
 
-    <!-- MODAL EDITAR SOLICITAÇÃO - ASO -->
-    <div class="modal fade" id="modalEditarASO" tabindex="-1">
+    <!-- MODAL EDITAR SOLICITAÇÃO - NOVO EXAME -->
+    <div class="modal fade" id="modalEditarExame" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
@@ -423,7 +497,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <input type="hidden" id="editAsoId">
+                    <input type="hidden" id="editExameId">
 
                     <div class="row g-3">
                         <div class="col-12">
@@ -431,7 +505,7 @@
                                 <div class="detail-label">
                                     <span>Nome Completo</span>
                                 </div>
-                                <input id="editAsoNomeFuncionario" class="detail-input" />
+                                <input id="editExameNomeFuncionario" class="detail-input" />
                             </div>
                         </div>
 
@@ -440,7 +514,7 @@
                                 <div class="detail-label">
                                     <span>Data de Nascimento</span>
                                 </div>
-                                <input type="date" id="editAsoDataNascimento" class="detail-input" />
+                                <input id="editExameDataNascimento" class="detail-input" />
                             </div>
                         </div>
 
@@ -449,7 +523,7 @@
                                 <div class="detail-label">
                                     <span>CPF</span>
                                 </div>
-                                <input id="editAsoCPF" class="detail-input" />
+                                <input id="editExameCPF" class="detail-input" />
                             </div>
                         </div>
 
@@ -458,7 +532,7 @@
                                 <div class="detail-label">
                                     <span>Matrícula eSocial</span>
                                 </div>
-                                <input id="editAsoMatricula" class="detail-input" />
+                                <input id="editExameMatricula" class="detail-input" />
                             </div>
                         </div>
 
@@ -467,7 +541,7 @@
                                 <div class="detail-label">
                                     <span>Data de Admissão</span>
                                 </div>
-                                <input type="date" id="editAsoDataAdmissao" class="detail-input" />
+                                <input id="editExameDataAdmissao" class="detail-input" />
                             </div>
                         </div>
 
@@ -476,7 +550,7 @@
                                 <div class="detail-label">
                                     <span>Empresa do Funcionário</span>
                                 </div>
-                                <input id="editAsoNomeEmpresa" class="detail-input" />
+                                <input id="editExameNomeEmpresa" class="detail-input" />
                             </div>
                         </div>
 
@@ -485,7 +559,7 @@
                                 <div class="detail-label">
                                     <span>Unidade do Funcionário</span>
                                 </div>
-                                <input id="editAsoNomeUnidade" class="detail-input" />
+                                <input id="editExameNomeUnidade" class="detail-input" />
                             </div>
                         </div>
 
@@ -494,7 +568,7 @@
                                 <div class="detail-label">
                                     <span>Setor do Funcionário</span>
                                 </div>
-                                <input id="editAsoNomeSetor" class="detail-input" />
+                                <input id="editExameNomeSetor" class="detail-input" />
                             </div>
                         </div>
 
@@ -503,7 +577,39 @@
                                 <div class="detail-label">
                                     <span>Cargo do Funcionário</span>
                                 </div>
-                                <input id="editAsoNomeCargo" class="detail-input" />
+                                <input id="editExameNomeCargo" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>RAC</span>
+                                </div>
+                                <select id="editExameRac" class="detail-input">
+                                    <option value="">Selecione...</option>
+                                    <option value="FORMULARIO_RAC_VALE">Formulário RAC Vale</option>
+                                    <option value="FORMULARIO_UNIDADE_CSN">Formulário unidade CSN</option>
+                                    <option value="FORMULARIO_UNIDADE_VALLOUREC">Formulário unidade Vallourec</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Tipo de RAC</span>
+                                </div>
+                                <select id="editExameTipoRac" class="detail-input">
+                                    <option value="">Selecione...</option>
+                                    <option value="RAC_1">RAC 1 - Trabalhos em Altura</option>
+                                    <option value="RAC_2">RAC 2 - Veículos Automotores</option>
+                                    <option value="RAC_3">RAC 3 - Equipamentos Móveis</option>
+                                    <option value="RAC_5">RAC 5 - Içamento de Cargas</option>
+                                    <option value="RAC_6">RAC 6 - Espaço Confinado</option>
+                                    <option value="RAC_10">RAC 10 - Trabalhos em Eletricidade</option>
+                                    <option value="RAC_11">RAC 11 - Metal Líquido</option>
+                                </select>
                             </div>
                         </div>
 
@@ -512,7 +618,88 @@
                                 <div class="detail-label">
                                     <span>Tipo de Exame</span>
                                 </div>
-                                <input id="editAsoTipoExame" class="detail-input" />
+
+                                <select id="editExameTipoExame" class="detail-input">
+                                    <option value="">Selecione...</option>
+                                    <option value="PERIODICO">Periódico</option>
+                                    <option value="MUDANCA_RISCOS_OCUPACIONAIS">Mudança de Função / Riscos Ocupacionais
+                                    </option>
+                                    <option value="CONSULTA_ASSISTENCIAL">Consulta Assistencial</option>
+                                    <option value="DEMISSIONAL">Demissional</option>
+                                    <option value="RETORNO_TRABALHO">Retorno ao Trabalho</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Data do Exame</span>
+                                </div>
+                                <input id="editExameDataExame" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Hora do Exame</span>
+                                </div>
+                                <input id="editExameHoraExame" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divFuncaoAnterior">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Função exercida atualmente</span>
+                                </div>
+                                <input id="editExameFuncaoAnterior" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divFuncaoAtual">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Função que irá exercer</span>
+                                </div>
+                                <input id="editExameFuncaoAtual" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divNovaFuncao">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome da Nova Função</span>
+                                </div>
+                                <input id="editExameNovaFuncao" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameSetorAtual">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Setor que irá atuar</span>
+                                </div>
+                                <input id="editExameSetorAtual" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameNovoSetor">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome do Novo Setor</span>
+                                </div>
+                                <input id="editExameNovoSetor" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divMotivoConsulta">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Motivo Consulta</span>
+                                </div>
+                                <input id="editExameMotivoConsulta" class="detail-input" />
                             </div>
                         </div>
 
@@ -521,7 +708,7 @@
                                 <div class="detail-label">
                                     <span>CNH</span>
                                 </div>
-                                <input id="editAsoCNH" class="detail-input" />
+                                <input id="editExameCNH" class="detail-input" />
                             </div>
                         </div>
 
@@ -530,7 +717,7 @@
                                 <div class="detail-label">
                                     <span>Vencimento CNH</span>
                                 </div>
-                                <input type="date" id="editAsoVencimentoCNH" class="detail-input" />
+                                <input id="editExameVencimentoCNH" class="detail-input" />
                             </div>
                         </div>
 
@@ -539,45 +726,18 @@
                                 <div class="detail-label">
                                     <span>Nome do laboratório ou município para realização do exame toxicológico</span>
                                 </div>
-                                <input id="editAsoLabToxicologico" class="detail-input" />
+                                <input id="editExameLabToxicologico" class="detail-input" />
                             </div>
                         </div>
 
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Função Anterior</span>
-                                </div>
-                                <input id="editAsoFuncaoAnterior" class="detail-input" />
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Função Atual</span>
-                                </div>
-                                <input id="editAsoFuncaoAtual" class="detail-input" />
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Setor Atual</span>
-                                </div>
-                                <input id="editAsoSetorAtual" class="detail-input" />
-                            </div>
-                        </div>
-
-                        <div id="blocoAsoClinica" class="d-none">
+                        <div id="blocoExameClinica" class="d-none">
                             <div class="row g-3">
                                 <div class="col-6">
                                     <div class="detail-item">
                                         <div class="detail-label">
                                             <span>Estado da Clínica</span>
                                         </div>
-                                        <span id="editAsoEstadoClinica" class="detail-value"></span>
+                                        <input id="editExameEstadoClinica" class="detail-input" />
                                     </div>
                                 </div>
 
@@ -586,29 +746,29 @@
                                         <div class="detail-label">
                                             <span>Cidade da Clínica</span>
                                         </div>
-                                        <span id="editAsoCidadeClinica" class="detail-value"></span>
+                                        <input id="editExameCidadeClinica" class="detail-input" />
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-12">
                                     <div class="detail-item">
                                         <div class="detail-label">
                                             <span>Nome da Clínica</span>
                                         </div>
-                                        <span id="editAsoNomeClinica" class="detail-value"></span>
+                                        <input id="editExameNomeClinica" class="detail-input" />
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div id="blocoAsoCredenciamento" class="d-none">
+                        <div id="blocoExameCredenciamento" class="d-none">
                             <div class="row g-3">
                                 <div class="col-6">
                                     <div class="detail-item">
                                         <div class="detail-label">
                                             <span>Estado para Credenciamento</span>
                                         </div>
-                                        <span id="editAsoEstadoCredenciamento" class="detail-value"></span>
+                                        <input id="editExameEstadoCredenciamento" class="detail-input" />
                                     </div>
                                 </div>
 
@@ -617,7 +777,7 @@
                                         <div class="detail-label">
                                             <span>Cidade para Credenciamento</span>
                                         </div>
-                                        <span id="editAsoCidadeCredenciamento" class="detail-value"></span>
+                                        <input id="editExameCidadeCredenciamento" class="detail-input" />
                                     </div>
                                 </div>
                             </div>
@@ -628,7 +788,7 @@
                                 <div class="detail-label">
                                     <span>Observações</span>
                                 </div>
-                                <input id="editAsoObservacao" class="detail-input" />
+                                <input id="editExameObservacao" class="detail-input" />
                             </div>
                         </div>
                     </div>
@@ -641,7 +801,7 @@
                             Cancelar
                         </button>
 
-                        <button class="btn-action btn-salvar" onclick="salvarEdicaoASO()">
+                        <button class="btn-action btn-salvar" onclick="salvarEdicaoExame()">
                             <i class="fa-solid fa-check"></i>
                             Salvar
                         </button>

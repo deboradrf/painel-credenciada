@@ -70,9 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btnBuscar").addEventListener("click", aplicarFiltros);
 
   document.getElementById("btnLimpar").addEventListener("click", () => {
+    document.getElementById("filterTipo").value = "";
+    document.getElementById("filterCPF").value = "";
     document.getElementById("filterStatus").value = "";
-    document.getElementById("filterEmpresa").value = "";
-    document.getElementById("filterFuncionario").value = "";
+    
     renderizarTabela(solicitacoes);
   });
 
@@ -82,7 +83,13 @@ document.addEventListener("DOMContentLoaded", () => {
 // FUNÇÃO PARA CARREGAR SOLICITAÇÕES E RENDERIZAR A TABELA
 async function carregarSolicitacoes() {
   const res = await fetch("http://localhost:3001/solicitacoes");
+
   solicitacoes = await res.json();
+
+  solicitacoes.sort((a, b) => {
+    return new Date(a.solicitado_em) - new Date(b.solicitado_em);
+  });
+
   renderizarTabela(solicitacoes);
 }
 
@@ -110,13 +117,13 @@ function renderizarTabela(lista) {
 
     if (s.tipo === "NOVO_CADASTRO") {
       iconeTipo = `
-      <i class="fa-solid fa-user-plus fa-lg" style="color: #F1AE33"></i>
+      <i class="fa-solid fa-user-plus fa-lg" style="color: #53A5A6"></i>
     `;
     }
 
-    if (s.tipo === "ASO") {
+    if (s.tipo === "NOVO_EXAME") {
       iconeTipo = `
-      <i class="fa-solid fa-file-circle-plus fa-lg" style="color: #F1AE33"></i>
+      <i class="fa-solid fa-file-circle-plus fa-lg" style="color: #53A5A6"></i>
     `;
     }
 
@@ -188,16 +195,16 @@ async function cancelarSolicitacao(id, tipo, usuarioLogadoId) {
 
 // FUNÇÃO PARA APLICAR FILTROS
 function aplicarFiltros() {
+  const tipo = document.getElementById("filterTipo").value;
+  const cpf = document.getElementById("filterCPF").value;
   const status = document.getElementById("filterStatus").value;
-  const empresa = document.getElementById("filterEmpresa").value.toLowerCase();
-  const funcionario = document.getElementById("filterFuncionario").value.toLowerCase();
-
+  
   const filtradas = solicitacoes.filter(s => {
+    const matchTipo = !tipo || s.tipo === tipo;
+    const matchCPF = !cpf || s.cpf.includes(cpf);
     const matchStatus = !status || s.status === status;
-    const matchEmpresa = !empresa || s.nome_empresa.toLowerCase().includes(empresa);
-    const matchFuncionario = !funcionario || s.nome_funcionario.toLowerCase().includes(funcionario);
 
-    return matchStatus && matchEmpresa && matchFuncionario;
+    return matchTipo && matchCPF && matchStatus;
   });
 
   renderizarTabela(filtradas);
@@ -209,8 +216,8 @@ async function verDetalhes(id, tipo) {
 
   try {
     const url =
-      tipo === "ASO"
-        ? `http://localhost:3001/solicitacoes/aso/${id}`
+      tipo === "NOVO_EXAME"
+        ? `http://localhost:3001/solicitacoes/novo-exame/${id}`
         : `http://localhost:3001/solicitacoes/novo-cadastro/${id}`;
 
     const res = await fetch(url);
@@ -221,8 +228,8 @@ async function verDetalhes(id, tipo) {
     preencherModal(dados, tipo);
 
     const modalId =
-      tipo === "ASO"
-        ? "modalDetalhesASO"
+      tipo === "NOVO_EXAME"
+        ? "modalDetalhesNovoExame"
         : "modalDetalhesNovoCadastro";
 
     new bootstrap.Modal(
@@ -297,28 +304,33 @@ function pegarDadosEdicaoCadastro() {
 // FUNÇÃO PARA PREENCHER O MODAL
 function preencherModal(s, tipo) {
   if (tipo === "NOVO_CADASTRO") {
-    document.getElementById("cadastro_nome_funcionario").innerText = s.nome_funcionario || "-";
-    document.getElementById("cadastro_data_nascimento").innerText = formatarData(s.data_nascimento) || "-";
-    document.getElementById("cadastro_sexo").innerText = s.sexo || "-";
-    document.getElementById("cadastro_estado_civil").innerText = s.estado_civil || "-";
+    document.getElementById("cadastro_nome_funcionario").innerText = s.nome_funcionario;
+    document.getElementById("cadastro_data_nascimento").innerText = formatarData(s.data_nascimento);
+    document.getElementById("cadastro_sexo").innerText = s.sexo;
+    document.getElementById("cadastro_estado_civil").innerText = s.estado_civil;
     document.getElementById("cadastro_doc_identidade").innerText = s.doc_identidade || "-";
-    document.getElementById("cadastro_cpf").innerText = s.cpf || "-";
+    document.getElementById("cadastro_cpf").innerText = s.cpf;
     document.getElementById("cadastro_matricula").innerText = s.matricula || "NÃO POSSUI MATRÍCULA";
-    document.getElementById("cadastro_data_admissao").innerText = formatarData(s.data_admissao) || "-";
-    document.getElementById("cadastro_tipo_contratacao").innerText = s.tipo_contratacao || "-";
-    document.getElementById("cadastro_regime_trabalho").innerText = s.regime_trabalho || "-";
-    document.getElementById("cadastro_nome_empresa").innerText = s.nome_empresa || "-";
-    document.getElementById("cadastro_nome_unidade").innerText = s.nome_unidade || "-";
+    document.getElementById("cadastro_data_admissao").innerText = formatarData(s.data_admissao);
+    document.getElementById("cadastro_tipo_contratacao").innerText = s.tipo_contratacao;
+    document.getElementById("cadastro_regime_trabalho").innerText = s.regime_trabalho;
+    document.getElementById("cadastro_nome_empresa").innerText = s.nome_empresa;
+    document.getElementById("cadastro_nome_unidade").innerText = s.nome_unidade;
     document.getElementById("cadastro_nome_setor").innerText = s.nome_setor || "-";
-    document.getElementById("cadastro_novo_setor").innerText = s.nome_novo_setor || "-";
+    document.getElementById("cadastro_novo_setor").innerText = s.nome_novo_setor;
     document.getElementById("cadastro_nome_cargo").innerText = s.nome_cargo || "-";
-    document.getElementById("cadastro_novo_cargo").innerText = s.nome_novo_cargo || "-";
-    document.getElementById("cadastro_tipo_exame").innerText = s.tipo_exame || "-";
+    document.getElementById("cadastro_novo_cargo").innerText = s.nome_novo_cargo;
+    document.getElementById("cadastro_rac").innerText = s.rac || "-";
+    document.getElementById("cadastro_tipo_rac").innerText = s.tipo_rac || "-";
+    document.getElementById("cadastro_tipo_exame").innerText = s.tipo_exame;
     document.getElementById("cadastro_cnh").innerText = s.cnh || "-";
     document.getElementById("cadastro_vencimento_cnh").innerText = formatarData(s.vencimento_cnh) || "-";
     document.getElementById("cadastro_lab_toxicologico").innerText = s.lab_toxicologico || "-";
-    document.getElementById("cadastro_nome_clinica").innerText = s.nome_clinica || "-";
-    document.getElementById("cadastro_cidade_clinica").innerText = s.cidade_clinica || "-";
+    document.getElementById("cadastro_estado_clinica").innerText = s.estado_clinica;
+    document.getElementById("cadastro_cidade_clinica").innerText = s.cidade_clinica;
+    document.getElementById("cadastro_nome_clinica").innerText = s.nome_clinica;
+    document.getElementById("cadastro_estado_credenciamento").innerText = s.estado_credenciamento;
+    document.getElementById("cadastro_cidade_credenciamento").innerText = s.cidade_credenciamento;
     document.getElementById("cadastro_observacao").innerText = s.observacao || "-";
 
     // MOSTRAR / ESCONDER BLOCO DE NOVO SETOR / NOVO CARGO
@@ -362,7 +374,7 @@ function preencherModal(s, tipo) {
       spanCargo.style.display = "none";
       selectCargo.style.display = "block";
 
-      // Popula select com todos os cargos da empresa da solicitação
+      // POPULAR O SELECT COM TODOS OS CARGOS DA EMPRESA DA SOLICITAÇÃO
       carregarCargos(s.cod_empresa, spanCargo.innerText);
     } else {
       spanCargo.style.display = "block";
@@ -390,47 +402,46 @@ function preencherModal(s, tipo) {
     }
   }
 
-  if (tipo === "ASO") {
-    document.getElementById("aso_nome_funcionario").innerText = s.nome_funcionario || "-";
-    document.getElementById("aso_data_nascimento").innerText = formatarData(s.data_nascimento) || "-";
-    document.getElementById("aso_cpf").innerText = s.cpf || "-";
-    document.getElementById("aso_matricula").innerText = s.matricula || "NÃO POSSUI MATRÍCULA";
-    document.getElementById("aso_data_admissao").innerText = formatarData(s.data_admissao) || "-";
-    document.getElementById("aso_nome_empresa").innerText = s.nome_empresa || "-";
-    document.getElementById("aso_nome_unidade").innerText = s.nome_unidade || "-";
-    document.getElementById("aso_nome_setor").innerText = s.nome_setor || "-";
-    document.getElementById("aso_nome_cargo").innerText = s.nome_cargo || "-";
-    document.getElementById("aso_tipo_exame").innerText = s.tipo_exame || "-";
-    document.getElementById("aso_funcao_anterior").innerText = s.funcao_anterior || "-";
-    document.getElementById("aso_funcao_atual").innerText = s.funcao_atual || "-";
-    document.getElementById("aso_nova_funcao").innerText = s.nome_nova_funcao || "-";
-    document.getElementById("aso_setor_atual").innerText = s.setor_atual || "-";
-    document.getElementById("aso_novo_setor").innerText = s.nome_novo_setor || "-";
-    document.getElementById("aso_cnh").innerText = s.cnh || "-";
-    document.getElementById("aso_vencimento_cnh").innerText = formatarData(s.vencimento_cnh) || "-";
-    document.getElementById("aso_lab_toxicologico").innerText = s.lab_toxicologico || "-";
-    document.getElementById("aso_estado_clinica").innerText = s.estado_clinica || "-";
-    document.getElementById("aso_cidade_clinica").innerText = s.cidade_clinica || "-";
-    document.getElementById("aso_nome_clinica").innerText = s.nome_clinica || "-";
-    document.getElementById("aso_estado_credenciamento").innerText = s.estado_credenciamento || "-";
-    document.getElementById("aso_cidade_credenciamento").innerText = s.cidade_credenciamento || "-";
-    document.getElementById("aso_observacao").innerText = s.observacao || "-";
+  if (tipo === "NOVO_EXAME") {
+    document.getElementById("exame_nome_funcionario").innerText = s.nome_funcionario;
+    document.getElementById("exame_data_nascimento").innerText = formatarData(s.data_nascimento);
+    document.getElementById("exame_cpf").innerText = s.cpf;
+    document.getElementById("exame_matricula").innerText = s.matricula || "NÃO POSSUI MATRÍCULA";
+    document.getElementById("exame_data_admissao").innerText = formatarData(s.data_admissao);
+    document.getElementById("exame_nome_empresa").innerText = s.nome_empresa;
+    document.getElementById("exame_nome_unidade").innerText = s.nome_unidade;
+    document.getElementById("exame_nome_setor").innerText = s.nome_setor;
+    document.getElementById("exame_nome_cargo").innerText = s.nome_cargo;
+    document.getElementById("exame_rac").innerText = s.rac || "-";
+    document.getElementById("exame_tipo_rac").innerText = s.tipo_rac || "-";
+    document.getElementById("exame_tipo_exame").innerText = s.tipo_exame;
+    document.getElementById("exame_data_exame").innerText = formatarData(s.data_exame);
+    document.getElementById("exame_hora_exame").innerText = s.hora_exame;
+    document.getElementById("exame_funcao_anterior").innerText = s.funcao_anterior;
+    document.getElementById("exame_funcao_atual").innerText = s.funcao_atual;
+    document.getElementById("exame_nova_funcao").innerText = s.nome_nova_funcao;
+    document.getElementById("exame_setor_atual").innerText = s.setor_atual;
+    document.getElementById("exame_novo_setor").innerText = s.nome_novo_setor;
+    document.getElementById("exame_motivo_consulta").innerText = s.motivo_consulta;
+    document.getElementById("exame_cnh").innerText = s.cnh || "-";
+    document.getElementById("exame_vencimento_cnh").innerText = formatarData(s.vencimento_cnh) || "-";
+    document.getElementById("exame_lab_toxicologico").innerText = s.lab_toxicologico || "-";
+    document.getElementById("exame_estado_clinica").innerText = s.estado_clinica;
+    document.getElementById("exame_cidade_clinica").innerText = s.cidade_clinica;
+    document.getElementById("exame_nome_clinica").innerText = s.nome_clinica;
+    document.getElementById("exame_estado_credenciamento").innerText = s.estado_credenciamento;
+    document.getElementById("exame_cidade_credenciamento").innerText = s.cidade_credenciamento;
+    document.getElementById("exame_observacao").innerText = s.observacao || "-";
 
     // MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE RISCOS OCUPACIONAIS
     const blocoFuncaoAnterior = document.getElementById("divFuncaoAnterior");
     const blocoFuncaoAtual = document.getElementById("divFuncaoAtual");
     const blocoNovaFuncao = document.getElementById("divNovaFuncao");
     const blocoSetorAtual = document.getElementById("divSetorAtual");
-    const blocoNovoSetor = document.getElementById("divAsoNovoSetor");
+    const blocoNovoSetor = document.getElementById("divExameNovoSetor");
 
     // OCULTAR CAMPOS DE FUNÇÃO E SETOR QUANDO NÃO FOR MUDANÇA DE RISCOS OCUPACIONAIS
-    if (s.tipo_exame !== "MUDANCA_RISCOS_OCUPACIONAIS") {
-      blocoFuncaoAnterior.classList.add("d-none");
-      blocoFuncaoAtual.classList.add("d-none");
-      blocoNovaFuncao.classList.add("d-none");
-      blocoSetorAtual.classList.add("d-none");
-      blocoNovoSetor.classList.add("d-none");
-    } else {
+    if (s.tipo_exame === "MUDANCA_RISCOS_OCUPACIONAIS") {
       // MOSTRAR OS BLOCOS DE FUNÇÃO E SETOR
       blocoFuncaoAnterior.classList.remove("d-none");
       blocoFuncaoAtual.classList.remove("d-none");
@@ -441,13 +452,13 @@ function preencherModal(s, tipo) {
         blocoFuncaoAtual.classList.add("d-none");
         blocoNovaFuncao.classList.remove("d-none");
 
-        document.getElementById("aso_funcao_atual").innerText = "";
-        document.getElementById("aso_nova_funcao").innerText = s.nome_nova_funcao || "-";
+        document.getElementById("exame_funcao_atual").innerText = "";
+        document.getElementById("exame_nova_funcao").innerText = s.nome_nova_funcao || "-";
       } else {
         blocoFuncaoAtual.classList.remove("d-none");
         blocoNovaFuncao.classList.add("d-none");
 
-        document.getElementById("aso_funcao_atual").innerText = s.funcao_atual || "-";
+        document.getElementById("exame_funcao_atual").innerText = s.funcao_atual || "-";
       }
 
       // SE FOR SOLICITAR CRIAÇÃO DE NOVO SETOR, MOSTRAR CAMPO
@@ -455,41 +466,56 @@ function preencherModal(s, tipo) {
         blocoSetorAtual.classList.add("d-none");
         blocoNovoSetor.classList.remove("d-none");
 
-        document.getElementById("aso_setor_atual").innerText = "";
-        document.getElementById("aso_novo_setor").innerText = s.nome_novo_setor || "-";
+        document.getElementById("exame_setor_atual").innerText = "";
+        document.getElementById("exame_novo_setor").innerText = s.nome_novo_setor || "-";
       } else {
         blocoSetorAtual.classList.remove("d-none");
         blocoNovoSetor.classList.add("d-none");
 
-        document.getElementById("aso_setor_atual").innerText = s.setor_atual || "-";
+        document.getElementById("exame_setor_atual").innerText = s.setor_atual || "-";
       }
+    } else {
+      blocoFuncaoAnterior.classList.add("d-none");
+      blocoFuncaoAtual.classList.add("d-none");
+      blocoNovaFuncao.classList.add("d-none");
+      blocoSetorAtual.classList.add("d-none");
+      blocoNovoSetor.classList.add("d-none");
+    }
+
+    // MOSTRAR / ESCONDER TEXTAREA DE MOTIVO DA CONSULTA
+    const blocoMotivoConsulta = document.getElementById("divMotivoConsulta");
+
+    if (s.tipo_exame === "CONSULTA_ASSISTENCIAL") {
+      blocoMotivoConsulta.classList.remove("d-none");
+    } else {
+      blocoMotivoConsulta.classList.add("d-none");
     }
 
     // MOSTRAR / ESCONDER SEÇÃO DE NOVO CREDENCIAMENTO
-    const blocoClinica = document.getElementById("blocoAsoClinica");
-    const blocoCredenciamento = document.getElementById("blocoAsoCredenciamento");
+    const blocoClinica = document.getElementById("blocoExameClinica");
+    const blocoCredenciamento = document.getElementById("blocoExameCredenciamento");
 
     if (s.solicitar_credenciamento === true) {
       blocoClinica.classList.add("d-none");
       blocoCredenciamento.classList.remove("d-none");
 
-      document.getElementById("aso_estado_credenciamento").innerText = s.estado_credenciamento;
-      document.getElementById("aso_cidade_credenciamento").innerText = s.cidade_credenciamento;
+      document.getElementById("exame_estado_credenciamento").innerText = s.estado_credenciamento;
+      document.getElementById("exame_cidade_credenciamento").innerText = s.cidade_credenciamento;
 
     } else {
       blocoClinica.classList.remove("d-none");
       blocoCredenciamento.classList.add("d-none");
 
-      document.getElementById("aso_estado_clinica").innerText = s.estado_clinica;
-      document.getElementById("aso_cidade_clinica").innerText = s.cidade_clinica;
-      document.getElementById("aso_nome_clinica").innerText = s.nome_clinica;
+      document.getElementById("exame_estado_clinica").innerText = s.estado_clinica;
+      document.getElementById("exame_cidade_clinica").innerText = s.cidade_clinica;
+      document.getElementById("exame_nome_clinica").innerText = s.nome_clinica;
     }
   }
 
   // MOSTRAR MOTIVO DE REPROVAÇÃO NA REAVALIAÇÃO
   const textareaMotivo =
-    tipo === "ASO"
-      ? document.getElementById("motivoReprovacaoASO")
+    tipo === "NOVO_EXAME"
+      ? document.getElementById("motivoReprovacaoExame")
       : document.getElementById("motivoReprovacaoCadastro");
 
   if (s.status === "PENDENTE_REAVALIACAO" || s.status === "REPROVADO") {
@@ -500,8 +526,8 @@ function preencherModal(s, tipo) {
 
   // STATUS
   const alertStatus =
-    tipo === "ASO"
-      ? document.getElementById("linha_aprovacao_aso")
+    tipo === "NOVO_EXAME"
+      ? document.getElementById("linha_aprovacao_exame")
       : document.getElementById("linha_aprovacao_cadastro");
 
   alertStatus.style.display = "none";
@@ -645,10 +671,10 @@ function formatarDataHora(data) {
 
 // FUNÇÃO PARA APROVAR / REPROVAR SOLICITAÇÃO
 async function analisarSolicitacao(status) {
-  const isASO = document.getElementById("modalDetalhesASO").classList.contains("show");
+  const isExame = document.getElementById("modalDetalhesNovoExame").classList.contains("show");
 
-  const motivoInput = isASO
-    ? document.getElementById("motivoReprovacaoASO")
+  const motivoInput = isExame
+    ? document.getElementById("motivoReprovacaoExame")
     : document.getElementById("motivoReprovacaoCadastro");
 
   const motivo = motivoInput.value;
@@ -658,10 +684,10 @@ async function analisarSolicitacao(status) {
     return;
   }
 
-  const tipo = isASO ? "ASO" : "NOVO_CADASTRO";
+  const tipo = isExame ? "NOVO_EXAME" : "NOVO_CADASTRO";
 
   // Se for NOVO_CADASTRO, atualiza setor/cargo antes de aprovar
-  if (!isASO) {
+  if (!isExame) {
     const selectSetor = document.getElementById("setorSelect");
     const selectCargo = document.getElementById("cargoSelect");
 
@@ -670,7 +696,7 @@ async function analisarSolicitacao(status) {
 
     if (solicitarNovoSetor || solicitarNovoCargo) {
       const dadosEdicao = pegarDadosEdicaoCadastro();
-      await fetch(`http://localhost:3001/solicitacoes/cadastro/${solicitacaoAtualId}/editar-setor-cargo`, {
+      await fetch(`http://localhost:3001/solicitacoes/novo-cadastro/${solicitacaoAtualId}/editar-setor-cargo`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dadosEdicao)
@@ -700,6 +726,21 @@ async function analisarSolicitacao(status) {
     alert("Erro ao analisar solicitação");
   }
 }
+
+// MÁSCARA DE CPF
+const cpfInput = document.getElementById("filterCPF");
+
+cpfInput.addEventListener("input", function () {
+  let value = this.value.replace(/\D/g, "");
+
+  if (value.length > 11) value = value.slice(0, 11);
+
+  value = value.replace(/(\d{3})(\d)/, "$1.$2");
+  value = value.replace(/(\d{3})(\d)/, "$1.$2");
+  value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+
+  this.value = value;
+});
 
 // FUNÇÃO DE LOGOUT
 function logout() {

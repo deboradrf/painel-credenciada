@@ -372,14 +372,17 @@ main {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
-/* FLOW */
-.flow {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
+.help-section {
+    background-color: #000000;
+    width: 100%;
+    padding: 40px 0;
 }
 
+.help-section:not(:last-child) {
+    border-bottom: 1px solid #eee;
+}
+
+/* FLOW
 .flow-card {
     width: 100%;
     max-width: 360px;
@@ -389,17 +392,42 @@ main {
     border: 1px solid #E9ECEF;
     border-radius: 12px;
     transition: all 0.2s ease;
+}*/
+
+.flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin: 30px 0;
+}
+
+/* ===== FLOW CARD ===== */
+.flow-card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 16px 20px;
+    width: 200px;
+    height: 150px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s ease;
 }
 
 .flow-card i {
-    font-size: 1.8rem;
+    font-size: 1.3rem;
     color: #F1AE33;
     margin-bottom: 10px;
 }
 
 .flow-card h6 {
-    font-weight: 600;
-    margin-bottom: 6px;
+    font-weight: 400;
+    font-size: 14px;
 }
 
 .flow-card:hover {

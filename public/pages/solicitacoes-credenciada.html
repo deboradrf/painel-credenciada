@@ -12,7 +12,7 @@
         href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
     <script src="https://kit.fontawesome.com/4392b60e4c.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="../css/credenciada.css">
+    <link rel="stylesheet" href="../css/solicitacoes-credenciada.css">
 </head>
 
 <body>
@@ -94,11 +94,25 @@
             <div class="title">
                 <h3>Solicitações Realizadas</h3>
                 <p class="subtitle">
-                    Visualize, filtre e gerencie todas as solicitações de ASOs e cadastro de funcionários
+                    Visualize, filtre e gerencie todas as solicitações de exames e cadastro de funcionários
                 </p>
             </div>
 
             <div class="filters">
+                <div class="filter-group">
+                    <label>Tipo</label>
+                    <select id="filterTipo">
+                        <option value="">Todos</option>
+                        <option value="NOVO_CADASTRO">Solicitação de Cadastro</option>
+                        <option value="NOVO_EXAME">Solicitação de Exame</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>CPF Funcionário</label>
+                    <input id="filterCPF" type="text" placeholder="Buscar funcionário pelo CPF">
+                </div>
+
                 <div class="filter-group">
                     <label>Status</label>
                     <select id="filterStatus">
@@ -110,16 +124,6 @@
                         <option value="ENVIADO_SOC">Enviado ao SOC</option>
                         <option value="ERRO_SOC">Erro</option>
                     </select>
-                </div>
-
-                <div class="filter-group">
-                    <label>Empresa</label>
-                    <input id="filterEmpresa" type="text" placeholder="Buscar empresa">
-                </div>
-
-                <div class="filter-group">
-                    <label>Nome do Funcionário</label>
-                    <input id="filterFuncionario" type="text" placeholder="Buscar por nome">
                 </div>
 
                 <div class="filter-actions">
@@ -145,15 +149,7 @@
                     </thead>
 
                     <tbody>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td class="actions"></td>
-                        </tr>
+                        <!-- GERADO NO JS -->
                     </tbody>
                 </table>
             </div>
@@ -324,7 +320,7 @@
                         <div class="col-6" id="divNovoSetor">
                             <div class="detail-item">
                                 <div class="detail-label">
-                                    <span>Nome do novo Setor</span>
+                                    <span>Nome do Novo Setor</span>
                                 </div>
                                 <span id="cadastro_novo_setor" class="detail-value"></span>
                             </div>
@@ -333,9 +329,27 @@
                         <div class="col-6" id="divNovoCargo">
                             <div class="detail-item">
                                 <div class="detail-label">
-                                    <span>Nome do novo Cargo</span>
+                                    <span>Nome do Novo Cargo</span>
                                 </div>
                                 <span id="cadastro_novo_cargo" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>RAC</span>
+                                </div>
+                                <span id="cadastro_rac" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Tipo de RAC</span>
+                                </div>
+                                <span id="cadastro_tipo_rac" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -462,8 +476,8 @@
         </div>
     </div>
 
-    <!-- MODAL DETALHES - ASO-->
-    <div class="modal fade" id="modalDetalhesASO" tabindex="-1">
+    <!-- MODAL DETALHES - NOVO EXAME -->
+    <div class="modal fade" id="modalDetalhesNovoExame" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
 
@@ -477,7 +491,7 @@
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-12">
-                            <p id="linha_aprovacao_aso" class="text-muted small"></p>
+                            <p id="linha_aprovacao_exame" class="text-muted small"></p>
                         </div>
 
                         <div class="col-12">
@@ -485,7 +499,7 @@
                                 <div class="detail-label">
                                     <span>Nome completo</span>
                                 </div>
-                                <span id="aso_nome_funcionario" class="detail-value"></span>
+                                <span id="exame_nome_funcionario" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -494,7 +508,7 @@
                                 <div class="detail-label">
                                     <span>Data de Nascimento</span>
                                 </div>
-                                <span id="aso_data_nascimento" class="detail-value"></span>
+                                <span id="exame_data_nascimento" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -503,7 +517,7 @@
                                 <div class="detail-label">
                                     <span>CPF</span>
                                 </div>
-                                <span id="aso_cpf" class="detail-value"></span>
+                                <span id="exame_cpf" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -512,7 +526,7 @@
                                 <div class="detail-label">
                                     <span>Matrícula eSocial</span>
                                 </div>
-                                <span id="aso_matricula" class="detail-value"></span>
+                                <span id="exame_matricula" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -521,7 +535,7 @@
                                 <div class="detail-label">
                                     <span>Data de Admissão</span>
                                 </div>
-                                <span id="aso_data_admissao" class="detail-value"></span>
+                                <span id="exame_data_admissao" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -530,7 +544,7 @@
                                 <div class="detail-label">
                                     <span>Empresa do Funcionário</span>
                                 </div>
-                                <span id="aso_nome_empresa" class="detail-value"></span>
+                                <span id="exame_nome_empresa" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -539,7 +553,7 @@
                                 <div class="detail-label">
                                     <span>Unidade do Funcionário</span>
                                 </div>
-                                <span id="aso_nome_unidade" class="detail-value"></span>
+                                <span id="exame_nome_unidade" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -548,7 +562,7 @@
                                 <div class="detail-label">
                                     <span>Setor do Funcionário</span>
                                 </div>
-                                <span id="aso_nome_setor" class="detail-value"></span>
+                                <span id="exame_nome_setor" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -557,7 +571,25 @@
                                 <div class="detail-label">
                                     <span>Cargo do Funcionário</span>
                                 </div>
-                                <span id="aso_nome_cargo" class="detail-value"></span>
+                                <span id="exame_nome_cargo" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>RAC</span>
+                                </div>
+                                <span id="exame_rac" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Tipo de RAC</span>
+                                </div>
+                                <span id="exame_tipo_rac" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -566,7 +598,25 @@
                                 <div class="detail-label">
                                     <span>Tipo de Exame</span>
                                 </div>
-                                <span id="aso_tipo_exame" class="detail-value"></span>
+                                <span id="exame_tipo_exame" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Data do Exame</span>
+                                </div>
+                                <span id="exame_data_exame" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Hora do Exame</span>
+                                </div>
+                                <span id="exame_hora_exame" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -575,7 +625,7 @@
                                 <div class="detail-label">
                                     <span>Função exercida atualmente</span>
                                 </div>
-                                <span id="aso_funcao_anterior" class="detail-value"></span>
+                                <span id="exame_funcao_anterior" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -584,7 +634,7 @@
                                 <div class="detail-label">
                                     <span>Função que irá exercer</span>
                                 </div>
-                                <span id="aso_funcao_atual" class="detail-value"></span>
+                                <span id="exame_funcao_atual" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -593,7 +643,7 @@
                                 <div class="detail-label">
                                     <span>Nome da Nova Função</span>
                                 </div>
-                                <span id="aso_nova_funcao" class="detail-value"></span>
+                                <span id="exame_nova_funcao" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -602,16 +652,25 @@
                                 <div class="detail-label">
                                     <span>Setor que irá atuar</span>
                                 </div>
-                                <span id="aso_setor_atual" class="detail-value"></span>
+                                <span id="exame_setor_atual" class="detail-value"></span>
                             </div>
                         </div>
 
-                        <div class="col-6" id="divAsoNovoSetor">
+                        <div class="col-6" id="divExameNovoSetor">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Nome do Novo Setor</span>
                                 </div>
-                                <span id="aso_novo_setor" class="detail-value"></span>
+                                <span id="exame_novo_setor" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divMotivoConsulta">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Motivo Consulta</span>
+                                </div>
+                                <span id="exame_motivo_consulta" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -620,7 +679,7 @@
                                 <div class="detail-label">
                                     <span>CNH</span>
                                 </div>
-                                <span id="aso_cnh" class="detail-value"></span>
+                                <span id="exame_cnh" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -629,7 +688,7 @@
                                 <div class="detail-label">
                                     <span>Vencimento CNH</span>
                                 </div>
-                                <span id="aso_vencimento_cnh" class="detail-value"></span>
+                                <span id="exame_vencimento_cnh" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -638,18 +697,18 @@
                                 <div class="detail-label">
                                     <span>Nome do laboratório ou município para realização do exame toxicológico</span>
                                 </div>
-                                <span id="aso_lab_toxicologico" class="detail-value"></span>
+                                <span id="exame_lab_toxicologico" class="detail-value"></span>
                             </div>
                         </div>
 
-                        <div id="blocoAsoClinica" class="d-none">
+                        <div id="blocoExameClinica" class="d-none">
                             <div class="row g-3">
                                 <div class="col-6">
                                     <div class="detail-item">
                                         <div class="detail-label">
                                             <span>Estado da Clínica</span>
                                         </div>
-                                        <span id="aso_estado_clinica" class="detail-value"></span>
+                                        <span id="exame_estado_clinica" class="detail-value"></span>
                                     </div>
                                 </div>
 
@@ -658,7 +717,7 @@
                                         <div class="detail-label">
                                             <span>Cidade da Clínica</span>
                                         </div>
-                                        <span id="aso_cidade_clinica" class="detail-value"></span>
+                                        <span id="exame_cidade_clinica" class="detail-value"></span>
                                     </div>
                                 </div>
 
@@ -667,20 +726,20 @@
                                         <div class="detail-label">
                                             <span>Nome da Clínica</span>
                                         </div>
-                                        <span id="aso_nome_clinica" class="detail-value"></span>
+                                        <span id="exame_nome_clinica" class="detail-value"></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div id="blocoAsoCredenciamento" class="d-none">
+                        <div id="blocoExameCredenciamento" class="d-none">
                             <div class="row g-3">
                                 <div class="col-6">
                                     <div class="detail-item">
                                         <div class="detail-label">
                                             <span>Estado para Credenciamento</span>
                                         </div>
-                                        <span id="aso_estado_credenciamento" class="detail-value"></span>
+                                        <span id="exame_estado_credenciamento" class="detail-value"></span>
                                     </div>
                                 </div>
 
@@ -689,7 +748,7 @@
                                         <div class="detail-label">
                                             <span>Cidade para Credenciamento</span>
                                         </div>
-                                        <span id="aso_cidade_credenciamento" class="detail-value"></span>
+                                        <span id="exame_cidade_credenciamento" class="detail-value"></span>
                                     </div>
                                 </div>
                             </div>
@@ -700,7 +759,7 @@
                                 <div class="detail-label">
                                     <span>Observações</span>
                                 </div>
-                                <span id="aso_observacao" class="detail-value"></span>
+                                <span id="exame_observacao" class="detail-value"></span>
                             </div>
                         </div>
                     </div>
@@ -722,7 +781,7 @@
 
                     <div class="col-12">
                         <label class="form-label">Motivo da reprovação</label>
-                        <textarea id="motivoReprovacaoASO" class="form-control" rows="2"
+                        <textarea id="motivoReprovacaoExame" class="form-control" rows="2"
                             placeholder="Digite o motivo da reprovação"></textarea>
                     </div>
                 </div>
@@ -731,7 +790,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../script/credenciada.js"></script>
+    <script src="../script/solicitacoes-credenciada.js"></script>
 </body>
 
 </html>

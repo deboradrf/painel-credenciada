@@ -148,6 +148,24 @@ async function carregarUnidades(empresaCodigo) {
     }
 }
 
+// CAMPO DE NOME SEMPRE MAIÚSCULO E SEM CARACTERES ESPECIAIS
+const nomeInput = document.getElementById("nome");
+
+nomeInput.addEventListener("input", function () {
+  let valor = this.value.toUpperCase();
+
+  valor = valor.replace(/[^A-ZÇÀ-Ÿ\s]/g, "");
+
+  valor = valor
+    .replace(/[ÁÀÂÃ]/g, "A")
+    .replace(/[ÉÈÊ]/g, "E")
+    .replace(/[ÍÌÎ]/g, "I")
+    .replace(/[ÓÒÔÕ]/g, "O")
+    .replace(/[ÚÙÛ]/g, "U");
+
+  this.value = valor;
+});
+
 // SUBMIT DO FORMULÁRIO
 document.getElementById("cadastroForm").addEventListener("submit", async e => {
     e.preventDefault();

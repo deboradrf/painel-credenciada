@@ -187,7 +187,7 @@ async function buscarCPF() {
     }
 
     // CPF EXISTE E ESTÁ ATIVO
-    const funcionarioASO = {
+    const funcionario = {
       nome: f.nome,
       cpf: f.cpf,
       matricula: f.matricula,
@@ -198,7 +198,7 @@ async function buscarCPF() {
       cod_cargo: f.cargo?.codigo
     };
 
-    localStorage.setItem("funcionarioASO", JSON.stringify(funcionarioASO));
+    localStorage.setItem("funcionario", JSON.stringify(funcionario));
 
     resultado.innerHTML = `      
       <div class="alerts-container mb-2">
@@ -255,8 +255,8 @@ async function buscarCPF() {
       </div>
 
       <div class="d-flex justify-content-center my-3">
-        <button class="btn-solicitar-aso"
-          onclick="window.location.href='formulario-solicitar-exames.html'">
+        <button class="btn-solicitar-exame"
+          onclick="window.location.href='formulario-solicitar-exame.html'">
           Solicitar exame para este funcionário
         </button>
       </div>

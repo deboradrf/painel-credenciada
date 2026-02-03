@@ -1,4 +1,5 @@
 let usuario = null;
+let solicitacoes = [];
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
@@ -64,24 +65,30 @@ document.addEventListener("DOMContentLoaded", () => {
   profileBtn.addEventListener("hide.bs.dropdown", () => {
     document.body.classList.remove("blur-main");
   });
+
+  document.getElementById("btnBuscar").addEventListener("click", aplicarFiltros);
+
+  document.getElementById("btnLimpar").addEventListener("click", () => {
+    document.getElementById("filterTipo").value = "";
+    document.getElementById("filterCPF").value = "";
+    document.getElementById("filterStatus").value = "";
+  
+    renderizarTabela(solicitacoes);
+  });
+
+  carregarSolicitacoes();
 });
 
 // FUNÇÃO PARA CARREGAR HISTÓRICO DAS SOLICITAÇÕES
-document.addEventListener("DOMContentLoaded", carregarHistorico);
+async function carregarSolicitacoes() {
+  const res = await fetch(`http://localhost:3001/solicitacoes-empresa/${usuario.id}`);
 
-async function carregarHistorico() {
-  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  solicitacoes = await res.json();
 
-  if (!usuario) {
-    window.location.href = "login.html";
-    return;
-  }
+  solicitacoes.sort((a, b) => {
+    return new Date(a.solicitado_em) - new Date(b.solicitado_em);
+  });
 
-  const res = await fetch(
-    `http://localhost:3001/solicitacoes-empresa/${usuario.id}`
-  );
-
-  const solicitacoes = await res.json();
   renderizarTabela(solicitacoes);
 }
 
@@ -103,9 +110,40 @@ function renderizarTabela(lista) {
 
   lista.forEach(s => {
     const iconeTipo =
-      s.tipo === "ASO"
-        ? `<i class="fa-solid fa-file-circle-plus fa-lg" style="color: #F1AE33"></i>`
-        : `<i class="fa-solid fa-user-plus fa-lg" style="color: #F1AE33"></i>`;
+      s.tipo === "NOVO_EXAME"
+        ? `<i class="fa-solid fa-file-circle-plus fa-lg" style="color: #53A5A6"></i>`
+        : `<i class="fa-solid fa-user-plus fa-lg" style="color: #53A5A6"></i>`;
+
+    // TEXTO DA SITUAÇÃO
+    let situacao = "—";
+    if (s.status === "PENDENTE") situacao = "Solicitação em análise";
+    if (s.status === "PENDENTE_REAVALIACAO") situacao = "Solicitação em análise";
+    if (s.status === "APROVADO") situacao = "Solicitação aprovada";
+    if (s.status === "REPROVADO") situacao = "Ajustes necessários";
+    if (s.status === "ENVIADO_SOC") situacao = "Solicitação finalizada";
+    if (s.status === "CANCELADO") situacao = "Solicitação cancelada";
+
+    // AÇÕES
+    let acoes = "Nenhuma ação a ser feita";
+    if (s.status === "PENDENTE") {
+      acoes = `
+        <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuario.id})">
+          Cancelar
+        </button>
+      `;
+    }
+
+    if (s.status === "REPROVADO") {
+      acoes = `
+        <button onclick="verMotivo('${s.motivo_reprovacao}')">
+          Ver motivo
+        </button>
+
+        <button onclick="abrirModalEditar(${s.solicitacao_id}, '${s.tipo}')">
+          Editar
+        </button>
+      `;
+    }
 
     tbody.innerHTML += `
       <tr>
@@ -118,43 +156,11 @@ function renderizarTabela(lista) {
             ${s.status}
           </span>
         </td>
-        <td class="actions">
-          ${
-            (() => {
-              if (s.status === "REPROVADO") {
-                return `
-                  <button onclick="verMotivo('${(s.motivo_reprovacao || s.retorno_soc_erro || "Erro no envio ao SOC").replace(/'/g, "\\'")}')">
-                    Ver motivo
-                  </button>
-                  <button onclick="abrirModalEditar(${s.solicitacao_id}, '${s.tipo}')">
-                    Editar
-                  </button>
-                `;
-              } 
-              if (s.status === "ENVIADO_SOC" || (s.status === "APROVADO" && s.tipo === "ASO")) {
-                return `<span class="text-muted">Solicitação finalizada</span>`;
-              }
-              if (s.status === "APROVADO" && s.tipo === "NOVO_CADASTRO") {
-                return `<span class="text-muted">Solicitação aprovada</span>`;
-              }
-              if (s.status === "PENDENTE") {
-                return `
-                  <div id="solicitacao-${s.solicitacao_id}" style="position: relative; text-align: center;">
-                    <span class="texto-status text-muted">Solicitação em análise</span>
-                    <span 
-                      onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuario.id})" 
-                      style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); cursor: pointer; color: red;">
-                      Cancelar
-                    </span>
-                  </div>
-                `;
-              }
-              if (s.status === "CANCELADO") {
-                return `<span class="text-muted">Solicitação cancelada</span>`;
-              }
-              return `<span class="text-muted" style="display: block; text-align: center;">Solicitação em análise</span>`;
-            })()
-          }
+        <td class="text-muted">
+          ${situacao}
+        </td>
+        <td class="actions text-muted">
+          ${acoes || "-"}
         </td>
       </tr>
     `;
@@ -179,7 +185,7 @@ async function cancelarSolicitacao(id, tipo, usuarioId) {
 
     if (data.sucesso) {
       alert("Solicitação cancelada com sucesso!");
-      carregarHistorico();
+      carregarSolicitacoes();
     } else {
       alert(data.erro || "Não foi possível cancelar a solicitação.");
     }
@@ -203,8 +209,8 @@ function verMotivo(motivo) {
 // ABRIR MODAL DE EDITAR
 async function abrirModalEditar(id, tipo) {
   const url =
-    tipo === "ASO"
-      ? `http://localhost:3001/solicitacoes/aso/${id}`
+    tipo === "NOVO_EXAME"
+      ? `http://localhost:3001/solicitacoes/novo-exame/${id}`
       : `http://localhost:3001/solicitacoes/novo-cadastro/${id}`;
 
   const res = await fetch(url);
@@ -215,10 +221,10 @@ async function abrirModalEditar(id, tipo) {
 
   const { dados: s } = await res.json();
 
-  if (tipo === "ASO") {
-    preencherModalEditarASO(s);
+  if (tipo === "NOVO_EXAME") {
+    preencherModalEditarExame(s);
     new bootstrap.Modal(
-      document.getElementById("modalEditarASO")
+      document.getElementById("modalEditarExame")
     ).show();
   } else {
     preencherModalEditarCadastro(s);
@@ -226,6 +232,23 @@ async function abrirModalEditar(id, tipo) {
       document.getElementById("modalEditarCadastro")
     ).show();
   }
+}
+
+// FUNÇÃO PARA APLICAR FILTROS
+function aplicarFiltros() {
+  const tipo = document.getElementById("filterTipo").value;
+  const cpf = document.getElementById("filterCPF").value;
+  const status = document.getElementById("filterStatus").value;
+
+  const filtradas = solicitacoes.filter(s => {
+    const matchTipo = !tipo || s.tipo === tipo;
+    const matchCPF = !cpf || s.cpf.includes(cpf);
+    const matchStatus = !status || s.status === status;
+
+    return matchTipo && matchCPF && matchStatus;
+  });
+
+  renderizarTabela(filtradas);
 }
 
 // FUNÇÃO PARA FORMATAR CPF
@@ -255,9 +278,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const editAsoCPF = document.getElementById("editAsoCPF");
-  if (editAsoCPF) {
-    editAsoCPF.addEventListener("input", (e) => {
+  const editExameCPF = document.getElementById("editExameCPF");
+  if (editExameCPF) {
+    editExameCPF.addEventListener("input", (e) => {
       e.target.value = formatarCPF(e.target.value);
     });
   }
@@ -268,30 +291,61 @@ function preencherModalEditarCadastro(s) {
   document.getElementById("editCadId").value = s.solicitacao_id;
 
   document.getElementById("editCadNomeFuncionario").value = s.nome_funcionario;
-  document.getElementById("editCadDataNascimento").value = dataParaInputDate(s.data_nascimento);
+  document.getElementById("editCadDataNascimento").value = formatarData(s.data_nascimento);
   document.getElementById("editCadSexo").value = s.sexo;
   document.getElementById("editCadEstadoCivil").value = s.estado_civil;
   document.getElementById("editCadDocIdentidade").value = s.doc_identidade;
   document.getElementById("editCadCPF").value = s.cpf;
-  document.getElementById("editCadMatricula").value = s.matricula || "-";
-  document.getElementById("editCadDataAdmissao").value = dataParaInputDate(s.data_admissao);
+  document.getElementById("editCadMatricula").value = s.matricula;
+  document.getElementById("editCadDataAdmissao").value = formatarData(s.data_admissao);
   document.getElementById("editCadTipoContratacao").value = s.tipo_contratacao;
   document.getElementById("editCadRegimeTrabalho").value = s.regime_trabalho;
   document.getElementById("editCadNomeEmpresa").value = s.nome_empresa;
   document.getElementById("editCadNomeUnidade").value = s.nome_unidade;
   document.getElementById("editCadNomeSetor").value = s.nome_setor;
+  document.getElementById("editCadNovoSetor").value = s.nome_novo_setor;
   document.getElementById("editCadNomeCargo").value = s.nome_cargo;
+  document.getElementById("editCadNovoCargo").value = s.nome_novo_cargo;
+  document.getElementById("editCadRac").value = s.rac,
+  document.getElementById("editCadTipoRac").value = s.tipo_rac,
   document.getElementById("editCadTipoExame").value = s.tipo_exame;
-  document.getElementById("editCadCNH").value = s.cnh || "-";
-  document.getElementById("editCadVencimentoCNH").value = dataParaInputDate(s.vencimento_cnh) || "-";
-  document.getElementById("editCadLabToxicologico").value = s.lab_toxicologico || "-";
-  document.getElementById("editCadEstadoClinica").value = s.estado_clinica || "-";
-  document.getElementById("editCadCidadeClinica").value = s.cidade_clinica || "-";
-  document.getElementById("editCadNomeClinica").value = s.nome_clinica || "-";
-  document.getElementById("editCadEstadoCredenciamento").value = s.estado_credenciamento || "-";
-  document.getElementById("editCadCidadeCredenciamento").value = s.cidade_credenciamento || "-";
-  document.getElementById("editCadObservacao").value = s.observacao || "-";
+  document.getElementById("editCadCNH").value = s.cnh;
+  document.getElementById("editCadVencimentoCNH").value = formatarData(s.vencimento_cnh);
+  document.getElementById("editCadLabToxicologico").value = s.lab_toxicologico;
+  document.getElementById("editCadEstadoClinica").value = s.estado_clinica;
+  document.getElementById("editCadCidadeClinica").value = s.cidade_clinica;
+  document.getElementById("editCadNomeClinica").value = s.nome_clinica;
+  document.getElementById("editCadEstadoCredenciamento").value = s.estado_credenciamento;
+  document.getElementById("editCadCidadeCredenciamento").value = s.cidade_credenciamento;
+  document.getElementById("editCadObservacao").value = s.observacao;
 
+  // MOSTRAR / OCULTAR SEÇÃO DE NOVO SETOR / CARGO
+  const blocoSetorAtual = document.getElementById("divCadSetorAtual");
+  const blocoNovoSetor  = document.getElementById("divNovoSetor");
+  const blocoCargoAtual = document.getElementById("divCargoAtual");
+  const blocoNovoCargo  = document.getElementById("divNovoCargo");
+
+  if (s.solicitar_novo_setor === true) {
+    blocoSetorAtual.classList.add("d-none");
+    blocoNovoSetor.classList.remove("d-none");
+
+    document.getElementById("editCadNovoSetor").value = s.nome_novo_setor;
+  } else {
+    blocoSetorAtual.classList.remove("d-none");
+    blocoNovoSetor.classList.add("d-none");
+  }
+
+  if (s.solicitar_novo_cargo === true) {
+    blocoCargoAtual.classList.add("d-none");
+    blocoNovoCargo.classList.remove("d-none");
+
+    document.getElementById("editCadNovoCargo").value = s.nome_novo_cargo;
+  } else {
+    blocoCargoAtual.classList.remove("d-none");
+    blocoNovoCargo.classList.add("d-none");
+  }
+
+  // MOSTRAR / ESCONDER SEÇÃO DE NOVO CREDENCIAMENTO
   const blocoClinica = document.getElementById("blocoCadClinica");
   const blocoCredenciamento = document.getElementById("blocoCadCredenciamento");
 
@@ -299,76 +353,64 @@ function preencherModalEditarCadastro(s) {
     blocoClinica.classList.add("d-none");
     blocoCredenciamento.classList.remove("d-none");
 
-    document.getElementById("editCadEstadoCredenciamento").innerText = s.estado_credenciamento || "-";
-    document.getElementById("editCadCidadeCredenciamento").innerText = s.cidade_credenciamento || "-";
+    document.getElementById("editCadEstadoCredenciamento").innerText = s.estado_credenciamento;
+    document.getElementById("editCadCidadeCredenciamento").innerText = s.cidade_credenciamento ;
 
   } else {
     blocoClinica.classList.remove("d-none");
     blocoCredenciamento.classList.add("d-none");
 
-    document.getElementById("editCadEstadoClinica").innerText = s.estado_clinica || "-";
-    document.getElementById("editCadCidadeClinica").innerText = s.cidade_clinica || "-";
-    document.getElementById("editCadNomeClinica").innerText = s.nome_clinica || "-";
+    document.getElementById("editCadEstadoClinica").innerText = s.estado_clinica;
+    document.getElementById("editCadCidadeClinica").innerText = s.cidade_clinica;
+    document.getElementById("editCadNomeClinica").innerText = s.nome_clinica;
   }
 }
 
-// FUNÇÃO PARA PREENHCER OS CAMPOS DO MODAL - ASO
-function preencherModalEditarASO(s) {
-  document.getElementById("editAsoId").value = s.solicitacao_id;
+// FUNÇÃO PARA PREENHCER OS CAMPOS DO MODAL - NOVO EXAME
+function preencherModalEditarExame(s) {
+  document.getElementById("editExameId").value = s.solicitacao_id;
 
-  document.getElementById("editAsoNomeFuncionario").value = s.nome_funcionario;
-  document.getElementById("editAsoDataNascimento").value = dataParaInputDate(s.data_nascimento);
-  document.getElementById("editAsoCPF").value = s.cpf;
-  document.getElementById("editAsoMatricula").value = s.matricula;
-  document.getElementById("editAsoDataAdmissao").value = dataParaInputDate(s.data_admissao);
-  document.getElementById("editAsoNomeEmpresa").value = s.nome_empresa;
-  document.getElementById("editAsoNomeUnidade").value = s.nome_unidade;
-  document.getElementById("editAsoNomeSetor").value = s.nome_setor;
-  document.getElementById("editAsoNomeCargo").value = s.nome_cargo;
-  document.getElementById("editAsoTipoExame").value = s.tipo_exame;
-  document.getElementById("editAsoFuncaoAnterior").value = s.funcao_anterior || "";
-  document.getElementById("editAsoFuncaoAtual").value = s.funcao_atual || "";
-  document.getElementById("editAsoSetorAtual").value = s.setor_atual || "";
-  document.getElementById("editAsoCNH").value = s.cnh || "";
-  document.getElementById("editAsoVencimentoCNH").value = s.vencimento_cnh || "";
-  document.getElementById("editAsoLabToxicologico").value = s.lab_toxicologico;
-  document.getElementById("editAsoEstadoClinica").value = s.estado_clinica;
-  document.getElementById("editAsoCidadeClinica").value = s.cidade_clinica;
-  document.getElementById("editAsoNomeClinica").value = s.nome_clinica;
-  document.getElementById("editAsoEstadoCredenciamento").value = s.estado_credenciamento;
-  document.getElementById("editAsoCidadeCredenciamento").value = s.estado_credenciamento;
-  document.getElementById("editAsoObservacao").value = s.observacao;
-
-  const blocoClinica = document.getElementById("blocoAsoClinica");
-  const blocoCredenciamento = document.getElementById("blocoAsoCredenciamento");
-
-  if (s.solicitar_credenciamento === true) {
-    blocoClinica.classList.add("d-none");
-    blocoCredenciamento.classList.remove("d-none");
-
-    document.getElementById("editAsoEstadoCredenciamento").innerText = s.estado_credenciamento || "-";
-    document.getElementById("editAsoCidadeCredenciamento").innerText = s.cidade_credenciamento || "-";
-
-  } else {
-    blocoClinica.classList.remove("d-none");
-    blocoCredenciamento.classList.add("d-none");
-
-    document.getElementById("editAsoEstadoClinica").innerText = s.estado_clinica || "-";
-    document.getElementById("editAsoCidadeClinica").innerText = s.cidade_clinica || "-";
-    document.getElementById("editAsoNomeClinica").innerText = s.nome_clinica || "-";
-  }
+  document.getElementById("editExameNomeFuncionario").value = s.nome_funcionario;
+  document.getElementById("editExameDataNascimento").value = formatarData(s.data_nascimento);
+  document.getElementById("editExameCPF").value = s.cpf;
+  document.getElementById("editExameMatricula").value = s.matricula;
+  document.getElementById("editExameDataAdmissao").value = formatarData(s.data_admissao);
+  document.getElementById("editExameNomeEmpresa").value = s.nome_empresa;
+  document.getElementById("editExameNomeUnidade").value = s.nome_unidade;
+  document.getElementById("editExameNomeSetor").value = s.nome_setor;
+  document.getElementById("editExameNomeCargo").value = s.nome_cargo;
+  document.getElementById("editExameTipoExame").value = s.tipo_exame;
+  document.getElementById("editExameDataExame").value = formatarData(s.data_exame);
+  document.getElementById("editExameHoraExame").value = s.hora_exame;
+  document.getElementById("editExameRac").value = s.rac,
+  document.getElementById("editExameTipoRac").value = s.tipo_rac,
+  document.getElementById("editExameFuncaoAnterior").value = s.funcao_anterior;
+  document.getElementById("editExameFuncaoAtual").value = s.funcao_atual;
+  document.getElementById("editExameNovaFuncao").value = s.nome_nova_funcao;
+  document.getElementById("editExameSetorAtual").value = s.setor_atual;
+  document.getElementById("editExameNovoSetor").value = s.nome_novo_setor;
+  document.getElementById("editExameMotivoConsulta").value = s.motivo_consulta;
+  document.getElementById("editExameCNH").value = s.cnh;
+  document.getElementById("editExameVencimentoCNH").value = formatarData(s.vencimento_cnh);
+  document.getElementById("editExameLabToxicologico").value = s.lab_toxicologico;
+  document.getElementById("editExameEstadoClinica").value = s.estado_clinica;
+  document.getElementById("editExameCidadeClinica").value = s.cidade_clinica;
+  document.getElementById("editExameNomeClinica").value = s.nome_clinica;
+  document.getElementById("editExameEstadoCredenciamento").value = s.estado_credenciamento;
+  document.getElementById("editExameCidadeCredenciamento").value = s.cidade_credenciamento;
+  document.getElementById("editExameObservacao").value = s.observacao;
 
   // BLOQUEAR CAMPOS QUE VÊM DO SOC (NÃO EDITÁVEIS)
   const camposBloqueados = [
-    "editAsoNomeFuncionario",
-    "editAsoDataNascimento",
-    "editAsoCPF",
-    "editAsoMatricula",
-    "editAsoDataAdmissao",
-    "editAsoNomeEmpresa",
-    "editAsoNomeUnidade",
-    "editAsoNomeSetor",
-    "editAsoNomeCargo"
+    "editExameNomeFuncionario",
+    "editExameDataNascimento",
+    "editExameCPF",
+    "editExameMatricula",
+    "editExameDataAdmissao",
+    "editExameNomeEmpresa",
+    "editExameNomeUnidade",
+    "editExameNomeSetor",
+    "editExameNomeCargo"
   ];
 
   camposBloqueados.forEach(id => {
@@ -377,9 +419,87 @@ function preencherModalEditarASO(s) {
       campo.disabled = true;
     }
   });
+
+  // MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE RISCOS OCUPACIONAIS
+  const blocoFuncaoAnterior = document.getElementById("divFuncaoAnterior");
+  const blocoFuncaoAtual = document.getElementById("divFuncaoAtual");
+  const blocoNovaFuncao = document.getElementById("divNovaFuncao");
+  const blocoSetorAtual = document.getElementById("divExameSetorAtual");
+  const blocoNovoSetor = document.getElementById("divExameNovoSetor");
+
+  // OCULTAR CAMPOS DE FUNÇÃO E SETOR QUANDO NÃO FOR MUDANÇA DE RISCOS OCUPACIONAIS
+  if (s.tipo_exame === "MUDANCA_RISCOS_OCUPACIONAIS") {
+    // MOSTRAR OS BLOCOS DE FUNÇÃO E SETOR
+    blocoFuncaoAnterior.classList.remove("d-none");
+    blocoFuncaoAtual.classList.remove("d-none");
+    blocoSetorAtual.classList.remove("d-none");
+
+    // SE FOR SOLICITAR CRIAÇÃO DE NOVA FUNÇÃO, MOSTRAR CAMPO
+    if (s.solicitar_nova_funcao === true) {
+      blocoFuncaoAtual.classList.add("d-none");
+      blocoNovaFuncao.classList.remove("d-none");
+
+      document.getElementById("editExameFuncaoAtual").innerText = "";
+      document.getElementById("editExameNovaFuncao").innerText = s.nome_nova_funcao;
+    } else {
+      blocoFuncaoAtual.classList.remove("d-none");
+      blocoNovaFuncao.classList.add("d-none");
+
+      document.getElementById("editExameFuncaoAtual").innerText = s.funcao_atual;
+    }
+
+    // SE FOR SOLICITAR CRIAÇÃO DE NOVO SETOR, MOSTRAR CAMPO
+    if (s.solicitar_novo_setor === true) {
+      blocoSetorAtual.classList.add("d-none");
+      blocoNovoSetor.classList.remove("d-none");
+
+      document.getElementById("editExameSetorAtual").innerText = "";
+      document.getElementById("editExameNovoSetor").innerText = s.nome_novo_setor;
+    } else {
+      blocoSetorAtual.classList.remove("d-none");
+      blocoNovoSetor.classList.add("d-none");
+
+      document.getElementById("editExameSetorAtual").innerText = s.setor_atual;
+    }
+  } else {
+    blocoFuncaoAnterior.classList.add("d-none");
+    blocoFuncaoAtual.classList.add("d-none");
+    blocoNovaFuncao.classList.add("d-none");
+    blocoSetorAtual.classList.add("d-none");
+    blocoNovoSetor.classList.add("d-none");
+  }
+
+  // MOSTRAR / ESCONDER TEXTAREA DE MOTIVO DA CONSULTA
+  const blocoMotivoConsulta = document.getElementById("divMotivoConsulta");
+
+  if (s.tipo_exame === "CONSULTA_ASSISTENCIAL") {
+    blocoMotivoConsulta.classList.remove("d-none");
+  } else {
+    blocoMotivoConsulta.classList.add("d-none");
+  }
+
+  // MOSTRAR / ESCONDER SEÇÃO DE NOVO CREDENCIAMENTO
+  const blocoClinica = document.getElementById("blocoExameClinica");
+  const blocoCredenciamento = document.getElementById("blocoExameCredenciamento");
+
+  if (s.solicitar_credenciamento === true) {
+    blocoClinica.classList.add("d-none");
+    blocoCredenciamento.classList.remove("d-none");
+
+    document.getElementById("editExameEstadoCredenciamento").innerText = s.estado_credenciamento;
+    document.getElementById("editExameCidadeCredenciamento").innerText = s.cidade_credenciamento;
+
+  } else {
+    blocoClinica.classList.remove("d-none");
+    blocoCredenciamento.classList.add("d-none");
+
+    document.getElementById("editExameEstadoClinica").innerText = s.estado_clinica;
+    document.getElementById("editExameCidadeClinica").innerText = s.cidade_clinica;
+    document.getElementById("editExameNomeClinica").innerText = s.nome_clinica;
+  }
 }
 
-// FUNÇÃO PARA SALVAR EDIÇÃO NOVO CADASTRO
+// FUNÇÃO PARA SALVAR EDIÇÃO - NOVO CADASTRO
 async function salvarEdicaoCadastro() {
   const id = document.getElementById("editCadId").value;
 
@@ -397,7 +517,11 @@ async function salvarEdicaoCadastro() {
     nome_empresa: document.getElementById("editCadNomeEmpresa").value,
     nome_unidade: document.getElementById("editCadNomeUnidade").value,
     nome_setor: document.getElementById("editCadNomeSetor").value,
+    nome_novo_setor: document.getElementById("editCadNovoSetor").value,
     nome_cargo: document.getElementById("editCadNomeCargo").value,
+    nome_novo_cargo: document.getElementById("editCadNovoCargo").value,
+    rac: document.getElementById("editCadRac").value,
+    tipo_rac: document.getElementById("editCadTipoRac").value,
     tipo_exame: document.getElementById("editCadTipoExame").value,
     cnh: document.getElementById("editCadCNH").value,
     vencimento_cnh: document.getElementById("editCadVencimentoCNH").value,
@@ -410,7 +534,7 @@ async function salvarEdicaoCadastro() {
     observacao: document.getElementById("editCadObservacao").value
   };
 
-  const res = await fetch(`http://localhost:3001/solicitacoes/cadastro/${id}/editar`, {
+  const res = await fetch(`http://localhost:3001/solicitacoes/novo-cadastro/${id}/editar`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(dados)
@@ -427,39 +551,46 @@ async function salvarEdicaoCadastro() {
     .getInstance(document.getElementById("modalEditarCadastro"))
     .hide();
 
-  carregarHistorico();
+  carregarSolicitacoes();
 }
 
-// FUNÇÃO PARA SALVAR EDIÇÃO ASO
-async function salvarEdicaoASO() {
-  const id = document.getElementById("editAsoId").value;
+// FUNÇÃO PARA SALVAR EDIÇÃO - NOVO EXAME
+async function salvarEdicaoExame() {
+  const id = document.getElementById("editExameId").value;
 
   const dados = {
-    nome_funcionario: document.getElementById("editAsoNomeFuncionario").value,
-    data_nascimento: tratarData(document.getElementById("editAsoDataNascimento").value),
-    cpf: document.getElementById("editAsoCPF").value,
-    matricula: document.getElementById("editAsoMatricula").value,
-    data_admissao: tratarData(document.getElementById("editAsoDataAdmissao").value),
-    nome_empresa: document.getElementById("editAsoNomeEmpresa").value,
-    nome_unidade: document.getElementById("editAsoNomeUnidade").value,
-    nome_setor: document.getElementById("editAsoNomeSetor").value,
-    nome_cargo: document.getElementById("editAsoNomeCargo").value,
-    tipo_exame: document.getElementById("editAsoTipoExame").value,
-    funcao_anterior: document.getElementById("editAsoFuncaoAnterior").value,
-    funcao_atual: document.getElementById("editAsoFuncaoAtual").value,
-    setor_atual: document.getElementById("editAsoSetorAtual").value,
-    cnh: document.getElementById("editAsoCNH").value,
-    vencimento_cnh: document.getElementById("editAsoVencimentoCNH").value,
-    lab_toxicologico: document.getElementById("editAsoLabToxicologico").value,
-    estado_clinica: document.getElementById("editAsoEstadoClinica").value,
-    cidade_clinica: document.getElementById("editAsoCidadeClinica").value,
-    nome_clinica: document.getElementById("editAsoNomeClinica").value,
-    estado_credenciamento: document.getElementById("editAsoEstadoCredenciamento").value,
-    cidade_credenciamento: document.getElementById("editAsoCidadeCredenciamento").value,
-    observacao: document.getElementById("editAsoObservacao").value
+    nome_funcionario: document.getElementById("editExameNomeFuncionario").value,
+    data_nascimento: document.getElementById("editExameDataNascimento").value,
+    cpf: document.getElementById("editExameCPF").value,
+    matricula: document.getElementById("editExameMatricula").value,
+    data_admissao: document.getElementById("editExameDataAdmissao").value,
+    nome_empresa: document.getElementById("editExameNomeEmpresa").value,
+    nome_unidade: document.getElementById("editExameNomeUnidade").value,
+    nome_setor: document.getElementById("editExameNomeSetor").value,
+    nome_cargo: document.getElementById("editExameNomeCargo").value,
+    rac: document.getElementById("editExameRac").value,
+    tipo_rac: document.getElementById("editExameTipoRac").value,
+    tipo_exame: document.getElementById("editExameTipoExame").value,
+    data_exame: document.getElementById("editExameDataExame").value,
+    hora_exame: document.getElementById("editExameHoraExame").value,
+    funcao_anterior: document.getElementById("editExameFuncaoAnterior").value,
+    funcao_atual: document.getElementById("editExameFuncaoAtual").value || null,
+    nome_nova_funcao: document.getElementById("editExameNovaFuncao").value || null,
+    setor_atual: document.getElementById("editExameSetorAtual").value || null,
+    nome_novo_setor: document.getElementById("editExameNovoSetor").value || null,
+    motivo_consulta: document.getElementById("editExameMotivoConsulta").value || null,
+    cnh: document.getElementById("editExameCNH").value || null,
+    vencimento_cnh: document.getElementById("editExameVencimentoCNH").value,
+    lab_toxicologico: document.getElementById("editExameLabToxicologico").value || null,
+    estado_clinica: document.getElementById("editExameEstadoClinica").value || null,
+    cidade_clinica: document.getElementById("editExameCidadeClinica").value || null,
+    nome_clinica: document.getElementById("editExameNomeClinica").value || null,
+    estado_credenciamento: document.getElementById("editExameEstadoCredenciamento").value || null,
+    cidade_credenciamento: document.getElementById("editExameCidadeCredenciamento").value || null,
+    observacao: document.getElementById("editExameObservacao").value || null
   };
 
-  const res = await fetch(`http://localhost:3001/solicitacoes/aso/${id}/editar`, {
+  const res = await fetch(`http://localhost:3001/solicitacoes/novo-exame/${id}/editar`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(dados)
@@ -473,36 +604,95 @@ async function salvarEdicaoASO() {
   }
 
   bootstrap.Modal
-    .getInstance(document.getElementById("modalEditarASO"))
+    .getInstance(document.getElementById("modalEditarExame"))
     .hide();
 
-  carregarHistorico();
+  carregarSolicitacoes();
 }
 
-function dataParaInputDate(data) {
-  if (!data) return "";
-  return new Date(data).toISOString().split("T")[0];
-}
+// MÁSCARA DE CPF
+const cpfInput = document.getElementById("filterCPF");
 
-function tratarData(valor) {
-  if (!valor) return null;
+cpfInput.addEventListener("input", function () {
+  let value = this.value.replace(/\D/g, "");
 
-  if (valor.includes("-")) return valor;
+  if (value.length > 11) value = value.slice(0, 11);
 
-  const [dia, mes, ano] = valor.split("/");
-  return `${ano}-${mes}-${dia}`;
-}
+  value = value.replace(/(\d{3})(\d)/, "$1.$2");
+  value = value.replace(/(\d{3})(\d)/, "$1.$2");
+  value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 
+  this.value = value;
+});
+
+// FUNÇÃO PARA FORAMATAR DATA E HORA DAS SOLICITAÇÕES
 function formatarDataHora(data) {
   if (!data) return "";
 
   const d = new Date(data);
 
-  const dataFormatada = d.toLocaleDateString("pt-BR"); // dd/mm/aaaa
-  const horaFormatada = d.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' }); // hh:mm
+  const dataFormatada = d.toLocaleDateString("pt-BR");
+  const horaFormatada = d.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
 
   return `${dataFormatada} ${horaFormatada}`;
 }
+
+// FUNÇÃO PARA FORMATAR DATAS
+function formatarData(dataISO) {
+  if (!dataISO) return "";
+
+  const [data] = dataISO.split("T");
+  const [ano, mes, dia] = data.split("-");
+
+  return `${dia}/${mes}/${ano}`;
+}
+
+// CAMPO DE NOME SEMPRE MAIÚSCULO E SEM CARACTERES ESPECIAIS
+const nomeInput = document.getElementById("editCadNomeFuncionario");
+
+nomeInput.addEventListener("input", function () {
+  let valor = this.value.toUpperCase();
+
+  valor = valor.replace(/[^A-ZÇÀ-Ÿ\s]/g, "");
+
+  valor = valor
+    .replace(/[ÁÀÂÃ]/g, "A")
+    .replace(/[ÉÈÊ]/g, "E")
+    .replace(/[ÍÌÎ]/g, "I")
+    .replace(/[ÓÒÔÕ]/g, "O")
+    .replace(/[ÚÙÛ]/g, "U");
+
+  this.value = valor;
+});
+
+// MÁSCARA DE DATA
+const camposData = [
+  "editCadDataNascimento",
+  "editCadDataAdmissao",
+  "editCadVencimentoCNH",
+  "editExameDataNascimento",
+  "editExameDataAdmissao",
+  "editExameVencimentoCNH"
+];
+
+camposData.forEach(id => {
+  const input = document.getElementById(id);
+  if (!input) return;
+
+  input.addEventListener("input", function () {
+    let valor = this.value.replace(/\D/g, "");
+
+    if (valor.length > 8) valor = valor.slice(0, 8);
+
+    if (valor.length >= 5) {
+      valor = valor.replace(/(\d{2})(\d{2})(\d{1,4})/, "$1/$2/$3");
+    } else if (valor.length >= 3) {
+      valor = valor.replace(/(\d{2})(\d{1,2})/, "$1/$2");
+    }
+
+    this.value = valor;
+  });
+});
 
 // FUNÇÃO DE LOGOUT
 function logout() {

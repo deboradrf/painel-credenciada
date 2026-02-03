@@ -512,6 +512,34 @@ document.getElementById("solicitarCredenciamento").addEventListener("change", fu
   }
 });
 
+// MOSTRAR / OCULTAR TIPO RAC
+const racSelect = document.getElementById("racSelect");
+const divRacValeOpcoes = document.getElementById("divRacValeOpcoes");
+
+racSelect.addEventListener("change", () => {
+  if (racSelect.value === "FORMULARIO_RAC_VALE") {
+    divRacValeOpcoes.classList.remove("d-none");
+  } else {
+    divRacValeOpcoes.classList.add("d-none");
+
+    document.getElementById("racValeOpcao").value = "";
+  }
+});
+
+// TORNAR OBRIGATÓRICO QUANDO A OPÇÃO SELECIONADA FOR VALE
+const racValeOpcao = document.getElementById("racValeOpcao");
+
+racSelect.addEventListener("change", () => {
+  const isVale = racSelect.value === "FORMULARIO_RAC_VALE";
+
+  divRacValeOpcoes.classList.toggle("d-none", !isVale);
+  racValeOpcao.required = isVale;
+
+  if (!isVale) {
+    racValeOpcao.value = "";
+  }
+});
+
 // NÃO PERMITIR DATAS MANUAIS COM MAIS DE 4 DÍGITOS NO ANO
 document.addEventListener("DOMContentLoaded", function () {
   const inputDataNascimento = document.getElementById("data_nascimento");
@@ -645,19 +673,16 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     nome_empresa: nomeEmpresa,
     cod_unidade: unidadeSelect.value,
     nome_unidade: unidadeSelect.selectedOptions[0].dataset.nome,
-
     cod_setor: solicitarNovoSetor ? null : setorSelect.value,
     nome_setor: solicitarNovoSetor ? null : setorSelect.selectedOptions[0].dataset.nome,
-
     solicitar_novo_setor: solicitarNovoSetor,
     nome_novo_setor: solicitarNovoSetor ? nomeNovoSetor : null,
-
     cod_cargo: solicitarNovoCargo ? null : cargoSelect.value,
     nome_cargo: solicitarNovoCargo ? null : cargoSelect.selectedOptions[0].dataset.nome,
-
     solicitar_novo_cargo: solicitarNovoCargo,
     nome_novo_cargo: solicitarNovoCargo ? nomeNovoCargo : null,
-
+    rac: document.getElementById("racSelect").value || null,
+    tipo_rac: document.getElementById("racValeOpcao").value || null,
     tipo_exame: document.getElementById("tipo_exame").value,
     cnh: document.getElementById("cnh").value || null,
     vencimento_cnh: document.getElementById("vencimento_cnh").value || null,
