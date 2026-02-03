@@ -1435,7 +1435,7 @@ app.put("/usuarios/:id", async (req, res) => {
   }
 });
 
-const PORT = process.env.NODE_ENV === 'development' ? 3000 : (process.env.PORT || 80);
+const PORT = process.env.NODE_ENV === 'development' ? 3000 : (process.env.PORT || 3003);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
