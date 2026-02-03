@@ -1,14 +1,20 @@
 const pool = require("./db/pool");
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const axios = require("axios");
 const { XMLParser } = require("fast-xml-parser");
 const iconv = require("iconv-lite");
 const soap = require("soap");
 
 const app = express();
+const PORT = 3003;
+
 app.use(cors());
 app.use(express.json());
+
+// ✅ SERVIR ARQUIVOS ESTÁTICOS
+app.use(express.static(path.join(__dirname, "public")));
 
 // SOC – SOAP
 const WSDL_URL = "https://ws1.soc.com.br/WSSoc/FuncionarioModelo2Ws?wsdl";
@@ -67,9 +73,14 @@ const EXPORTA_DETALHES_PRESTADOR = {
 
 const parser = new XMLParser({ ignoreAttributes: false });
 
-// TESTE
+// ROTA PRINCIPAL
 app.get("/", (req, res) => {
-  res.send("🚀 API Cadastro Funcionários rodando");
+  res.sendFile(path.join(__dirname, "public/pages/index.html"));
+});
+
+// TESTE API
+app.get("/api/status", (req, res) => {
+  res.json({ ok: true });
 });
 
 // EXPORTA DADOS - TODAS EMPRESAS - (apenas ativos)
@@ -1426,6 +1437,6 @@ app.put("/usuarios/:id", async (req, res) => {
   }
 });
 
-app.listen(3001, () => {
-  console.log("🚀 API rodando em http://localhost:3001");
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
