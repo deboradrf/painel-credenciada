@@ -12,19 +12,9 @@ const nomeEmpresa = usuarioLogado.nome_empresa;
 
 // CACHE
 let prestadoresCache = [];
-let usuario = null;
-
-const API = "http://localhost:3001";
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
-  usuario = JSON.parse(localStorage.getItem("usuario"));
-
-  if (!usuario) {
-    window.location.href = "login.html";
-    return;
-  }
-
   const userNameDropdown = document.getElementById("userNameDropdown");
   const dropdownUserExtra = document.getElementById("dropdownUserExtra");
 
@@ -34,25 +24,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const avatarBtn = document.querySelector(".profile-trigger .avatar-circle");
   const avatarDrop = document.querySelector(".profile-header .avatar-circle");
 
-  function getPrimeiroNomeESobrenome(nomeCompleto) {
-    if (!nomeCompleto) return "";
-    const partes = nomeCompleto.trim().split(" ");
-    return partes.length >= 2
-      ? `${partes[0]} ${partes[1]}`
-      : partes[0];
-  }
-
   // NOME
-  userNameDropdown.innerText = getPrimeiroNomeESobrenome(usuario.nome);
+  userNameDropdown.innerText = usuarioLogado.nome?.trim() || "";
 
   // EMPRESA E UNIDADE
   dropdownUserExtra.innerHTML = `
-    <div class="company-name">${usuario.nome_empresa}</div>
-    <div class="unit-name">${usuario.nome_unidade}</div>
+    <div class="company-name">${usuarioLogado.nome_empresa}</div>
+    <div class="unit-name">${usuarioLogado.nome_unidade}</div>
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO
-  if (usuario.perfil === "CREDENCIADA") {
+  if (usuarioLogado.perfil === "CREDENCIADA") {
     avatarIcon.classList.add("fa-hospital");
     avatarIconDropdown.classList.add("fa-hospital");
 
@@ -60,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     avatarDrop.classList.add("credenciada");
   }
 
-  if (usuario.perfil === "EMPRESA") {
+  if (usuarioLogado.perfil === "EMPRESA") {
     avatarIcon.classList.add("fa-city");
     avatarIconDropdown.classList.add("fa-city");
 
@@ -98,7 +80,7 @@ async function carregarPrestadores() {
   if (!select) return;
 
   try {
-    await fetch(`http://localhost:3001/prestadores/${empresaCodigo}`);
+    await fetch(`/prestadores/${empresaCodigo}`);
 
     await listarPrestadores();
 
@@ -109,7 +91,7 @@ async function carregarPrestadores() {
 
 // LISTAR OS PRESTADORES
 async function listarPrestadores() {
-  const res = await fetch(`http://localhost:3001/prestadores/${empresaCodigo}`);
+  const res = await fetch(`/prestadores/${empresaCodigo}`);
   const prestadoresBase = await res.json();
 
   const detalhes = [];
@@ -135,7 +117,7 @@ async function listarPrestadores() {
 // PEGAR OS DETALHES DO PRESTADOR
 async function buscarDetalhesPrestador(codigo) {
   try {
-    const res = await fetch(`http://localhost:3001/prestador/${empresaCodigo}/${codigo}`);
+    const res = await fetch(`/prestador/${empresaCodigo}/${codigo}`);
     if (!res.ok) throw new Error();
 
     const dados = await res.json();
@@ -341,7 +323,7 @@ function preencherFuncionario() {
 
 // FUNÇÃO PARA CARREGAR O SELECT DAS UNIDADES
 async function carregarUnidades() {
-  const res = await fetch(`${API}/unidades/${usuarioLogado.cod_empresa}`);
+  const res = await fetch(`/unidades/${usuarioLogado.cod_empresa}`);
 
   const dados = await res.json();
 
@@ -361,7 +343,7 @@ async function carregarUnidades() {
 
 // FUNÇÃO PARA CARREGAR O SELECT DOS SETORES
 async function carregarSetores() {
-  const res = await fetch(`${API}/setores/${usuarioLogado.cod_empresa}`);
+  const res = await fetch(`/setores/${usuarioLogado.cod_empresa}`);
 
   const dados = await res.json();
 
@@ -381,7 +363,7 @@ async function carregarSetores() {
 
 // FUNÇÃO PARA CARREGAR O SELECT DOS CARGOS
 async function carregarCargos() {
-  const res = await fetch(`${API}/cargos/${usuarioLogado.cod_empresa}`);
+  const res = await fetch(`/cargos/${usuarioLogado.cod_empresa}`);
 
   const dados = await res.json();
 
@@ -657,7 +639,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   }
 
   try {
-    const res = await fetch("http://localhost:3001/solicitar-exame", {
+    const res = await fetch("/solicitar-exame", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados)

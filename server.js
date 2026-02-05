@@ -657,7 +657,6 @@ app.get("/solicitacoes/novo-cadastro/:id", async (req, res) => {
         f.*,
         sf.status,
         sf.motivo_reprovacao,
-        sf.retorno_soc_erro,
         sf.solicitado_em,
         u.nome AS solicitado_por_nome,
         ua.nome AS analisado_por_nome,

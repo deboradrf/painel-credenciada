@@ -29,25 +29,30 @@ function gerarSenhaNoInput(tamanho = 10) {
 function copiarSenha() {
     const input = document.getElementById("senha");
 
-    if (!input.value) {
+    if (!input || !input.value) {
         alert("Nenhuma senha para copiar");
         return;
     }
 
-    input.select();
-    input.setSelectionRange(0, 99999);
+    const textarea = document.createElement("textarea");
+    textarea.value = input.value;
 
-    navigator.clipboard.writeText(input.value)
-        .then(() => {
-            alert("Senha copiada!");
-        })
-        .catch(() => {
-            // Fallback caso clipboard API falhe
-            document.execCommand("copy");
-            alert("Senha copiada!");
-        });
+    textarea.style.position = "fixed";
+    textarea.style.top = "-9999px";
 
-    window.getSelection().removeAllRanges();
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    try {
+        document.execCommand("copy");
+        alert("Senha copiada!");
+    } catch (err) {
+        alert("Não foi possível copiar a senha");
+        console.error(err);
+    }
+
+    document.body.removeChild(textarea);
 }
 
 // LISTENER PARA QUANDO SELECIONAR O PERFIL
@@ -150,18 +155,18 @@ async function carregarUnidades(empresaCodigo) {
 const nomeInput = document.getElementById("nome");
 
 nomeInput.addEventListener("input", function () {
-  let valor = this.value.toUpperCase();
+    let valor = this.value.toUpperCase();
 
-  valor = valor.replace(/[^A-ZÇÀ-Ÿ\s]/g, "");
+    valor = valor.replace(/[^A-ZÇÀ-Ÿ\s]/g, "");
 
-  valor = valor
-    .replace(/[ÁÀÂÃ]/g, "A")
-    .replace(/[ÉÈÊ]/g, "E")
-    .replace(/[ÍÌÎ]/g, "I")
-    .replace(/[ÓÒÔÕ]/g, "O")
-    .replace(/[ÚÙÛ]/g, "U");
+    valor = valor
+        .replace(/[ÁÀÂÃ]/g, "A")
+        .replace(/[ÉÈÊ]/g, "E")
+        .replace(/[ÍÌÎ]/g, "I")
+        .replace(/[ÓÒÔÕ]/g, "O")
+        .replace(/[ÚÙÛ]/g, "U");
 
-  this.value = valor;
+    this.value = valor;
 });
 
 // SUBMIT DO FORMULÁRIO

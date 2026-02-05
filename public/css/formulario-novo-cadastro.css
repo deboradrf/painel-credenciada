@@ -34,7 +34,7 @@ body.blur-main header {
     background: linear-gradient(135deg, #53A5A6, #61B4B6, #4A8F90);
     border-radius: 40px;
     padding: 14px 32px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    box-shadow: -3px 0 12px rgba(0, 0, 0, 0.12);
 }
 
 .header-left {
@@ -53,16 +53,19 @@ body.blur-main header {
     gap: 20px;
 }
 
+.header-center span {
+    transition: transform 0.2s;
+}
+
+.header-center span:hover {
+    transform: translateY(-2px);
+}
+
 .header-link {
     color: #FFFFFF;
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
-}
-
-.header-link:hover {
-    text-decoration: none;
-    opacity: 0.7;
 }
 
 .profile-trigger {
@@ -106,7 +109,7 @@ body.blur-main header {
 }
 
 .user-name {
-    font-weight: 500;
+    font-weight: 400;
     font-size: 14px;
     line-height: 1;
     color: #000000;
@@ -115,7 +118,6 @@ body.blur-main header {
 .profile-menu {
     width: 280px;
     background: #FFFFFF;
-    color: #000000;
     border-radius: 10px;
     padding: 14px;
     border: none;
@@ -156,7 +158,7 @@ body.blur-main header {
     display: flex;
     align-items: center;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .profile-list li:hover {
@@ -169,6 +171,7 @@ body.blur-main header {
 }
 
 .profile-list a i {
+    color: #F1AE33;
     margin-right: 5px;
 }
 
@@ -296,7 +299,7 @@ h5::after {
     border-left: 5px solid #F1AE33;
     border-radius: 0.6rem;
     background-color: #FFF8E6;
-    color: #7A5A1A;
+    color: #7A6C1A;
 }
 
 .label-nao-possui-matricula,
@@ -339,7 +342,7 @@ h5::after {
     align-items: center;
     background: #F9FAFB;
     border: 2px solid #8A94A6;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     align-items: stretch;
 }
@@ -418,34 +421,96 @@ h5::after {
     color: #9CA3AF;
 }
 
+.btn-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn-animado {
+    background: #FFFFFF;
+    width: 200px;
+    height: 3rem;
+    border-radius: 10px;
+    position: relative;
+    color: #4F545A;
+    font-size: 14px;
+    font-weight: 500;
+    overflow: hidden;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 50px;
+    box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+}
+
+.btn-animado span {
+    position: relative;
+    z-index: 5;
+}
+
+/* Barrinha lateral */
+.btn-animado .btn-hover-layer {
+    border-radius: 8px;
+    width: 48px;
+    height: 2.5rem;
+    position: absolute;
+    left: 0.35rem;
+    top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    font-size: 22px;
+    transition: width 0.5s ease;
+    background: #F1AE33;
+}
+
+.btn-animado:hover .btn-hover-layer {
+    width: calc(100% - 10px);
+}
+
+/* .action {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .btn-enviar {
     background-color: #F1AE33;
     border: 1px solid #E5E7EB;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
     color: #FFFFFF;
     cursor: pointer;
-    display: inline-block;
     font-size: 14px;
     font-weight: 500;
+    line-height: 28px;
     padding: 0 10px 0 10px;
-    text-align: center;
-    width: 180px;
     height: 40px;
+    transition: all 0.25s ease;
 }
 
 .btn-enviar:hover {
-    background-color: #F1AE33;
+    transform: translateY(-2px);
+} */
+
+.footer-container {
+    filter: drop-shadow(0 -3px 12px rgba(0, 0, 0, 0.12));
 }
 
-.footer-wave {
+.footer {
     margin-top: auto;
     width: 100%;
     position: relative;
     background: #53A5A6;
+    margin-bottom: -5px;
 }
 
-.footer-wave-svg {
+.footer-wrapper {
     width: 100%;
     height: clamp(120px, 18vw, 180px);
     overflow: hidden;
@@ -455,49 +520,57 @@ h5::after {
     z-index: 1;
 }
 
-.footer-wave-svg svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-.wave-bottom {
+.footer-svg {
+    position: absolute;
+    top: auto;
+    bottom: 0;
     width: 100%;
     overflow: hidden;
-    position: relative;
-    z-index: 1;
+    line-height: 0;
 }
 
-.wave-bottom svg {
+.footer-svg svg {
+    position: relative;
     display: block;
     width: 100%;
     height: 100%;
+    transform: rotate(180deg);
 }
 
-.footer-wave-svg::after {
-    content: "© 2026 • Salubritá Saúde e Segurança no Trabalho";
-    position: absolute;
-    top: 85%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 2;
+.footer-svg .shape-fill {
+    fill: #53A5A6;
+}
+
+.div-space {
+    height: clamp(120px, 18vw, 180px);
+}
+
+.extra-section {
+    height: 50px;
+    background-color: #53A5A6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     color: #FFFFFF;
+}
+
+.extra-section p {
+    margin: 0;
     font-size: 14px;
     font-weight: 500;
-    pointer-events: none;
 }
 
-.footer-socials {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%);
+/*
+.socials {
     display: flex;
-    gap: 14px;
-    z-index: 3;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
-.footer-socials a {
+.socials a {
     width: 36px;
     height: 36px;
     text-decoration: none;
@@ -512,10 +585,10 @@ h5::after {
     transition: transform 0.2s ease;
 }
 
-.footer-socials a:hover {
+.socials a:hover {
     transform: translateY(-3px) scale(1.05);
     background: rgba(255, 255, 255, 0.3);
-}
+}*/
 
 input:-webkit-autofill,
 input:-webkit-autofill:focus,

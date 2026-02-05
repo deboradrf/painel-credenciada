@@ -62,7 +62,7 @@
                     <ul class="profile-list">
                         <li>
                             <a href="editar-perfil.html">
-                                <i class="fa-regular fa-user"></i>
+                                <i class="fa-solid fa-user"></i>
                                 Editar Perfil
                             </a>
                         </li>
@@ -227,19 +227,6 @@
                                     <option value="PESSOA_JURIDICA">Pessoa Jurídica</option>
                                     <option value="ESTAGIARIO">Estagiário</option>
                                     <option value="MENOR_APRENDIZ">Menor Aprendiz</option>
-                                    <option value="ESTATUTARIO">Estatutário</option>
-                                    <option value="COMISSIONADO_INTERNO">Comissionado Interno</option>
-                                    <option value="COMISSIONADO_EXTERNO">Comissionado Externo</option>
-                                    <option value="APOSENTADO">Aposentado</option>
-                                    <option value="APOSENTADO_INATIVO_PREFEITURA">Aposentado/Inativo Prefeitura</option>
-                                    <option value="PENSIONISTA">Pensionista</option>
-                                    <option value="SERVIDOR_PUBLICO_EFETIVO">Servidor Público Efetivo</option>
-                                    <option value="EXTRANUMERARIO">Extranumerário</option>
-                                    <option value="AUTARQUICO">Autárquico</option>
-                                    <option value="INATIVO">Inativo</option>
-                                    <option value="TITULO_PRECARIO">Título Precário</option>
-                                    <option value="SERVIDOR_ADM_CENTRALIZADA_OU_DESCENTRALIZADA">Servidor Adm
-                                        Centralizada ou Descentralizada</option>
                                 </select>
                             </div>
                         </div>
@@ -349,7 +336,8 @@
                             <div class="alerts-container mb-2">
                                 <div class="alert alert-warning">
                                     <i class="fa-solid fa-circle-info fa-lg" style="color: #F1AE33"></i>
-                                    <p class="alert-text">Em caso de colaborador mapeado em Atividades Críticas, selecione o campo abaixo:</p>
+                                    <p class="alert-text">Em caso de colaborador mapeado em Atividades Críticas,
+                                        selecione o campo abaixo:</p>
                                 </div>
                             </div>
                         </div>
@@ -401,6 +389,29 @@
                                     <option value="ADMISSIONAL">Admissional</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label>Deseja solicitar mais de um ASO para outras unidades?</label>
+
+                            <div class="d-flex gap-2 mt-2">
+                                <button type="button" class="btn btn-outline-primary btn-sm"
+                                    onclick="ativarUnidades(true)">
+                                    Sim
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    onclick="ativarUnidades(false)">
+                                    Não
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="unidadesContainer" class="d-none mt-3"></div>
+
+                        <div id="btnAddUnidade" class="d-none mt-2">
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="adicionarUnidade()">
+                                <i class="fa-solid fa-plus"></i> Adicionar outra unidade
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -490,7 +501,7 @@
                                 <div class="alert alert-warning">
                                     <i class="fa-solid fa-circle-info fa-lg" style="color: #F1AE33"></i>
                                     <p class="alert-text">Caso não encontre a clínica desejada, selecione o campo abaixo
-                                        para solicitar um credenciamento:</p>
+                                        para solicitar um novo credenciamento:</p>
                                 </div>
                             </div>
                             <div class="form-check mt-2">
@@ -548,30 +559,48 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-enviar">
-                    Enviar solicitação
-                </button>
+                <div class="btn-wrapper">
+                    <button type="submit" class="btn-animado">
+                        <div class="btn-hover-layer">
+                            <i class="fa-solid fa-paper-plane" style="color: #FFFFFF"></i>
+                        </div>
+                        <span>Enviar solicitação</span>
+                    </button>
+                </div>
             </form>
 
             <div id="mensagem" class="mt-3"></div>
         </div>
     </main>
 
-    <footer class="footer-wave">
-        <div class="footer-wave-svg">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
-                <path fill="#53A5A6" stroke="none"
-                    d="M0,128L48,144C96,160,192,192,288,176C384,160,480,96,576,74.7C672,53,768,75,864,85.3C960,96,1056,96,1152,80C1248,64,1344,32,1392,16L1440,0L1440,320L0,320Z">
-                </path>
-            </svg>
-            <div class="footer-socials">
-                <a href="https://www.instagram.com/salubritasso/" target="_blank"><i
-                        class="fa-brands fa-instagram"></i></a>
+    <div class="footer-container">
+        <footer class="footer">
+            <div class="footer-wrapper">
+                <div class="footer-svg">
+                    <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"
+                        preserveAspectRatio="none">
+                        <path
+                            d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z"
+                            opacity=".3" class="shape-fill"></path>
+                        <path
+                            d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"
+                            class="shape-fill"></path>
+                    </svg>
+                </div>
+            </div>
+        </footer>
+
+        <div class="div-space"></div>
+
+        <section class="extra-section">
+            <!-- <div class="socials">
+                <a href="https://www.instagram.com/salubritasso/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
                 <a href="https://salubrita.com.br/" target="_blank"><i class="fa-solid fa-globe"></i></a>
                 <a href="https://wa.me/553131669006" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-            </div>
-        </div>
-    </footer>
+            </div> -->
+            <p>© 2026 • Salubritá Saúde e Segurança no Trabalho</p>
+        </section>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>

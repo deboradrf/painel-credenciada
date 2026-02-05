@@ -9,22 +9,11 @@ const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
 
 if (!usuarioLogado) {
   alert("Sessão expirada. Faça login novamente.");
-  window.location.href = "/login.html";
+  window.location.href = "login.html";
 }
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
-  const usuario = JSON.parse(localStorage.getItem("usuario"));
-
-  if (!usuario) {
-    window.location.href = "/login.html";
-    return;
-  }
-
-  // PREENCHE A EMPRESA NO FORMULÁRIO
-  document.getElementById("empresaNomeView").value = usuario.nome_empresa;
-  document.getElementById("empresaCodigoHidden").value = usuario.cod_empresa;
-
   const avatarIcon = document.getElementById("avatarIcon");
   const avatarIconDropdown = document.getElementById("avatarIconDropdown");
 
@@ -34,23 +23,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const avatarBtn = document.querySelector(".profile-trigger .avatar-circle");
   const avatarDrop = document.querySelector(".profile-header .avatar-circle");
 
-  function getPrimeiroNome(nomeCompleto) {
-    if (!nomeCompleto) return "";
-    const partes = nomeCompleto.trim().split(" ");
-    return partes.slice(0, 2).join(" ");
-  }
-
   // NOME
-  userNameDropdown.textContent = getPrimeiroNome(usuario.nome);
+  userNameDropdown.innerText = usuarioLogado.nome?.trim() || "";
 
   // EMPRESA E UNIDADE
   dropdownUserExtra.innerHTML = `
-    <div class="company-name">${usuario.nome_empresa}</div>
-    <div class="unit-name">${usuario.nome_unidade}</div>
+    <div class="company-name">${usuarioLogado.nome_empresa}</div>
+    <div class="unit-name">${usuarioLogado.nome_unidade}</div>
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO
-  if (usuario.perfil === "CREDENCIADA") {
+  if (usuarioLogado.perfil === "CREDENCIADA") {
     avatarIcon.classList.add("fa-hospital");
     avatarIconDropdown.classList.add("fa-hospital");
 
@@ -58,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     avatarDrop.classList.add("credenciada");
   }
 
-  if (usuario.perfil === "EMPRESA") {
+  if (usuarioLogado.perfil === "EMPRESA") {
     avatarIcon.classList.add("fa-city");
     avatarIconDropdown.classList.add("fa-city");
 
@@ -92,7 +75,7 @@ async function carregarNomeEmpresa() {
   if (!empresaCodigo) return;
 
   try {
-    const res = await fetch("http://localhost:3001/empresas");
+    const res = await fetch("/empresas");
     const empresas = await res.json();
 
     const empresaSelecionada = empresas.find(
@@ -108,11 +91,63 @@ async function carregarNomeEmpresa() {
   }
 }
 
+let contadorUnidades = 0;
+
+window.ativarUnidades = function (ativar) {
+  const container = document.getElementById("unidadesContainer");
+  const btnAdd = document.getElementById("btnAddUnidade");
+
+  if (!container || !btnAdd) {
+    console.error("Container ou botão não encontrado");
+    return;
+  }
+
+  if (ativar) {
+    container.classList.remove("d-none");
+    btnAdd.classList.remove("d-none");
+
+    if (contadorUnidades === 0) {
+      window.adicionarUnidade();
+    }
+  } else {
+    container.classList.add("d-none");
+    btnAdd.classList.add("d-none");
+    container.innerHTML = "";
+    contadorUnidades = 0;
+  }
+};
+
+window.adicionarUnidade = function () {
+  contadorUnidades++;
+
+  const container = document.getElementById("unidadesContainer");
+  if (!container) return;
+
+  container.insertAdjacentHTML(
+    "beforeend",
+    `
+    <div class="form-group mt-2">
+      <label>Unidade ${contadorUnidades}</label>
+      <div class="input-wrapper">
+        <div class="input-icon">
+          <i class="fa-solid fa-building"></i>
+        </div>
+        <select name="unidades[]" required>
+          <option value="">Selecione a unidade</option>
+          <option value="MATRIZ">Matriz</option>
+          <option value="FILIAL">Filial</option>
+        </select>
+      </div>
+    </div>
+    `
+  );
+};
+
 // CARREGAR UNIDADES
 async function carregarUnidades() {
   if (!empresaCodigo) return;
 
-  const res = await fetch(`http://localhost:3001/unidades/${empresaCodigo}`);
+  const res = await fetch(`/unidades/${empresaCodigo}`);
   const unidades = await res.json();
 
   const select = document.getElementById("unidadeSelect");
@@ -132,7 +167,7 @@ async function carregarSetores() {
   if (!empresaCodigo) return;
 
   try {
-    const res = await fetch(`http://localhost:3001/setores/${empresaCodigo}`);
+    const res = await fetch(`/setores/${empresaCodigo}`);
     const setores = await res.json();
 
     const select = document.getElementById("setorSelect");
@@ -152,7 +187,7 @@ async function carregarSetores() {
 
 // CARREGAR CARGOS
 async function carregarCargos() {
-  const res = await fetch(`http://localhost:3001/cargos/${empresaCodigo}`);
+  const res = await fetch(`/cargos/${empresaCodigo}`);
   const cargos = await res.json();
 
   const select = document.getElementById("cargoSelect");
@@ -175,7 +210,7 @@ async function carregarPrestadores() {
   if (!select) return;
 
   try {
-    await fetch(`http://localhost:3001/prestadores/${empresaCodigo}`);
+    await fetch(`/prestadores/${empresaCodigo}`);
 
     await listarPrestadores();
 
@@ -186,7 +221,7 @@ async function carregarPrestadores() {
 
 // LISTAR OS PRESTADORES
 async function listarPrestadores() {
-  const res = await fetch(`http://localhost:3001/prestadores/${empresaCodigo}`);
+  const res = await fetch(`/prestadores/${empresaCodigo}`);
   const prestadoresBase = await res.json();
 
   const detalhes = [];
@@ -212,7 +247,7 @@ async function listarPrestadores() {
 // PEGAR OS DETALHES DO PRESTADOR
 async function buscarDetalhesPrestador(codigo) {
   try {
-    const res = await fetch(`http://localhost:3001/prestador/${empresaCodigo}/${codigo}`);
+    const res = await fetch(`/prestador/${empresaCodigo}/${codigo}`);
     if (!res.ok) throw new Error();
 
     const dados = await res.json();
@@ -300,6 +335,10 @@ document.getElementById("cidade_clinica").addEventListener("change", function ()
     selectClinica.appendChild(opt);
   });
 });
+
+// PREENCHE O CAMPO DE EMPRESA NO FORMULÁRIO
+document.getElementById("empresaNomeView").value = usuarioLogado.nome_empresa;
+document.getElementById("empresaCodigoHidden").value = usuarioLogado.cod_empresa;
 
 // MOSTRAR SEÇÃO DE NOVO SETOR
 document.getElementById("solicitarNovoSetor").addEventListener("change", function () {
@@ -391,19 +430,7 @@ const codCategoriaMap = {
   TEMPORARIO: "106",
   PESSOA_JURIDICA: "",
   ESTAGIARIO: "901",
-  MENOR_APRENDIZ: "103",
-  ESTATUTARIO: "",
-  COMISSIONADO_INTERNO: "",
-  COMISSIONADO_EXTERNO: "",
-  APOSENTADO: "",
-  APOSENTADO_INATIVO_PREFEITURA: "",
-  PENSIONISTA: "",
-  SERVIDOR_PUBLICO_EFETIVO: "",
-  EXTRANUMERARIO: "",
-  AUTARQUICO: "",
-  INATIVO: "",
-  TITULO_PRECARIO: "",
-  SERVIDOR_ADM_CENTRALIZADA_OU_DESCENTRALIZADA: ""
+  MENOR_APRENDIZ: "103"
 };
 
 // MÁSCARA DE CPF
@@ -708,7 +735,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   }
 
   try {
-    const res = await fetch("http://localhost:3001/novo-cadastro", {
+    const res = await fetch("/novo-cadastro", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados)

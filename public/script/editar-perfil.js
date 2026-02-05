@@ -1,3 +1,4 @@
+let usuarioLogado = null;
 let dadosOriginais = {};
 
 // DROPDOWN DO PERFIL
@@ -17,16 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const avatarBtn = document.querySelector(".profile-trigger .avatar-circle");
     const avatarDrop = document.querySelector(".profile-header .avatar-circle");
 
-    function getPrimeiroNomeESobrenome(nomeCompleto) {
-        if (!nomeCompleto) return "";
-        const partes = nomeCompleto.trim().split(" ");
-        return partes.length >= 2
-            ? `${partes[0]} ${partes[1]}`
-            : partes[0];
-    }
-
     // NOME
-    userNameDropdown.innerText = getPrimeiroNomeESobrenome(usuarioLogado.nome);
+    userNameDropdown.innerText = usuarioLogado.nome?.trim() || "";
 
     // EMPRESA E UNIDADE
     dropdownUserExtra.innerHTML = `
@@ -66,15 +59,13 @@ document.addEventListener("DOMContentLoaded", () => {
 carregarPerfil();
 
 async function carregarPerfil() {
-    const API = "http://localhost:3001";
-
     const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
 
     if (!usuarioLogado) {
         window.location.href = "login.html";
     }
 
-    const res = await fetch(`${API}/usuarios/${usuarioLogado.id}`);
+    const res = await fetch(`/usuarios/${usuarioLogado.id}`);
     const user = await res.json();
 
     if (!res.ok) {
@@ -169,13 +160,12 @@ function cancelarEdicao() {
 
 // FUNÇÃO PARA SALVAR EDIÇÃO
 async function salvarEdicao() {
-    const API = "http://localhost:3001";
     const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
 
     const email = document.getElementById("email").value;
     const senha = document.getElementById("senha").value;
 
-    const res = await fetch(`${API}/usuarios/${usuarioLogado.id}`, {
+    const res = await fetch(`/usuarios/${usuarioLogado.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, senha })

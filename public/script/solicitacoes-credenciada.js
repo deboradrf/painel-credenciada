@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // FUNÇÃO PARA CARREGAR SOLICITAÇÕES E RENDERIZAR A TABELA
 async function carregarSolicitacoes() {
-  const res = await fetch("http://localhost:3001/solicitacoes");
+  const res = await fetch("/solicitacoes");
 
   solicitacoes = await res.json();
 
@@ -171,7 +171,7 @@ async function cancelarSolicitacao(id, tipo, usuarioLogadoId) {
   if (!confirmar) return;
 
   try {
-    const response = await fetch(`http://localhost:3001/solicitacoes/${tipo}/${id}/cancelar`, {
+    const response = await fetch(`/solicitacoes/${tipo}/${id}/cancelar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ usuario_id: usuarioLogadoId })
@@ -217,8 +217,8 @@ async function verDetalhes(id, tipo) {
   try {
     const url =
       tipo === "NOVO_EXAME"
-        ? `http://localhost:3001/solicitacoes/novo-exame/${id}`
-        : `http://localhost:3001/solicitacoes/novo-cadastro/${id}`;
+        ? `/solicitacoes/novo-exame/${id}`
+        : `/solicitacoes/novo-cadastro/${id}`;
 
     const res = await fetch(url);
     if (!res.ok) throw new Error();
@@ -250,7 +250,7 @@ async function carregarSetores(empresaCodigo, selecionadoNome = "") {
   select.innerHTML = '<option value="">-</option>';
 
   try {
-    const res = await fetch(`http://localhost:3001/setores/${empresaCodigo}`);
+    const res = await fetch(`/setores/${empresaCodigo}`);
     const setores = await res.json();
 
     setores.forEach(s => {
@@ -273,7 +273,7 @@ async function carregarCargos(empresaCodigo, selecionadoNome = "") {
   select.innerHTML = '<option value="">-</option>';
 
   try {
-    const res = await fetch(`http://localhost:3001/cargos/${empresaCodigo}`);
+    const res = await fetch(`/cargos/${empresaCodigo}`);
     const cargos = await res.json();
 
     cargos.forEach(c => {
@@ -619,7 +619,7 @@ async function enviarSOC(id) {
 
   try {
     const res = await fetch(
-      `http://localhost:3001/soc/funcionarios/${id}/enviar`,
+      `/soc/funcionarios/${id}/enviar`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -696,7 +696,7 @@ async function analisarSolicitacao(status) {
 
     if (solicitarNovoSetor || solicitarNovoCargo) {
       const dadosEdicao = pegarDadosEdicaoCadastro();
-      await fetch(`http://localhost:3001/solicitacoes/novo-cadastro/${solicitacaoAtualId}/editar-setor-cargo`, {
+      await fetch(`/solicitacoes/novo-cadastro/${solicitacaoAtualId}/editar-setor-cargo`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dadosEdicao)
@@ -705,7 +705,7 @@ async function analisarSolicitacao(status) {
   }
 
   const res = await fetch(
-    `http://localhost:3001/solicitacoes/${tipo}/${solicitacaoAtualId}/analisar`,
+    `/solicitacoes/${tipo}/${solicitacaoAtualId}/analisar`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

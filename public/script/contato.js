@@ -1,10 +1,10 @@
-let usuario = null;
+let usuarioLogado = null;
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
-    usuario = JSON.parse(localStorage.getItem("usuario"));
+    usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
 
-    if (!usuario) {
+    if (!usuarioLogado) {
         window.location.href = "login.html";
         return;
     }
@@ -21,28 +21,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const avatarBtn = document.querySelector(".profile-trigger .avatar-circle");
     const avatarDrop = document.querySelector(".profile-header .avatar-circle");
 
-    function getPrimeiroNomeESobrenome(nomeCompleto) {
-        if (!nomeCompleto) return "";
-
-        const partes = nomeCompleto.trim().split(" ");
-
-        return partes.length >= 2
-            ? `${partes[0]} ${partes[1]}`
-            : partes[0];
-    }
-
     // NOME
-    const nomeFormatado = getPrimeiroNomeESobrenome(usuario.nome);
-    userNameDropdown.innerText = nomeFormatado;
+    userNameDropdown.innerText = usuarioLogado.nome?.trim() || "";
 
     // EMPRESA E UNIDADE
     dropdownUserExtra.innerHTML = `
-        <div class="company-name">${usuario.nome_empresa}</div>
-        <div class="unit-name">${usuario.nome_unidade}</div>
+        <div class="company-name">${usuarioLogado.nome_empresa}</div>
+        <div class="unit-name">${usuarioLogado.nome_unidade}</div>
     `;
 
     // LÓGICA DOS PERFIS DE ACESSO
-    if (usuario.perfil === "CREDENCIADA") {
+    if (usuarioLogado.perfil === "CREDENCIADA") {
         cardsEmpresa.forEach(card => card.style.display = "none");
         cardsCredenciada.forEach(card => card.style.display = "flex");
 
@@ -53,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
         avatarDrop.classList.add("credenciada");
     }
 
-    if (usuario.perfil === "EMPRESA") {
+    if (usuarioLogado.perfil === "EMPRESA") {
         cardsEmpresa.forEach(card => card.style.display = "flex");
         cardsCredenciada.forEach(card => card.style.display = "none");
 

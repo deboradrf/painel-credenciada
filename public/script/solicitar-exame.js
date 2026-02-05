@@ -1,20 +1,10 @@
-let usuario = null;
-
-const API = "http://localhost:3001";
-
-// USUÁRIO LOGADO
-const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
-
-if (!usuarioLogado) {
-  alert("Usuário não logado");
-  window.location.href = "login.html";
-}
+let usuarioLogado = null;
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
-  usuario = JSON.parse(localStorage.getItem("usuario"));
+  usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
 
-  if (!usuario) {
+  if (!usuarioLogado) {
     window.location.href = "login.html";
     return;
   }
@@ -28,27 +18,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const avatarBtn = document.querySelector(".profile-trigger .avatar-circle");
   const avatarDrop = document.querySelector(".profile-header .avatar-circle");
 
-  function getPrimeiroNomeESobrenome(nomeCompleto) {
-    if (!nomeCompleto) return "";
-
-    const partes = nomeCompleto.trim().split(" ");
-
-    return partes.length >= 2
-      ? `${partes[0]} ${partes[1]}`
-      : partes[0];
-  }
-
   // NOME
-  userNameDropdown.innerText = getPrimeiroNomeESobrenome(usuario.nome);
+  userNameDropdown.innerText = usuarioLogado.nome?.trim() || "";
 
   // EMPRESA E UNIDADE
   dropdownUserExtra.innerHTML = `
-    <div class="company-name">${usuario.nome_empresa}</div>
-    <div class="unit-name">${usuario.nome_unidade}</div>
+    <div class="company-name">${usuarioLogado.nome_empresa}</div>
+    <div class="unit-name">${usuarioLogado.nome_unidade}</div>
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO
-  if (usuario.perfil === "CREDENCIADA") {
+  if (usuarioLogado.perfil === "CREDENCIADA") {
     avatarIcon.classList.add("fa-hospital");
     avatarIconDropdown.classList.add("fa-hospital");
 
@@ -56,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     avatarDrop.classList.add("credenciada");
   }
 
-  if (usuario.perfil === "EMPRESA") {
+  if (usuarioLogado.perfil === "EMPRESA") {
     avatarIcon.classList.add("fa-city");
     avatarIconDropdown.classList.add("fa-city");
 
@@ -85,16 +65,21 @@ async function buscarCPF() {
   const empresaUsuario = usuarioLogado.cod_empresa;
 
   if (cpf.length !== 11) {
-    resultado.innerHTML = `<div class="alert alert-warning">CPF inválido</div>`;
+    resultado.innerHTML = `
+      <div class="alerts-container mb-4">
+        <div class="alert alert-invalido">
+          <i class="fa-solid fa-circle-xmark fa-lg" style="color: #F1AE33"></i>
+          <p class="alert-text">CPF inválido</p>
+        </div>
+      </div>
+    `;
     return;
   }
 
   resultado.innerHTML = "🔎 Consultando funcionário no SOC...";
 
   try {
-    const res = await fetch(
-      `${API}/soc/funcionario-por-cpf/${cpf}/${empresaUsuario}`
-    );
+    const res = await fetch(`/soc/funcionario-por-cpf/${cpf}/${empresaUsuario}`);
 
     const data = await res.json();
 
@@ -102,16 +87,16 @@ async function buscarCPF() {
     if (!data.existe) {
       resultado.innerHTML = `
         <div class="alerts-container mb-4">
-          <div class="alert alert-danger">
-            <i class="fa-solid fa-circle-check fa-lg" style="color: #F05252"></i>
+          <div class="alert alert-nao-encontrou">
+            <i class="fa-solid fa-circle-xmark fa-lg" style="color: #F05252"></i>
             <p class="alert-text">Funcionário não encontrado. Solicite um novo cadastro</p>
           </div>
         </div>
 
         <div class="d-flex justify-content-center my-3">
-          <button class="btn"
+          <button class="btn-cadastrar-funcionario"
             onclick="window.location.href='formulario-novo-cadastro.html'">
-            Cadastrar Funcionário
+            Cadastrar funcionário
           </button>
         </div>
       `;
@@ -124,8 +109,8 @@ async function buscarCPF() {
     if (f.situacao?.toLowerCase() === "inativo") {
       resultado.innerHTML = `
         <div class="alerts-container mb-2">
-          <div class="alert alert-warning">
-            <i class="fa-solid fa-circle-check fa-lg" style="color: #F1AE33"></i>
+          <div class="alert alert-encontrou-inativo">
+            <i class="fa-solid fa-circle-exclamation fa-lg" style="color: #F1AE33"></i>
             <p class="alert-text">Funcionário encontrado, porém está INATIVO. Solicite um novo cadastro</p>
           </div>
         </div>
@@ -177,9 +162,9 @@ async function buscarCPF() {
         </div>
 
         <div class="d-flex justify-content-center my-3">
-          <button class="btn-cadastrar-funcionario"
+          <button class="btn-cadastrar-funcionario-inativo"
             onclick="window.location.href='formulario-novo-cadastro.html'">
-            Cadastrar Funcionário
+            Cadastrar funcionário
           </button>
         </div>
       `;
@@ -202,7 +187,7 @@ async function buscarCPF() {
 
     resultado.innerHTML = `      
       <div class="alerts-container mb-2">
-        <div class="alert alert-success">
+        <div class="alert alert-encontrou-ativo">
           <i class="fa-solid fa-circle-check fa-lg" style="color: #53A5A6"></i>
           <p class="alert-text">Funcionário encontrado</p>
         </div>
@@ -264,7 +249,13 @@ async function buscarCPF() {
 
   } catch (err) {
     console.error(err);
-    resultado.innerHTML = `<div class="alert alert-danger">Erro ao consultar CPF</div>`;
+    resultado.innerHTML = `
+      <div class="alerts-container mb-4">
+        <div class="alert alert-erro">
+          <i class="fa-solid fa-circle-xmark fa-lg" style="color: #F05252"></i>
+          <p class="alert-text">Erro ao consultar CPF. Tente novamente</p>
+        </div>
+      </div>`;
   }
 }
 

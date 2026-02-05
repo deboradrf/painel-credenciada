@@ -1,11 +1,11 @@
-let usuario = null;
+let usuarioLogado = null;
 let solicitacoes = [];
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
-  usuario = JSON.parse(localStorage.getItem("usuario"));
+  usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
 
-  if (!usuario) {
+  if (!usuarioLogado) {
     window.location.href = "login.html";
     return;
   }
@@ -19,27 +19,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const avatarBtn = document.querySelector(".profile-trigger .avatar-circle");
   const avatarDrop = document.querySelector(".profile-header .avatar-circle");
 
-  function getPrimeiroNomeESobrenome(nomeCompleto) {
-    if (!nomeCompleto) return "";
-
-    const partes = nomeCompleto.trim().split(" ");
-
-    return partes.length >= 2
-      ? `${partes[0]} ${partes[1]}`
-      : partes[0];
-  }
-
   // NOME
-  userNameDropdown.innerText = getPrimeiroNomeESobrenome(usuario.nome);
+  userNameDropdown.innerText = usuarioLogado.nome?.trim() || "";
 
   // EMPRESA E UNIDADE
   dropdownUserExtra.innerHTML = `
-    <div class="company-name">${usuario.nome_empresa}</div>
-    <div class="unit-name">${usuario.nome_unidade}</div>
+    <div class="company-name">${usuarioLogado.nome_empresa}</div>
+    <div class="unit-name">${usuarioLogado.nome_unidade}</div>
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO
-  if (usuario.perfil === "CREDENCIADA") {
+  if (usuarioLogado.perfil === "CREDENCIADA") {
     avatarIcon.classList.add("fa-hospital");
     avatarIconDropdown.classList.add("fa-hospital");
 
@@ -47,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     avatarDrop.classList.add("credenciada");
   }
 
-  if (usuario.perfil === "EMPRESA") {
+  if (usuarioLogado.perfil === "EMPRESA") {
     avatarIcon.classList.add("fa-city");
     avatarIconDropdown.classList.add("fa-city");
 
@@ -81,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // FUNÇÃO PARA CARREGAR HISTÓRICO DAS SOLICITAÇÕES
 async function carregarSolicitacoes() {
-  const res = await fetch(`http://localhost:3001/solicitacoes-empresa/${usuario.id}`);
+  const res = await fetch(`/solicitacoes-empresa/${usuarioLogado.id}`);
 
   solicitacoes = await res.json();
 
@@ -127,7 +117,7 @@ function renderizarTabela(lista) {
     let acoes = "Nenhuma ação a ser feita";
     if (s.status === "PENDENTE") {
       acoes = `
-        <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuario.id})">
+        <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
           Cancelar
         </button>
       `;
@@ -168,15 +158,15 @@ function renderizarTabela(lista) {
 }
 
 // FUNÇÃO PARA CANCELAR SOLICITAÇÃO PENDENTE
-async function cancelarSolicitacao(id, tipo, usuarioId) {
+async function cancelarSolicitacao(id, tipo, usuarioLogadoId) {
   const confirmar = confirm("Tem certeza que deseja cancelar esta solicitação?");
   if (!confirmar) return;
 
   try {
-    const response = await fetch(`http://localhost:3001/solicitacoes/${tipo}/${id}/cancelar`, {
+    const response = await fetch(`/solicitacoes/${tipo}/${id}/cancelar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ usuario_id: usuarioId })
+      body: JSON.stringify({ usuarioLogado: usuarioLogadoId })
     });
 
     if (!response.ok) throw new Error("Erro na comunicação com o servidor");
@@ -210,8 +200,8 @@ function verMotivo(motivo) {
 async function abrirModalEditar(id, tipo) {
   const url =
     tipo === "NOVO_EXAME"
-      ? `http://localhost:3001/solicitacoes/novo-exame/${id}`
-      : `http://localhost:3001/solicitacoes/novo-cadastro/${id}`;
+      ? `/solicitacoes/novo-exame/${id}`
+      : `/solicitacoes/novo-cadastro/${id}`;
 
   const res = await fetch(url);
   if (!res.ok) {
@@ -382,8 +372,8 @@ function preencherModalEditarExame(s) {
   document.getElementById("editExameTipoExame").value = s.tipo_exame;
   document.getElementById("editExameDataExame").value = formatarData(s.data_exame);
   document.getElementById("editExameHoraExame").value = s.hora_exame;
-  document.getElementById("editExameRac").value = s.rac,
-  document.getElementById("editExameTipoRac").value = s.tipo_rac,
+  document.getElementById("editExameRac").value = s.rac;
+  document.getElementById("editExameTipoRac").value = s.tipo_rac;
   document.getElementById("editExameFuncaoAnterior").value = s.funcao_anterior;
   document.getElementById("editExameFuncaoAtual").value = s.funcao_atual;
   document.getElementById("editExameNovaFuncao").value = s.nome_nova_funcao;
@@ -505,13 +495,13 @@ async function salvarEdicaoCadastro() {
 
   const dados = {
     nome_funcionario: document.getElementById("editCadNomeFuncionario").value,
-    data_nascimento: tratarData(document.getElementById("editCadDataNascimento").value),
+    data_nascimento: document.getElementById("editCadDataNascimento").value,
     sexo: document.getElementById("editCadSexo").value,
     estado_civil: document.getElementById("editCadEstadoCivil").value,
     doc_identidade: document.getElementById("editCadDocIdentidade").value,
     cpf: document.getElementById("editCadCPF").value,
     matricula: document.getElementById("editCadMatricula").value,
-    data_admissao: tratarData(document.getElementById("editCadDataAdmissao").value),
+    data_admissao: document.getElementById("editCadDataAdmissao").value,
     tipo_contratacao: document.getElementById("editCadTipoContratacao").value,
     regime_trabalho: document.getElementById("editCadRegimeTrabalho").value,
     nome_empresa: document.getElementById("editCadNomeEmpresa").value,
@@ -534,7 +524,7 @@ async function salvarEdicaoCadastro() {
     observacao: document.getElementById("editCadObservacao").value
   };
 
-  const res = await fetch(`http://localhost:3001/solicitacoes/novo-cadastro/${id}/editar`, {
+  const res = await fetch(`/solicitacoes/novo-cadastro/${id}/editar`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(dados)
@@ -590,7 +580,7 @@ async function salvarEdicaoExame() {
     observacao: document.getElementById("editExameObservacao").value || null
   };
 
-  const res = await fetch(`http://localhost:3001/solicitacoes/novo-exame/${id}/editar`, {
+  const res = await fetch(`/solicitacoes/novo-exame/${id}/editar`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(dados)
