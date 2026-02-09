@@ -193,6 +193,10 @@ hr {
     color: #6B7280;
 }
 
+main {
+    flex: 1;
+}
+
 .title {
     display: flex;
     flex-direction: column;

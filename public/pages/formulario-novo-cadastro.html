@@ -262,68 +262,244 @@
                                 <input type="hidden" id="empresaCodigoHidden">
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Unidade do Funcionário <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-building"></i>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Unidade do Funcionário <span class="required">*</span></label>
+                                <div class="unidade-group">
+                                    <div class="input-wrapper unidade-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-building"></i>
+                                        </div>
+                                        <select id="unidadeSelect" required>
+                                            <option value="">Carregando...</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="solicitarNovaUnidade">
+                                        <label class="form-check-label label-solicitar-unidade"
+                                            for="solicitarNovaUnidade">
+                                            SOLICITAR CRIAÇÃO DE NOVA UNIDADE
+                                        </label>
+                                    </div>
                                 </div>
-                                <select id="unidadeSelect" required>
-                                    <option value="">Carregando...</option>
-                                </select>
                             </div>
                         </div>
+
+                        <div id="divNovaUnidade" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nome Fantasia <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-store"></i>
+                                        </div>
+                                        <input type="text" id="nome_fantasia">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Razão Social <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-file-signature"></i>
+                                        </div>
+                                        <input type="text" id="razao_social">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>CNPJ (que deve sair no ASO e na nota fiscal de cobrança) <span
+                                            class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-id-card"></i>
+                                        </div>
+                                        <input type="text" id="cnpj">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>CNAE <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-industry"></i>
+                                        </div>
+                                        <input type="text" id="cnae">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>CEP <span class="required">*</span></label>
+                                <div class="cep-row">
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-map-pin"></i>
+                                        </div>
+                                        <input type="text" id="cep">
+                                    </div>
+                                    <button type="button" id="btnBuscarCep" class="btn-buscar-cep">
+                                        Buscar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Rua <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-road"></i>
+                                        </div>
+                                        <input type="text" id="rua">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Número <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-hashtag"></i>
+                                        </div>
+                                        <input type="text" id="numero">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Bairro <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-city"></i>
+                                        </div>
+                                        <input type="text" id="bairro">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Estado <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-flag"></i>
+                                        </div>
+                                        <input type="text" id="estado">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-check my-2">
+                                <input class="form-check-input" type="checkbox" id="nota_unica">
+                                <label class="form-check-label label-nota_unica" for="nota_unica">
+                                    Essa unidade será faturada junto com a empresa principal, em uma única
+                                    nota
+                                </label>
+                            </div>
+
+                            <div class="form-check mt-2 mb-4">
+                                <input class="form-check-input" type="checkbox" id="nota_separada">
+                                <label class="form-check-label label-nota_separada" for="nota_separada">
+                                    Essa unidade será faturada separadamente da empresa principal, com uma
+                                    nota
+                                    separada
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label>E-mail para envio das faturas correspondentes a essa unidade <span
+                                        class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-envelope"></i>
+                                    </div>
+                                    <input type="email" id="email">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Setor do Funcionário <span class="required">*</span></label>
+                                <div class="setor-group">
+                                    <div class="input-wrapper setor-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-sitemap"></i>
+                                        </div>
+                                        <select id="setorSelect" required>
+                                            <option value="">Carregando...</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="solicitarNovoSetor">
+                                        <label class="form-check-label label-solicitar-setor" for="solicitarNovoSetor">
+                                            SOLICITAR CRIAÇÃO DE NOVO SETOR
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="novoSetorWrapper" style="display: none;">
+                            <div class="form-group">
+                                <label>Nome do Novo Setor <span class="required">*</span></label>
                                 <div class="input-wrapper">
                                     <div class="input-icon">
                                         <i class="fa-solid fa-sitemap"></i>
                                     </div>
-                                    <select id="setorSelect" required>
-                                        <option value="">Carregando...</option>
-                                    </select>
+                                    <input type="text" id="novoSetor" placeholder="Ex: Financeiro">
                                 </div>
-                                <div class="form-check my-3">
-                                    <input class="form-check-input" type="checkbox" id="solicitarNovoSetor">
-                                    <label class="form-check-label label-solicitar-setor" for="solicitarNovoSetor">
-                                        SOLICITAR CRIAÇÃO DE NOVO SETOR
-                                    </label>
-                                </div>
-                                <div id="novoSetorWrapper" class="novo-campo" style="display: none;">
-                                    <label>Nome do Novo Setor <span class="required">*</span></label>
-                                    <div class="input-wrapper">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Cargo do Funcionário <span class="required">*</span></label>
+                                <div class="cargo-group">
+                                    <div class="input-wrapper cargo-wrapper">
                                         <div class="input-icon">
-                                            <i class="fa-solid fa-sitemap"></i>
+                                            <i class="fa-solid fa-user-tie"></i>
                                         </div>
-                                        <input type="text" id="novoSetor" placeholder="Ex: Financeiro">
+                                        <select id="cargoSelect" required>
+                                            <option value="">Carregando...</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="solicitarNovoCargo">
+                                        <label class="form-check-label label-solicitar-cargo" for="solicitarNovoCargo">
+                                            SOLICITAR CRIAÇÃO DE NOVO CARGO
+                                        </label>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <div id="novoCargoWrapper" style="display: none;">
                             <div class="form-group">
-                                <label>Cargo do Funcionário <span class="required">*</span></label>
+                                <label>Nome do Novo Cargo <span class="required">*</span></label>
                                 <div class="input-wrapper">
                                     <div class="input-icon">
                                         <i class="fa-solid fa-user-tie"></i>
                                     </div>
-                                    <select id="cargoSelect" required>
-                                        <option value="">Carregando...</option>
-                                    </select>
+                                    <input type="text" id="novoCargo" placeholder="Ex: Analista Administrativo">
                                 </div>
-                                <div class="form-check my-3">
-                                    <input class="form-check-input" type="checkbox" id="solicitarNovoCargo">
-                                    <label class="form-check-label label-solicitar-cargo" for="solicitarNovoCargo">
-                                        SOLICITAR CRIAÇÃO DE NOVO CARGO
-                                    </label>
-                                </div>
-                                <div id="novoCargoWrapper" class="novo-campo" style="display: none;">
-                                    <label>Nome do Novo Cargo <span class="required">*</span></label>
-                                    <div class="input-wrapper">
-                                        <div class="input-icon">
-                                            <i class="fa-solid fa-user-tie"></i>
-                                        </div>
-                                        <input type="text" id="novoCargo" placeholder="Ex: Analista Administrativo">
+                            </div>
+                        </div>
+
+                        <div id="descricaoAtividadeWrapper" class="mt-3" style="display: none;">
+                            <div class="form-group">
+                                <label>Descrição de Atividade <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-user-pen"></i>
                                     </div>
+
+                                    <textarea id="descricao_atividade" rows="2"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -378,29 +554,45 @@
                 </div>
 
                 <div class="card mb-4">
+                    <div class="p-3">
+                        <h5 class="my-2">Informação sobre o Exame</h5>
+                    </div>
                     <div class="card-body">
-                        <div class="form-group mt-2">
-                            <label>Tipo de Exame</label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-file"></i>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tipo de Exame</label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-file"></i>
+                                    </div>
+                                    <select id="tipo_exame">
+                                        <option value="ADMISSIONAL">Admissional</option>
+                                    </select>
                                 </div>
-                                <select id="tipo_exame">
-                                    <option value="ADMISSIONAL">Admissional</option>
-                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Data sugerida para realização do exame</label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-calendar"></i>
+                                    </div>
+                                    <input type="date" id="data_exame">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="form-group mt-3">
+                        <div class="form-group mt-2">
                             <label>Deseja solicitar mais de um ASO para outras unidades?</label>
 
+                            <input type="hidden" id="solicitarMaisUnidades" name="solicitar_mais_unidades"
+                                value="false">
+
                             <div class="d-flex gap-2 mt-2">
-                                <button type="button" class="btn btn-outline-primary btn-sm"
-                                    onclick="ativarUnidades(true)">
+                                <button type="button" class="btn-sim" onclick="ativarUnidades(true)">
                                     Sim
                                 </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm"
-                                    onclick="ativarUnidades(false)">
+                                <button type="button" class="btn-nao" onclick="ativarUnidades(false)">
                                     Não
                                 </button>
                             </div>
@@ -409,7 +601,7 @@
                         <div id="unidadesContainer" class="d-none mt-3"></div>
 
                         <div id="btnAddUnidade" class="d-none mt-2">
-                            <button type="button" class="btn btn-outline-success btn-sm" onclick="adicionarUnidade()">
+                            <button type="button" class="btn-add-unidade" onclick="adicionarUnidade()">
                                 <i class="fa-solid fa-plus"></i> Adicionar outra unidade
                             </button>
                         </div>
@@ -603,10 +795,10 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <!--<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
         emailjs.init("1pr-7ed79IA57qLnM");
-    </script>
+    </script> -->
     <script src="../script/formulario-novo-cadastro.js"></script>
 </body>
 

@@ -98,24 +98,25 @@
                 </p>
             </div>
 
-            <div class="filters">
+            <div class="filters mb-4">
                 <div class="filter-group">
-                    <label>Tipo</label>
-                    <select id="filterTipo">
+                    <select id="filterTipo" required>
+                        <option value="" disabled selected></option>
                         <option value="">Todos</option>
                         <option value="NOVO_CADASTRO">Solicitação de Cadastro</option>
                         <option value="NOVO_EXAME">Solicitação de Exame</option>
                     </select>
+                    <label>Tipo</label>
                 </div>
 
                 <div class="filter-group">
+                    <input id="filterCPF" type="text" placeholder=" " />
                     <label>CPF Funcionário</label>
-                    <input id="filterCPF" type="text" placeholder="Buscar funcionário pelo CPF">
                 </div>
 
                 <div class="filter-group">
-                    <label>Status</label>
-                    <select id="filterStatus">
+                    <select id="filterStatus" required>
+                        <option value="" disabled selected></option>
                         <option value="">Todos</option>
                         <option value="PENDENTE">Pendente</option>
                         <option value="APROVADO">Aprovado</option>
@@ -124,13 +125,15 @@
                         <option value="ENVIADO_SOC">Enviado ao SOC</option>
                         <option value="ERRO_SOC">Erro</option>
                     </select>
+                    <label>Status</label>
                 </div>
 
                 <div class="filter-actions">
                     <button id="btnBuscar" class="btn-search">
-                        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        Buscar
                     </button>
-                    <button id="btnLimpar" class="btn-clear">Limpar filtros</button>
+                    <button id="btnLimpar" class="btn-clear">Limpar Filtros</button>
                 </div>
             </div>
 
@@ -172,9 +175,9 @@
                 </div>
             </div>
         </footer>
-    
+
         <div class="div-space"></div>
-    
+
         <section class="extra-section">
             <!-- <div class="socials">
                 <a href="https://www.instagram.com/salubritasso/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
@@ -316,7 +319,7 @@
                                     <span>Setor do Funcionário</span>
                                 </div>
                                 <span id="cadastro_nome_setor" class="detail-value"></span>
-                                <select id="setorSelect" class="form-select" style="display:none;"></select>
+                                <select id="setorSelect" class="detail-input" style="display:none"></select>
                             </div>
                         </div>
 
@@ -326,7 +329,7 @@
                                     <span>Cargo do Funcionário</span>
                                 </div>
                                 <span id="cadastro_nome_cargo" class="detail-value"></span>
-                                <select id="cargoSelect" class="form-select" style="display:none;"></select>
+                                <select id="cargoSelect" class="detail-input" style="display:none"></select>
                             </div>
                         </div>
 
@@ -345,6 +348,15 @@
                                     <span>Nome do Novo Cargo</span>
                                 </div>
                                 <span id="cadastro_novo_cargo" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="divDescricaoAtividade">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Descrição de Atividade</span>
+                                </div>
+                                <span id="cadastro_descricao_atividade" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -372,6 +384,24 @@
                                     <span>Tipo de Exame</span>
                                 </div>
                                 <span id="cadastro_tipo_exame" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Data do Exame</span>
+                                </div>
+                                <span id="cadastro_data_exame" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 d-none" id="bloco_mais_unidades">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Solicitar ASO para unidades</span>
+                                </div>
+                                <div id="cadastro_mais_unidades" class="detail-value"></div>
                             </div>
                         </div>
 
@@ -615,21 +645,21 @@
                             </div>
                         </div>
 
-                        <div class="col-6">
+                        <div class="col-12 d-none" id="bloco_exame_mais_unidades">
                             <div class="detail-item">
                                 <div class="detail-label">
-                                    <span>Data do Exame</span>
+                                    <span>Solicitar ASO para unidades</span>
                                 </div>
-                                <span id="exame_data_exame" class="detail-value"></span>
+                                <div id="exame_mais_unidades" class="detail-value"></div>
                             </div>
                         </div>
 
                         <div class="col-6">
                             <div class="detail-item">
                                 <div class="detail-label">
-                                    <span>Hora do Exame</span>
+                                    <span>Data do Exame</span>
                                 </div>
-                                <span id="exame_hora_exame" class="detail-value"></span>
+                                <span id="exame_data_exame" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -657,6 +687,15 @@
                                     <span>Nome da Nova Função</span>
                                 </div>
                                 <span id="exame_nova_funcao" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="divExameDescricaoAtividade">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Descrição de Atividade</span>
+                                </div>
+                                <span id="exame_descricao_atividade" class="detail-value"></span>
                             </div>
                         </div>
 

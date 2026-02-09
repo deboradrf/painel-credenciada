@@ -99,39 +99,42 @@
                 </p>
             </div>
 
-            <div class="filters">
+            <div class="filters mb-4">
                 <div class="filter-group">
-                    <label>Tipo</label>
-                    <select id="filterTipo">
+                    <select id="filterTipo" required>
+                        <option value="" disabled selected></option>
                         <option value="">Todos</option>
                         <option value="NOVO_CADASTRO">Solicitação de Cadastro</option>
                         <option value="NOVO_EXAME">Solicitação de Exame</option>
                     </select>
+                    <label>Tipo</label>
                 </div>
 
                 <div class="filter-group">
+                    <input id="filterCPF" type="text" placeholder=" " />
                     <label>CPF Funcionário</label>
-                    <input id="filterCPF" type="text" placeholder="Buscar funcionário pelo CPF">
                 </div>
 
                 <div class="filter-group">
-                    <label>Status</label>
-                    <select id="filterStatus">
+                    <select id="filterStatus" required>
+                        <option value="" disabled selected></option>
                         <option value="">Todos</option>
                         <option value="PENDENTE">Pendente</option>
-                        <option value="PENDENTE_REAVALIACAO">Pendente Reavaliação</option>
                         <option value="APROVADO">Aprovado</option>
                         <option value="REPROVADO">Reprovado</option>
-                        <option value="CANCELADO">Cancelado</option>
+                        <option value="PENDENTE_REAVALIACAO">Pendente Reavaliação</option>
                         <option value="ENVIADO_SOC">Enviado ao SOC</option>
+                        <option value="ERRO_SOC">Erro</option>
                     </select>
+                    <label>Status</label>
                 </div>
 
                 <div class="filter-actions">
                     <button id="btnBuscar" class="btn-search">
-                        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        Buscar
                     </button>
-                    <button id="btnLimpar" class="btn-clear">Limpar filtros</button>
+                    <button id="btnLimpar" class="btn-clear">Limpar Filtros</button>
                 </div>
             </div>
 
@@ -173,9 +176,9 @@
                 </div>
             </div>
         </footer>
-    
+
         <div class="div-space"></div>
-    
+
         <section class="extra-section">
             <!-- <div class="socials">
                 <a href="https://www.instagram.com/salubritasso/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
@@ -363,6 +366,15 @@
                             </div>
                         </div>
 
+                        <div class="col-6" id="divCadDescricaoAtividade">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Descrição de Atividade</span>
+                                </div>
+                                <input id="editCadDescricaoAtividade" class="detail-input" />
+                            </div>
+                        </div>
+
                         <div class="col-6">
                             <div class="detail-item">
                                 <div class="detail-label">
@@ -387,6 +399,24 @@
                                     <span>Tipo de Exame</span>
                                 </div>
                                 <input id="editCadTipoExame" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Data do Exame</span>
+                                </div>
+                                <input id="editCadDataExame" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="bloco_mais_unidades">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Solicitar ASO para unidades</span>
+                                </div>
+                                <div id="editCadMaisUnidades" class="detail-value"></div>
                             </div>
                         </div>
 
@@ -599,12 +629,7 @@
                                 <div class="detail-label">
                                     <span>RAC</span>
                                 </div>
-                                <select id="editExameRac" class="detail-input">
-                                    <option value="">Selecione...</option>
-                                    <option value="FORMULARIO_RAC_VALE">Formulário RAC Vale</option>
-                                    <option value="FORMULARIO_UNIDADE_CSN">Formulário unidade CSN</option>
-                                    <option value="FORMULARIO_UNIDADE_VALLOUREC">Formulário unidade Vallourec</option>
-                                </select>
+                                <input id="editExameRac" class="detail-input" />
                             </div>
                         </div>
 
@@ -613,16 +638,7 @@
                                 <div class="detail-label">
                                     <span>Tipo de RAC</span>
                                 </div>
-                                <select id="editExameTipoRac" class="detail-input">
-                                    <option value="">Selecione...</option>
-                                    <option value="RAC_1">RAC 1 - Trabalhos em Altura</option>
-                                    <option value="RAC_2">RAC 2 - Veículos Automotores</option>
-                                    <option value="RAC_3">RAC 3 - Equipamentos Móveis</option>
-                                    <option value="RAC_5">RAC 5 - Içamento de Cargas</option>
-                                    <option value="RAC_6">RAC 6 - Espaço Confinado</option>
-                                    <option value="RAC_10">RAC 10 - Trabalhos em Eletricidade</option>
-                                    <option value="RAC_11">RAC 11 - Metal Líquido</option>
-                                </select>
+                                <input id="editExameTipoRac" class="detail-input" />
                             </div>
                         </div>
 
@@ -631,16 +647,16 @@
                                 <div class="detail-label">
                                     <span>Tipo de Exame</span>
                                 </div>
+                                <input id="editExameTipoExame" class="detail-input" />
+                            </div>
+                        </div>
 
-                                <select id="editExameTipoExame" class="detail-input">
-                                    <option value="">Selecione...</option>
-                                    <option value="PERIODICO">Periódico</option>
-                                    <option value="MUDANCA_RISCOS_OCUPACIONAIS">Mudança de Função / Riscos Ocupacionais
-                                    </option>
-                                    <option value="CONSULTA_ASSISTENCIAL">Consulta Assistencial</option>
-                                    <option value="DEMISSIONAL">Demissional</option>
-                                    <option value="RETORNO_TRABALHO">Retorno ao Trabalho</option>
-                                </select>
+                        <div class="col-12" id="bloco_exame_mais_unidades">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Solicitar ASO para unidades</span>
+                                </div>
+                                <div id="editExameMaisUnidades" class="detail-value"></div>
                             </div>
                         </div>
 
@@ -650,15 +666,6 @@
                                     <span>Data do Exame</span>
                                 </div>
                                 <input id="editExameDataExame" class="detail-input" />
-                            </div>
-                        </div>
-
-                        <div class="col-6">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Hora do Exame</span>
-                                </div>
-                                <input id="editExameHoraExame" class="detail-input" />
                             </div>
                         </div>
 
@@ -686,6 +693,15 @@
                                     <span>Nome da Nova Função</span>
                                 </div>
                                 <input id="editExameNovaFuncao" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameDescricaoAtividade">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Descrição de Atividade</span>
+                                </div>
+                                <input id="editExameDescricaoAtividade" class="detail-input" />
                             </div>
                         </div>
 

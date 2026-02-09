@@ -14,6 +14,10 @@ if (!usuarioLogado) {
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
+  // PREENCHE O CAMPO DE EMPRESA NO FORMULÁRIO
+  document.getElementById("empresaNomeView").value = usuarioLogado.nome_empresa;
+  document.getElementById("empresaCodigoHidden").value = usuarioLogado.cod_empresa;
+
   const avatarIcon = document.getElementById("avatarIcon");
   const avatarIconDropdown = document.getElementById("avatarIconDropdown");
 
@@ -91,57 +95,82 @@ async function carregarNomeEmpresa() {
   }
 }
 
+// LISTENER DOS CAMPOS DE DATA/HORA DO EXAME (SÓ PERMITIR MAIS DE 24H DA SOLICITAÇÃO)
+const dataInput = document.getElementById("data_exame");
+
+dataInput.addEventListener("blur", validarDataHoraExame);
+
+function validarDataHoraExame() {
+  const data = dataInput.value;
+  if (!data) return;
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  const dataSelecionada = new Date(data + "T00:00:00");
+
+  if (dataSelecionada <= hoje) {
+    alert(
+      "Atenção: o período para realização do exame deve ser, preferencialmente, no mínimo 24 horas da solicitação."
+    );
+  }
+}
+
+// FUNÇÃO PARA GERAR MAIS UNIDADES PRA SOLICITAR ASO
 let contadorUnidades = 0;
 
-window.ativarUnidades = function (ativar) {
+function ativarUnidades(ativar) {
   const container = document.getElementById("unidadesContainer");
   const btnAdd = document.getElementById("btnAddUnidade");
-
-  if (!container || !btnAdd) {
-    console.error("Container ou botão não encontrado");
-    return;
-  }
+  const hidden = document.getElementById("solicitarMaisUnidades");
 
   if (ativar) {
+    hidden.value = "true";
     container.classList.remove("d-none");
     btnAdd.classList.remove("d-none");
 
     if (contadorUnidades === 0) {
-      window.adicionarUnidade();
+      adicionarUnidade();
     }
   } else {
+    hidden.value = "false";
     container.classList.add("d-none");
     btnAdd.classList.add("d-none");
     container.innerHTML = "";
     contadorUnidades = 0;
   }
-};
+}
 
-window.adicionarUnidade = function () {
+function adicionarUnidade() {
   contadorUnidades++;
 
   const container = document.getElementById("unidadesContainer");
-  if (!container) return;
+  const selectBase = document.getElementById("unidadeSelect");
 
-  container.insertAdjacentHTML(
-    "beforeend",
-    `
-    <div class="form-group mt-2">
-      <label>Unidade ${contadorUnidades}</label>
-      <div class="input-wrapper">
-        <div class="input-icon">
-          <i class="fa-solid fa-building"></i>
+  const options = Array.from(selectBase.options)
+    .filter(opt => opt.value)
+    .map(opt =>
+      `<option value="${opt.value}"
+          data-nome="${opt.dataset.nome}">
+          ${opt.textContent}
+        </option>`
+    ).join("");
+
+  container.insertAdjacentHTML("beforeend", `
+        <div class="form-group mt-2 unidade-extra">
+            <label>Unidade adicional ${contadorUnidades}</label>
+            <div class="input-wrapper">
+              <div class="input-icon">
+                <i class="fa-solid fa-building"></i>
+              </div>
+              <select class="form-control unidade-extra-select" required>
+                <option value="">Selecione a unidade</option>
+                ${options}
+              </select>
+            </div>
         </div>
-        <select name="unidades[]" required>
-          <option value="">Selecione a unidade</option>
-          <option value="MATRIZ">Matriz</option>
-          <option value="FILIAL">Filial</option>
-        </select>
-      </div>
-    </div>
-    `
-  );
-};
+    `);
+}
 
 // CARREGAR UNIDADES
 async function carregarUnidades() {
@@ -336,9 +365,98 @@ document.getElementById("cidade_clinica").addEventListener("change", function ()
   });
 });
 
-// PREENCHE O CAMPO DE EMPRESA NO FORMULÁRIO
-document.getElementById("empresaNomeView").value = usuarioLogado.nome_empresa;
-document.getElementById("empresaCodigoHidden").value = usuarioLogado.cod_empresa;
+// MOSTRAR SEÇÃO PARA NOVA UNIDADE
+document.getElementById("solicitarNovaUnidade").addEventListener("change", function () {
+  const divNomaUnidade = document.getElementById("divNovaUnidade");
+
+  divNomaUnidade.style.display = this.checked ? "block" : "none";
+});
+
+// CAMPO DE NOME FANTASIA SEMPRE MAIÚSCULO
+const inputNomeFantasia = document.getElementById("nome_fantasia");
+
+inputNomeFantasia.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+// CAMPO DE RAZÃO SOCIAL SEMPRE MAIÚSCULO
+const inputRazaoSocial = document.getElementById("razao_social");
+
+inputRazaoSocial.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+// API QUE PREENCHE OS CAMPOS BASEADOS NO CEP
+document.addEventListener("DOMContentLoaded", function () {
+  const cepInput = document.getElementById("cep");
+  const btnBuscar = document.getElementById("btnBuscarCep");
+
+  if (!cepInput || !btnBuscar) return;
+
+  // 🔹 Máscara de CEP
+  cepInput.addEventListener("input", function () {
+    let valor = this.value.replace(/\D/g, "");
+
+    if (valor.length > 8) valor = valor.slice(0, 8);
+
+    if (valor.length > 5) {
+      this.value = valor.replace(/^(\d{5})(\d)/, "$1-$2");
+    } else {
+      this.value = valor;
+    }
+  });
+
+  // 🔹 Buscar CEP ao clicar no botão
+  btnBuscar.addEventListener("click", function () {
+    const cep = cepInput.value.replace(/\D/g, "");
+
+    if (cep.length !== 8) {
+      alert("Digite um CEP válido");
+      return;
+    }
+
+    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.erro) {
+          alert("CEP não encontrado");
+          return;
+        }
+
+        document.getElementById("rua").value = (data.logradouro).toUpperCase();
+        document.getElementById("bairro").value = (data.bairro).toUpperCase();
+        document.getElementById("estado").value = data.uf;
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Erro ao buscar o CEP");
+      });
+  });
+});
+
+// // COLOCAR REQUIRED NOS CAMPOS DE NOVA UNIDADE
+// document.addEventListener("DOMContentLoaded", () => {
+//   const chkSolicitarNovaUnidade = document.getElementById("solicitarNovaUnidade");
+//   const selectSetor = document.getElementById("setorSelect");
+//   const novoSetor = document.getElementById("novoSetor");
+
+//   if (!chkSolicitarNovaUnidade || !selectSetor) return;
+
+//   chkSolicitarNovaUnidade.addEventListener("change", () => {
+//     if (chkSolicitarNovaUnidade.checked) {
+//       selectSetor.value = "";
+//       selectSetor.disabled = true;
+//       selectSetor.removeAttribute("required");
+
+//       novoSetor.required = true;
+//     } else {
+//       selectSetor.disabled = false;
+//       selectSetor.setAttribute("required", "required");
+
+//       novoSetor.required = false;
+//     }
+//   });
+// });
 
 // MOSTRAR SEÇÃO DE NOVO SETOR
 document.getElementById("solicitarNovoSetor").addEventListener("change", function () {
@@ -346,10 +464,64 @@ document.getElementById("solicitarNovoSetor").addEventListener("change", functio
   wrapper.style.display = this.checked ? "block" : "none";
 });
 
-// MOSTRAR SEÇÃO DE NOVO CARGO
+// COLOCAR REQUIRED NO CAMPO DE NOVO SETOR
+document.addEventListener("DOMContentLoaded", () => {
+  const chkSolicitarNovoSetor = document.getElementById("solicitarNovoSetor");
+  const selectSetor = document.getElementById("setorSelect");
+  const novoSetor = document.getElementById("novoSetor");
+
+  if (!chkSolicitarNovoSetor || !selectSetor) return;
+
+  chkSolicitarNovoSetor.addEventListener("change", () => {
+    if (chkSolicitarNovoSetor.checked) {
+      selectSetor.value = "";
+      selectSetor.disabled = true;
+      selectSetor.removeAttribute("required");
+
+      novoSetor.required = true;
+    } else {
+      selectSetor.disabled = false;
+      selectSetor.setAttribute("required", "required");
+
+      novoSetor.required = false;
+    }
+  });
+});
+
+// MOSTRAR SEÇÃO DE NOVO CARGO E DESCRIÇÃO DE ATIVIDADE
 document.getElementById("solicitarNovoCargo").addEventListener("change", function () {
-  const wrapper = document.getElementById("novoCargoWrapper");
-  wrapper.style.display = this.checked ? "block" : "none";
+  const divNovoCargo = document.getElementById("novoCargoWrapper");
+  const divDescricaoAtividade = document.getElementById("descricaoAtividadeWrapper");
+
+  divNovoCargo.style.display = this.checked ? "block" : "none";
+  divDescricaoAtividade.style.display = this.checked ? "block" : "none";
+});
+
+// COLOCAR REQUIRED NO CAMPO DE NOVO CARGO E DESCRIÇÃO DE ATIVIDADE
+document.addEventListener("DOMContentLoaded", () => {
+  const chkSolicitarNovoCargo = document.getElementById("solicitarNovoCargo");
+  const selectCargo = document.getElementById("cargoSelect");
+  const novoCargo = document.getElementById("novoCargo");
+  const descricaoAtividade = document.getElementById("descricao_atividade");
+
+  if (!chkSolicitarNovoCargo || !selectCargo) return;
+
+  chkSolicitarNovoCargo.addEventListener("change", () => {
+    if (chkSolicitarNovoCargo.checked) {
+      selectCargo.value = "";
+      selectCargo.disabled = true;
+      selectCargo.removeAttribute("required");
+
+      novoCargo.required = true;
+      descricaoAtividade.required = true;
+    } else {
+      selectCargo.disabled = false;
+      selectCargo.setAttribute("required", "required");
+
+      novoCargo.required = false;
+      descricaoAtividade.required = false;
+    }
+  });
 });
 
 // MOSTRAR SEÇÃO DE NOVO CREDENCIAMENTO
@@ -428,7 +600,6 @@ const codCategoriaMap = {
   TERCEIRIZADO: "102",
   AUTONOMO: "701",
   TEMPORARIO: "106",
-  PESSOA_JURIDICA: "",
   ESTAGIARIO: "901",
   MENOR_APRENDIZ: "103"
 };
@@ -472,44 +643,6 @@ rgInput.addEventListener("input", function () {
   if (ultimoDigito) finalValue += "-" + ultimoDigito;
 
   rgInput.value = finalValue;
-});
-
-// COLOCAR REQUIRED NO CAMPO DE NOVO SETOR
-document.addEventListener("DOMContentLoaded", () => {
-  const chkSolicitarNovoSetor = document.getElementById("solicitarNovoSetor");
-  const selectSetor = document.getElementById("setorSelect");
-
-  if (!chkSolicitarNovoSetor || !selectSetor) return;
-
-  chkSolicitarNovoSetor.addEventListener("change", () => {
-    if (chkSolicitarNovoSetor.checked) {
-      selectSetor.value = "";
-      selectSetor.disabled = true;
-      selectSetor.removeAttribute("required");
-    } else {
-      selectSetor.disabled = false;
-      selectSetor.setAttribute("required", "required");
-    }
-  });
-});
-
-// COLOCAR REQUIRED NO CAMPO DE NOVO CARGO
-document.addEventListener("DOMContentLoaded", () => {
-  const chkSolicitarNovoCargo = document.getElementById("solicitarNovoCargo");
-  const selectCargo = document.getElementById("cargoSelect");
-
-  if (!chkSolicitarNovoCargo || !selectCargo) return;
-
-  chkSolicitarNovoCargo.addEventListener("change", () => {
-    if (chkSolicitarNovoCargo.checked) {
-      selectCargo.value = "";
-      selectCargo.disabled = true;
-      selectCargo.removeAttribute("required");
-    } else {
-      selectCargo.disabled = false;
-      selectCargo.setAttribute("required", "required");
-    }
-  });
 });
 
 // COLOCAR REQUIRED NO CAMPO DE ESTADO CLÍNICA E CIDADE CLÍNICA PARA CREDENCIAMENTO
@@ -571,53 +704,84 @@ racSelect.addEventListener("change", () => {
 document.addEventListener("DOMContentLoaded", function () {
   const inputDataNascimento = document.getElementById("data_nascimento");
   const inputDataAdmissao = document.getElementById("data_admissao");
+  const inputDataExame = document.getElementById("data_exame");
   const inputVencimentoCNH = document.getElementById("vencimento_cnh");
 
-  if (inputDataNascimento) {
-    inputDataNascimento.addEventListener("input", function () {
-      let valor = inputDataNascimento.value;
+  function limitarAno(input) {
+    if (!input) return;
+
+    input.addEventListener("input", function () {
+      let valor = input.value;
       const partes = valor.split("-");
 
-      if (partes[0]) partes[0] = partes[0].slice(0, 4);
+      if (partes[0]) {
+        partes[0] = partes[0].slice(0, 4);
+      }
 
-      inputDataNascimento.value = partes.join("-");
+      input.value = partes.join("-");
     });
   }
 
-  if (inputDataAdmissao) {
-    inputDataAdmissao.addEventListener("input", function () {
-      let valor = inputDataAdmissao.value;
-      const partes = valor.split("-");
-
-      if (partes[0]) partes[0] = partes[0].slice(0, 4);
-
-      inputDataAdmissao.value = partes.join("-");
-    });
-  }
-
-  if (inputVencimentoCNH) {
-    inputVencimentoCNH.addEventListener("input", function () {
-      let valor = inputVencimentoCNH.value;
-      const partes = valor.split("-");
-
-      if (partes[0]) partes[0] = partes[0].slice(0, 4);
-
-      inputVencimentoCNH.value = partes.join("-");
-    });
-  }
+  limitarAno(inputDataNascimento);
+  limitarAno(inputDataAdmissao);
+  limitarAno(inputDataExame);
+  limitarAno(inputVencimentoCNH);
 });
 
-// FUNÇÃO PARA ENVIAR EMAIL AUTOMATICO PRA ENGENHARIA QUANDO PRECISAR CRIAR SETOR/CARGO
+// // FUNÇÃO PARA ENVIAR EMAIL AUTOMATICO PRA ENGENHARIA QUANDO PRECISAR CRIAR SETOR/CARGO
+// async function enviarEmailSolicitacao(dados) {
+//   if (!dados.solicitar_novo_setor && !dados.solicitar_novo_cargo) return;
+
+//   let solicitacao = "";
+
+//   if (dados.solicitar_novo_setor) {
+//     solicitacao += `• Setor: ${dados.nome_novo_setor}\n`;
+//   }
+
+//   if (dados.solicitar_novo_cargo) {
+//     solicitacao += `• Cargo: ${dados.nome_novo_cargo}\n`;
+//   }
+
+//   const mensagem = `
+//     Prezados,
+
+//     Gentileza seguir com a criação do(s) item(ns) abaixo solicitado(s):
+
+//     ${solicitacao}
+//     Empresa: ${dados.nome_empresa}
+//     Unidade: ${dados.nome_unidade}
+
+//     Atenciosamente,
+//     Débora
+//   `;
+
+//   try {
+//     await emailjs.send(
+//       "service_8ebe4kr",
+//       "template_vktvl1g",
+//       {
+//         assunto: "Solicitação de criação de cargo/setor",
+//         mensagem
+//       }
+//     );
+
+//     alert("📧 E-mail enviado com sucesso!");
+//   } catch (erro) {
+//     console.error("Erro ao enviar e-mail:", erro);
+//     alert("❌ Não foi possível enviar o e-mail.");
+//   }
+// }
+
 async function enviarEmailSolicitacao(dados) {
   if (!dados.solicitar_novo_setor && !dados.solicitar_novo_cargo) return;
 
   let solicitacao = "";
 
-  if (dados.solicitar_novo_setor) {
+  if (dados.solicitar_novo_setor === true) {
     solicitacao += `• Setor: ${dados.nome_novo_setor}\n`;
   }
 
-  if (dados.solicitar_novo_cargo) {
+  if (dados.solicitar_novo_cargo === true) {
     solicitacao += `• Cargo: ${dados.nome_novo_cargo}\n`;
   }
 
@@ -634,26 +798,26 @@ async function enviarEmailSolicitacao(dados) {
     Débora
   `;
 
-  try {
-    await emailjs.send(
-      "service_8ebe4kr",
-      "template_vktvl1g",
-      {
-        assunto: "Solicitação de criação de cargo/setor",
-        mensagem
-      }
-    );
-
-    alert("📧 E-mail enviado com sucesso!");
-  } catch (erro) {
-    console.error("Erro ao enviar e-mail:", erro);
-    alert("❌ Não foi possível enviar o e-mail.");
-  }
+  await fetch("/enviar-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      assunto: "Solicitação de criação de cargo/setor",
+      mensagem
+    })
+  });
 }
 
 // ENVIO DO FORMULÁRIO
 document.getElementById("formCadastro").addEventListener("submit", async function (e) {
   e.preventDefault();
+
+  const cpf = document.getElementById("cpf").value.replace(/\D/g, "");
+
+  if (cpf.length !== 11) {
+    alert("CPF inválido! O CPF deve ter 11 dígitos.");
+    return;
+  }
 
   const unidadeSelect = document.getElementById("unidadeSelect");
   const setorSelect = document.getElementById("setorSelect");
@@ -669,18 +833,22 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   const nomeNovoSetor = document.getElementById("novoSetor")?.value || null;
   const nomeNovoCargo = document.getElementById("novoCargo")?.value || null;
 
+  const solicitarMaisUnidades = document.getElementById("solicitarMaisUnidades").value === "true";
+
   const solicitarCredenciamento = document.getElementById("solicitarCredenciamento")?.checked === true;
 
-  if (solicitarNovoSetor || solicitarNovoCargo) {
-    console.log("⚠️ Existe solicitação de novo setor ou cargo");
+  let unidades = [];
 
-    if (solicitarNovoSetor) {
-      console.log("Novo setor solicitado:", document.getElementById("novoSetor").value);
-    }
-
-    if (solicitarNovoCargo) {
-      console.log("Novo cargo solicitado:", document.getElementById("novoCargo").value);
-    }
+  if (solicitarMaisUnidades) {
+    document.querySelectorAll(".unidade-extra-select")
+      .forEach(select => {
+        if (select.value) {
+          unidades.push({
+            cod_unidade: select.value,
+            nome_unidade: select.selectedOptions[0].dataset.nome
+          });
+        }
+      });
   }
 
   const dados = {
@@ -708,9 +876,13 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     nome_cargo: solicitarNovoCargo ? null : cargoSelect.selectedOptions[0].dataset.nome,
     solicitar_novo_cargo: solicitarNovoCargo,
     nome_novo_cargo: solicitarNovoCargo ? nomeNovoCargo : null,
+    descricao_atividade: document.getElementById("descricao_atividade").value,
     rac: document.getElementById("racSelect").value || null,
     tipo_rac: document.getElementById("racValeOpcao").value || null,
     tipo_exame: document.getElementById("tipo_exame").value,
+    data_exame: document.getElementById("data_exame").value || null,
+    solicitar_mais_unidades: solicitarMaisUnidades,
+    mais_unidades: solicitarMaisUnidades ? unidades : [],
     cnh: document.getElementById("cnh").value || null,
     vencimento_cnh: document.getElementById("vencimento_cnh").value || null,
     lab_toxicologico: document.getElementById("lab_toxicologico").value || null,

@@ -191,13 +191,13 @@ hr {
 main {
     flex: 1;
     display: flex;
+    min-height: calc(100vh - 200px);
 }
 
 .container-fluid {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 24px;
 }
 
 .card {

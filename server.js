@@ -6,6 +6,7 @@ const axios = require("axios");
 const { XMLParser } = require("fast-xml-parser");
 const iconv = require("iconv-lite");
 const soap = require("soap");
+const nodemailer = require("nodemailer");
 
 const app = express();
 
@@ -408,9 +409,13 @@ app.post("/novo-cadastro", async (req, res) => {
         nome_cargo,
         solicitar_novo_cargo,
         nome_novo_cargo,
+        descricao_atividade,
         rac,
         tipo_rac,
         tipo_exame,
+        data_exame,
+        solicitar_mais_unidades,
+        mais_unidades,
         cnh,
         vencimento_cnh,
         lab_toxicologico,
@@ -421,7 +426,7 @@ app.post("/novo-cadastro", async (req, res) => {
         estado_credenciamento,
         cidade_credenciamento,
         observacao)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41)
       RETURNING id
       `,
       [
@@ -449,9 +454,12 @@ app.post("/novo-cadastro", async (req, res) => {
         f.nome_cargo,
         f.solicitar_novo_cargo,
         f.nome_novo_cargo,
+        f.descricao_atividade,
         f.rac,
         f.tipo_rac,
         f.tipo_exame,
+        f.data_exame,
+        f.solicitar_mais_unidades, JSON.stringify(f.mais_unidades || []),
         f.cnh,
         f.vencimento_cnh,
         f.lab_toxicologico,
@@ -514,11 +522,13 @@ app.post("/solicitar-exame", async (req, res) => {
         tipo_rac,
         tipo_exame,
         data_exame,
-        hora_exame,
+        solicitar_mais_unidades,
+        mais_unidades,
         funcao_anterior,
         funcao_atual,
         solicitar_nova_funcao,
         nome_nova_funcao,
+        descricao_atividade,
         setor_atual,
         solicitar_novo_setor,
         nome_novo_setor,
@@ -534,7 +544,7 @@ app.post("/solicitar-exame", async (req, res) => {
         cidade_credenciamento,
         observacao
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38)
       RETURNING id
       `,
       [
@@ -555,11 +565,12 @@ app.post("/solicitar-exame", async (req, res) => {
         f.tipo_rac,
         f.tipo_exame,
         f.data_exame,
-        f.hora_exame,
+        f.solicitar_mais_unidades, JSON.stringify(f.mais_unidades || []),
         f.funcao_anterior,
         f.funcao_atual,
         f.solicitar_nova_funcao,
         f.nome_nova_funcao,
+        f.descricao_atividade,
         f.setor_atual,
         f.solicitar_novo_setor,
         f.nome_novo_setor,
@@ -883,23 +894,27 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
         nome_empresa = $11,
         nome_unidade = $12,
         nome_setor = $13,
-        nome_cargo = $14,
-        rac = $15,
-        tipo_rac = $16,
-        tipo_exame = $17,
-        cnh = $18,
-        vencimento_cnh = $19,
-        lab_toxicologico = $20,
-        estado_clinica = $21,
-        cidade_clinica = $22,
-        nome_clinica = $23,
-        estado_credenciamento = $24,
-        cidade_credenciamento = $25,
-        observacao = $26
+        nome_novo_setor = $14,
+        nome_cargo = $15,
+        nome_novo_cargo = $16,
+        descricao_atividade = $17,
+        rac = $18,
+        tipo_rac = $19,
+        tipo_exame = $20,
+        data_exame = $21,
+        cnh = $22,
+        vencimento_cnh = $23,
+        lab_toxicologico = $24,
+        estado_clinica = $25,
+        cidade_clinica = $26,
+        nome_clinica = $27,
+        estado_credenciamento = $28,
+        cidade_credenciamento = $29,
+        observacao = $30
       WHERE id = (
         SELECT novo_cadastro_id
         FROM solicitacoes_novo_cadastro
-        WHERE id = $27
+        WHERE id = $31
       )
     `, [
       f.nome_funcionario,
@@ -915,10 +930,14 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
       f.nome_empresa,
       f.nome_unidade,
       f.nome_setor,
+      f.nome_novo_setor,
       f.nome_cargo,
+      f.nome_novo_cargo,
+      f.descricao_atividade,
       f.rac,
       f.tipo_rac,
       f.tipo_exame,
+      f.data_exame,
       f.cnh,
       f.vencimento_cnh || null,
       f.lab_toxicologico,
@@ -1037,26 +1056,25 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
         tipo_rac = $11,
         tipo_exame = $12,
         data_exame = $13,
-        hora_exame = $14,
-        funcao_anterior = $15,
-        funcao_atual = $16,
-        nome_nova_funcao = $17,
-        setor_atual = $18,
-        nome_novo_setor = $19,
-        motivo_consulta = $20,
-        cnh = $21,
-        vencimento_cnh = $22,
-        lab_toxicologico = $23,
-        estado_clinica = $24,
+        funcao_anterior = $14,
+        funcao_atual = $15,
+        nome_nova_funcao = $16,
+        setor_atual = $17,
+        nome_novo_setor = $18,
+        motivo_consulta = $19,
+        cnh = $20,
+        vencimento_cnh = $21,
+        lab_toxicologico = $22,
+        estado_clinica = $23,
+        cidade_clinica = $24,
         nome_clinica = $25,
-        cidade_clinica = $26,
-        estado_credenciamento = $27,
-        cidade_credenciamento = $28,
-        observacao = $29
+        estado_credenciamento = $26,
+        cidade_credenciamento = $27,
+        observacao = $28
       WHERE id = (
         SELECT novo_exame_id
         FROM solicitacoes_novo_exame
-        WHERE id = $30
+        WHERE id = $29
       )
     `, [
       f.nome_funcionario,
@@ -1072,7 +1090,6 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
       f.tipo_rac,
       f.tipo_exame,
       f.data_exame,
-      f.hora_exame,
       f.funcao_anterior,
       f.funcao_atual,
       f.nome_nova_funcao,
@@ -1431,6 +1448,40 @@ app.put("/usuarios/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: "Erro ao atualizar perfil" });
+  }
+});
+
+app.post("/enviar-email", async (req, res) => {
+  const { assunto, mensagem } = req.body;
+
+  console.log("📩 Rota /enviar-email chamada", req.body);
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: "smtp.mail.yahoo.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: "deborapfonseca@yahoo.com",
+        pass: "nbtijncjpammjbrv"
+      }
+    });
+
+    await transporter.sendMail({
+      from: "Teste <deborapfonseca@yahoo.com>",
+      to: "debora.fonseca@salubrita.com.br",
+      subject: assunto,
+      text: mensagem
+    });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Erro nodemailer:", err.message);
+    console.error(err);
+    res.status(500).json({
+      erro: "Falha ao enviar e-mail",
+      detalhe: err.message
+    });
   }
 });
 

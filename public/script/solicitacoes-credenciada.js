@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("filterTipo").value = "";
     document.getElementById("filterCPF").value = "";
     document.getElementById("filterStatus").value = "";
-    
+
     renderizarTabela(solicitacoes);
   });
 
@@ -117,13 +117,13 @@ function renderizarTabela(lista) {
 
     if (s.tipo === "NOVO_CADASTRO") {
       iconeTipo = `
-      <i class="fa-solid fa-user-plus fa-lg" style="color: #53A5A6"></i>
+      <i class="fa-solid fa-user-plus fa-lg" style="color: #F1AE33"></i>
     `;
     }
 
     if (s.tipo === "NOVO_EXAME") {
       iconeTipo = `
-      <i class="fa-solid fa-file-circle-plus fa-lg" style="color: #53A5A6"></i>
+      <i class="fa-solid fa-file-circle-plus fa-lg" style="color: #F1AE33"></i>
     `;
     }
 
@@ -198,7 +198,7 @@ function aplicarFiltros() {
   const tipo = document.getElementById("filterTipo").value;
   const cpf = document.getElementById("filterCPF").value;
   const status = document.getElementById("filterStatus").value;
-  
+
   const filtradas = solicitacoes.filter(s => {
     const matchTipo = !tipo || s.tipo === tipo;
     const matchCPF = !cpf || s.cpf.includes(cpf);
@@ -239,6 +239,30 @@ async function verDetalhes(id, tipo) {
   } catch (err) {
     console.error(err);
     alert("Erro ao carregar detalhes");
+  }
+}
+
+// FUNÇÃO PARA MOSTRAR AS UNIDADES ADICIONAIS CASO TENHA
+function preencherMaisUnidades(cadastro) {
+  const inputCadMaisUnidades = document.getElementById("cadastro_mais_unidades");
+
+  inputCadMaisUnidades.innerHTML = "";
+
+  if (cadastro.solicitar_mais_unidades && Array.isArray(cadastro.mais_unidades) && cadastro.mais_unidades.length > 0) {
+    cadastro.mais_unidades.forEach((u) => {
+      const div = document.createElement("div");
+
+      div.classList.add("mb-1");
+
+      div.innerHTML = `${u.cod_unidade} - ${u.nome_unidade}`;
+
+      inputCadMaisUnidades.appendChild(div);
+    });
+  }
+  else {
+    const span = document.createElement("span");
+
+    inputCadMaisUnidades.appendChild(span);
   }
 }
 
@@ -288,6 +312,28 @@ async function carregarCargos(empresaCodigo, selecionadoNome = "") {
   }
 }
 
+function preencherMaisUnidadesExame(exame) {
+  const container = document.getElementById("exame_mais_unidades");
+  container.innerHTML = "";
+
+  if (exame.solicitar_mais_unidades && Array.isArray(exame.mais_unidades) && exame.mais_unidades.length > 0) {
+    exame.mais_unidades.forEach((u) => {
+      const div = document.createElement("div");
+      div.classList.add("mb-1");
+      div.innerText = `${u.nome_unidade}`;
+      container.appendChild(div);
+    });
+
+    // Mostra o bloco se estiver escondido
+    const bloco = document.getElementById("bloco_exame_mais_unidades");
+    if (bloco) bloco.classList.remove("d-none");
+  } else {
+    // Se não houver unidades adicionais, mantém o bloco escondido
+    const bloco = document.getElementById("bloco_exame_mais_unidades");
+    if (bloco) bloco.classList.add("d-none");
+  }
+}
+
 // função para pegar os valores selecionados do modal de cargo e setor
 function pegarDadosEdicaoCadastro() {
   const setorSelect = document.getElementById("setorSelect");
@@ -320,9 +366,12 @@ function preencherModal(s, tipo) {
     document.getElementById("cadastro_novo_setor").innerText = s.nome_novo_setor;
     document.getElementById("cadastro_nome_cargo").innerText = s.nome_cargo || "-";
     document.getElementById("cadastro_novo_cargo").innerText = s.nome_novo_cargo;
+    document.getElementById("cadastro_descricao_atividade").innerText = s.descricao_atividade;
     document.getElementById("cadastro_rac").innerText = s.rac || "-";
     document.getElementById("cadastro_tipo_rac").innerText = s.tipo_rac || "-";
     document.getElementById("cadastro_tipo_exame").innerText = s.tipo_exame;
+    document.getElementById("cadastro_data_exame").innerText = formatarData(s.data_exame);
+    preencherMaisUnidades(s);
     document.getElementById("cadastro_cnh").innerText = s.cnh || "-";
     document.getElementById("cadastro_vencimento_cnh").innerText = formatarData(s.vencimento_cnh) || "-";
     document.getElementById("cadastro_lab_toxicologico").innerText = s.lab_toxicologico || "-";
@@ -333,12 +382,14 @@ function preencherModal(s, tipo) {
     document.getElementById("cadastro_cidade_credenciamento").innerText = s.cidade_credenciamento;
     document.getElementById("cadastro_observacao").innerText = s.observacao || "-";
 
-    // MOSTRAR / ESCONDER BLOCO DE NOVO SETOR / NOVO CARGO
+    // MOSTRAR / ESCONDER BLOCO DE NOVO SETOR / NOVO CARGO / DESCRIÇÃO ATIVIDADE
     const blocoNovoSetor = document.getElementById("divNovoSetor");
     const blocoNovoCargo = document.getElementById("divNovoCargo");
+    const blocoDescricaoAtividade = document.getElementById("divDescricaoAtividade");
 
     if (s.solicitar_novo_setor === true) {
       blocoNovoSetor.classList.remove("d-none");
+
     } else {
       blocoNovoSetor.classList.add("d-none");
     }
@@ -349,8 +400,13 @@ function preencherModal(s, tipo) {
       blocoNovoCargo.classList.add("d-none");
     }
 
-    // TRANSFORMAR O CAMPO DE SETOR DO FUNCIONÁRIO EM SELECT CASO PRECISE CRIAR UM NOVO
-    // PARA SER SELECIONADO APÓS CRIADO 
+    if (s.solicitar_novo_cargo === true) {
+      blocoDescricaoAtividade.classList.remove("d-none");
+    } else {
+      blocoDescricaoAtividade.classList.add("d-none");
+    }
+
+    // TRANSFORMAR O CAMPO DE SETOR DO FUNCIONÁRIO EM SELECT CASO PRECISE CRIAR UM NOVO PARA SER SELECIONADO APÓS CRIADO 
     const spanSetor = document.getElementById("cadastro_nome_setor");
     const selectSetor = document.getElementById("setorSelect");
 
@@ -365,8 +421,7 @@ function preencherModal(s, tipo) {
       selectSetor.style.display = "none";
     }
 
-    // TRANSFORMAR O CAMPO DE CARGO DO FUNCIONÁRIO EM SELECT CASO PRECISE CRIAR UM NOVO
-    // PARA SER SELECIONADO APÓS CRIADO
+    // TRANSFORMAR O CAMPO DE CARGO DO FUNCIONÁRIO EM SELECT CASO PRECISE CRIAR UM NOVO PARA SER SELECIONADO APÓS CRIADO
     const spanCargo = document.getElementById("cadastro_nome_cargo");
     const selectCargo = document.getElementById("cargoSelect");
 
@@ -379,6 +434,18 @@ function preencherModal(s, tipo) {
     } else {
       spanCargo.style.display = "block";
       selectCargo.style.display = "none";
+    }
+
+    // MOSTRAR / ESCONDER BLOCO DE MAIS UNIDADES
+    const blocoMaisUnidades = document.getElementById("bloco_mais_unidades");
+
+    if (blocoMaisUnidades) {
+      if (s.solicitar_mais_unidades && Array.isArray(s.mais_unidades) && s.mais_unidades.length > 0) {
+        blocoMaisUnidades.classList.remove("d-none");
+      }
+      else {
+        blocoMaisUnidades.classList.add("d-none");
+      }
     }
 
     // MOSTRAR / ESCONDER BLOCO DE NOVO CREDENCIAMENTO
@@ -416,10 +483,11 @@ function preencherModal(s, tipo) {
     document.getElementById("exame_tipo_rac").innerText = s.tipo_rac || "-";
     document.getElementById("exame_tipo_exame").innerText = s.tipo_exame;
     document.getElementById("exame_data_exame").innerText = formatarData(s.data_exame);
-    document.getElementById("exame_hora_exame").innerText = s.hora_exame;
+    preencherMaisUnidadesExame(s);
     document.getElementById("exame_funcao_anterior").innerText = s.funcao_anterior;
     document.getElementById("exame_funcao_atual").innerText = s.funcao_atual;
     document.getElementById("exame_nova_funcao").innerText = s.nome_nova_funcao;
+    document.getElementById("exame_descricao_atividade").innerText = s.descricao_atividade;
     document.getElementById("exame_setor_atual").innerText = s.setor_atual;
     document.getElementById("exame_novo_setor").innerText = s.nome_novo_setor;
     document.getElementById("exame_motivo_consulta").innerText = s.motivo_consulta;
@@ -437,6 +505,9 @@ function preencherModal(s, tipo) {
     const blocoFuncaoAnterior = document.getElementById("divFuncaoAnterior");
     const blocoFuncaoAtual = document.getElementById("divFuncaoAtual");
     const blocoNovaFuncao = document.getElementById("divNovaFuncao");
+
+    const blocoDescricaoAtividade = document.getElementById("divExameDescricaoAtividade");
+
     const blocoSetorAtual = document.getElementById("divSetorAtual");
     const blocoNovoSetor = document.getElementById("divExameNovoSetor");
 
@@ -480,6 +551,24 @@ function preencherModal(s, tipo) {
       blocoNovaFuncao.classList.add("d-none");
       blocoSetorAtual.classList.add("d-none");
       blocoNovoSetor.classList.add("d-none");
+    }
+
+    if (s.solicitar_novo_cargo === true) {
+      blocoDescricaoAtividade.classList.remove("d-none");
+    } else {
+      blocoDescricaoAtividade.classList.add("d-none");
+    }
+
+    // MOSTRAR / ESCONDER BLOCO DE MAIS UNIDADES
+    const blocoExameMaisUnidades = document.getElementById("bloco_exame_mais_unidades");
+
+    if (blocoExameMaisUnidades) {
+      if (s.solicitar_mais_unidades && Array.isArray(s.mais_unidades) && s.mais_unidades.length > 0) {
+        blocoExameMaisUnidades.classList.remove("d-none");
+      }
+      else {
+        blocoExameMaisUnidades.classList.add("d-none");
+      }
     }
 
     // MOSTRAR / ESCONDER TEXTAREA DE MOTIVO DA CONSULTA

@@ -188,6 +188,10 @@ hr {
     color: #5F5D6B;
 }
 
+main {
+    flex: 1;
+}
+
 .container-fluid {
     display: flex;
     flex-direction: column;

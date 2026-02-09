@@ -189,6 +189,7 @@ hr {
 }
 
 main {
+    flex: 1;
     background-color: #F1F1F1;
 }
 
@@ -276,6 +277,21 @@ h5::after {
     margin-bottom: 20px;
 }
 
+.unidade-group,
+.setor-group,
+.cargo-group {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 16px;
+}
+
+.input-wrapper.unidade-wrapper,
+.input-wrapper.setor-wrapper,
+.input-wrapper.cargo-wrapper {
+    width: 68%;
+}
+
 .alert {
     display: flex;
     align-items: center;
@@ -302,8 +318,36 @@ h5::after {
     color: #7A6C1A;
 }
 
+.cep-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.cep-row .input-wrapper {
+    flex: 1;
+}
+
+.btn-buscar-cep {
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: #F1AE33;
+    color: #FFFFFF;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    width: 80px;
+}
+
+.btn-buscar-cep:hover {
+    transform: translateY(-2px);
+}
+
 .label-nao-possui-matricula,
-.label-solicitar-credenciamento {
+.label-solicitar-credenciamento,
+.label-solicitar-unidade {
     color: #F1AE33 !important;
     font-weight: bold;
 }
@@ -389,7 +433,7 @@ h5::after {
     background: transparent;
     border: none;
     flex: 1;
-    padding: 12px 14px;
+    padding: 11px;
     font-size: 16px;
     color: #000000;
     cursor: pointer;
@@ -497,6 +541,42 @@ h5::after {
 .btn-enviar:hover {
     transform: translateY(-2px);
 } */
+
+.btn-sim, .btn-nao {
+    background-color: #FFFFFF;
+    border: 2px solid #8A94A6;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #000000;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
+    width: 60px;
+    transition: all 0.25s ease;
+}
+
+.btn-sim:hover, .btn-nao:hover {
+    transform: translateY(-2px);
+}
+
+.btn-add-unidade {
+    background-color: #53A5A6;
+    border: 1px solid #53A5A6;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
+    width: 200px;
+    transition: all 0.25s ease;
+}
+
+.btn-add-unidade:hover {
+    transform: translateY(-2px);
+}
 
 .footer-container {
     filter: drop-shadow(0 -3px 12px rgba(0, 0, 0, 0.12));

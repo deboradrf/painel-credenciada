@@ -1,4 +1,4 @@
-// USUÁRIO LOGADO (PRIMEIRO DE TUDO)
+// USUÁRIO LOGADO
 const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
 
 if (!usuarioLogado) {
@@ -6,7 +6,7 @@ if (!usuarioLogado) {
   window.location.href = "login.html";
 }
 
-// DADOS DA EMPRESA (DEPOIS)
+// DADOS DA EMPRESA
 const empresaCodigo = usuarioLogado.cod_empresa;
 const nomeEmpresa = usuarioLogado.nome_empresa;
 
@@ -72,7 +72,453 @@ document.addEventListener("DOMContentLoaded", async () => {
   await carregarPrestadores();
 });
 
-// CARREGAR PRESTADORES
+// FUNÇÃO PARA PREENCHER O FORMULÁRIO COM OS DADOS ENCONTRADOS NO SOC
+function preencherFuncionario() {
+  const f = JSON.parse(localStorage.getItem("funcionario"));
+
+  if (!f) {
+    alert("Pesquise um funcionário primeiro");
+    window.location.href = "solicitar-exame.html";
+    return;
+  }
+
+  document.getElementById("nome").value = f.nome;
+  document.getElementById("cpf").value = formatarCPF(f.cpf);
+  document.getElementById("matricula").value = f.matricula || "NÃO POSSUI MATRÍCULA";
+
+  // FORMATAR DATAS
+  if (f.data_nascimento) {
+    const [d, m, a] = f.data_nascimento.split("/");
+    document.getElementById("data-nascimento").value = `${a}-${m}-${d}`;
+  }
+
+  if (f.data_admissao) {
+    const [d, m, a] = f.data_admissao.split("/");
+    document.getElementById("data_admissao").value = `${a}-${m}-${d}`;
+  }
+
+  document.getElementById("cpf").readOnly = true;
+
+  setTimeout(() => {
+    const unidadeSelect = document.getElementById("unidadeSelect");
+    const setorSelect = document.getElementById("setorSelect");
+    const cargoSelect = document.getElementById("cargoSelect");
+    const funcaoAnterior = document.getElementById("funcao_anterior");
+
+    unidadeSelect.value = f.cod_unidade;
+    setorSelect.value = f.cod_setor;
+    cargoSelect.value = f.cod_cargo;
+
+    unidadeSelect.disabled = true;
+    setorSelect.disabled = true;
+    cargoSelect.disabled = true;
+
+    funcaoAnterior.value = cargoSelect.options[cargoSelect.selectedIndex]?.text || "";
+  }, 500);
+}
+
+// FUNÇÃO PARA FORMATAR CPF
+function formatarCPF(cpf) {
+  if (!cpf) return "";
+
+  const numeros = cpf.replace(/\D/g, "");
+
+  if (numeros.length !== 11) return cpf;
+
+  return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+}
+
+// PREENCHER O CAMPO COM O NOME DA EMPRESA DO USUÁRIO LOGADO
+function preencherEmpresaUsuario() {
+  document.getElementById("empresaNomeView").value = usuarioLogado.nome_empresa;
+  document.getElementById("empresaCodigoHidden").value = usuarioLogado.cod_empresa;
+}
+
+// MOSTRAR / OCULTAR TIPO RAC
+const racSelect = document.getElementById("racSelect");
+const divRacValeOpcoes = document.getElementById("divRacValeOpcoes");
+
+racSelect.addEventListener("change", () => {
+  if (racSelect.value === "FORMULARIO_RAC_VALE") {
+    divRacValeOpcoes.classList.remove("d-none");
+  } else {
+    divRacValeOpcoes.classList.add("d-none");
+
+    document.getElementById("racValeOpcao").value = "";
+  }
+});
+
+// TORNAR OBRIGATÓRICO QUANDO A OPÇÃO SELECIONADA FOR VALE
+const racValeOpcao = document.getElementById("racValeOpcao");
+
+racSelect.addEventListener("change", () => {
+  const isVale = racSelect.value === "FORMULARIO_RAC_VALE";
+
+  divRacValeOpcoes.classList.toggle("d-none", !isVale);
+  racValeOpcao.required = isVale;
+
+  if (!isVale) {
+    racValeOpcao.value = "";
+  }
+});
+
+// NÃO PERMITIR DATAS MANUAIS COM MAIS DE 4 DÍGITOS NO ANO
+document.addEventListener("DOMContentLoaded", function () {
+  const inputDataExame = document.getElementById("data_exame");
+  const inputVencimentoCNH = document.getElementById("vencimento_cnh");
+
+  function limitarAno(input) {
+    if (!input) return;
+
+    input.addEventListener("input", function () {
+      let valor = input.value;
+      const partes = valor.split("-");
+
+      if (partes[0]) {
+        partes[0] = partes[0].slice(0, 4);
+      }
+
+      input.value = partes.join("-");
+    });
+  }
+
+  limitarAno(inputDataExame);
+  limitarAno(inputVencimentoCNH);
+});
+
+// LISTENER DOS CAMPOS DE DATA/HORA DO EXAME (SÓ PERMITIR MAIS DE 24H DA SOLICITAÇÃO)
+const dataInput = document.getElementById("data_exame");
+
+dataInput.addEventListener("blur", validarDataExame);
+
+function validarDataExame() {
+  const data = dataInput.value;
+  if (!data) return;
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  const dataSelecionada = new Date(data + "T00:00:00");
+
+  if (dataSelecionada <= hoje) {
+    alert(
+      "Atenção: o período para realização do exame deve ser, preferencialmente, no mínimo 24 horas da solicitação."
+    );
+  }
+}
+
+// MOSTRAR CAMPO DE ADD MAIS UNIDADES SE TIPO EXAME FOR 'PERIODICO', OU 'MUDANÇA FUNÇÃO' OU 'DEMISSIONAL'
+document.addEventListener("DOMContentLoaded", () => {
+  const tipoExame = document.getElementById("tipo_exame");
+  const blocoMaisUnidades = document.getElementById("blocoSolicitarMaisUnidades");
+
+  tipoExame.addEventListener("change", () => {
+    const tiposPermitidos = ["PERIODICO", "MUDANCA_RISCOS_OCUPACIONAIS", "DEMISSIONAL"];
+
+    if (tiposPermitidos.includes(tipoExame.value)) {
+      blocoMaisUnidades.style.display = "block";
+    } else {
+      blocoMaisUnidades.style.display = "none";
+
+      ativarUnidades(false);
+    }
+  });
+
+  tipoExame.dispatchEvent(new Event("change"));
+});
+
+// FUNÇÃO PARA GERAR MAIS UNIDADES PRA SOLICITAR ASO
+let contadorUnidades = 0;
+
+function ativarUnidades(ativar) {
+  const container = document.getElementById("unidadesContainer");
+  const btnAdd = document.getElementById("btnAddUnidade");
+  const hidden = document.getElementById("solicitarMaisUnidades");
+
+  if (ativar) {
+    hidden.value = "true";
+    container.classList.remove("d-none");
+    btnAdd.classList.remove("d-none");
+
+    if (contadorUnidades === 0) {
+      adicionarUnidade();
+    }
+  } else {
+    hidden.value = "false";
+    container.classList.add("d-none");
+    btnAdd.classList.add("d-none");
+    container.innerHTML = "";
+    contadorUnidades = 0;
+  }
+}
+
+function adicionarUnidade() {
+  contadorUnidades++;
+
+  const container = document.getElementById("unidadesContainer");
+  const selectBase = document.getElementById("unidadeSelect");
+
+  const options = Array.from(selectBase.options)
+    .filter(opt => opt.value)
+    .map(opt =>
+      `<option value="${opt.value}" data-nome="${opt.textContent.trim()}">
+       ${opt.textContent}
+     </option>`
+    ).join("");
+
+  container.insertAdjacentHTML("beforeend", `
+      <div class="form-group mt-2 unidade-extra">
+          <label>Unidade adicional ${contadorUnidades}</label>
+          <div class="input-wrapper">
+            <div class="input-icon">
+              <i class="fa-solid fa-building"></i>
+            </div>
+            <select class="form-control unidade-extra-select" required>
+              <option value="">Selecione a unidade</option>
+              ${options}
+            </select>
+          </div>
+      </div>
+    `);
+}
+
+// MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE FUNÇÃO E COLOCAR REQUIRED NOS CAMPOS
+document.addEventListener("DOMContentLoaded", () => {
+  const tipoExame = document.getElementById("tipo_exame");
+  const cardMudancaFuncao = document.getElementById("cardMudancaFuncao");
+
+  const funcaoAtual = document.getElementById("funcao_atual");
+  const setorAtual = document.getElementById("setor_atual");
+
+  const solicitarNovaFuncao = document.getElementById("solicitarNovaFuncao");
+  const novaFuncaoWrapper = document.getElementById("novaFuncaoWrapper");
+  const novaFuncao = document.getElementById("novaFuncao");
+
+  const descricaoAtividadeWrapper = document.getElementById("descricaoAtividadeWrapper");
+  const descricaoAtividade = document.getElementById("descricao_atividade");
+
+  const solicitarNovoSetor = document.getElementById("solicitarNovoSetor");
+  const novoSetorWrapper = document.getElementById("novoSetorWrapper");
+  const novoSetor = document.getElementById("novoSetor");
+
+  // MOSTRA / OCULTAR SEÇÃO DE MUDANÇA DE FUNÇÃO
+  tipoExame.addEventListener("change", () => {
+    if (tipoExame.value === "MUDANCA_RISCOS_OCUPACIONAIS") {
+      cardMudancaFuncao.style.display = "block";
+
+      funcaoAtual.required = true;
+      setorAtual.required = true;
+    } else {
+      cardMudancaFuncao.style.display = "none";
+
+      funcaoAtual.required = false;
+      setorAtual.required = false;
+
+      solicitarNovaFuncao.checked = false;
+      solicitarNovoSetor.checked = false;
+
+      novaFuncaoWrapper.style.display = "none";
+      novoSetorWrapper.style.display = "none";
+
+      funcaoAtual.disabled = false;
+      setorAtual.disabled = false;
+
+      novaFuncao.required = false;
+      novoSetor.required = false;
+
+      novaFuncao.value = "";
+      novoSetor.value = "";
+    }
+  });
+
+  // MOSTAR INPUT DE NOVA FUNÇÃO E DESCRIÇÃO DE ATIVIDADE E COLOCAR REQUIRED
+  solicitarNovaFuncao.addEventListener("change", function () {
+    if (this.checked) {
+      novaFuncaoWrapper.style.display = "block";
+      descricaoAtividadeWrapper.style.display = "block";
+
+      funcaoAtual.value = "";
+      funcaoAtual.disabled = true;
+      funcaoAtual.required = false;
+
+      novaFuncao.required = true;
+      descricaoAtividade.required = true;
+    } else {
+      novaFuncaoWrapper.style.display = "none";
+      descricaoAtividadeWrapper.style.display = "none";
+
+      funcaoAtual.disabled = false;
+      funcaoAtual.required = true;
+
+      novaFuncao.required = false;
+      novaFuncao.value = "";
+
+      descricaoAtividade.required = false;
+    }
+  });
+
+  // MOSTRAR INPUT DE NOVO SETOR E COLOCAR REQUIRED
+  solicitarNovoSetor.addEventListener("change", function () {
+    if (this.checked) {
+      novoSetorWrapper.style.display = "block";
+
+      setorAtual.value = "";
+      setorAtual.disabled = true;
+      setorAtual.required = false;
+
+      novoSetor.required = true;
+    } else {
+      novoSetorWrapper.style.display = "none";
+
+      setorAtual.disabled = false;
+      setorAtual.required = true;
+
+      novoSetor.required = false;
+      novoSetor.value = "";
+    }
+  });
+});
+
+// FUNÇÃO PARA CARREGAR O SELECT DAS UNIDADES E DA FUNÇÃO
+async function carregarUnidades() {
+  const res = await fetch(`/unidades/${usuarioLogado.cod_empresa}`);
+
+  const dados = await res.json();
+
+  const select = document.getElementById("unidadeSelect");
+  const selectFuncaoAtual = document.getElementById("funcao_atual");
+
+  select.innerHTML = `<option value="">Selecione...</option>`;
+  dados.forEach(u => {
+    select.innerHTML += `<option value="${u.codigo}">${u.nome}</option>`;
+  });
+
+  selectFuncaoAtual.innerHTML = `<option value="">Selecione...</option>`;
+  dados.forEach(c => {
+    selectFuncaoAtual.innerHTML += `<option value="${c.codigo}">${c.nome}</option>`;
+  });
+}
+
+// FUNÇÃO PARA CARREGAR O SELECT DOS SETORES
+async function carregarSetores() {
+  const res = await fetch(`/setores/${usuarioLogado.cod_empresa}`);
+
+  const dados = await res.json();
+
+  const select = document.getElementById("setorSelect");
+  const selectSetorAtual = document.getElementById("setor_atual");
+
+  select.innerHTML = `<option value="">Selecione...</option>`;
+  dados.forEach(s => {
+    select.innerHTML += `<option value="${s.codigo}">${s.nome}</option>`;
+  });
+
+  selectSetorAtual.innerHTML = `<option value="">Selecione...</option>`;
+  dados.forEach(c => {
+    selectSetorAtual.innerHTML += `<option value="${c.codigo}">${c.nome}</option>`;
+  });
+}
+
+// FUNÇÃO PARA CARREGAR O SELECT DOS CARGOS
+async function carregarCargos() {
+  const res = await fetch(`/cargos/${usuarioLogado.cod_empresa}`);
+
+  const dados = await res.json();
+
+  const select = document.getElementById("cargoSelect");
+
+  select.innerHTML = `<option value="">Selecione...</option>`;
+  dados.forEach(c => {
+    select.innerHTML += `<option value="${c.codigo}">${c.nome}</option>`;
+  });
+}
+
+// MOSTRAR / OCULTAR TEXTAREA DE MOTIVO DA CONSULTA E COLOCAR REQUIRED NO CAMPO
+document.addEventListener("DOMContentLoaded", () => {
+  const tipoExame = document.getElementById("tipo_exame");
+  const cardMotivoConsulta = document.getElementById("cardMotivoConsulta");
+
+  const textAreaMotivoConsulta = document.getElementById("motivo_consulta");
+
+  // MOSTRA / OCULTAR TEXTAREA DE MOTIVO DA CONSULTA
+  tipoExame.addEventListener("change", () => {
+    if (tipoExame.value === "CONSULTA_ASSISTENCIAL") {
+      cardMotivoConsulta.style.display = "block";
+
+      textAreaMotivoConsulta.required = true;
+    } else {
+      cardMotivoConsulta.style.display = "none";
+
+      textAreaMotivoConsulta.required = false;
+    }
+  });
+});
+
+// MOSTRAR / OCULTAR AVISO DE RETORNO AO TRABALHO
+document.addEventListener("DOMContentLoaded", () => {
+  const tipoExame = document.getElementById("tipo_exame");
+  const cardRetornoTrabalho = document.getElementById("cardRetornoTrabalho");
+
+  // MOSTRA / OCULTAR TEXTAREA DE MOTIVO DA CONSULTA
+  tipoExame.addEventListener("change", () => {
+    if (tipoExame.value === "RETORNO_TRABALHO") {
+      cardRetornoTrabalho.style.display = "block";
+    } else {
+      cardRetornoTrabalho.style.display = "none";
+    }
+  });
+});
+
+// MOSTRAR SEÇÃO DE NOVO CREDENCIAMENTO
+document.addEventListener("DOMContentLoaded", () => {
+  const chkCredenciamento = document.getElementById("solicitarCredenciamento");
+
+  const selectEstado = document.getElementById("estado_clinica");
+  const selectCidade = document.getElementById("cidade_clinica");
+  const selectClinica = document.getElementById("nome_clinica");
+
+  const cardCredenciamento = document.getElementById("cardCredenciamento");
+  const estadoCredenciamento = document.getElementById("estado_credenciamento");
+  const cidadeCredenciamento = document.getElementById("cidade_credenciamento");
+
+  if (!chkCredenciamento) return;
+
+  function resetarSelect(select, texto = "Selecione...") {
+    if (!select) return;
+    select.innerHTML = `<option value="">${texto}</option>`;
+    select.value = "";
+  }
+
+  function limparCampos() {
+    estadoCredenciamento.value = "";
+    cidadeCredenciamento.value = "";
+  }
+
+  chkCredenciamento.addEventListener("change", () => {
+    if (chkCredenciamento.checked) {
+      resetarSelect(selectEstado);
+      resetarSelect(selectCidade);
+      resetarSelect(selectClinica);
+
+      selectEstado.disabled = true;
+      selectCidade.disabled = true;
+      selectClinica.disabled = true;
+
+      cardCredenciamento.style.display = "block";
+    }
+    else {
+      selectEstado.disabled = false;
+      selectCidade.disabled = false;
+      selectClinica.disabled = false;
+
+      cardCredenciamento.style.display = "none";
+
+      limparCampos();
+    }
+  });
+});
+
+// FUNÇÃO PARA CARREGAR OS PRESTADORES VINCULADOS À EMPRESA LOGADA
 async function carregarPrestadores() {
   if (!empresaCodigo) return;
 
@@ -89,7 +535,7 @@ async function carregarPrestadores() {
   }
 }
 
-// LISTAR OS PRESTADORES
+// FUNÇÃO PARA LISTAR ESSES PRESTADORES
 async function listarPrestadores() {
   const res = await fetch(`/prestadores/${empresaCodigo}`);
   const prestadoresBase = await res.json();
@@ -114,7 +560,7 @@ async function listarPrestadores() {
   popularSelectEstados(extrairEstados(prestadoresCache));
 }
 
-// PEGAR OS DETALHES DO PRESTADOR
+// FUNÇÃO PARA PEGAR OS DETALHES DESSES PRESTADORES
 async function buscarDetalhesPrestador(codigo) {
   try {
     const res = await fetch(`/prestador/${empresaCodigo}/${codigo}`);
@@ -142,7 +588,7 @@ function extrairEstados(prestadores) {
   )].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 }
 
-// POPULAR O SELECT DE ESTADOS
+// FUNÇÃO PARA POPULAR O SELECT DE ESTADOS
 function popularSelectEstados(estados) {
   const select = document.getElementById("estado_clinica");
   if (!select) return;
@@ -205,307 +651,6 @@ document.getElementById("cidade_clinica").addEventListener("change", function ()
   });
 });
 
-// MOSTRAR SEÇÃO DE NOVO CREDENCIAMENTO
-document.addEventListener("DOMContentLoaded", () => {
-  const chkCredenciamento = document.getElementById("solicitarCredenciamento");
-
-  const selectEstado = document.getElementById("estado_clinica");
-  const selectCidade = document.getElementById("cidade_clinica");
-  const selectClinica = document.getElementById("nome_clinica");
-
-  const cardCredenciamento = document.getElementById("cardCredenciamento");
-  const estadoCredenciamento = document.getElementById("estado_credenciamento");
-  const cidadeCredenciamento = document.getElementById("cidade_credenciamento");
-
-  if (!chkCredenciamento) return;
-
-  function resetarSelect(select, texto = "Selecione...") {
-    if (!select) return;
-    select.innerHTML = `<option value="">${texto}</option>`;
-    select.value = "";
-  }
-
-  function limparCampos() {
-    estadoCredenciamento.value = "";
-    cidadeCredenciamento.value = "";
-  }
-
-  chkCredenciamento.addEventListener("change", () => {
-    if (chkCredenciamento.checked) {
-      resetarSelect(selectEstado);
-      resetarSelect(selectCidade);
-      resetarSelect(selectClinica);
-
-      selectEstado.disabled = true;
-      selectCidade.disabled = true;
-      selectClinica.disabled = true;
-
-      cardCredenciamento.style.display = "block";
-    }
-    else {
-      selectEstado.disabled = false;
-      selectCidade.disabled = false;
-      selectClinica.disabled = false;
-
-      cardCredenciamento.style.display = "none";
-
-      limparCampos();
-    }
-  });
-});
-
-// NÃO PERMITIR DATAS MANUAIS COM MAIS DE 4 DÍGITOS NO ANO
-document.addEventListener("DOMContentLoaded", function () {
-  const inputVencimentoCNH = document.getElementById("vencimento_cnh");
-
-  if (inputVencimentoCNH) {
-    inputVencimentoCNH.addEventListener("input", function () {
-      let valor = inputVencimentoCNH.value;
-      const partes = valor.split("-");
-
-      if (partes[0]) partes[0] = partes[0].slice(0, 4);
-
-      inputVencimentoCNH.value = partes.join("-");
-    });
-  }
-});
-
-// PREENCHER O CAMPO COM O NOME DA EMPRESA DO USUÁRIO LOGADO
-function preencherEmpresaUsuario() {
-  document.getElementById("empresaNomeView").value = usuarioLogado.nome_empresa;
-  document.getElementById("empresaCodigoHidden").value = usuarioLogado.cod_empresa;
-}
-
-// FUNÇÃO PARA PREENCHER O FORMULÁRIO COM OS DADOS ENCONTRADOS NO SOC
-function preencherFuncionario() {
-  const f = JSON.parse(localStorage.getItem("funcionario"));
-
-  if (!f) {
-    alert("Pesquise um funcionário primeiro");
-    window.location.href = "solicitar-exame.html";
-    return;
-  }
-
-  document.getElementById("nome").value = f.nome;
-  document.getElementById("cpf").value = formatarCPF(f.cpf);
-  document.getElementById("matricula").value = f.matricula || "NÃO POSSUI MATRÍCULA";
-
-  // FORMATAR DATAS
-  if (f.data_nascimento) {
-    const [d, m, a] = f.data_nascimento.split("/");
-    document.getElementById("data-nascimento").value = `${a}-${m}-${d}`;
-  }
-
-  if (f.data_admissao) {
-    const [d, m, a] = f.data_admissao.split("/");
-    document.getElementById("data_admissao").value = `${a}-${m}-${d}`;
-  }
-
-  document.getElementById("cpf").readOnly = true;
-
-  setTimeout(() => {
-    const unidadeSelect = document.getElementById("unidadeSelect");
-    const setorSelect = document.getElementById("setorSelect");
-    const cargoSelect = document.getElementById("cargoSelect");
-    const funcaoAnterior = document.getElementById("funcao_anterior");
-
-    unidadeSelect.value = f.cod_unidade;
-    setorSelect.value = f.cod_setor;
-    cargoSelect.value = f.cod_cargo;
-
-    unidadeSelect.disabled = true;
-    setorSelect.disabled = true;
-    cargoSelect.disabled = true;
-
-    funcaoAnterior.value = cargoSelect.options[cargoSelect.selectedIndex]?.text || "";
-  }, 500);
-}
-
-// FUNÇÃO PARA CARREGAR O SELECT DAS UNIDADES
-async function carregarUnidades() {
-  const res = await fetch(`/unidades/${usuarioLogado.cod_empresa}`);
-
-  const dados = await res.json();
-
-  const select = document.getElementById("unidadeSelect");
-  const selectFuncaoAtual = document.getElementById("funcao_atual");
-
-  select.innerHTML = `<option value="">Selecione...</option>`;
-  dados.forEach(u => {
-    select.innerHTML += `<option value="${u.codigo}">${u.nome}</option>`;
-  });
-
-  selectFuncaoAtual.innerHTML = `<option value="">Selecione...</option>`;
-  dados.forEach(c => {
-    selectFuncaoAtual.innerHTML += `<option value="${c.codigo}">${c.nome}</option>`;
-  });
-}
-
-// FUNÇÃO PARA CARREGAR O SELECT DOS SETORES
-async function carregarSetores() {
-  const res = await fetch(`/setores/${usuarioLogado.cod_empresa}`);
-
-  const dados = await res.json();
-
-  const select = document.getElementById("setorSelect");
-  const selectSetorAtual = document.getElementById("setor_atual");
-
-  select.innerHTML = `<option value="">Selecione...</option>`;
-  dados.forEach(s => {
-    select.innerHTML += `<option value="${s.codigo}">${s.nome}</option>`;
-  });
-
-  selectSetorAtual.innerHTML = `<option value="">Selecione...</option>`;
-  dados.forEach(c => {
-    selectSetorAtual.innerHTML += `<option value="${c.codigo}">${c.nome}</option>`;
-  });
-}
-
-// FUNÇÃO PARA CARREGAR O SELECT DOS CARGOS
-async function carregarCargos() {
-  const res = await fetch(`/cargos/${usuarioLogado.cod_empresa}`);
-
-  const dados = await res.json();
-
-  const select = document.getElementById("cargoSelect");
-
-  select.innerHTML = `<option value="">Selecione...</option>`;
-  dados.forEach(c => {
-    select.innerHTML += `<option value="${c.codigo}">${c.nome}</option>`;
-  });
-}
-
-// MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE FUNÇÃO E COLOCAR REQUIRED NOS CAMPOS
-document.addEventListener("DOMContentLoaded", () => {
-  const tipoExame = document.getElementById("tipo_exame");
-  const cardMudancaFuncao = document.getElementById("cardMudancaFuncao");
-
-  const funcaoAtual = document.getElementById("funcao_atual");
-  const setorAtual = document.getElementById("setor_atual");
-
-  const solicitarNovaFuncao = document.getElementById("solicitarNovaFuncao");
-  const novaFuncaoWrapper = document.getElementById("novaFuncaoWrapper");
-  const novaFuncao = document.getElementById("novaFuncao");
-
-  const solicitarNovoSetor = document.getElementById("solicitarNovoSetor");
-  const novoSetorWrapper = document.getElementById("novoSetorWrapper");
-  const novoSetor = document.getElementById("novoSetor");
-
-  // MOSTRA / OCULTAR SEÇÃO DE MUDANÇA DE FUNÇÃO
-  tipoExame.addEventListener("change", () => {
-    if (tipoExame.value === "MUDANCA_RISCOS_OCUPACIONAIS") {
-      cardMudancaFuncao.style.display = "block";
-
-      funcaoAtual.required = true;
-      setorAtual.required = true;
-    } else {
-      cardMudancaFuncao.style.display = "none";
-
-      funcaoAtual.required = false;
-      setorAtual.required = false;
-
-      solicitarNovaFuncao.checked = false;
-      solicitarNovoSetor.checked = false;
-
-      novaFuncaoWrapper.style.display = "none";
-      novoSetorWrapper.style.display = "none";
-
-      funcaoAtual.disabled = false;
-      setorAtual.disabled = false;
-
-      novaFuncao.required = false;
-      novoSetor.required = false;
-
-      novaFuncao.value = "";
-      novoSetor.value = "";
-    }
-  });
-
-  // MOSTAR INPUT DE NOVA FUNÇÃO E COLOCAR REQUIRED
-  solicitarNovaFuncao.addEventListener("change", function () {
-    if (this.checked) {
-      novaFuncaoWrapper.style.display = "block";
-
-      funcaoAtual.value = "";
-      funcaoAtual.disabled = true;
-      funcaoAtual.required = false;
-
-      novaFuncao.required = true;
-    } else {
-      novaFuncaoWrapper.style.display = "none";
-
-      funcaoAtual.disabled = false;
-      funcaoAtual.required = true;
-
-      novaFuncao.required = false;
-      novaFuncao.value = "";
-    }
-  });
-
-  // MOSTRAR INPUT DE NOVO SETOR E COLOCAR REQUIRED
-  solicitarNovoSetor.addEventListener("change", function () {
-    if (this.checked) {
-      novoSetorWrapper.style.display = "block";
-
-      setorAtual.value = "";
-      setorAtual.disabled = true;
-      setorAtual.required = false;
-
-      novoSetor.required = true;
-    } else {
-      novoSetorWrapper.style.display = "none";
-
-      setorAtual.disabled = false;
-      setorAtual.required = true;
-
-      novoSetor.required = false;
-      novoSetor.value = "";
-    }
-  });
-});
-
-// MOSTRAR SEÇÃO DE NOVO SETOR
-document.getElementById("solicitarNovoSetor").addEventListener("change", function () {
-  const wrapper = document.getElementById("novoSetorWrapper");
-  wrapper.style.display = this.checked ? "block" : "none";
-});
-
-// MOSTRAR / OCULTAR TEXTAREA DE MOTIVO DA CONSULTA E COLOCAR REQUIRED NO CAMPO
-document.addEventListener("DOMContentLoaded", () => {
-  const tipoExame = document.getElementById("tipo_exame");
-  const cardMotivoConsulta = document.getElementById("cardMotivoConsulta");
-  
-  const textAreaMotivoConsulta = document.getElementById("motivo_consulta");
-
-  // MOSTRA / OCULTAR TEXTAREA DE MOTIVO DA CONSULTA
-  tipoExame.addEventListener("change", () => {
-    if (tipoExame.value === "CONSULTA_ASSISTENCIAL") {
-      cardMotivoConsulta.style.display = "block";
-
-      textAreaMotivoConsulta.required = true;
-    } else {
-      cardMotivoConsulta.style.display = "none";
-
-      textAreaMotivoConsulta.required = false;
-    }
-  });
-});
-
-// MOSTRAR / OCULTAR AVISO DE RETORNO AO TRABALHo
-document.addEventListener("DOMContentLoaded", () => {
-  const tipoExame = document.getElementById("tipo_exame");
-  const cardRetornoTrabalho = document.getElementById("cardRetornoTrabalho");
-
-  // MOSTRA / OCULTAR TEXTAREA DE MOTIVO DA CONSULTA
-  tipoExame.addEventListener("change", () => {
-    if (tipoExame.value === "RETORNO_TRABALHO") {
-      cardRetornoTrabalho.style.display = "block";
-    } else {
-      cardRetornoTrabalho.style.display = "none";
-    }
-  });
-});
-
 // COLOCAR REQUIRED NO CAMPO DE ESTADO CLÍNICA E CIDADE CLÍNICA PARA CREDENCIAMENTO
 document.getElementById("solicitarCredenciamento").addEventListener("change", function () {
   const estadoSelect = document.getElementById("estado_clinica");
@@ -533,45 +678,6 @@ document.getElementById("solicitarCredenciamento").addEventListener("change", fu
   }
 });
 
-// MOSTRAR / OCULTAR TIPO RAC
-const racSelect = document.getElementById("racSelect");
-const divRacValeOpcoes = document.getElementById("divRacValeOpcoes");
-
-racSelect.addEventListener("change", () => {
-  if (racSelect.value === "FORMULARIO_RAC_VALE") {
-    divRacValeOpcoes.classList.remove("d-none");
-  } else {
-    divRacValeOpcoes.classList.add("d-none");
-
-    document.getElementById("racValeOpcao").value = "";
-  }
-});
-
-// TORNAR OBRIGATÓRICO QUANDO A OPÇÃO SELECIONADA FOR VALE
-const racValeOpcao = document.getElementById("racValeOpcao");
-
-racSelect.addEventListener("change", () => {
-  const isVale = racSelect.value === "FORMULARIO_RAC_VALE";
-
-  divRacValeOpcoes.classList.toggle("d-none", !isVale);
-  racValeOpcao.required = isVale;
-
-  if (!isVale) {
-    racValeOpcao.value = "";
-  }
-});
-
-// FUNÇÃO PARA FORMATAR CPF
-function formatarCPF(cpf) {
-  if (!cpf) return "";
-
-  const numeros = cpf.replace(/\D/g, "");
-
-  if (numeros.length !== 11) return cpf;
-
-  return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-}
-
 // ENVIO DO FORMULÁRIO
 document.getElementById("formCadastro").addEventListener("submit", async function (e) {
   e.preventDefault();
@@ -579,19 +685,29 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   const unidadeSelect = document.getElementById("unidadeSelect");
   const setorSelect = document.getElementById("setorSelect");
   const cargoSelect = document.getElementById("cargoSelect");
-
   const solicitarNovaFuncao = document.getElementById("solicitarNovaFuncao")?.checked === true;
   const solicitarNovoSetor = document.getElementById("solicitarNovoSetor")?.checked === true;
-
   const funcaoSelect = document.getElementById("funcao_atual");
   const setorAtualSelect = document.getElementById("setor_atual");
-
   const nomeNovaFuncao = document.getElementById("novaFuncao")?.value || null;
   const nomeNovoSetor = document.getElementById("novoSetor")?.value || null;
-
+  const solicitarMaisUnidades = document.getElementById("solicitarMaisUnidades").value === "true";
   const solicitarCredenciamento = document.getElementById("solicitarCredenciamento")?.checked === true;
-
   const clinicaSelect = document.getElementById("nome_clinica");
+
+  let unidades = [];
+
+  if (solicitarMaisUnidades) {
+    document.querySelectorAll(".unidade-extra-select")
+      .forEach(select => {
+        if (select.value) {
+          unidades.push({
+            cod_unidade: select.value,
+            nome_unidade: select.selectedOptions[0].dataset.nome
+          });
+        }
+      });
+  }
 
   const dados = {
     nome_funcionario: document.getElementById("nome").value,
@@ -610,12 +726,14 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     rac: document.getElementById("racSelect").value || null,
     tipo_rac: document.getElementById("racValeOpcao").value || null,
     tipo_exame: document.getElementById("tipo_exame").value,
-    data_exame: document.getElementById("data_exame").value,
-    hora_exame: document.getElementById("hora_exame").value,
+    data_exame: document.getElementById("data_exame").value || null,
+    solicitar_mais_unidades: solicitarMaisUnidades,
+    mais_unidades: solicitarMaisUnidades ? unidades : [],
     funcao_anterior: document.getElementById("funcao_anterior")?.value || null,
     funcao_atual: funcaoSelect.value ? funcaoSelect.options[funcaoSelect.selectedIndex].text : null,
     solicitar_nova_funcao: solicitarNovaFuncao,
     nome_nova_funcao: solicitarNovaFuncao ? nomeNovaFuncao : null,
+    descricao_atividade: document.getElementById("descricao_atividade").value,
     setor_atual: setorAtualSelect.value ? setorAtualSelect.options[setorAtualSelect.selectedIndex].text : null,
     solicitar_novo_setor: solicitarNovoSetor,
     nome_novo_setor: solicitarNovoSetor ? nomeNovoSetor : null,
@@ -662,53 +780,6 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     console.error(erro);
     alert("Erro ao enviar solicitação");
   }
-});
-
-// LISTENER DOS CAMPOS DE DATA/HORA DO EXAME (SÓ PERMITIR MAIS DE 24H DA SOLICITAÇÃO)
-const dataInput = document.getElementById("data_exame");
-const horaInput = document.getElementById("hora_exame");
-
-dataInput.addEventListener("change", validarDataHoraExame);
-horaInput.addEventListener("change", validarDataHoraExame);
-
-function validarDataHoraExame() {
-    const data = dataInput.value;
-    const hora = horaInput.value;
-
-    if (!data || !hora) return;
-
-    const [ano, mes, dia] = data.split("-").map(Number);
-    const [horaNum, minNum] = hora.split(":").map(Number);
-
-    const dataHoraSelecionada = new Date(
-        ano,
-        mes - 1,
-        dia,
-        horaNum,
-        minNum,
-        0,
-        0
-    );
-
-    const agora = new Date();
-    const dataMinima = new Date(agora.getTime() + 24 * 60 * 60 * 1000);
-
-    if (dataHoraSelecionada < dataMinima) {
-        alert(
-          "Atenção: o período para realização do exame deve ser, preferencialmente, no mínimo 24 horas da solicitação."
-        );
-    }
-}
-
-// FORMATAR A HORA PARA HH:MM QUANDO É DIGITADA
-document.getElementById("hora_exame").addEventListener("input", function() {
-    let valor = this.value.replace(/\D/g, "");
-
-    if (valor.length > 2) {
-        valor = valor.slice(0,2) + ":" + valor.slice(2,4);
-    }
-
-    this.value = valor;
 });
 
 // FUNÇÃO DE LOGOUT

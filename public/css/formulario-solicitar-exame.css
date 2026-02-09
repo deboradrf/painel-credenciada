@@ -189,6 +189,7 @@ hr {
 }
 
 main {
+    flex: 1;
     background-color: #F1F1F1;
 }
 
@@ -367,7 +368,7 @@ h5::after {
     background: transparent;
     border: none;
     flex: 1;
-    padding: 12px 14px;
+    padding: 11px;
     font-size: 16px;
     color: #000000;
     cursor: pointer;
@@ -483,6 +484,42 @@ h5::after {
 
 .btn-animado:hover .btn-hover-layer {
     width: calc(100% - 10px);
+}
+
+.btn-sim, .btn-nao {
+    background-color: #FFFFFF;
+    border: 2px solid #8A94A6;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #000000;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
+    width: 60px;
+    transition: all 0.25s ease;
+}
+
+.btn-sim:hover, .btn-nao:hover {
+    transform: translateY(-2px);
+}
+
+.btn-add-unidade {
+    background-color: #53A5A6;
+    border: 1px solid #53A5A6;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
+    width: 200px;
+    transition: all 0.25s ease;
+}
+
+.btn-add-unidade:hover {
+    transform: translateY(-2px);
 }
 
 .footer-container {
