@@ -111,7 +111,8 @@ function renderizarTabela(lista) {
 
   lista.forEach(s => {
     const tr = document.createElement("tr");
-    const statusClass = s.status.toLowerCase();
+    const status = (s.status || "PENDENTE").toUpperCase();
+    const statusClass = status.toLowerCase();
 
     let iconeTipo = "";
 
@@ -127,7 +128,7 @@ function renderizarTabela(lista) {
     `;
     }
 
-    const bloqueiaEnvioSOC = (s.solicitar_novo_setor === true || s.solicitar_novo_cargo === true) && s.status !== "APROVADO";
+    const bloqueiaEnvioSOC = (s.solicitar_novo_setor === true || s.solicitar_novo_cargo === true || s.solicitar_credenciamento) && s.status !== "APROVADO";
     const podeEnviarSOC = s.tipo === "NOVO_CADASTRO" && s.status !== "CANCELADO";
 
     tr.innerHTML = `
@@ -152,11 +153,13 @@ function renderizarTabela(lista) {
             </button>
           ` : ""}
 
-          ${s.status === "PENDENTE" ? `
-            <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})" >
-              Cancelar
-            </button>
-          ` : ""}
+          ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO"].includes(s.status)
+            ? `
+              <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
+                Cancelar
+              </button>
+            ` : ""
+          }
         </div>
       </td>
     `;
@@ -281,6 +284,7 @@ async function carregarSetores(empresaCodigo, selecionadoNome = "") {
       const opt = document.createElement("option");
       opt.value = s.codigo;
       opt.textContent = s.nome;
+
       if (s.nome === selecionadoNome) opt.selected = true;
       select.appendChild(opt);
     });
@@ -304,11 +308,36 @@ async function carregarCargos(empresaCodigo, selecionadoNome = "") {
       const opt = document.createElement("option");
       opt.value = c.codigo;
       opt.textContent = c.nome;
+
       if (c.nome === selecionadoNome) opt.selected = true;
       select.appendChild(opt);
     });
   } catch (err) {
     console.error("Erro ao carregar cargos:", err);
+  }
+}
+
+// FUNÇÃO PARA POPULAR O SELECT DE UNIDADES NO MODAL
+async function carregarUnidades(empresaCodigo, selecionadoNome = "") {
+  if (!empresaCodigo) return;
+
+  const select = document.getElementById("unidadeSelect");
+  select.innerHTML = '<option value="">-</option>';
+
+  try {
+    const res = await fetch(`/unidades/${empresaCodigo}`);
+    const unidades = await res.json();
+
+    unidades.forEach(u => {
+      const opt = document.createElement("option");
+      opt.value = u.codigo;
+      opt.textContent = u.nome;
+
+      if (u.nome === selecionadoNome) opt.selected = true;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error("Erro ao carregar unidades:", err);
   }
 }
 
@@ -334,21 +363,179 @@ function preencherMaisUnidadesExame(exame) {
   }
 }
 
-// função para pegar os valores selecionados do modal de cargo e setor
-function pegarDadosEdicaoCadastro() {
-  const setorSelect = document.getElementById("setorSelect");
-  const cargoSelect = document.getElementById("cargoSelect");
+// FUNÇÃO PARA FORMATAR OS TIPOS DE RAC
+function formatarTiposRac(tipos) {
+  if (!Array.isArray(tipos) || tipos.length === 0) return "-";
 
-  return {
-    cod_setor: setorSelect.value || null,
-    nome_setor: setorSelect.options[setorSelect.selectedIndex]?.text || null,
-    cod_cargo: cargoSelect.value || null,
-    nome_cargo: cargoSelect.options[cargoSelect.selectedIndex]?.text || null
+  return tipos
+    .map(t => t.replace("RAC_", "RAC "))
+    .join(", ");
+}
+
+function pegarDadosEdicao(statusAtual) {
+  let payload = {};
+
+  payload = {
+    ...payload,
+    ...edicaoUnidade(statusAtual),
+    ...edicaoSC(statusAtual),
+    ...edicaoCredenciamento(statusAtual),
   };
+
+  return payload;
+}
+
+function edicaoUnidade(statusAtual) {
+  const payload = {};
+
+  if (statusAtual === "PENDENTE_UNIDADE") {
+    const select = document.getElementById("unidadeSelect");
+
+    if (!select || !select.value) {
+      alert("Selecione uma unidade antes de salvar.");
+      throw new Error("Unidade não selecionada");
+    }
+
+    const optionSelecionada = select.options[select.selectedIndex];
+
+    payload.cod_unidade = select.value;
+    payload.nome_unidade = optionSelecionada.textContent;
+  }
+  return payload;
+}
+
+function edicaoSC(statusAtual) {
+  const payload = {};
+
+  if (statusAtual !== "PENDENTE_SC") return payload;
+
+  // SETOR
+  const selectSetor = document.getElementById("setorSelect");
+  if (selectSetor && selectSetor.style.display !== "none" && selectSetor.value) {
+    const opt = selectSetor.options[selectSetor.selectedIndex];
+
+    payload.cod_setor = selectSetor.value;
+    payload.nome_setor = opt.textContent;
+  }
+
+  // CARGO
+  const selectCargo = document.getElementById("cargoSelect");
+  if (selectCargo && selectCargo.style.display !== "none" && selectCargo.value) {
+    const opt = selectCargo.options[selectCargo.selectedIndex];
+
+    payload.cod_cargo = selectCargo.value;
+    payload.nome_cargo = opt.textContent;
+  }
+
+  if (!payload.cod_setor && !payload.cod_cargo) {
+    alert("Selecione ao menos um setor ou cargo.");
+    throw new Error("Nada para salvar em SC");
+  }
+
+  return payload;
+}
+
+function edicaoCredenciamento(statusAtual) {
+  const payload = {};
+
+  if (statusAtual !== "PENDENTE_CREDENCIAMENTO") return payload;
+
+  const select = document.getElementById("clinicaSelect");
+
+  if (!select || !select.value) {
+    alert("Selecione uma clínica antes de salvar.");
+    throw new Error("Clínica não selecionada");
+  }
+
+  const optionSelecionada = select.options[select.selectedIndex];
+
+  payload.cod_clinica = select.value;          // pode ser código ou nome
+  payload.nome_clinica = optionSelecionada.textContent;
+
+  return payload;
+}
+
+async function salvar() {
+  if (!solicitacaoAtualId) {
+    alert("ID da solicitação não encontrado");
+    return;
+  }
+
+  const statusAtual = window.statusAtualSolicitacao;
+  const dadosEdicao = pegarDadosEdicao(statusAtual);
+
+  let endpoint = "";
+
+  if (statusAtual === "PENDENTE_UNIDADE") {
+    endpoint = `/solicitacoes/novo-cadastro/${solicitacaoAtualId}/salvar-unidade`;
+  }
+
+  if (statusAtual === "PENDENTE_SC") {
+    endpoint = `/solicitacoes/novo-cadastro/${solicitacaoAtualId}/salvar-sc`;
+  }
+
+  if (statusAtual === "PENDENTE_CREDENCIAMENTO") {
+    endpoint = `/solicitacoes/novo-cadastro/${solicitacaoAtualId}/salvar-credenciamento`;
+  }
+
+  if (!endpoint) {
+    alert("Este status não permite edição.");
+    return;
+  }
+
+  try {
+    const res = await fetch(endpoint, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dadosEdicao)
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error(txt);
+      alert("Erro ao salvar (ver console)");
+      return;
+    }
+
+    alert("Salvo com sucesso");
+    bootstrap.Modal.getInstance(document.querySelector(".modal.show")).hide();
+    carregarSolicitacoes();
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro de comunicação com o servidor");
+  }
+}
+
+// FUNÇÃO PARA CARREGAR AS CLÍNICAS E POPULAR O SELECT
+async function carregarClinicas(codEmpresa, clinicaSelecionada) {
+  if (!codEmpresa) return;
+
+  const select = document.getElementById("clinicaSelect");
+  if (!select) return;
+
+  const res = await fetch(`/prestadores/${codEmpresa}`);
+  const clinicas = await res.json();
+
+  select.innerHTML = '<option value="">-</option>';
+
+  clinicas.forEach(c => {
+    const option = document.createElement("option");
+    option.value = c.nome;
+    option.textContent = c.nome;
+
+    if (c.nome === clinicaSelecionada) {
+      option.selected = true;
+    }
+
+    select.appendChild(option);
+  });
 }
 
 // FUNÇÃO PARA PREENCHER O MODAL
 function preencherModal(s, tipo) {
+  window.statusAtualSolicitacao = s.status;
+
   if (tipo === "NOVO_CADASTRO") {
     document.getElementById("cadastro_nome_funcionario").innerText = s.nome_funcionario;
     document.getElementById("cadastro_data_nascimento").innerText = formatarData(s.data_nascimento);
@@ -362,13 +549,24 @@ function preencherModal(s, tipo) {
     document.getElementById("cadastro_regime_trabalho").innerText = s.regime_trabalho;
     document.getElementById("cadastro_nome_empresa").innerText = s.nome_empresa;
     document.getElementById("cadastro_nome_unidade").innerText = s.nome_unidade;
+    document.getElementById("cadastro_nome_fantasia").innerText = s.nome_fantasia;
+    document.getElementById("cadastro_razao_social").innerText = s.razao_social;
+    document.getElementById("cadastro_cnpj").innerText = s.cnpj;
+    document.getElementById("cadastro_cnae").innerText = s.cnae;
+    document.getElementById("cadastro_cep").innerText = s.cep;
+    document.getElementById("cadastro_rua").innerText = s.rua;
+    document.getElementById("cadastro_numero").innerText = s.numero;
+    document.getElementById("cadastro_bairro").innerText = s.bairro;
+    document.getElementById("cadastro_estado").innerText = s.estado;
+    document.getElementById("cadastro_tipo_faturamento").innerText = s.tipo_faturamento;
+    document.getElementById("cadastro_email").innerText = s.email;
     document.getElementById("cadastro_nome_setor").innerText = s.nome_setor || "-";
     document.getElementById("cadastro_novo_setor").innerText = s.nome_novo_setor;
     document.getElementById("cadastro_nome_cargo").innerText = s.nome_cargo || "-";
     document.getElementById("cadastro_novo_cargo").innerText = s.nome_novo_cargo;
     document.getElementById("cadastro_descricao_atividade").innerText = s.descricao_atividade;
     document.getElementById("cadastro_rac").innerText = s.rac || "-";
-    document.getElementById("cadastro_tipo_rac").innerText = s.tipo_rac || "-";
+    document.getElementById("cadastro_tipos_rac").innerText = formatarTiposRac(s.tipos_rac);
     document.getElementById("cadastro_tipo_exame").innerText = s.tipo_exame;
     document.getElementById("cadastro_data_exame").innerText = formatarData(s.data_exame);
     preencherMaisUnidades(s);
@@ -381,6 +579,75 @@ function preencherModal(s, tipo) {
     document.getElementById("cadastro_estado_credenciamento").innerText = s.estado_credenciamento;
     document.getElementById("cadastro_cidade_credenciamento").innerText = s.cidade_credenciamento;
     document.getElementById("cadastro_observacao").innerText = s.observacao || "-";
+
+    const btnSalvar = document.getElementById("btn-salvar");
+    const btnAprovar = document.getElementById("btn-aprovar");
+
+    // ESCONDER TUDO POR PADRÃO
+    if (btnSalvar) btnSalvar.style.display = "none";
+    if (btnAprovar) btnAprovar.style.display = "none";
+
+    // MOSTRAR CONFORME STATUS
+    if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO") {
+      if (btnSalvar) btnSalvar.style.display = "inline-flex";
+    }
+
+    if (s.status === "PENDENTE") {
+      if (btnAprovar) btnAprovar.style.display = "inline-flex";
+    }
+
+    // MOSTRAR / ESCONDER BLOCO DE NOVA UNIDADE
+    const blocoNomeFantasia = document.getElementById("divNomeFantasia");
+    const blocoRazaoSocial = document.getElementById("divRazaoSocial");
+    const blocoCnpj = document.getElementById("divCnpj");
+    const blocoCnae = document.getElementById("divCnae");
+    const blocoCep = document.getElementById("divCep");
+    const blocoRua = document.getElementById("divRua");
+    const blocoNumero = document.getElementById("divNumero");
+    const blocoBairro = document.getElementById("divBairro");
+    const blocoEstado = document.getElementById("divEstado");
+    const blocoTipoFaturamento = document.getElementById("divTipoFaturamento");
+    const blocoEmail = document.getElementById("divEmail");
+
+    if (s.solicitar_nova_unidade === true) {
+      blocoNomeFantasia.classList.remove("d-none");
+      blocoRazaoSocial.classList.remove("d-none");
+      blocoCnpj.classList.remove("d-none");
+      blocoCnae.classList.remove("d-none");
+      blocoCep.classList.remove("d-none");
+      blocoRua.classList.remove("d-none");
+      blocoNumero.classList.remove("d-none");
+      blocoBairro.classList.remove("d-none");
+      blocoEstado.classList.remove("d-none");
+      blocoTipoFaturamento.classList.remove("d-none");
+      blocoEmail.classList.remove("d-none");
+    } else {
+      blocoNomeFantasia.classList.add("d-none");
+      blocoRazaoSocial.classList.add("d-none");
+      blocoCnpj.classList.add("d-none");
+      blocoCnae.classList.add("d-none");
+      blocoCep.classList.add("d-none");
+      blocoRua.classList.add("d-none");
+      blocoNumero.classList.add("d-none");
+      blocoBairro.classList.add("d-none");
+      blocoEstado.classList.add("d-none");
+      blocoTipoFaturamento.classList.add("d-none");
+      blocoEmail.classList.add("d-none");
+    }
+
+    // TRANSFORMAR O CAMPO DE UNIDADE EM SELECT CASO PRECISE CRIAR UMA NOVA
+    const spanUnidade = document.getElementById("cadastro_nome_unidade");
+    const selectUnidade = document.getElementById("unidadeSelect");
+
+    if (s.solicitar_nova_unidade === true) {
+      spanUnidade.style.display = "none";
+      selectUnidade.style.display = "block";
+
+      carregarUnidades(s.cod_empresa, s.nome_unidade);
+    } else {
+      spanUnidade.style.display = "block";
+      selectUnidade.style.display = "none";
+    }
 
     // MOSTRAR / ESCONDER BLOCO DE NOVO SETOR / NOVO CARGO / DESCRIÇÃO ATIVIDADE
     const blocoNovoSetor = document.getElementById("divNovoSetor");
@@ -449,23 +716,54 @@ function preencherModal(s, tipo) {
     }
 
     // MOSTRAR / ESCONDER BLOCO DE NOVO CREDENCIAMENTO
-    const blocoClinica = document.getElementById("blocoCadClinica");
-    const blocoCredenciamento = document.getElementById("blocoCadCredenciamento");
+    const blocoEstadoClinica = document.getElementById("divEstadoClinica");
+    const blocoCidadeClinica = document.getElementById("divCidadeClinica");
+    const blocoNomeClinica = document.getElementById("divNomeClinica");
+
+    const blocoEstadoCredenciamento = document.getElementById("divEstadoCredenciamento");
+    const blocoCidadeCredenciamento = document.getElementById("divCidadeCredenciamento");
 
     if (s.solicitar_credenciamento === true) {
-      blocoClinica.classList.add("d-none");
-      blocoCredenciamento.classList.remove("d-none");
+      blocoEstadoClinica.classList.add("d-none");
+      blocoCidadeClinica.classList.add("d-none");
 
-      document.getElementById("cadastro_estado_credenciamento").innerText = s.estado_credenciamento;
-      document.getElementById("cadastro_cidade_credenciamento").innerText = s.cidade_credenciamento;
+      // MOSTRA CAMPOS DE CREDENCIAMENTO
+      blocoEstadoCredenciamento.classList.remove("d-none");
+      blocoCidadeCredenciamento.classList.remove("d-none");
+      blocoNomeClinica.classList.remove("d-none");
+
+      document.getElementById("cadastro_estado_credenciamento").innerText = s.estado_credenciamento || "-";
+      document.getElementById("cadastro_cidade_credenciamento").innerText = s.cidade_credenciamento || "-";
+    } else {
+      blocoEstadoClinica.classList.remove("d-none");
+      blocoCidadeClinica.classList.remove("d-none");
+      blocoNomeClinica.classList.remove("d-none");
+
+      // ESCONDE CREDENCIAMENTO
+      blocoEstadoCredenciamento.classList.add("d-none");
+      blocoCidadeCredenciamento.classList.add("d-none");
+
+      document.getElementById("cadastro_estado_clinica").innerText = s.estado_clinica || "-";
+      document.getElementById("cadastro_cidade_clinica").innerText = s.cidade_clinica || "-";
+    }
+
+    // TRANSFORMAR O CAMPO DE NOME DA CLINICA EM SELECT CASO PRECISE CRIAR UM NOVO CREDENCIAMENTO PARA SER SELECIONADO APÓS CRIADO
+    const spanClinica = document.getElementById("cadastro_nome_clinica");
+    const selectClinica = document.getElementById("clinicaSelect");
+
+    if (s.solicitar_credenciamento === true) {
+      spanClinica.style.display = "none";
+
+      selectClinica.classList.remove("d-none"); // 🔴 ISSO É O QUE FALTAVA
+      selectClinica.style.display = "block";
+
+      carregarClinicas(s.cod_empresa, spanClinica.innerText);
 
     } else {
-      blocoClinica.classList.remove("d-none");
-      blocoCredenciamento.classList.add("d-none");
+      spanClinica.style.display = "block";
 
-      document.getElementById("cadastro_estado_clinica").innerText = s.estado_clinica;
-      document.getElementById("cadastro_cidade_clinica").innerText = s.cidade_clinica;
-      document.getElementById("cadastro_nome_clinica").innerText = s.nome_clinica;
+      selectClinica.classList.add("d-none"); // 🔴 E ISSO AQUI
+      selectClinica.style.display = "none";
     }
   }
 
@@ -480,7 +778,7 @@ function preencherModal(s, tipo) {
     document.getElementById("exame_nome_setor").innerText = s.nome_setor;
     document.getElementById("exame_nome_cargo").innerText = s.nome_cargo;
     document.getElementById("exame_rac").innerText = s.rac || "-";
-    document.getElementById("exame_tipo_rac").innerText = s.tipo_rac || "-";
+    document.getElementById("exame_tipos_rac").innerText = formatarTiposRac(s.tipos_rac);
     document.getElementById("exame_tipo_exame").innerText = s.tipo_exame;
     document.getElementById("exame_data_exame").innerText = formatarData(s.data_exame);
     preencherMaisUnidadesExame(s);
@@ -771,26 +1069,6 @@ async function analisarSolicitacao(status) {
   if (status === "REPROVADO" && !motivo.trim()) {
     alert("Informe o motivo da reprovação");
     return;
-  }
-
-  const tipo = isExame ? "NOVO_EXAME" : "NOVO_CADASTRO";
-
-  // Se for NOVO_CADASTRO, atualiza setor/cargo antes de aprovar
-  if (!isExame) {
-    const selectSetor = document.getElementById("setorSelect");
-    const selectCargo = document.getElementById("cargoSelect");
-
-    const solicitarNovoSetor = selectSetor && selectSetor.style.display !== "none";
-    const solicitarNovoCargo = selectCargo && selectCargo.style.display !== "none";
-
-    if (solicitarNovoSetor || solicitarNovoCargo) {
-      const dadosEdicao = pegarDadosEdicaoCadastro();
-      await fetch(`/solicitacoes/novo-cadastro/${solicitacaoAtualId}/editar-setor-cargo`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dadosEdicao)
-      });
-    }
   }
 
   const res = await fetch(

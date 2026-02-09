@@ -393,19 +393,18 @@
                             </div>
 
                             <div class="form-check my-2">
-                                <input class="form-check-input" type="checkbox" id="nota_unica">
-                                <label class="form-check-label label-nota_unica" for="nota_unica">
+                                <input class="form-check-input" type="radio" name="tipo_faturamento" value="JUNTO">
+                                <label class="form-check-label">
                                     Essa unidade será faturada junto com a empresa principal, em uma única
                                     nota
                                 </label>
                             </div>
 
                             <div class="form-check mt-2 mb-4">
-                                <input class="form-check-input" type="checkbox" id="nota_separada">
-                                <label class="form-check-label label-nota_separada" for="nota_separada">
+                                <input class="form-check-input" type="radio" name="tipo_faturamento" value="SEPARADO">
+                                <label class="form-check-label">
                                     Essa unidade será faturada separadamente da empresa principal, com uma
-                                    nota
-                                    separada
+                                    nota separada
                                 </label>
                             </div>
 
@@ -499,7 +498,7 @@
                                         <i class="fa-solid fa-user-pen"></i>
                                     </div>
 
-                                    <textarea id="descricao_atividade" rows="2"></textarea>
+                                    <textarea id="descricao_atividade" rows="2" maxlength="999"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -534,20 +533,42 @@
 
                         <div class="form-group mt-3 d-none" id="divRacValeOpcoes">
                             <label>Tipo de RAC <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-list-check"></i>
-                                </div>
-                                <select id="racValeOpcao">
-                                    <option value="">Selecione...</option>
-                                    <option value="RAC_1">RAC 1 - Trabalhos em Altura</option>
-                                    <option value="RAC_2">RAC 2 - Veículos Automotores</option>
-                                    <option value="RAC_3">RAC 3 - Equipamentos Móveis</option>
-                                    <option value="RAC_5">RAC 5 - Içamento de Cargas</option>
-                                    <option value="RAC_6">RAC 6 - Espaço Confinado</option>
-                                    <option value="RAC_10">RAC 10 - Trabalhos em Eletricidade</option>
-                                    <option value="RAC_11">RAC 11 - Metal Líquido</option>
-                                </select>
+
+                            <div class="rac-checkbox-group">
+                                <label class="rac-checkbox">
+                                    <input type="checkbox" name="racValeOpcao" value="RAC_1">
+                                    RAC 1 - Trabalhos em Altura
+                                </label>
+
+                                <label class="rac-checkbox">
+                                    <input type="checkbox" name="racValeOpcao" value="RAC_2">
+                                    RAC 2 - Veículos Automotores
+                                </label>
+
+                                <label class="rac-checkbox">
+                                    <input type="checkbox" name="racValeOpcao" value="RAC_3">
+                                    RAC 3 - Equipamentos Móveis
+                                </label>
+
+                                <label class="rac-checkbox">
+                                    <input type="checkbox" name="racValeOpcao" value="RAC_5">
+                                    RAC 5 - Içamento de Cargas
+                                </label>
+
+                                <label class="rac-checkbox">
+                                    <input type="checkbox" name="racValeOpcao" value="RAC_6">
+                                    RAC 6 - Espaço Confinado
+                                </label>
+
+                                <label class="rac-checkbox">
+                                    <input type="checkbox" name="racValeOpcao" value="RAC_10">
+                                    RAC 10 - Trabalhos em Eletricidade
+                                </label>
+
+                                <label class="rac-checkbox">
+                                    <input type="checkbox" name="racValeOpcao" value="RAC_11">
+                                    RAC 11 - Metal Líquido
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -795,10 +816,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!--<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-    <script>
-        emailjs.init("1pr-7ed79IA57qLnM");
-    </script> -->
     <script src="../script/formulario-novo-cadastro.js"></script>
 </body>
 

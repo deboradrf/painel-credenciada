@@ -694,6 +694,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   const solicitarMaisUnidades = document.getElementById("solicitarMaisUnidades").value === "true";
   const solicitarCredenciamento = document.getElementById("solicitarCredenciamento")?.checked === true;
   const clinicaSelect = document.getElementById("nome_clinica");
+  const tiposRacSelecionados = Array.from(document.querySelectorAll('input[name="racValeOpcao"]:checked')).map(el => el.value);
 
   let unidades = [];
 
@@ -724,7 +725,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     cod_cargo: cargoSelect.value,
     nome_cargo: cargoSelect.options[cargoSelect.selectedIndex]?.text || null,
     rac: document.getElementById("racSelect").value || null,
-    tipo_rac: document.getElementById("racValeOpcao").value || null,
+    tipos_rac: tiposRacSelecionados.length ? tiposRacSelecionados : null,
     tipo_exame: document.getElementById("tipo_exame").value,
     data_exame: document.getElementById("data_exame").value || null,
     solicitar_mais_unidades: solicitarMaisUnidades,

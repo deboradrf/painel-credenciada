@@ -205,6 +205,7 @@
                         <div class="col-12">
                             <p id="linha_aprovacao_cadastro" class="text-muted small"></p>
                         </div>
+
                         <div class="col-12">
                             <div class="detail-item">
                                 <div class="detail-label">
@@ -304,12 +305,112 @@
                             </div>
                         </div>
 
-                        <div class="col-6">
+                        <div class="col-12">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Unidade do Funcionário</span>
                                 </div>
                                 <span id="cadastro_nome_unidade" class="detail-value"></span>
+                                <select id="unidadeSelect" class="detail-input" style="display:none"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divNomeFantasia">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome Fantasia</span>
+                                </div>
+                                <span id="cadastro_nome_fantasia" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divRazaoSocial">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Razão Social</span>
+                                </div>
+                                <span id="cadastro_razao_social" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divCnpj">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>CNPJ</span>
+                                </div>
+                                <span id="cadastro_cnpj" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divCnae">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>CNAE</span>
+                                </div>
+                                <span id="cadastro_cnae" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divCep">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>CEP</span>
+                                </div>
+                                <span id="cadastro_cep" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divRua">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Rua</span>
+                                </div>
+                                <span id="cadastro_rua" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divNumero">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Número</span>
+                                </div>
+                                <span id="cadastro_numero" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divBairro">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Bairro</span>
+                                </div>
+                                <span id="cadastro_bairro" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divEstado">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Estado</span>
+                                </div>
+                                <span id="cadastro_estado" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divTipoFaturamento">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Tipo Faturamento</span>
+                                </div>
+                                <span id="cadastro_tipo_faturamento" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="divEmail">
+                            <div class="detail-item">
+                                <div class="detail-label destacado">
+                                    <span>E-mail</span>
+                                </div>
+                                <span id="cadastro_email" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -323,6 +424,15 @@
                             </div>
                         </div>
 
+                        <div class="col-6" id="divNovoSetor">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome do Novo Setor</span>
+                                </div>
+                                <span id="cadastro_novo_setor" class="detail-value"></span>
+                            </div>
+                        </div>
+
                         <div class="col-6">
                             <div class="detail-item">
                                 <div class="detail-label">
@@ -330,15 +440,6 @@
                                 </div>
                                 <span id="cadastro_nome_cargo" class="detail-value"></span>
                                 <select id="cargoSelect" class="detail-input" style="display:none"></select>
-                            </div>
-                        </div>
-
-                        <div class="col-6" id="divNovoSetor">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Nome do Novo Setor</span>
-                                </div>
-                                <span id="cadastro_novo_setor" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -374,7 +475,7 @@
                                 <div class="detail-label">
                                     <span>Tipo de RAC</span>
                                 </div>
-                                <span id="cadastro_tipo_rac" class="detail-value"></span>
+                                <span id="cadastro_tipos_rac" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -432,56 +533,49 @@
                             </div>
                         </div>
 
-                        <div id="blocoCadClinica" class="d-none">
-                            <div class="row g-3">
-                                <div class="col-6">
-                                    <div class="detail-item">
-                                        <div class="detail-label">
-                                            <span>Estado da Clínica</span>
-                                        </div>
-                                        <span id="cadastro_estado_clinica" class="detail-value"></span>
-                                    </div>
+                        <div class="col-6" id="divEstadoClinica">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Estado da Clínica</span>
                                 </div>
-
-                                <div class="col-6">
-                                    <div class="detail-item">
-                                        <div class="detail-label">
-                                            <span>Cidade da Clínica</span>
-                                        </div>
-                                        <span id="cadastro_cidade_clinica" class="detail-value"></span>
-                                    </div>
-                                </div>
-
-                                <div class="col-12">
-                                    <div class="detail-item">
-                                        <div class="detail-label">
-                                            <span>Nome da Clínica</span>
-                                        </div>
-                                        <span id="cadastro_nome_clinica" class="detail-value"></span>
-                                    </div>
-                                </div>
+                                <span id="cadastro_estado_clinica" class="detail-value"></span>
                             </div>
                         </div>
 
-                        <div id="blocoCadCredenciamento" class="d-none">
-                            <div class="row g-3">
-                                <div class="col-6">
-                                    <div class="detail-item">
-                                        <div class="detail-label">
-                                            <span>Estado para Credenciamento</span>
-                                        </div>
-                                        <span id="cadastro_estado_credenciamento" class="detail-value"></span>
-                                    </div>
+                        <div class="col-6" id="divCidadeClinica">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Cidade da Clínica</span>
                                 </div>
+                                <span id="cadastro_cidade_clinica" class="detail-value"></span>
+                            </div>
+                        </div>
 
-                                <div class="col-6">
-                                    <div class="detail-item">
-                                        <div class="detail-label">
-                                            <span>Cidade para Credenciamento</span>
-                                        </div>
-                                        <span id="cadastro_cidade_credenciamento" class="detail-value"></span>
-                                    </div>
+                        <div class="col-12" id="divNomeClinica">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome da Clínica</span>
                                 </div>
+                                <span id="cadastro_nome_clinica" class="detail-value"></span>
+                                <select id="clinicaSelect" class="detail-input d-none"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divEstadoCredenciamento">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Estado para Credenciamento</span>
+                                </div>
+                                <span id="cadastro_estado_credenciamento" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divCidadeCredenciamento">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Cidade para Credenciamento</span>
+                                </div>
+                                <span id="cadastro_cidade_credenciamento" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -498,11 +592,17 @@
 
                 <div class="modal-footer">
                     <div class="action-buttons">
-                        <button type="button" class="btn-action btn-aprovar" onclick="analisarSolicitacao('APROVADO')">
+                        <button type="button" class="btn-action" id="btn-aprovar"
+                            onclick="analisarSolicitacao('APROVADO')">
                             <i class="fa-solid fa-check"></i>
                             Aprovar
                         </button>
-                        <button type="button" class="btn-action btn-reprovar"
+
+                        <button type="button" class="btn-action" id="btn-salvar" onclick="salvar()">
+                            Salvar
+                        </button>
+
+                        <button type="button" class="btn-action" id="btn-reprovar"
                             onclick="analisarSolicitacao('REPROVADO')">
                             <i class="fa-solid fa-xmark"></i>
                             Reprovar
@@ -632,7 +732,7 @@
                                 <div class="detail-label">
                                     <span>Tipo de RAC</span>
                                 </div>
-                                <span id="exame_tipo_rac" class="detail-value"></span>
+                                <span id="exame_tipos_rac" class="detail-value"></span>
                             </div>
                         </div>
 

@@ -435,28 +435,65 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // // COLOCAR REQUIRED NOS CAMPOS DE NOVA UNIDADE
-// document.addEventListener("DOMContentLoaded", () => {
-//   const chkSolicitarNovaUnidade = document.getElementById("solicitarNovaUnidade");
-//   const selectSetor = document.getElementById("setorSelect");
-//   const novoSetor = document.getElementById("novoSetor");
+document.addEventListener("DOMContentLoaded", () => {
+  const chkNovaUnidade = document.getElementById("solicitarNovaUnidade");
+  const unidadeSelect = document.getElementById("unidadeSelect");
 
-//   if (!chkSolicitarNovaUnidade || !selectSetor) return;
+  const camposNovaUnidade = [
+    "nome_fantasia",
+    "razao_social",
+    "cnpj",
+    "cnae",
+    "cep",
+    "rua",
+    "numero",
+    "bairro",
+    "estado",
+    "email"
+  ].map(id => document.getElementById(id));
 
-//   chkSolicitarNovaUnidade.addEventListener("change", () => {
-//     if (chkSolicitarNovaUnidade.checked) {
-//       selectSetor.value = "";
-//       selectSetor.disabled = true;
-//       selectSetor.removeAttribute("required");
+  const radiosTipoFaturamento = document.querySelectorAll(
+    'input[name="tipo_faturamento"]'
+  );
 
-//       novoSetor.required = true;
-//     } else {
-//       selectSetor.disabled = false;
-//       selectSetor.setAttribute("required", "required");
+  if (!chkNovaUnidade || !unidadeSelect) return;
 
-//       novoSetor.required = false;
-//     }
-//   });
-// });
+  function atualizarRequired() {
+    if (chkNovaUnidade.checked) {
+      // ❌ unidade existente
+      unidadeSelect.value = "";
+      unidadeSelect.removeAttribute("required");
+
+      // ✅ nova unidade
+      camposNovaUnidade.forEach(campo => {
+        if (campo) campo.required = true;
+      });
+
+      radiosTipoFaturamento.forEach(radio => {
+        radio.required = true;
+      });
+
+    } else {
+      // ✅ unidade existente
+      unidadeSelect.setAttribute("required", "required");
+
+      // ❌ nova unidade
+      camposNovaUnidade.forEach(campo => {
+        if (campo) {
+          campo.required = false;
+          campo.value = "";
+        }
+      });
+
+      radiosTipoFaturamento.forEach(radio => {
+        radio.required = false;
+        radio.checked = false;
+      });
+    }
+  }
+
+  chkNovaUnidade.addEventListener("change", atualizarRequired);
+});
 
 // MOSTRAR SEÇÃO DE NOVO SETOR
 document.getElementById("solicitarNovoSetor").addEventListener("change", function () {
@@ -600,6 +637,7 @@ const codCategoriaMap = {
   TERCEIRIZADO: "102",
   AUTONOMO: "701",
   TEMPORARIO: "106",
+  PESSOA_JURIDICA: "701",
   ESTAGIARIO: "901",
   MENOR_APRENDIZ: "103"
 };
@@ -728,50 +766,6 @@ document.addEventListener("DOMContentLoaded", function () {
   limitarAno(inputVencimentoCNH);
 });
 
-// // FUNÇÃO PARA ENVIAR EMAIL AUTOMATICO PRA ENGENHARIA QUANDO PRECISAR CRIAR SETOR/CARGO
-// async function enviarEmailSolicitacao(dados) {
-//   if (!dados.solicitar_novo_setor && !dados.solicitar_novo_cargo) return;
-
-//   let solicitacao = "";
-
-//   if (dados.solicitar_novo_setor) {
-//     solicitacao += `• Setor: ${dados.nome_novo_setor}\n`;
-//   }
-
-//   if (dados.solicitar_novo_cargo) {
-//     solicitacao += `• Cargo: ${dados.nome_novo_cargo}\n`;
-//   }
-
-//   const mensagem = `
-//     Prezados,
-
-//     Gentileza seguir com a criação do(s) item(ns) abaixo solicitado(s):
-
-//     ${solicitacao}
-//     Empresa: ${dados.nome_empresa}
-//     Unidade: ${dados.nome_unidade}
-
-//     Atenciosamente,
-//     Débora
-//   `;
-
-//   try {
-//     await emailjs.send(
-//       "service_8ebe4kr",
-//       "template_vktvl1g",
-//       {
-//         assunto: "Solicitação de criação de cargo/setor",
-//         mensagem
-//       }
-//     );
-
-//     alert("📧 E-mail enviado com sucesso!");
-//   } catch (erro) {
-//     console.error("Erro ao enviar e-mail:", erro);
-//     alert("❌ Não foi possível enviar o e-mail.");
-//   }
-// }
-
 async function enviarEmailSolicitacao(dados) {
   if (!dados.solicitar_novo_setor && !dados.solicitar_novo_cargo) return;
 
@@ -808,6 +802,64 @@ async function enviarEmailSolicitacao(dados) {
   });
 }
 
+// CHECKBOX DE NOVA UNIDADE TORNA OBRIGATORIO A CRIAÇÃO DE NOVO SETOR/CARGO
+document.addEventListener("DOMContentLoaded", () => {
+  const chkNovaUnidade = document.getElementById("solicitarNovaUnidade");
+
+  const selectSetor = document.getElementById("setorSelect");
+  const selectCargo = document.getElementById("cargoSelect");
+
+  function bloquearSelect(e) {
+    if (chkNovaUnidade.checked) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      alert("Para criação de nova unidade é necessário criar novo setor e cargo.");
+      return false;
+    }
+  }
+
+  // Intercepta mouse
+  selectSetor.addEventListener("mousedown", bloquearSelect);
+  selectCargo.addEventListener("mousedown", bloquearSelect);
+
+  // Intercepta teclado (TAB / ENTER)
+  selectSetor.addEventListener("keydown", bloquearSelect);
+  selectCargo.addEventListener("keydown", bloquearSelect);
+
+  // Visual opcional (cursor)
+  function atualizarVisual() {
+    const bloqueado = chkNovaUnidade.checked;
+
+    selectSetor.style.cursor = bloqueado ? "not-allowed" : "pointer";
+    selectCargo.style.cursor = bloqueado ? "not-allowed" : "pointer";
+  }
+
+  chkNovaUnidade.addEventListener("change", atualizarVisual);
+
+  atualizarVisual();
+});
+
+function definirStatusInicialCadastro(s) {
+  const precisaUnidade = s.solicitar_nova_unidade === true;
+  const precisaSetorCargo = s.solicitar_novo_setor === true || s.solicitar_novo_cargo === true;
+  const precisaCredenciamento = s.solicitar_credenciamento === true;
+
+  if (precisaUnidade) {
+    return "PENDENTE_UNIDADE";
+  }
+
+  if (precisaSetorCargo) {
+    return "PENDENTE_SC";
+  }
+
+  if (precisaCredenciamento) {
+    return "PENDENTE_CREDENCIAMENTO";
+  }
+
+  return "PENDENTE";
+}
+
 // ENVIO DO FORMULÁRIO
 document.getElementById("formCadastro").addEventListener("submit", async function (e) {
   e.preventDefault();
@@ -820,21 +872,28 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   }
 
   const unidadeSelect = document.getElementById("unidadeSelect");
+  const solicitarNovaUnidade = document.getElementById("solicitarNovaUnidade")?.checked === true;
+  const nomeFantasia = document.getElementById("nome_fantasia")?.value || null;
+  const razaoSocial = document.getElementById("razao_social")?.value || null;
+  const cnpj = document.getElementById("cnpj")?.value || null;
+  const cnae = document.getElementById("cnae")?.value || null;
+  const cep = document.getElementById("cep")?.value || null;
+  const rua = document.getElementById("rua")?.value || null;
+  const numero = document.getElementById("numero")?.value || null;
+  const bairro = document.getElementById("bairro")?.value || null;
+  const estado = document.getElementById("estado")?.value || null;
+  const email = document.getElementById("email")?.value || null;
+  const tipoFaturamento = document.querySelector('input[name="tipo_faturamento"]:checked')?.value || null;
   const setorSelect = document.getElementById("setorSelect");
   const cargoSelect = document.getElementById("cargoSelect");
-
   const tipoContratacaoValue = document.getElementById("tipo_contratacao").value;
-
   const naoPossuiMatricula = document.getElementById("naoPossuiMatricula")?.checked === true;
-
   const solicitarNovoSetor = document.getElementById("solicitarNovoSetor")?.checked === true;
   const solicitarNovoCargo = document.getElementById("solicitarNovoCargo")?.checked === true;
-
   const nomeNovoSetor = document.getElementById("novoSetor")?.value || null;
   const nomeNovoCargo = document.getElementById("novoCargo")?.value || null;
-
   const solicitarMaisUnidades = document.getElementById("solicitarMaisUnidades").value === "true";
-
+  const tiposRacSelecionados = Array.from(document.querySelectorAll('input[name="racValeOpcao"]:checked')).map(el => el.value);
   const solicitarCredenciamento = document.getElementById("solicitarCredenciamento")?.checked === true;
 
   let unidades = [];
@@ -866,8 +925,20 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     regime_trabalho: document.getElementById("regime_trabalho").value,
     cod_empresa: empresaCodigo,
     nome_empresa: nomeEmpresa,
-    cod_unidade: unidadeSelect.value,
-    nome_unidade: unidadeSelect.selectedOptions[0].dataset.nome,
+    cod_unidade: solicitarNovaUnidade ? null : unidadeSelect.value,
+    nome_unidade: solicitarNovaUnidade ? null : unidadeSelect.selectedOptions[0].dataset.nome,
+    solicitar_nova_unidade: solicitarNovaUnidade,
+    nome_fantasia: solicitarNovaUnidade ? nomeFantasia : null,
+    razao_social: solicitarNovaUnidade ? razaoSocial : null,
+    cnpj: solicitarNovaUnidade ? cnpj : null,
+    cnae: solicitarNovaUnidade ? cnae : null,
+    cep: solicitarNovaUnidade ? cep : null,
+    rua: solicitarNovaUnidade ? rua : null,
+    numero: solicitarNovaUnidade ? numero : null,
+    bairro: solicitarNovaUnidade ? bairro : null,
+    estado: solicitarNovaUnidade ? estado : null,
+    tipo_faturamento: solicitarNovaUnidade ? tipoFaturamento : null,
+    email: solicitarNovaUnidade ? email : null,
     cod_setor: solicitarNovoSetor ? null : setorSelect.value,
     nome_setor: solicitarNovoSetor ? null : setorSelect.selectedOptions[0].dataset.nome,
     solicitar_novo_setor: solicitarNovoSetor,
@@ -878,7 +949,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     nome_novo_cargo: solicitarNovoCargo ? nomeNovoCargo : null,
     descricao_atividade: document.getElementById("descricao_atividade").value,
     rac: document.getElementById("racSelect").value || null,
-    tipo_rac: document.getElementById("racValeOpcao").value || null,
+    tipos_rac: tiposRacSelecionados.length ? tiposRacSelecionados : null,
     tipo_exame: document.getElementById("tipo_exame").value,
     data_exame: document.getElementById("data_exame").value || null,
     solicitar_mais_unidades: solicitarMaisUnidades,
@@ -905,6 +976,9 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     dados.cod_clinica = clinicaSelect.value;
     dados.nome_clinica = clinicaSelect.selectedOptions[0]?.dataset.nome || null;
   }
+
+  const statusInicial = definirStatusInicialCadastro(dados);
+  dados.status = statusInicial;
 
   try {
     const res = await fetch("/novo-cadastro", {

@@ -276,18 +276,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+function formatarTiposRac(tipos) {
+  if (!Array.isArray(tipos) || tipos.length === 0) return "-";
+
+  return tipos
+    .map(t => t.replace("RAC_", "RAC "))
+    .join(", ");
+}
+
 // FUNÇÃO PARA PREENCHER OS CAMPOS DO MODAL - NOVO CADASTRO
 function preencherModalEditarCadastro(s) {
   document.getElementById("editCadId").value = s.solicitacao_id;
 
   document.getElementById("editCadNomeFuncionario").value = s.nome_funcionario;
-  document.getElementById("editCadDataNascimento").value = formatarData(s.data_nascimento);
+  document.getElementById("editCadDataNascimento").value = s.data_nascimento;
   document.getElementById("editCadSexo").value = s.sexo;
   document.getElementById("editCadEstadoCivil").value = s.estado_civil;
   document.getElementById("editCadDocIdentidade").value = s.doc_identidade;
   document.getElementById("editCadCPF").value = s.cpf;
   document.getElementById("editCadMatricula").value = s.matricula;
-  document.getElementById("editCadDataAdmissao").value = formatarData(s.data_admissao);
+  document.getElementById("editCadDataAdmissao").value = s.data_admissao;
   document.getElementById("editCadTipoContratacao").value = s.tipo_contratacao;
   document.getElementById("editCadRegimeTrabalho").value = s.regime_trabalho;
   document.getElementById("editCadNomeEmpresa").value = s.nome_empresa;
@@ -298,12 +306,12 @@ function preencherModalEditarCadastro(s) {
   document.getElementById("editCadNovoCargo").value = s.nome_novo_cargo;
   document.getElementById("editCadDescricaoAtividade").value = s.descricao_atividade;
   document.getElementById("editCadRac").value = s.rac,
-    document.getElementById("editCadTipoRac").value = s.tipo_rac,
-    document.getElementById("editCadTipoExame").value = s.tipo_exame;
-  document.getElementById("editCadDataExame").value = formatarData(s.data_exame);
+  document.getElementById("editCadTiposRac").value = s.tipos_rac;
+  document.getElementById("editCadTipoExame").value = s.tipo_exame;
+  document.getElementById("editCadDataExame").value = s.data_exame;
   document.getElementById("editCadMaisUnidades").innerText = s.mais_unidades;
   document.getElementById("editCadCNH").value = s.cnh;
-  document.getElementById("editCadVencimentoCNH").value = formatarData(s.vencimento_cnh);
+  document.getElementById("editCadVencimentoCNH").value = s.vencimento_cnh;
   document.getElementById("editCadLabToxicologico").value = s.lab_toxicologico;
   document.getElementById("editCadEstadoClinica").value = s.estado_clinica;
   document.getElementById("editCadCidadeClinica").value = s.cidade_clinica;
@@ -382,7 +390,6 @@ function preencherModalEditarCadastro(s) {
     editCadMaisUnidades.innerHTML = "";
     blocoMaisUnidades.classList.add("d-none");
   }
-
 }
 
 // FUNÇÃO PARA PREENHCER OS CAMPOS DO MODAL - NOVO EXAME
@@ -390,19 +397,19 @@ function preencherModalEditarExame(s) {
   document.getElementById("editExameId").value = s.solicitacao_id;
 
   document.getElementById("editExameNomeFuncionario").value = s.nome_funcionario;
-  document.getElementById("editExameDataNascimento").value = formatarData(s.data_nascimento);
+  document.getElementById("editExameDataNascimento").value = s.data_nascimento;
   document.getElementById("editExameCPF").value = s.cpf;
   document.getElementById("editExameMatricula").value = s.matricula;
-  document.getElementById("editExameDataAdmissao").value = formatarData(s.data_admissao);
+  document.getElementById("editExameDataAdmissao").value = s.data_admissao;
   document.getElementById("editExameNomeEmpresa").value = s.nome_empresa;
   document.getElementById("editExameNomeUnidade").value = s.nome_unidade;
   document.getElementById("editExameNomeSetor").value = s.nome_setor;
   document.getElementById("editExameNomeCargo").value = s.nome_cargo;
   document.getElementById("editExameTipoExame").value = s.tipo_exame;
-  document.getElementById("editExameDataExame").value = formatarData(s.data_exame);
+  document.getElementById("editExameDataExame").value = s.data_exame;
   document.getElementById("editExameMaisUnidades").innerText = s.mais_unidades;
   document.getElementById("editExameRac").value = s.rac;
-  document.getElementById("editExameTipoRac").value = s.tipo_rac;
+  document.getElementById("editExameTiposRac").value = s.tipos_rac;
   document.getElementById("editExameFuncaoAnterior").value = s.funcao_anterior;
   document.getElementById("editExameFuncaoAtual").value = s.funcao_atual;
   document.getElementById("editExameNovaFuncao").value = s.nome_nova_funcao;
@@ -411,7 +418,7 @@ function preencherModalEditarExame(s) {
   document.getElementById("editExameNovoSetor").value = s.nome_novo_setor;
   document.getElementById("editExameMotivoConsulta").value = s.motivo_consulta;
   document.getElementById("editExameCNH").value = s.cnh;
-  document.getElementById("editExameVencimentoCNH").value = formatarData(s.vencimento_cnh);
+  document.getElementById("editExameVencimentoCNH").value = s.vencimento_cnh;
   document.getElementById("editExameLabToxicologico").value = s.lab_toxicologico;
   document.getElementById("editExameEstadoClinica").value = s.estado_clinica;
   document.getElementById("editExameCidadeClinica").value = s.cidade_clinica;
@@ -544,6 +551,16 @@ function preencherModalEditarExame(s) {
   }
 }
 
+// Função inversa (texto → array do banco)
+function parseTiposRac(valor) {
+  if (!valor) return [];
+
+  return valor
+    .split(",")
+    .map(v => v.trim())
+    .map(v => v.replace("RAC ", "RAC_"));
+}
+
 // FUNÇÃO PARA SALVAR EDIÇÃO - NOVO CADASTRO
 async function salvarEdicaoCadastro() {
   const id = document.getElementById("editCadId").value;
@@ -567,7 +584,7 @@ async function salvarEdicaoCadastro() {
     nome_novo_cargo: document.getElementById("editCadNovoCargo").value,
     descricao_atividade: document.getElementById("editCadDescricaoAtividade").value,
     rac: document.getElementById("editCadRac").value,
-    tipo_rac: document.getElementById("editCadTipoRac").value,
+    tipos_rac: parseTiposRac(document.getElementById("editCadTiposRac").value),
     tipo_exame: document.getElementById("editCadTipoExame").value,
     data_exame: document.getElementById("editCadDataExame").value,
     cnh: document.getElementById("editCadCNH").value,
@@ -616,7 +633,7 @@ async function salvarEdicaoExame() {
     nome_setor: document.getElementById("editExameNomeSetor").value,
     nome_cargo: document.getElementById("editExameNomeCargo").value,
     rac: document.getElementById("editExameRac").value,
-    tipo_rac: document.getElementById("editExameTipoRac").value,
+    tipos_rac: parseTiposRac(document.getElementById("editExameTiposRac").value),
     tipo_exame: document.getElementById("editExameTipoExame").value,
     data_exame: document.getElementById("editExameDataExame").value,
     funcao_anterior: document.getElementById("editExameFuncaoAnterior").value,
@@ -710,35 +727,6 @@ nomeInput.addEventListener("input", function () {
     .replace(/[ÚÙÛ]/g, "U");
 
   this.value = valor;
-});
-
-// MÁSCARA DE DATA
-const camposData = [
-  "editCadDataNascimento",
-  "editCadDataAdmissao",
-  "editCadVencimentoCNH",
-  "editCadDataExame",
-  "editExameDataExame",
-  "editExameVencimentoCNH"
-];
-
-camposData.forEach(id => {
-  const input = document.getElementById(id);
-  if (!input) return;
-
-  input.addEventListener("input", function () {
-    let valor = this.value.replace(/\D/g, "");
-
-    if (valor.length > 8) valor = valor.slice(0, 8);
-
-    if (valor.length >= 5) {
-      valor = valor.replace(/(\d{2})(\d{2})(\d{1,4})/, "$1/$2/$3");
-    } else if (valor.length >= 3) {
-      valor = valor.replace(/(\d{2})(\d{1,2})/, "$1/$2");
-    }
-
-    this.value = valor;
-  });
 });
 
 // FUNÇÃO DE LOGOUT

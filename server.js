@@ -401,6 +401,18 @@ app.post("/novo-cadastro", async (req, res) => {
         regime_trabalho,
         cod_unidade,
         nome_unidade,
+        solicitar_nova_unidade,
+        nome_fantasia,
+        razao_social,
+        cnpj,
+        cnae,
+        cep,
+        rua,
+        numero,
+        bairro,
+        estado,
+        tipo_faturamento,
+        email,
         cod_setor,
         nome_setor,
         solicitar_novo_setor,
@@ -411,7 +423,7 @@ app.post("/novo-cadastro", async (req, res) => {
         nome_novo_cargo,
         descricao_atividade,
         rac,
-        tipo_rac,
+        tipos_rac,
         tipo_exame,
         data_exame,
         solicitar_mais_unidades,
@@ -425,8 +437,10 @@ app.post("/novo-cadastro", async (req, res) => {
         solicitar_credenciamento,
         estado_credenciamento,
         cidade_credenciamento,
-        observacao)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41)
+        observacao )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,
+              $24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,
+              $45,$46,$47,$48,$49,$50,$51,$52,$53)
       RETURNING id
       `,
       [
@@ -446,6 +460,18 @@ app.post("/novo-cadastro", async (req, res) => {
         f.regime_trabalho,
         f.cod_unidade,
         f.nome_unidade,
+        f.solicitar_nova_unidade,
+        f.nome_fantasia,
+        f.razao_social,
+        f.cnpj,
+        f.cnae,
+        f.cep,
+        f.rua,
+        f.numero,
+        f.bairro,
+        f.estado,
+        f.tipo_faturamento,
+        f.email,
         f.cod_setor,
         f.nome_setor,
         f.solicitar_novo_setor,
@@ -456,7 +482,7 @@ app.post("/novo-cadastro", async (req, res) => {
         f.nome_novo_cargo,
         f.descricao_atividade,
         f.rac,
-        f.tipo_rac,
+        JSON.stringify(f.tipos_rac || []),
         f.tipo_exame,
         f.data_exame,
         f.solicitar_mais_unidades, JSON.stringify(f.mais_unidades || []),
@@ -478,10 +504,10 @@ app.post("/novo-cadastro", async (req, res) => {
     await pool.query(
       `
       INSERT INTO solicitacoes_novo_cadastro
-        (novo_cadastro_id, solicitado_por)
-      VALUES ($1, $2)
+        (novo_cadastro_id, status, solicitado_por)
+      VALUES ($1, $2, $3)
       `,
-      [funcionarioId, f.usuario_id]
+      [funcionarioId, f.status, f.usuario_id]
     );
 
     await pool.query("COMMIT");
@@ -519,7 +545,7 @@ app.post("/solicitar-exame", async (req, res) => {
         cod_cargo,
         nome_cargo,
         rac,
-        tipo_rac,
+        tipos_rac,
         tipo_exame,
         data_exame,
         solicitar_mais_unidades,
@@ -562,7 +588,7 @@ app.post("/solicitar-exame", async (req, res) => {
         f.cod_cargo,
         f.nome_cargo,
         f.rac,
-        f.tipo_rac,
+        JSON.stringify(f.tipos_rac || []),
         f.tipo_exame,
         f.data_exame,
         f.solicitar_mais_unidades, JSON.stringify(f.mais_unidades || []),
@@ -643,7 +669,7 @@ app.get("/solicitacoes", async (req, res) => {
           f.solicitar_nova_funcao,
           f.solicitar_novo_setor,
           f.solicitar_credenciamento,
-          'NOVO_EXAME' AS tipo
+          'NOVO_EXAME' AS tipo      
         FROM solicitacoes_novo_exame s
         JOIN novo_exame f ON f.id = s.novo_exame_id
       ) t
@@ -654,6 +680,237 @@ app.get("/solicitacoes", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: "Erro ao buscar solicitações" });
+  }
+});
+
+// Rota para salvar a unidade de um cadastro
+app.put("/solicitacoes/novo-cadastro/:id/salvar-unidade", async (req, res) => {
+  const { id } = req.params;
+  const { cod_unidade, nome_unidade } = req.body;
+
+  if (!cod_unidade || !nome_unidade) {
+    return res.status(400).json({ erro: "Unidade inválida" });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // 1️⃣ Atualiza a unidade
+    await client.query(
+      `
+      UPDATE novo_cadastro
+      SET cod_unidade = $1,
+          nome_unidade = $2
+      WHERE id = (
+        SELECT novo_cadastro_id
+        FROM solicitacoes_novo_cadastro
+        WHERE id = $3
+      )
+      `,
+      [cod_unidade, nome_unidade, id]
+    );
+
+    // 2️⃣ Atualiza o status
+    const result = await client.query(
+      `
+      UPDATE solicitacoes_novo_cadastro
+      SET status = 'PENDENTE_SC'
+      WHERE id = $1
+      RETURNING status
+      `,
+      [id]
+    );
+
+    await client.query("COMMIT");
+
+    res.json({
+      sucesso: true,
+      status_novo: result.rows[0].status
+    });
+
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao salvar unidade" });
+
+  } finally {
+    client.release();
+  }
+});
+
+app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
+  const { id } = req.params;
+  const {
+    cod_setor,
+    nome_setor,
+    cod_cargo,
+    nome_cargo
+  } = req.body;
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // 🔍 busca status + flags reais do banco
+    const check = await client.query(`
+      SELECT
+        s.status,
+        nc.solicitar_novo_setor,
+        nc.solicitar_novo_cargo,
+        nc.solicitar_credenciamento
+      FROM solicitacoes_novo_cadastro s
+      JOIN novo_cadastro nc ON nc.id = s.novo_cadastro_id
+      WHERE s.id = $1
+    `, [id]);
+
+    if (!check.rows.length) {
+      return res.status(404).json({ erro: "Solicitação não encontrada" });
+    }
+
+    const { status, solicitar_novo_setor, solicitar_novo_cargo, solicitar_credenciamento } = check.rows[0];
+
+    if (status !== "PENDENTE_SC") {
+      return res.status(400).json({
+        erro: "Solicitação não está em PENDENTE_SC"
+      });
+    }
+
+    if (!solicitar_novo_setor && !solicitar_novo_cargo) {
+      return res.status(400).json({
+        erro: "Solicitação não requer setor nem cargo"
+      });
+    }
+
+    // 🎯 atualiza SETOR
+    if (solicitar_novo_setor) {
+      if (!cod_setor || !nome_setor) {
+        return res.status(400).json({
+          erro: "Setor obrigatório para esta solicitação"
+        });
+      }
+
+      await client.query(
+        `
+        UPDATE novo_cadastro
+        SET cod_setor = $1,
+            nome_setor = $2
+        WHERE id = (
+          SELECT novo_cadastro_id
+          FROM solicitacoes_novo_cadastro
+          WHERE id = $3
+        )
+        `,
+        [cod_setor, nome_setor, id]
+      );
+    }
+
+    // 🎯 atualiza CARGO
+    if (solicitar_novo_cargo) {
+      if (!cod_cargo || !nome_cargo) {
+        return res.status(400).json({
+          erro: "Cargo obrigatório para esta solicitação"
+        });
+      }
+
+      await client.query(
+        `
+        UPDATE novo_cadastro
+        SET cod_cargo = $1,
+            nome_cargo = $2
+        WHERE id = (
+          SELECT novo_cadastro_id
+          FROM solicitacoes_novo_cadastro
+          WHERE id = $3
+        )
+        `,
+        [cod_cargo, nome_cargo, id]
+      );
+    }
+
+    // 🔁 próximo status: verifica se precisa de credenciamento
+    const proximoStatus = solicitar_credenciamento ? "PENDENTE_CREDENCIAMENTO" : "PENDENTE";
+
+    const result = await client.query(
+      `
+      UPDATE solicitacoes_novo_cadastro
+      SET status = $1
+      WHERE id = $2
+      RETURNING status
+      `,
+      [proximoStatus, id]
+    );
+
+    await client.query("COMMIT");
+
+    res.json({
+      sucesso: true,
+      status_novo: result.rows[0].status
+    });
+
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao salvar SC" });
+  } finally {
+    client.release();
+  }
+});
+
+app.put("/solicitacoes/novo-cadastro/:id/salvar-credenciamento", async (req, res) => {
+  const { id } = req.params;
+  const { cod_clinica, nome_clinica } = req.body;
+
+  if (!cod_clinica || !nome_clinica) {
+    return res.status(400).json({ erro: "Clínica inválida" });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // 1️⃣ Atualiza a clínica
+    await client.query(
+      `
+      UPDATE novo_cadastro
+      SET nome_clinica = $1
+      WHERE id = (
+        SELECT novo_cadastro_id
+        FROM solicitacoes_novo_cadastro
+        WHERE id = $2
+      )
+      `,
+      [nome_clinica, id]
+    );
+
+    // 2️⃣ Atualiza status
+    const result = await client.query(
+      `
+      UPDATE solicitacoes_novo_cadastro
+      SET status = 'PENDENTE'
+      WHERE id = $1
+      RETURNING status
+      `,
+      [id]
+    );
+
+    await client.query("COMMIT");
+
+    res.json({
+      sucesso: true,
+      status_novo: result.rows[0].status
+    });
+
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao salvar credenciamento" });
+
+  } finally {
+    client.release();
   }
 });
 
@@ -899,7 +1156,7 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
         nome_novo_cargo = $16,
         descricao_atividade = $17,
         rac = $18,
-        tipo_rac = $19,
+        tipos_rac = $19,
         tipo_exame = $20,
         data_exame = $21,
         cnh = $22,
@@ -935,9 +1192,9 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
       f.nome_novo_cargo,
       f.descricao_atividade,
       f.rac,
-      f.tipo_rac,
+      JSON.stringify(f.tipos_rac),
       f.tipo_exame,
-      f.data_exame,
+      f.data_exame || null,
       f.cnh,
       f.vencimento_cnh || null,
       f.lab_toxicologico,
@@ -971,66 +1228,66 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
   }
 });
 
-// EDITAR SOMENTE SETOR E CARGO DE UMA SOLICITAÇÃO DE CADASTRO
-app.put("/solicitacoes/novo-cadastro/:id/editar-setor-cargo", async (req, res) => {
-  const { id } = req.params; // id da solicitação
-  const { cod_setor, nome_setor, cod_cargo, nome_cargo } = req.body;
+// // EDITAR SOMENTE SETOR E CARGO DE UMA SOLICITAÇÃO DE CADASTRO
+// app.put("/solicitacoes/novo-cadastro/:id/editar-setor-cargo", async (req, res) => {
+//   const { id } = req.params; // id da solicitação
+//   const { cod_setor, nome_setor, cod_cargo, nome_cargo } = req.body;
 
-  try {
-    await pool.query("BEGIN");
+//   try {
+//     await pool.query("BEGIN");
 
-    // Pega o funcionário e as flags na tabela novo_cadastro via solicitação
-    const { rows } = await pool.query(`
-      SELECT nc.id AS novo_cadastro_id, nc.solicitar_novo_setor, nc.solicitar_novo_cargo
-      FROM solicitacoes_novo_cadastro s
-      JOIN novo_cadastro nc ON nc.id = s.novo_cadastro_id
-      WHERE s.id = $1
-    `, [id]);
+//     // Pega o funcionário e as flags na tabela novo_cadastro via solicitação
+//     const { rows } = await pool.query(`
+//       SELECT nc.id AS novo_cadastro_id, nc.solicitar_novo_setor, nc.solicitar_novo_cargo
+//       FROM solicitacoes_novo_cadastro s
+//       JOIN novo_cadastro nc ON nc.id = s.novo_cadastro_id
+//       WHERE s.id = $1
+//     `, [id]);
 
-    if (rows.length === 0) {
-      await pool.query("ROLLBACK");
-      return res.status(404).json({ erro: "Solicitação não encontrada" });
-    }
+//     if (rows.length === 0) {
+//       await pool.query("ROLLBACK");
+//       return res.status(404).json({ erro: "Solicitação não encontrada" });
+//     }
 
-    const { novo_cadastro_id, solicitar_novo_setor, solicitar_novo_cargo } = rows[0];
-    const updates = [];
-    const values = [];
+//     const { novo_cadastro_id, solicitar_novo_setor, solicitar_novo_cargo } = rows[0];
+//     const updates = [];
+//     const values = [];
 
-    if (solicitar_novo_setor) {
-      updates.push(`cod_setor = $${updates.length + 1}`);
-      values.push(cod_setor);
+//     if (solicitar_novo_setor) {
+//       updates.push(`cod_setor = $${updates.length + 1}`);
+//       values.push(cod_setor);
 
-      updates.push(`nome_setor = $${updates.length + 1}`);
-      values.push(nome_setor);
-    }
+//       updates.push(`nome_setor = $${updates.length + 1}`);
+//       values.push(nome_setor);
+//     }
 
-    if (solicitar_novo_cargo) {
-      updates.push(`cod_cargo = $${updates.length + 1}`);
-      values.push(cod_cargo);
+//     if (solicitar_novo_cargo) {
+//       updates.push(`cod_cargo = $${updates.length + 1}`);
+//       values.push(cod_cargo);
 
-      updates.push(`nome_cargo = $${updates.length + 1}`);
-      values.push(nome_cargo);
-    }
+//       updates.push(`nome_cargo = $${updates.length + 1}`);
+//       values.push(nome_cargo);
+//     }
 
-    if (updates.length > 0) {
-      const sql = `
-        UPDATE novo_cadastro
-        SET ${updates.join(", ")}
-        WHERE id = $${updates.length + 1}
-      `;
-      values.push(novo_cadastro_id);
+//     if (updates.length > 0) {
+//       const sql = `
+//         UPDATE novo_cadastro
+//         SET ${updates.join(", ")}
+//         WHERE id = $${updates.length + 1}
+//       `;
+//       values.push(novo_cadastro_id);
 
-      await pool.query(sql, values);
-    }
+//       await pool.query(sql, values);
+//     }
 
-    await pool.query("COMMIT");
-    res.json({ sucesso: true });
-  } catch (err) {
-    await pool.query("ROLLBACK");
-    console.error(err);
-    res.status(500).json({ erro: "Erro ao editar setor/cargo" });
-  }
-});
+//     await pool.query("COMMIT");
+//     res.json({ sucesso: true });
+//   } catch (err) {
+//     await pool.query("ROLLBACK");
+//     console.error(err);
+//     res.status(500).json({ erro: "Erro ao editar setor/cargo" });
+//   }
+// });
 
 // EDITAR SOLICITAÇÃO - NOVO EXAME
 app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
@@ -1053,7 +1310,7 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
         nome_setor = $8,
         nome_cargo = $9,
         rac = $10,
-        tipo_rac = $11,
+        tipos_rac = $11,
         tipo_exame = $12,
         data_exame = $13,
         funcao_anterior = $14,
@@ -1087,9 +1344,9 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
       f.nome_setor,
       f.nome_cargo,
       f.rac,
-      f.tipo_rac,
+      JSON.stringify(f.tipos_rac),
       f.tipo_exame,
-      f.data_exame,
+      f.data_exame || null,
       f.funcao_anterior,
       f.funcao_atual,
       f.nome_nova_funcao,

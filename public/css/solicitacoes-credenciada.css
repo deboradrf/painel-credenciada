@@ -378,7 +378,12 @@ td {
 }
 
 .status-pill.pendente,
-.status-pill.pendente_reavaliacao {
+.status-pill.pendente_reavaliacao,
+.status-pill.pendente_unidade,
+.status-pill.pendente_usc_credenciamento,
+.status-pill.pendente_sc,
+.status-pill.pendente_sc_credenciamento,
+.status-pill.pendente_credenciamento {
     background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
 }
 
@@ -462,12 +467,26 @@ td {
     gap: 4px;
 }
 
-#blocoCadCredenciamento .detail-item,
+#divEstadoCredenciamento .detail-item,
+#divCidadeCredenciamento .detail-item,
 #blocoExameCredenciamento .detail-item,
 #divNovoSetor .detail-item,
 #divNovoCargo .detail-item,
 #divNovaFuncao .detail-item,
-#divExameNovoSetor .detail-item {
+#divExameNovoSetor .detail-item,
+#divDescricaoAtividade .detail-item,
+#divExameDescricaoAtividade .detail-item,
+#divNomeFantasia .detail-item,
+#divRazaoSocial .detail-item,
+#divCnpj .detail-item,
+#divCnae .detail-item,
+#divCep .detail-item,
+#divRua .detail-item,
+#divNumero .detail-item,
+#divBairro .detail-item,
+#divEstado .detail-item,
+#divTipoFaturamento .detail-item,
+#divEmail .detail-item {
     background-color: #F9FAFB;
     border: 2px solid #F1AE33;
 }
@@ -609,22 +628,22 @@ td {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
-.btn-aprovar {
+#btn-aprovar {
     background: linear-gradient(135deg, #22C55E, #16A34A);
     color: #FFFFFF;
 }
 
-.btn-aprovar:hover {
+#btn-aprovar:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 30px rgba(34, 197, 94, 0.35);
 }
 
-.btn-reprovar {
+#btn-reprovar {
     background: linear-gradient(135deg, #EF4444, #DC2626);
     color: #FFFFFF;
 }
 
-.btn-reprovar:hover {
+#btn-reprovar:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 30px rgba(239, 68, 68, 0.35);
 }
