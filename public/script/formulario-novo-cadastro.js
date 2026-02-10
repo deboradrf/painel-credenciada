@@ -435,6 +435,47 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarNovaUnidade();
 });
 
+// CHECKBOX DE NOVA UNIDADE TORNA OBRIGATORIO A CRIAÇÃO DE NOVO SETOR/CARGO
+document.addEventListener("DOMContentLoaded", () => {
+  const chkNovaUnidade = document.getElementById("solicitarNovaUnidade");
+
+  const selectSetor = document.getElementById("setorSelect");
+  const selectCargo = document.getElementById("cargoSelect");
+
+  function bloquearSelect(e) {
+    if (chkNovaUnidade.checked) {
+      e.preventDefault();
+      e.stopPropagation();
+      alert("Para criação de nova unidade é necessário criar novo setor e cargo.");
+      return false;
+    }
+  }
+
+  // 🔒 Intercepta interação
+  selectSetor.addEventListener("mousedown", bloquearSelect);
+  selectCargo.addEventListener("mousedown", bloquearSelect);
+  selectSetor.addEventListener("keydown", bloquearSelect);
+  selectCargo.addEventListener("keydown", bloquearSelect);
+
+  // 🧹 LIMPA CAMPOS quando marcar nova unidade
+  chkNovaUnidade.addEventListener("change", () => {
+    if (chkNovaUnidade.checked) {
+      selectSetor.value = "";
+      selectCargo.value = "";
+    }
+  });
+
+  // Visual opcional
+  function atualizarVisual() {
+    const bloqueado = chkNovaUnidade.checked;
+    selectSetor.style.cursor = bloqueado ? "not-allowed" : "pointer";
+    selectCargo.style.cursor = bloqueado ? "not-allowed" : "pointer";
+  }
+
+  chkNovaUnidade.addEventListener("change", atualizarVisual);
+  atualizarVisual();
+});
+
 // CAMPO DE NOME FANTASIA SEMPRE MAIÚSCULO
 const inputNomeFantasia = document.getElementById("nome_fantasia");
 
@@ -801,81 +842,89 @@ document.addEventListener("DOMContentLoaded", function () {
   limitarAno(inputVencimentoCNH);
 });
 
+
 async function enviarEmailSolicitacao(dados) {
-  if (!dados.solicitar_novo_setor && !dados.solicitar_novo_cargo) return;
+  let destinatario = null;
+  let assunto = "";
+  let mensagem = "";
 
-  let solicitacao = "";
+  // EMAIL PARA CRIAÇÃO DE UNIDADE
+  if (dados.solicitar_nova_unidade === true) {
+    destinatario = "debora.fonseca@salubrita.com.br";
+    assunto = "Solicitação de criação de nova unidade";
 
-  if (dados.solicitar_novo_setor === true) {
-    solicitacao += `• Setor: ${dados.nome_novo_setor}\n`;
+    mensagem = `
+      Prezados,
+
+      Gentileza seguir com a criação de nova unidade solicitada no Painel Salubritá.
+
+      Nome fantasia: ${dados.nome_fantasia}
+      CNPJ: ${dados.cnpj}
+
+      Atenciosamente,
+      Débora
+    `;
   }
 
-  if (dados.solicitar_novo_cargo === true) {
-    solicitacao += `• Cargo: ${dados.nome_novo_cargo}\n`;
+  // EMAIL PARA CRIAÇÃO DE NOVO SETOR/CARGO
+  else if (dados.solicitar_novo_setor === true || dados.solicitar_novo_cargo === true) {
+    destinatario = "debora.fonseca@salubrita.com.br";
+    assunto = "Solicitação de criação de setor/cargo";
+
+    let solicitacao = "";
+
+    if (dados.solicitar_novo_setor) {
+      solicitacao += `• Setor: ${dados.nome_novo_setor}\n`;
+    }
+
+    if (dados.solicitar_novo_cargo) {
+      solicitacao += `• Cargo: ${dados.nome_novo_cargo}\n`;
+    }
+
+    mensagem = `
+      Prezados,
+
+      Gentileza seguir com a criação do(s) item(ns) abaixo:
+
+      ${solicitacao}
+      Empresa: ${dados.nome_empresa}
+      Unidade: ${dados.nome_unidade}
+
+      Atenciosamente,
+      Débora
+    `;
   }
 
-  const mensagem = `
-    Prezados,
+  // EMAIL PARA CREDENCIAMENTO
+  else if (dados.solicitar_credenciamento === true) {
+    destinatario = "debora.fonseca@salubrita.com.br";
+    assunto = "Solicitação de credenciamento";
 
-    Gentileza seguir com a criação do(s) item(ns) abaixo solicitado(s):
+    mensagem = `
+      Prezados,
 
-    ${solicitacao}
-    Empresa: ${dados.nome_empresa}
-    Unidade: ${dados.nome_unidade}
+      Gentileza seguir com o credenciamento solicitado.
 
-    Atenciosamente,
-    Débora
-  `;
+      Estado: ${dados.estado_credenciamento}
+      Cidade: ${dados.cidade_credenciamento}
 
-  await fetch("/enviar-email", {
+      Atenciosamente,
+      Débora
+    `;
+  }
+
+  await fetch("/enviar-email-solicitacao", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      assunto: "Solicitação de criação de cargo/setor",
+      destinatario,
+      assunto,
       mensagem
     })
   });
 }
 
-// CHECKBOX DE NOVA UNIDADE TORNA OBRIGATORIO A CRIAÇÃO DE NOVO SETOR/CARGO
-document.addEventListener("DOMContentLoaded", () => {
-  const chkNovaUnidade = document.getElementById("solicitarNovaUnidade");
-
-  const selectSetor = document.getElementById("setorSelect");
-  const selectCargo = document.getElementById("cargoSelect");
-
-  function bloquearSelect(e) {
-    if (chkNovaUnidade.checked) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      alert("Para criação de nova unidade é necessário criar novo setor e cargo.");
-      return false;
-    }
-  }
-
-  // Intercepta mouse
-  selectSetor.addEventListener("mousedown", bloquearSelect);
-  selectCargo.addEventListener("mousedown", bloquearSelect);
-
-  // Intercepta teclado (TAB / ENTER)
-  selectSetor.addEventListener("keydown", bloquearSelect);
-  selectCargo.addEventListener("keydown", bloquearSelect);
-
-  // Visual opcional (cursor)
-  function atualizarVisual() {
-    const bloqueado = chkNovaUnidade.checked;
-
-    selectSetor.style.cursor = bloqueado ? "not-allowed" : "pointer";
-    selectCargo.style.cursor = bloqueado ? "not-allowed" : "pointer";
-  }
-
-  chkNovaUnidade.addEventListener("change", atualizarVisual);
-
-  atualizarVisual();
-});
-
-function definirStatusInicialCadastro(s) {
+function definirStatusInicial(s) {
   const precisaUnidade = s.solicitar_nova_unidade === true;
   const precisaSetorCargo = s.solicitar_novo_setor === true || s.solicitar_novo_cargo === true;
   const precisaCredenciamento = s.solicitar_credenciamento === true;
@@ -1012,7 +1061,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     dados.nome_clinica = clinicaSelect.selectedOptions[0]?.dataset.nome || null;
   }
 
-  const statusInicial = definirStatusInicialCadastro(dados);
+  const statusInicial = definirStatusInicial(dados);
   dados.status = statusInicial;
 
   try {

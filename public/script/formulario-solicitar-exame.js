@@ -294,7 +294,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const novaFuncaoWrapper = document.getElementById("novaFuncaoWrapper");
   const novaFuncao = document.getElementById("novaFuncao");
 
-  const descricaoAtividadeWrapper = document.getElementById("descricaoAtividadeWrapper");
   const descricaoAtividade = document.getElementById("descricao_atividade");
 
   const solicitarNovoSetor = document.getElementById("solicitarNovoSetor");
@@ -335,7 +334,6 @@ document.addEventListener("DOMContentLoaded", () => {
   solicitarNovaFuncao.addEventListener("change", function () {
     if (this.checked) {
       novaFuncaoWrapper.style.display = "block";
-      descricaoAtividadeWrapper.style.display = "block";
 
       funcaoAtual.value = "";
       funcaoAtual.disabled = true;
@@ -345,7 +343,6 @@ document.addEventListener("DOMContentLoaded", () => {
       descricaoAtividade.required = true;
     } else {
       novaFuncaoWrapper.style.display = "none";
-      descricaoAtividadeWrapper.style.display = "none";
 
       funcaoAtual.disabled = false;
       funcaoAtual.required = true;

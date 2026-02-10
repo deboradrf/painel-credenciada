@@ -106,6 +106,10 @@ function renderizarTabela(lista) {
 
     // TEXTO DA SITUAÇÃO
     let situacao = "—";
+
+    if (s.status === "PENDENTE_UNIDADE") situacao = "Aguardando criação de unidade";
+    if (s.status === "PENDENTE_SC") situacao = "Aguardando criação de setor/cargo";
+    if (s.status === "PENDENTE_CREDENCIAMENTO") situacao = "Aguardando credenciamento";
     if (s.status === "PENDENTE") situacao = "Solicitação em análise";
     if (s.status === "PENDENTE_REAVALIACAO") situacao = "Solicitação em análise";
     if (s.status === "APROVADO") situacao = "Solicitação aprovada";
@@ -115,7 +119,8 @@ function renderizarTabela(lista) {
 
     // AÇÕES
     let acoes = "Nenhuma ação a ser feita";
-    if (s.status === "PENDENTE") {
+
+    if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO") {
       acoes = `
         <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
           Cancelar

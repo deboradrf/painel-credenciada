@@ -128,8 +128,7 @@ function renderizarTabela(lista) {
     `;
     }
 
-    const bloqueiaEnvioSOC = (s.solicitar_novo_setor === true || s.solicitar_novo_cargo === true || s.solicitar_credenciamento) && s.status !== "APROVADO";
-    const podeEnviarSOC = s.tipo === "NOVO_CADASTRO" && s.status !== "CANCELADO";
+    const podeEnviarSOC = s.tipo === "NOVO_CADASTRO" && s.status === "APROVADO";
 
     tr.innerHTML = `
       <td>${iconeTipo}</td>
@@ -147,8 +146,7 @@ function renderizarTabela(lista) {
           </button>
 
           ${podeEnviarSOC ? `
-            <button type="button" onclick="enviarSOC(${s.solicitacao_id})"
-              ${bloqueiaEnvioSOC ? "disabled" : ""}>
+            <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
               Enviar SOC
             </button>
           ` : ""}
@@ -388,48 +386,36 @@ function pegarDadosEdicao(statusAtual) {
 function edicaoUnidade(statusAtual) {
   const payload = {};
 
-  if (statusAtual === "PENDENTE_UNIDADE") {
+  if (statusAtual === "PENDENTE_UNIDADE" || statusAtual === "PENDENTE_REAVALIACAO") {
     const select = document.getElementById("unidadeSelect");
 
-    if (!select || !select.value) {
-      alert("Selecione uma unidade antes de salvar.");
-      throw new Error("Unidade não selecionada");
+    if (select && select.style.display !== "none" && select.value) {
+      const opt = select.options[select.selectedIndex];
+      payload.cod_unidade = select.value;
+      payload.nome_unidade = opt.textContent;
     }
-
-    const optionSelecionada = select.options[select.selectedIndex];
-
-    payload.cod_unidade = select.value;
-    payload.nome_unidade = optionSelecionada.textContent;
   }
+
   return payload;
 }
 
 function edicaoSC(statusAtual) {
   const payload = {};
 
-  if (statusAtual !== "PENDENTE_SC") return payload;
+  if (statusAtual !== "PENDENTE_SC" && statusAtual !== "PENDENTE_REAVALIACAO") return payload;
 
-  // SETOR
   const selectSetor = document.getElementById("setorSelect");
   if (selectSetor && selectSetor.style.display !== "none" && selectSetor.value) {
     const opt = selectSetor.options[selectSetor.selectedIndex];
-
     payload.cod_setor = selectSetor.value;
     payload.nome_setor = opt.textContent;
   }
 
-  // CARGO
   const selectCargo = document.getElementById("cargoSelect");
   if (selectCargo && selectCargo.style.display !== "none" && selectCargo.value) {
     const opt = selectCargo.options[selectCargo.selectedIndex];
-
     payload.cod_cargo = selectCargo.value;
     payload.nome_cargo = opt.textContent;
-  }
-
-  if (!payload.cod_setor && !payload.cod_cargo) {
-    alert("Selecione ao menos um setor ou cargo.");
-    throw new Error("Nada para salvar em SC");
   }
 
   return payload;
@@ -438,19 +424,18 @@ function edicaoSC(statusAtual) {
 function edicaoCredenciamento(statusAtual) {
   const payload = {};
 
-  if (statusAtual !== "PENDENTE_CREDENCIAMENTO") return payload;
+  if (
+    statusAtual !== "PENDENTE_CREDENCIAMENTO" &&
+    statusAtual !== "PENDENTE_REAVALIACAO"
+  ) return payload;
 
   const select = document.getElementById("clinicaSelect");
 
-  if (!select || !select.value) {
-    alert("Selecione uma clínica antes de salvar.");
-    throw new Error("Clínica não selecionada");
+  if (select && select.style.display !== "none" && select.value) {
+    const opt = select.options[select.selectedIndex];
+    payload.cod_clinica = select.value;
+    payload.nome_clinica = opt.textContent;
   }
-
-  const optionSelecionada = select.options[select.selectedIndex];
-
-  payload.cod_clinica = select.value;          // pode ser código ou nome
-  payload.nome_clinica = optionSelecionada.textContent;
 
   return payload;
 }
@@ -466,20 +451,16 @@ async function salvar() {
 
   let endpoint = "";
 
-  if (statusAtual === "PENDENTE_UNIDADE") {
+  if (dadosEdicao.cod_unidade) {
     endpoint = `/solicitacoes/novo-cadastro/${solicitacaoAtualId}/salvar-unidade`;
-  }
-
-  if (statusAtual === "PENDENTE_SC") {
+  } else if (dadosEdicao.cod_setor || dadosEdicao.cod_cargo) {
     endpoint = `/solicitacoes/novo-cadastro/${solicitacaoAtualId}/salvar-sc`;
-  }
-
-  if (statusAtual === "PENDENTE_CREDENCIAMENTO") {
+  } else if (dadosEdicao.cod_clinica) {
     endpoint = `/solicitacoes/novo-cadastro/${solicitacaoAtualId}/salvar-credenciamento`;
   }
 
   if (!endpoint) {
-    alert("Este status não permite edição.");
+    alert("Nenhum alteração para salvar.");
     return;
   }
 
@@ -588,7 +569,7 @@ function preencherModal(s, tipo) {
     if (btnAprovar) btnAprovar.style.display = "none";
 
     // MOSTRAR CONFORME STATUS
-    if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO") {
+    if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || s.status === "PENDENTE_REAVALIACAO") {
       if (btnSalvar) btnSalvar.style.display = "inline-flex";
     }
 
@@ -656,7 +637,6 @@ function preencherModal(s, tipo) {
 
     if (s.solicitar_novo_setor === true) {
       blocoNovoSetor.classList.remove("d-none");
-
     } else {
       blocoNovoSetor.classList.add("d-none");
     }
@@ -754,7 +734,7 @@ function preencherModal(s, tipo) {
     if (s.solicitar_credenciamento === true) {
       spanClinica.style.display = "none";
 
-      selectClinica.classList.remove("d-none"); // 🔴 ISSO É O QUE FALTAVA
+      selectClinica.classList.remove("d-none");
       selectClinica.style.display = "block";
 
       carregarClinicas(s.cod_empresa, spanClinica.innerText);
@@ -762,7 +742,7 @@ function preencherModal(s, tipo) {
     } else {
       spanClinica.style.display = "block";
 
-      selectClinica.classList.add("d-none"); // 🔴 E ISSO AQUI
+      selectClinica.classList.add("d-none");
       selectClinica.style.display = "none";
     }
   }
@@ -888,7 +868,6 @@ function preencherModal(s, tipo) {
 
       document.getElementById("exame_estado_credenciamento").innerText = s.estado_credenciamento;
       document.getElementById("exame_cidade_credenciamento").innerText = s.cidade_credenciamento;
-
     } else {
       blocoClinica.classList.remove("d-none");
       blocoCredenciamento.classList.add("d-none");
@@ -1005,8 +984,7 @@ async function enviarSOC(id) {
   if (!confirm("Deseja enviar este funcionário ao SOC?")) return;
 
   try {
-    const res = await fetch(
-      `/soc/funcionarios/${id}/enviar`,
+    const res = await fetch(`/soc/funcionarios/${id}/enviar`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1014,14 +992,15 @@ async function enviarSOC(id) {
       }
     );
 
-    await carregarSolicitacoes();
+    const data = await res.json();
 
     if (!res.ok) {
-      alert("Erro ao enviar para o SOC");
+      alert(data.detalhe || "Erro ao enviar para o SOC");
       return;
     }
 
     alert("Enviado ao SOC com sucesso");
+    await carregarSolicitacoes();
 
   } catch (err) {
     alert("Falha de comunicação com o servidor");
@@ -1058,7 +1037,8 @@ function formatarDataHora(data) {
 
 // FUNÇÃO PARA APROVAR / REPROVAR SOLICITAÇÃO
 async function analisarSolicitacao(status) {
-  const isExame = document.getElementById("modalDetalhesNovoExame").classList.contains("show");
+   const isExame = document.getElementById("modalDetalhesNovoExame").classList.contains("show");
+   const tipo = isExame ? "NOVO_EXAME" : "NOVO_CADASTRO";
 
   const motivoInput = isExame
     ? document.getElementById("motivoReprovacaoExame")

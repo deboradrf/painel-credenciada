@@ -383,6 +383,8 @@ td {
 }
 
 .status-pill.pendente,
+.status-pill.pendente_unidade,
+.status-pill.pendente_sc,
 .status-pill.pendente_reavaliacao,
 .status-pill.pendente_credenciamento {
     background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);

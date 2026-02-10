@@ -303,6 +303,19 @@ h5::after {
     margin-bottom: 20px;
 }
 
+.funcao-group,
+.setor-group {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 16px;
+}
+
+.input-wrapper.funcao-wrapper,
+.input-wrapper.setor-wrapper {
+    width: 68%;
+}
+
 .card-header {
     border: none;
     background-color: #F1F1F1;

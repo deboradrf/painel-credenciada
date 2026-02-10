@@ -683,7 +683,7 @@ app.get("/solicitacoes", async (req, res) => {
   }
 });
 
-// Rota para salvar a unidade de um cadastro
+// ROTA PARA ATUALIZAR A UNIDADE DE UMA SOLICITAÇÃO 
 app.put("/solicitacoes/novo-cadastro/:id/salvar-unidade", async (req, res) => {
   const { id } = req.params;
   const { cod_unidade, nome_unidade } = req.body;
@@ -697,7 +697,6 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-unidade", async (req, res) => {
   try {
     await client.query("BEGIN");
 
-    // 1️⃣ Atualiza a unidade
     await client.query(
       `
       UPDATE novo_cadastro
@@ -712,7 +711,6 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-unidade", async (req, res) => {
       [cod_unidade, nome_unidade, id]
     );
 
-    // 2️⃣ Atualiza o status
     const result = await client.query(
       `
       UPDATE solicitacoes_novo_cadastro
@@ -722,6 +720,21 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-unidade", async (req, res) => {
       `,
       [id]
     );
+
+    // PEGAR OS DADOS DA SOLICITAÇÃO
+    const dados = await client.query(
+      `
+      SELECT
+        nc.nome_empresa,
+        nc.nome_unidade
+      FROM solicitacoes_novo_cadastro s
+      JOIN novo_cadastro nc ON nc.id = s.novo_cadastro_id
+      WHERE s.id = $1
+      `,
+      [id]
+    );
+
+    dadosSolicitacao = dados.rows[0];
 
     await client.query("COMMIT");
 
@@ -733,15 +746,53 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-unidade", async (req, res) => {
   } catch (err) {
     await client.query("ROLLBACK");
     console.error(err);
-    res.status(500).json({ erro: "Erro ao salvar unidade" });
+    return res.status(500).json({ erro: "Erro ao salvar unidade" });
 
   } finally {
     client.release();
   }
+
+  // ENVIAR EMAIL PARA CRIAÇÃO DE SETOR/CARGO
+  try {
+    await enviarEmailSetorCargo(dadosSolicitacao);
+  } catch (err) {
+    console.error("Erro ao enviar email SC:", err.message);
+  }
 });
 
+async function enviarEmailSetorCargo(dados) {
+  const transporter = nodemailer.createTransport({
+    host: "smtp.mail.yahoo.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: "deborapfonseca@yahoo.com",
+      pass: "nbtijncjpammjbrv"
+    }
+  });
+
+  await transporter.sendMail({
+    from: "Painel Salubritá <deborapfonseca@yahoo.com>",
+    to: "debora.fonseca@salubrita.com.br",
+    subject: "Solicitação de criação de setor/cargo",
+    text: `
+      Prezados,
+
+      Gentileza seguir com a criação de setor/cargo referente à solicitação abaixo:
+
+      Empresa: ${dados.nome_empresa}
+      Unidade: ${dados.nome_unidade}
+
+      Atenciosamente,
+      Débora
+    `
+  });
+}
+
+// ROTA PARA ATUALIZAR O SETOR/CARGO DE UMA SOLICITAÇÃO 
 app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
   const { id } = req.params;
+
   const {
     cod_setor,
     nome_setor,
@@ -751,11 +802,14 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
 
   const client = await pool.connect();
 
+  let proximoStatus = null;
+  let dadosSolicitacao = null;
+
   try {
     await client.query("BEGIN");
 
-    // 🔍 busca status + flags reais do banco
-    const check = await client.query(`
+    const check = await client.query(
+    `
       SELECT
         s.status,
         nc.solicitar_novo_setor,
@@ -784,7 +838,7 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
       });
     }
 
-    // 🎯 atualiza SETOR
+    // ATUALIZA SETOR
     if (solicitar_novo_setor) {
       if (!cod_setor || !nome_setor) {
         return res.status(400).json({
@@ -807,7 +861,7 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
       );
     }
 
-    // 🎯 atualiza CARGO
+    // ATUALIZA CARGO
     if (solicitar_novo_cargo) {
       if (!cod_cargo || !nome_cargo) {
         return res.status(400).json({
@@ -830,7 +884,7 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
       );
     }
 
-    // 🔁 próximo status: verifica se precisa de credenciamento
+    // VERIFICA SE PRECISA DE CREDENCIAMENTO
     const proximoStatus = solicitar_credenciamento ? "PENDENTE_CREDENCIAMENTO" : "PENDENTE";
 
     const result = await client.query(
@@ -843,6 +897,21 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
       [proximoStatus, id]
     );
 
+    // PEGAR OS DADOS DA SOLICITAÇÃO
+    const dados = await client.query(
+      `
+      SELECT
+        nc.nome_empresa,
+        nc.nome_unidade
+      FROM solicitacoes_novo_cadastro s
+      JOIN novo_cadastro nc ON nc.id = s.novo_cadastro_id
+      WHERE s.id = $1
+      `,
+      [id]
+    );
+
+    dadosSolicitacao = dados.rows[0];
+
     await client.query("COMMIT");
 
     res.json({
@@ -853,12 +922,51 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
   } catch (err) {
     await client.query("ROLLBACK");
     console.error(err);
-    res.status(500).json({ erro: "Erro ao salvar SC" });
+    return res.status(500).json({ erro: "Erro ao salvar SC" });
+
   } finally {
+    // ENVIAR EMAIL SE NECESSÁRIO CREDENCIAMENTO
+    if (proximoStatus === "PENDENTE_CREDENCIAMENTO") {
+      try {
+        await enviarEmailCredenciamento(dadosSolicitacao);
+      } catch (err) {
+        console.error("Erro ao enviar email de credenciamento:", err.message);
+      }
+    }
     client.release();
   }
 });
 
+async function enviarEmailCredenciamento(dados) {
+  const transporter = nodemailer.createTransport({
+    host: "smtp.mail.yahoo.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: "deborapfonseca@yahoo.com",
+      pass: "nbtijncjpammjbrv"
+    }
+  });
+
+  await transporter.sendMail({
+    from: "Painel Salubritá <deborapfonseca@yahoo.com>",
+    to: "debora.fonseca@salubrita.com.br",
+    subject: "Solicitação de credenciamento",
+    text: `
+      Prezados,
+
+      Gentileza seguir com o credenciamento referente à solicitação abaixo:
+
+      Empresa: ${dados.nome_empresa}
+      Unidade: ${dados.nome_unidade}
+
+      Atenciosamente,
+      Débora
+    `
+  });
+}
+
+// ROTA PARA ATUALIZAR O NOME DA CLÍNICA DE UMA SOLICITAÇÃO 
 app.put("/solicitacoes/novo-cadastro/:id/salvar-credenciamento", async (req, res) => {
   const { id } = req.params;
   const { cod_clinica, nome_clinica } = req.body;
@@ -872,7 +980,6 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-credenciamento", async (req, res
   try {
     await client.query("BEGIN");
 
-    // 1️⃣ Atualiza a clínica
     await client.query(
       `
       UPDATE novo_cadastro
@@ -886,7 +993,6 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-credenciamento", async (req, res
       [nome_clinica, id]
     );
 
-    // 2️⃣ Atualiza status
     const result = await client.query(
       `
       UPDATE solicitacoes_novo_cadastro
@@ -1426,8 +1532,9 @@ function interpretarRetornoSOC(retorno) {
 
 // ENVIO AO SOC
 app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
+  const { id } = req.params;
+
   try {
-    const { id } = req.params;
     const { usuario_id } = req.body;
 
     if (!usuario_id) {
@@ -1538,7 +1645,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
         `
         UPDATE solicitacoes_novo_cadastro
         SET status = 'ERRO_SOC',
-            retorno_soc_erro = $1
+            erro_soc = $1
         WHERE id = $2
         `,
         [resultadoSOC.mensagem, id]
@@ -1556,7 +1663,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
       UPDATE solicitacoes_novo_cadastro
       SET
         status = 'ENVIADO_SOC',
-        retorno_soc_erro = NULL,
+        erro_soc = NULL,
         enviado_soc_por = $1,
         enviado_soc_em = NOW()
       WHERE id = $2
@@ -1575,7 +1682,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
       `
       UPDATE solicitacoes_novo_cadastro
       SET status = 'ERRO_SOC',
-          retorno_soc_erro = $1
+          erro_soc = $1
       WHERE id = $2
       `,
       [err.message, id]
@@ -1708,10 +1815,9 @@ app.put("/usuarios/:id", async (req, res) => {
   }
 });
 
-app.post("/enviar-email", async (req, res) => {
+// FUNÇÃO PARA ENVIO DE EMAIL NA HORA DA SOLICITAÇÃO CRIADA
+app.post("/enviar-email-solicitacao", async (req, res) => {
   const { assunto, mensagem } = req.body;
-
-  console.log("📩 Rota /enviar-email chamada", req.body);
 
   try {
     const transporter = nodemailer.createTransport({
