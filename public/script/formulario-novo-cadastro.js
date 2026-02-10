@@ -365,11 +365,74 @@ document.getElementById("cidade_clinica").addEventListener("change", function ()
   });
 });
 
-// MOSTRAR SEÇÃO PARA NOVA UNIDADE
-document.getElementById("solicitarNovaUnidade").addEventListener("change", function () {
-  const divNomaUnidade = document.getElementById("divNovaUnidade");
+// MOSTRAR / OCULTAR SEÇÃO DE NOVA UNIDADE E DEFINIR REQUIRED NOS CAMPOS
+document.addEventListener("DOMContentLoaded", () => {
+  const chkNovaUnidade = document.getElementById("solicitarNovaUnidade");
+  const unidadeSelect = document.getElementById("unidadeSelect");
+  const divNovaUnidade = document.getElementById("divNovaUnidade");
 
-  divNomaUnidade.style.display = this.checked ? "block" : "none";
+  const camposNovaUnidade = [
+    "nome_fantasia",
+    "razao_social",
+    "cnpj",
+    "cnae",
+    "cep",
+    "rua",
+    "numero",
+    "bairro",
+    "estado",
+    "email"
+  ].map(id => document.getElementById(id));
+
+  const radiosTipoFaturamento = document.querySelectorAll('input[name="tipo_faturamento"]');
+
+  if (!chkNovaUnidade || !unidadeSelect || !divNovaUnidade) return;
+
+  function atualizarNovaUnidade() {
+    if (chkNovaUnidade.checked) {
+      // MOSTRAR DIV DE NOVA UNIDADE
+      divNovaUnidade.style.display = "block";
+
+      // BLOQUEAR O SELECT DE UNIDADE
+      unidadeSelect.value = "";
+      unidadeSelect.disabled = true;
+      unidadeSelect.removeAttribute("required");
+      unidadeSelect.style.cursor = "not-allowed";
+
+      // MARCAR CAMPOS DA NOVA UNIDADE COMO REQUIRED
+      camposNovaUnidade.forEach(campo => {
+        if (campo) campo.required = true;
+      });
+
+      radiosTipoFaturamento.forEach(radio => radio.required = true);
+
+    } else {
+      // OCULTAR DIV DE NOVA UNIDADE
+      divNovaUnidade.style.display = "none";
+
+      // DESBLOQUEAR SELECT DE UNIDADE
+      unidadeSelect.disabled = false;
+      unidadeSelect.setAttribute("required", "required");
+      unidadeSelect.style.cursor = "pointer";
+
+      // REMOVER REQUIRED DOS CAMPOS DE NOVA UNIDADE
+      camposNovaUnidade.forEach(campo => {
+        if (campo) {
+          campo.required = false;
+          campo.value = "";
+        }
+      });
+
+      radiosTipoFaturamento.forEach(radio => {
+        radio.required = false;
+        radio.checked = false;
+      });
+    }
+  }
+
+  chkNovaUnidade.addEventListener("change", atualizarNovaUnidade);
+
+  atualizarNovaUnidade();
 });
 
 // CAMPO DE NOME FANTASIA SEMPRE MAIÚSCULO
@@ -434,134 +497,106 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// // COLOCAR REQUIRED NOS CAMPOS DE NOVA UNIDADE
-document.addEventListener("DOMContentLoaded", () => {
-  const chkNovaUnidade = document.getElementById("solicitarNovaUnidade");
-  const unidadeSelect = document.getElementById("unidadeSelect");
-
-  const camposNovaUnidade = [
-    "nome_fantasia",
-    "razao_social",
-    "cnpj",
-    "cnae",
-    "cep",
-    "rua",
-    "numero",
-    "bairro",
-    "estado",
-    "email"
-  ].map(id => document.getElementById(id));
-
-  const radiosTipoFaturamento = document.querySelectorAll(
-    'input[name="tipo_faturamento"]'
-  );
-
-  if (!chkNovaUnidade || !unidadeSelect) return;
-
-  function atualizarRequired() {
-    if (chkNovaUnidade.checked) {
-      // ❌ unidade existente
-      unidadeSelect.value = "";
-      unidadeSelect.removeAttribute("required");
-
-      // ✅ nova unidade
-      camposNovaUnidade.forEach(campo => {
-        if (campo) campo.required = true;
-      });
-
-      radiosTipoFaturamento.forEach(radio => {
-        radio.required = true;
-      });
-
-    } else {
-      // ✅ unidade existente
-      unidadeSelect.setAttribute("required", "required");
-
-      // ❌ nova unidade
-      camposNovaUnidade.forEach(campo => {
-        if (campo) {
-          campo.required = false;
-          campo.value = "";
-        }
-      });
-
-      radiosTipoFaturamento.forEach(radio => {
-        radio.required = false;
-        radio.checked = false;
-      });
-    }
-  }
-
-  chkNovaUnidade.addEventListener("change", atualizarRequired);
-});
-
-// MOSTRAR SEÇÃO DE NOVO SETOR
-document.getElementById("solicitarNovoSetor").addEventListener("change", function () {
-  const wrapper = document.getElementById("novoSetorWrapper");
-  wrapper.style.display = this.checked ? "block" : "none";
-});
-
-// COLOCAR REQUIRED NO CAMPO DE NOVO SETOR
+// MOSTRAR / OCULTAR SEÇÃO DE NOVO SETOR E DEFINIR REQUIRED NO CAMPO
 document.addEventListener("DOMContentLoaded", () => {
   const chkSolicitarNovoSetor = document.getElementById("solicitarNovoSetor");
+  const wrapperNovoSetor = document.getElementById("novoSetorWrapper");
   const selectSetor = document.getElementById("setorSelect");
   const novoSetor = document.getElementById("novoSetor");
 
-  if (!chkSolicitarNovoSetor || !selectSetor) return;
+  if (!chkSolicitarNovoSetor || !selectSetor || !wrapperNovoSetor) return;
 
-  chkSolicitarNovoSetor.addEventListener("change", () => {
+  function atualizarNovoSetor() {
     if (chkSolicitarNovoSetor.checked) {
+      // MOSTRAR DIV DO NOVO SETOR
+      wrapperNovoSetor.style.display = "block";
+
+      // BLOQUEAR SELECT DE SETOR
       selectSetor.value = "";
       selectSetor.disabled = true;
       selectSetor.removeAttribute("required");
+      selectSetor.style.cursor = "not-allowed";
 
-      novoSetor.required = true;
+      // CAMPO NOVO SETOR OBRIGATÓRIO
+      if (novoSetor) novoSetor.required = true;
+
     } else {
+      // OCULTAR DIV DO NOVO SETOR
+      wrapperNovoSetor.style.display = "none";
+
+      // DESBLOQUEAR SELECT DE SETOR
       selectSetor.disabled = false;
       selectSetor.setAttribute("required", "required");
+      selectSetor.style.cursor = "pointer";
 
-      novoSetor.required = false;
+      // CAMPO NOVO SETOR NÃO OBRIGATÓRIO
+      if (novoSetor) {
+        novoSetor.required = false;
+        novoSetor.value = "";
+      }
     }
-  });
+  }
+
+  chkSolicitarNovoSetor.addEventListener("change", atualizarNovoSetor);
+
+  atualizarNovoSetor();
 });
 
-// MOSTRAR SEÇÃO DE NOVO CARGO E DESCRIÇÃO DE ATIVIDADE
-document.getElementById("solicitarNovoCargo").addEventListener("change", function () {
-  const divNovoCargo = document.getElementById("novoCargoWrapper");
-  const divDescricaoAtividade = document.getElementById("descricaoAtividadeWrapper");
-
-  divNovoCargo.style.display = this.checked ? "block" : "none";
-  divDescricaoAtividade.style.display = this.checked ? "block" : "none";
-});
-
-// COLOCAR REQUIRED NO CAMPO DE NOVO CARGO E DESCRIÇÃO DE ATIVIDADE
+// MOSTRAR / OCULTAR SEÇÃO DE NOVO CARGO E DESCRIÇÃO DE ATIVIDADE E DEFINIR REQUIRED NOS CAMPOS
 document.addEventListener("DOMContentLoaded", () => {
   const chkSolicitarNovoCargo = document.getElementById("solicitarNovoCargo");
+  const wrapperNovoCargo = document.getElementById("novoCargoWrapper");
+  const wrapperDescricaoAtividade = document.getElementById("descricaoAtividadeWrapper");
   const selectCargo = document.getElementById("cargoSelect");
   const novoCargo = document.getElementById("novoCargo");
   const descricaoAtividade = document.getElementById("descricao_atividade");
 
-  if (!chkSolicitarNovoCargo || !selectCargo) return;
+  if (!chkSolicitarNovoCargo || !selectCargo || !wrapperNovoCargo || !wrapperDescricaoAtividade) return;
 
-  chkSolicitarNovoCargo.addEventListener("change", () => {
+  function atualizarNovoCargo() {
     if (chkSolicitarNovoCargo.checked) {
+      // MOSTRAR DIVS
+      wrapperNovoCargo.style.display = "block";
+      wrapperDescricaoAtividade.style.display = "block";
+
+      // BLOQUEAR SELECT DE CARGO
       selectCargo.value = "";
       selectCargo.disabled = true;
       selectCargo.removeAttribute("required");
+      selectCargo.style.cursor = "not-allowed";
 
-      novoCargo.required = true;
-      descricaoAtividade.required = true;
+      // CAMPOS OBRIGATÓRIOS
+      if (novoCargo) novoCargo.required = true;
+      if (descricaoAtividade) descricaoAtividade.required = true;
+
     } else {
+      // OCULTAR DIVS
+      wrapperNovoCargo.style.display = "none";
+      wrapperDescricaoAtividade.style.display = "none";
+
+      // DESBLOQUEAR SELECT DE CARGO
       selectCargo.disabled = false;
       selectCargo.setAttribute("required", "required");
+      selectCargo.style.cursor = "pointer";
 
-      novoCargo.required = false;
-      descricaoAtividade.required = false;
+      // CAMPOS NÃO OBRIGATÓRIOS
+      if (novoCargo) {
+        novoCargo.required = false;
+        novoCargo.value = "";
+      }
+      if (descricaoAtividade) {
+        descricaoAtividade.required = false;
+        descricaoAtividade.value = "";
+      }
     }
-  });
+  }
+
+  chkSolicitarNovoCargo.addEventListener("change", atualizarNovoCargo);
+
+  atualizarNovoCargo();
 });
 
-// MOSTRAR SEÇÃO DE NOVO CREDENCIAMENTO
+// MOSTRAR / OCULTAR SEÇÃO DE NOVO CREDENCIAMENTO
 document.addEventListener("DOMContentLoaded", () => {
   const chkCredenciamento = document.getElementById("solicitarCredenciamento");
 
