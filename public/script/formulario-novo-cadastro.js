@@ -296,7 +296,7 @@ async function buscarDetalhesPrestador(codigo) {
 function extrairEstados(prestadores) {
   return [...new Set(
     prestadores
-      .map(p => p.estado)
+      .map(p => p.estado?.trim().toUpperCase())
       .filter(estado => estado)
   )].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 }
@@ -327,7 +327,9 @@ document.getElementById("estado_clinica").addEventListener("change", function ()
 
   const cidadesUnicas = [...new Set(
     prestadoresCache
-      .filter(p => p.estado === estadoSelecionado)
+      .filter(p =>
+        p.estado?.trim().toUpperCase() === estadoSelecionado?.trim().toUpperCase()
+      )
       .map(p => p.cidade)
       .filter(cidade => cidade)
   )].sort((a, b) => a.localeCompare(b, 'pt-BR'));
@@ -352,8 +354,9 @@ document.getElementById("cidade_clinica").addEventListener("change", function ()
 
   const clinicasFiltradas = prestadoresCache
     .filter(p =>
-      p.estado === estadoSelecionado &&
-      p.cidade === cidadeSelecionada)
+      p.estado?.trim().toUpperCase() === estadoSelecionado?.trim().toUpperCase() &&
+      p.cidade?.trim().toUpperCase() === cidadeSelecionada?.trim().toUpperCase()
+    )
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
 
   clinicasFiltradas.forEach(p => {
@@ -497,7 +500,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (!cepInput || !btnBuscar) return;
 
-  // 🔹 Máscara de CEP
+  // MÁSCARA DE CEP
   cepInput.addEventListener("input", function () {
     let valor = this.value.replace(/\D/g, "");
 
@@ -510,7 +513,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // 🔹 Buscar CEP ao clicar no botão
+  // BUSCAR CEP
   btnBuscar.addEventListener("click", function () {
     const cep = cepInput.value.replace(/\D/g, "");
 
@@ -536,6 +539,62 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("Erro ao buscar o CEP");
       });
   });
+});
+
+// CAMPO DE NOME LABORATÓRIO SEMPRE MAIÚSCULO
+const inputNomeLaboratorio = document.getElementById("lab_toxicologico");
+
+inputNomeLaboratorio.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+// CAMPO DE ESTADO CREDENCIAMENTO SEMPRE MAIÚSCULO
+const inputEstadoCredenciamento = document.getElementById("estado_credenciamento");
+
+inputEstadoCredenciamento.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+// CAMPO DE CIDADE CREDENCIAMENTO SEMPRE MAIÚSCULO
+const inputCidadeCredenciamento = document.getElementById("cidade_credenciamento");
+
+inputCidadeCredenciamento.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+// CAMPO DE RUA SEMPRE MAIÚSCULO
+const inputRua = document.getElementById("rua");
+
+inputRua.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+// CAMPO DE BAIRRO SEMPRE MAIÚSCULO
+const inputBairro = document.getElementById("bairro");
+
+inputBairro.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+// CAMPO DE ESTADO SEMPRE MAIÚSCULO
+const inputEstado = document.getElementById("estado");
+
+inputEstado.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+// CAMPO DE NOVO SETOR SEMPRE MAIÚSCULO
+const inputNovoSetor = document.getElementById("novoSetor");
+
+inputNovoSetor.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+// CAMPO DE NOVO CARGO SEMPRE MAIÚSCULO
+const inputNovoCargo = document.getElementById("novoCargo");
+
+inputNovoCargo.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
 });
 
 // MOSTRAR / OCULTAR SEÇÃO DE NOVO SETOR E DEFINIR REQUIRED NO CAMPO
@@ -800,6 +859,55 @@ racSelect.addEventListener("change", () => {
   }
 });
 
+let contadorEmails = 0;
+const limiteEmails = 2;
+
+function ativarEmails(valor) {
+  const inputHidden = document.getElementById("enviarMaisEmails");
+  const container = document.getElementById("emailsContainer");
+  const btnAdd = document.getElementById("btnAddEmail");
+
+  inputHidden.value = valor;
+
+  if (valor) {
+    container.classList.remove("d-none");
+    btnAdd.classList.remove("d-none");
+
+    if (contadorEmails === 0) {
+      adicionarEmail();
+    }
+  } else {
+    container.classList.add("d-none");
+    btnAdd.classList.add("d-none");
+    container.innerHTML = "";
+    contadorEmails = 0;
+  }
+}
+
+function adicionarEmail() {
+  if (contadorEmails >= limiteEmails) {
+    alert("Você pode adicionar no máximo 2 e-mails extras.");
+    return;
+  }
+
+  contadorEmails++;
+
+  const container = document.getElementById("emailsContainer");
+
+  const div = document.createElement("div");
+  div.classList.add("form-group", "mt-2");
+  div.innerHTML = `
+        <div class="input-wrapper">
+            <div class="input-icon">
+                <i class="fa-solid fa-envelope"></i>
+            </div>
+            <input type="email" name="emailsExtras[]" placeholder="Digite o e-mail adicional" required>
+        </div>
+    `;
+
+  container.appendChild(div);
+}
+
 // TORNAR OBRIGATÓRICO QUANDO A OPÇÃO SELECIONADA FOR VALE
 const racValeOpcao = document.getElementById("racValeOpcao");
 
@@ -842,9 +950,9 @@ document.addEventListener("DOMContentLoaded", function () {
   limitarAno(inputVencimentoCNH);
 });
 
-
+// FUNÇÃO PARA ENVIAR EMAIL NA HORA DA SOLICITAÇÃO
 async function enviarEmailSolicitacao(dados) {
-  let destinatario = null;
+  let destinatario = "";
   let assunto = "";
   let mensagem = "";
 
@@ -874,11 +982,11 @@ async function enviarEmailSolicitacao(dados) {
     let solicitacao = "";
 
     if (dados.solicitar_novo_setor) {
-      solicitacao += `• Setor: ${dados.nome_novo_setor}\n`;
+      solicitacao += `Setor: ${dados.nome_novo_setor}\n`;
     }
 
     if (dados.solicitar_novo_cargo) {
-      solicitacao += `• Cargo: ${dados.nome_novo_cargo}\n`;
+      solicitacao += `Cargo: ${dados.nome_novo_cargo}\n`;
     }
 
     mensagem = `
@@ -976,23 +1084,19 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   const solicitarNovoCargo = document.getElementById("solicitarNovoCargo")?.checked === true;
   const nomeNovoSetor = document.getElementById("novoSetor")?.value || null;
   const nomeNovoCargo = document.getElementById("novoCargo")?.value || null;
-  const solicitarMaisUnidades = document.getElementById("solicitarMaisUnidades").value === "true";
   const tiposRacSelecionados = Array.from(document.querySelectorAll('input[name="racValeOpcao"]:checked')).map(el => el.value);
   const solicitarCredenciamento = document.getElementById("solicitarCredenciamento")?.checked === true;
 
-  let unidades = [];
+  const unidades = Array.from(document.querySelectorAll(".unidade-extra-select"))
+    .filter(select => select.value)
+    .map(select => ({
+      cod_unidade: select.value,
+      nome_unidade: select.selectedOptions[0]?.dataset.nome || null
+    }));
 
-  if (solicitarMaisUnidades) {
-    document.querySelectorAll(".unidade-extra-select")
-      .forEach(select => {
-        if (select.value) {
-          unidades.push({
-            cod_unidade: select.value,
-            nome_unidade: select.selectedOptions[0].dataset.nome
-          });
-        }
-      });
-  }
+  const emailsExtras = Array.from(document.querySelectorAll('input[name="emailsExtras[]"]'))
+    .map(input => input.value.trim())
+    .filter(email => email !== "");
 
   const dados = {
     nome_funcionario: document.getElementById("nome").value,
@@ -1036,13 +1140,13 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     tipos_rac: tiposRacSelecionados.length ? tiposRacSelecionados : null,
     tipo_exame: document.getElementById("tipo_exame").value,
     data_exame: document.getElementById("data_exame").value || null,
-    solicitar_mais_unidades: solicitarMaisUnidades,
-    mais_unidades: solicitarMaisUnidades ? unidades : [],
+    unidades_extras: unidades,
     cnh: document.getElementById("cnh").value || null,
     vencimento_cnh: document.getElementById("vencimento_cnh").value || null,
     lab_toxicologico: document.getElementById("lab_toxicologico").value || null,
     solicitar_credenciamento: solicitarCredenciamento,
     observacao: document.getElementById("observacao").value || null,
+    emails_extras: emailsExtras,
 
     usuario_id: usuarioLogado.id
   };

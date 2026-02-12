@@ -239,9 +239,12 @@ app.get("/prestadores/:empresa", async (req, res) => {
         : [json.root.record]
       : [];
 
-    // APENAS PRESTADORES ATIVOS
+    // APENAS PRESTADORES ATIVOS (EXCLUIR PRESTADOR REAVALIADO)
     const prestadores = registros
-      .filter(p => p.statusPrestador === "Ativo")
+      .filter(p =>
+        p.statusPrestador === "Ativo" &&
+        p.nomePrestador?.trim().toUpperCase() !== "REAVALIADO"
+      )
       .map(p => ({
         codigo: p.codigoPrestador,
         nome: p.nomePrestador,
@@ -426,8 +429,7 @@ app.post("/novo-cadastro", async (req, res) => {
         tipos_rac,
         tipo_exame,
         data_exame,
-        solicitar_mais_unidades,
-        mais_unidades,
+        unidades_extras,
         cnh,
         vencimento_cnh,
         lab_toxicologico,
@@ -437,7 +439,8 @@ app.post("/novo-cadastro", async (req, res) => {
         solicitar_credenciamento,
         estado_credenciamento,
         cidade_credenciamento,
-        observacao )
+        observacao,
+        emails_extras )
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,
               $24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,
               $45,$46,$47,$48,$49,$50,$51,$52,$53)
@@ -485,7 +488,7 @@ app.post("/novo-cadastro", async (req, res) => {
         JSON.stringify(f.tipos_rac || []),
         f.tipo_exame,
         f.data_exame,
-        f.solicitar_mais_unidades, JSON.stringify(f.mais_unidades || []),
+        JSON.stringify(f.unidades_extras || []),
         f.cnh,
         f.vencimento_cnh,
         f.lab_toxicologico,
@@ -495,7 +498,8 @@ app.post("/novo-cadastro", async (req, res) => {
         f.solicitar_credenciamento,
         f.estado_credenciamento,
         f.cidade_credenciamento,
-        f.observacao
+        f.observacao,
+        JSON.stringify(f.emails_extras || []),
       ]
     );
 
@@ -521,169 +525,51 @@ app.post("/novo-cadastro", async (req, res) => {
   }
 });
 
-// FORMULÁRIO PARA SOLICITAR EXAMES
-app.post("/solicitar-exame", async (req, res) => {
-  const f = req.body;
-
+// DETALHES DA SOLICITAÇÃO - NOVO CADASTRO
+app.get("/solicitacoes/novo-cadastro/:id", async (req, res) => {
   try {
-    await pool.query("BEGIN");
+    const { id } = req.params;
 
-    const { rows } = await pool.query(
-      `
-      INSERT INTO novo_exame (
-        cod_empresa,
-        nome_empresa,
-        nome_funcionario,
-        data_nascimento,
-        cpf,
-        matricula,
-        data_admissao,
-        cod_unidade,
-        nome_unidade,
-        cod_setor,
-        nome_setor,
-        cod_cargo,
-        nome_cargo,
-        rac,
-        tipos_rac,
-        tipo_exame,
-        data_exame,
-        solicitar_mais_unidades,
-        mais_unidades,
-        funcao_anterior,
-        funcao_atual,
-        solicitar_nova_funcao,
-        nome_nova_funcao,
-        descricao_atividade,
-        setor_atual,
-        solicitar_novo_setor,
-        nome_novo_setor,
-        motivo_consulta,
-        cnh,
-        vencimento_cnh,
-        lab_toxicologico,
-        estado_clinica,
-        cidade_clinica,
-        nome_clinica,
-        solicitar_credenciamento,
-        estado_credenciamento,
-        cidade_credenciamento,
-        observacao
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38)
-      RETURNING id
-      `,
-      [
-        f.cod_empresa,
-        f.nome_empresa,
-        f.nome_funcionario,
-        f.data_nascimento,
-        f.cpf,
-        f.matricula,
-        f.data_admissao,
-        f.cod_unidade,
-        f.nome_unidade,
-        f.cod_setor,
-        f.nome_setor,
-        f.cod_cargo,
-        f.nome_cargo,
-        f.rac,
-        JSON.stringify(f.tipos_rac || []),
-        f.tipo_exame,
-        f.data_exame,
-        f.solicitar_mais_unidades, JSON.stringify(f.mais_unidades || []),
-        f.funcao_anterior,
-        f.funcao_atual,
-        f.solicitar_nova_funcao,
-        f.nome_nova_funcao,
-        f.descricao_atividade,
-        f.setor_atual,
-        f.solicitar_novo_setor,
-        f.nome_novo_setor,
-        f.motivo_consulta,
-        f.cnh,
-        f.vencimento_cnh,
-        f.lab_toxicologico,
-        f.estado_clinica,
-        f.cidade_clinica,
-        f.nome_clinica,
-        f.solicitar_credenciamento,
-        f.estado_credenciamento,
-        f.cidade_credenciamento,
-        f.observacao
-      ]
-    );
-
-    const funcionarioId = rows[0].id;
-
-    await pool.query(
-      `
-      INSERT INTO solicitacoes_novo_exame (novo_exame_id, solicitado_por)
-      VALUES ($1,$2)
-      `,
-      [funcionarioId, f.usuario_id]
-    );
-
-    await pool.query("COMMIT");
-
-    res.json({ sucesso: true });
-
-  } catch (err) {
-    await pool.query("ROLLBACK");
-    console.error(err);
-    res.status(500).json({ erro: "Erro ao gerar solicitação de exame" });
-  }
-});
-
-// LISTAR SOLICITAÇÕES (novo cadastro e exame)
-app.get("/solicitacoes", async (req, res) => {
-  try {
     const { rows } = await pool.query(`
-      SELECT *
-      FROM (
-        SELECT
-          s.id AS solicitacao_id,
-          f.id AS novo_cadastro_id,
-          f.nome_empresa,
-          f.nome_funcionario,
-          f.cpf,
-          s.status,
-          s.solicitado_em,
-          f.solicitar_novo_setor,
-          f.solicitar_novo_cargo,
-          f.solicitar_credenciamento,
-          'NOVO_CADASTRO' AS tipo
-        FROM solicitacoes_novo_cadastro s
-        JOIN novo_cadastro f ON f.id = s.novo_cadastro_id
+      SELECT
+        sf.id AS solicitacao_id,
+        f.*,
+        sf.status,
+        sf.motivo_reprovacao,
+        sf.solicitado_em,
+        u.nome AS solicitado_por_nome,
+        u.email AS solicitado_por_email,
+        ua.nome AS analisado_por_nome,
+        ue.nome AS enviado_soc_por_nome,
+        uc.nome AS cancelado_por_nome,
+        sf.analisado_em,
+        sf.enviado_soc_em,
+        sf.cancelado_em
+      FROM solicitacoes_novo_cadastro sf
+      JOIN novo_cadastro f ON f.id = sf.novo_cadastro_id
+      JOIN usuarios u ON u.id = sf.solicitado_por
+      LEFT JOIN usuarios ua ON ua.id = sf.analisado_por
+      LEFT JOIN usuarios ue ON ue.id = sf.enviado_soc_por
+      LEFT JOIN usuarios uc ON uc.id = sf.cancelado_por
+      WHERE sf.id = $1
+    `, [id]);
 
-        UNION ALL
+    if (!rows.length) {
+      return res.status(404).json({ erro: "Solicitação não encontrada" });
+    }
 
-        SELECT
-          s.id AS solicitacao_id,
-          f.id AS novo_exame_id,
-          f.nome_empresa,
-          f.nome_funcionario,
-          f.cpf,
-          s.status,
-          s.solicitado_em,
-          f.solicitar_nova_funcao,
-          f.solicitar_novo_setor,
-          f.solicitar_credenciamento,
-          'NOVO_EXAME' AS tipo      
-        FROM solicitacoes_novo_exame s
-        JOIN novo_exame f ON f.id = s.novo_exame_id
-      ) t
-      ORDER BY t.solicitado_em DESC;
-    `);
+    res.json({
+      tipo: "NOVO_CADASTRO",
+      dados: rows[0]
+    });
 
-    res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ erro: "Erro ao buscar solicitações" });
+    res.status(500).json({ erro: "Erro ao buscar detalhes do cadastro" });
   }
 });
 
-// ROTA PARA ATUALIZAR A UNIDADE DE UMA SOLICITAÇÃO 
+// ROTA PARA ATUALIZAR A UNIDADE DE UMA SOLICITAÇÃO DE NOVO CADASTRO
 app.put("/solicitacoes/novo-cadastro/:id/salvar-unidade", async (req, res) => {
   const { id } = req.params;
   const { cod_unidade, nome_unidade } = req.body;
@@ -760,36 +646,7 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-unidade", async (req, res) => {
   }
 });
 
-async function enviarEmailSetorCargo(dados) {
-  const transporter = nodemailer.createTransport({
-    host: "smtp.mail.yahoo.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: "deborapfonseca@yahoo.com",
-      pass: "nbtijncjpammjbrv"
-    }
-  });
-
-  await transporter.sendMail({
-    from: "Painel Salubritá <deborapfonseca@yahoo.com>",
-    to: "debora.fonseca@salubrita.com.br",
-    subject: "Solicitação de criação de setor/cargo",
-    text: `
-      Prezados,
-
-      Gentileza seguir com a criação de setor/cargo referente à solicitação abaixo:
-
-      Empresa: ${dados.nome_empresa}
-      Unidade: ${dados.nome_unidade}
-
-      Atenciosamente,
-      Débora
-    `
-  });
-}
-
-// ROTA PARA ATUALIZAR O SETOR/CARGO DE UMA SOLICITAÇÃO 
+// ROTA PARA ATUALIZAR O SETOR/CARGO DE UMA SOLICITAÇÃO DE NOVO CADASTRO
 app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
   const { id } = req.params;
 
@@ -809,7 +666,7 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
     await client.query("BEGIN");
 
     const check = await client.query(
-    `
+      `
       SELECT
         s.status,
         nc.solicitar_novo_setor,
@@ -885,7 +742,7 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
     }
 
     // VERIFICA SE PRECISA DE CREDENCIAMENTO
-    const proximoStatus = solicitar_credenciamento ? "PENDENTE_CREDENCIAMENTO" : "PENDENTE";
+    proximoStatus = solicitar_credenciamento ? "PENDENTE_CREDENCIAMENTO" : "PENDENTE";
 
     const result = await client.query(
       `
@@ -937,36 +794,7 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
   }
 });
 
-async function enviarEmailCredenciamento(dados) {
-  const transporter = nodemailer.createTransport({
-    host: "smtp.mail.yahoo.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: "deborapfonseca@yahoo.com",
-      pass: "nbtijncjpammjbrv"
-    }
-  });
-
-  await transporter.sendMail({
-    from: "Painel Salubritá <deborapfonseca@yahoo.com>",
-    to: "debora.fonseca@salubrita.com.br",
-    subject: "Solicitação de credenciamento",
-    text: `
-      Prezados,
-
-      Gentileza seguir com o credenciamento referente à solicitação abaixo:
-
-      Empresa: ${dados.nome_empresa}
-      Unidade: ${dados.nome_unidade}
-
-      Atenciosamente,
-      Débora
-    `
-  });
-}
-
-// ROTA PARA ATUALIZAR O NOME DA CLÍNICA DE UMA SOLICITAÇÃO 
+// ROTA PARA ATUALIZAR O NOME DA CLÍNICA DE UMA SOLICITAÇÃO DE NOVO CADASTRO
 app.put("/solicitacoes/novo-cadastro/:id/salvar-credenciamento", async (req, res) => {
   const { id } = req.params;
   const { cod_clinica, nome_clinica } = req.body;
@@ -1020,46 +848,119 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-credenciamento", async (req, res
   }
 });
 
-// DETALHES DA SOLICITAÇÃO - NOVO CADASTRO
-app.get("/solicitacoes/novo-cadastro/:id", async (req, res) => {
+// FORMULÁRIO PARA SOLICITAR EXAMES
+app.post("/solicitar-exame", async (req, res) => {
+  const f = req.body;
+
   try {
-    const { id } = req.params;
+    await pool.query("BEGIN");
 
-    const { rows } = await pool.query(`
-      SELECT
-        sf.id AS solicitacao_id,
-        f.*,
-        sf.status,
-        sf.motivo_reprovacao,
-        sf.solicitado_em,
-        u.nome AS solicitado_por_nome,
-        ua.nome AS analisado_por_nome,
-        ue.nome AS enviado_soc_por_nome,
-        uc.nome AS cancelado_por_nome,
-        sf.analisado_em,
-        sf.enviado_soc_em,
-        sf.cancelado_em
-      FROM solicitacoes_novo_cadastro sf
-      JOIN novo_cadastro f ON f.id = sf.novo_cadastro_id
-      JOIN usuarios u ON u.id = sf.solicitado_por
-      LEFT JOIN usuarios ua ON ua.id = sf.analisado_por
-      LEFT JOIN usuarios ue ON ue.id = sf.enviado_soc_por
-      LEFT JOIN usuarios uc ON uc.id = sf.cancelado_por
-      WHERE sf.id = $1
-    `, [id]);
+    const { rows } = await pool.query(
+      `
+      INSERT INTO novo_exame (
+        cod_empresa,
+        nome_empresa,
+        nome_funcionario,
+        data_nascimento,
+        cpf,
+        matricula,
+        data_admissao,
+        cod_unidade,
+        nome_unidade,
+        cod_setor,
+        nome_setor,
+        cod_cargo,
+        nome_cargo,
+        rac,
+        tipos_rac,
+        tipo_exame,
+        data_exame,
+        unidades_extras,
+        funcao_anterior,
+        funcao_atual,
+        solicitar_nova_funcao,
+        nome_nova_funcao,
+        descricao_atividade,
+        setor_atual,
+        solicitar_novo_setor,
+        nome_novo_setor,
+        motivo_consulta,
+        cnh,
+        vencimento_cnh,
+        lab_toxicologico,
+        estado_clinica,
+        cidade_clinica,
+        nome_clinica,
+        solicitar_credenciamento,
+        estado_credenciamento,
+        cidade_credenciamento,
+        observacao,
+        emails_extras
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38)
+      RETURNING id
+      `,
+      [
+        f.cod_empresa,
+        f.nome_empresa,
+        f.nome_funcionario,
+        f.data_nascimento,
+        f.cpf,
+        f.matricula,
+        f.data_admissao,
+        f.cod_unidade,
+        f.nome_unidade,
+        f.cod_setor,
+        f.nome_setor,
+        f.cod_cargo,
+        f.nome_cargo,
+        f.rac,
+        JSON.stringify(f.tipos_rac || []),
+        f.tipo_exame,
+        f.data_exame,
+        JSON.stringify(f.unidades_extras || []),
+        f.funcao_anterior,
+        f.funcao_atual,
+        f.solicitar_nova_funcao,
+        f.nome_nova_funcao,
+        f.descricao_atividade,
+        f.setor_atual,
+        f.solicitar_novo_setor,
+        f.nome_novo_setor,
+        f.motivo_consulta,
+        f.cnh,
+        f.vencimento_cnh,
+        f.lab_toxicologico,
+        f.estado_clinica,
+        f.cidade_clinica,
+        f.nome_clinica,
+        f.solicitar_credenciamento,
+        f.estado_credenciamento,
+        f.cidade_credenciamento,
+        f.observacao,
+        JSON.stringify(f.emails_extras || [])
+      ]
+    );
 
-    if (!rows.length) {
-      return res.status(404).json({ erro: "Solicitação não encontrada" });
-    }
+    const funcionarioId = rows[0].id;
 
-    res.json({
-      tipo: "NOVO_CADASTRO",
-      dados: rows[0]
-    });
+    await pool.query(
+      `
+      INSERT INTO solicitacoes_novo_exame
+        (novo_exame_id, status, solicitado_por)
+      VALUES ($1, $2, $3)
+      `,
+      [funcionarioId, f.status, f.usuario_id]
+    );
+
+    await pool.query("COMMIT");
+
+    res.json({ sucesso: true });
 
   } catch (err) {
+    await pool.query("ROLLBACK");
     console.error(err);
-    res.status(500).json({ erro: "Erro ao buscar detalhes do cadastro" });
+    res.status(500).json({ erro: "Erro ao gerar solicitação de exame" });
   }
 });
 
@@ -1076,6 +977,7 @@ app.get("/solicitacoes/novo-exame/:id", async (req, res) => {
         sf.motivo_reprovacao,
         sf.solicitado_em,
         u.nome AS solicitado_por_nome,
+        u.email AS solicitado_por_email,
         ua.nome AS analisado_por_nome,
         uc.nome AS cancelado_por_nome,
         sf.analisado_em,
@@ -1100,6 +1002,249 @@ app.get("/solicitacoes/novo-exame/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: "Erro ao buscar detalhes do exame" });
+  }
+});
+
+// ROTA PARA ATUALIZAR A FUNÇÃO/SETOR DE UMA SOLICITAÇÃO DE NOVO EXAME
+app.put("/solicitacoes/novo-exame/:id/salvar-sc", async (req, res) => {
+  const { id } = req.params;
+
+  const { funcao_atual, setor_atual } = req.body;
+
+  const client = await pool.connect();
+
+  let proximoStatus = null;
+  let dadosSolicitacao = null;
+
+  try {
+    await client.query("BEGIN");
+
+    const check = await client.query(
+      `
+      SELECT
+        s.status,
+        nc.solicitar_nova_funcao,
+        nc.solicitar_novo_setor,
+        nc.solicitar_credenciamento
+      FROM solicitacoes_novo_exame s
+      JOIN novo_exame nc ON nc.id = s.novo_exame_id
+      WHERE s.id = $1
+    `, [id]);
+
+    if (!check.rows.length) {
+      return res.status(404).json({ erro: "Solicitação não encontrada" });
+    }
+
+    const { status, solicitar_nova_funcao, solicitar_novo_setor, solicitar_credenciamento } = check.rows[0];
+
+    if (status !== "PENDENTE_SC" && status !== "PENDENTE_REAVALIACAO") {
+      return res.status(400).json({
+        erro: "Solicitação não está em PENDENTE_SC ou PENDENTE_REAVALIACAO"
+      });
+    }
+
+    if (!solicitar_nova_funcao && !solicitar_novo_setor) {
+      return res.status(400).json({
+        erro: "Solicitação não requer função nem setor"
+      });
+    }
+
+    // ATUALIZA FUNÇÃO
+    if (solicitar_nova_funcao) {
+      if (!funcao_atual) {
+        return res.status(400).json({
+          erro: "Função obrigatória para esta solicitação"
+        });
+      }
+
+      await client.query(
+        `
+        UPDATE novo_exame
+        SET funcao_atual = $1
+        WHERE id = (
+          SELECT novo_exame_id
+          FROM solicitacoes_novo_exame
+          WHERE id = $2
+        )
+        `,
+        [funcao_atual, id]
+      );
+    }
+
+    // ATUALIZA SETOR
+    if (solicitar_novo_setor) {
+      if (!setor_atual) {
+        return res.status(400).json({
+          erro: "Setor obrigatório para esta solicitação"
+        });
+      }
+
+      await client.query(
+        `
+        UPDATE novo_exame
+        SET setor_atual = $1
+        WHERE id = (
+          SELECT novo_exame_id
+          FROM solicitacoes_novo_exame
+          WHERE id = $2
+        )
+        `,
+        [setor_atual, id]
+      );
+    }
+
+    // VERIFICA SE PRECISA DE CREDENCIAMENTO
+    proximoStatus = solicitar_credenciamento ? "PENDENTE_CREDENCIAMENTO" : "PENDENTE";
+
+    const result = await client.query(
+      `
+      UPDATE solicitacoes_novo_exame
+      SET status = $1
+      WHERE id = $2
+      RETURNING status
+      `,
+      [proximoStatus, id]
+    );
+
+    // PEGAR OS DADOS DA SOLICITAÇÃO
+    const dados = await client.query(
+      `
+      SELECT
+        nc.nome_empresa,
+        nc.nome_unidade
+      FROM solicitacoes_novo_exame s
+      JOIN novo_exame nc ON nc.id = s.novo_exame_id
+      WHERE s.id = $1
+      `,
+      [id]
+    );
+
+    dadosSolicitacao = dados.rows[0];
+
+    await client.query("COMMIT");
+
+    res.json({
+      sucesso: true,
+      status_novo: result.rows[0].status
+    });
+
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error(err);
+    return res.status(500).json({ erro: "Erro ao salvar SC" });
+
+  } finally {
+    // ENVIAR EMAIL SE NECESSÁRIO CREDENCIAMENTO
+    if (proximoStatus === "PENDENTE_CREDENCIAMENTO") {
+      try {
+        await enviarEmailCredenciamento(dadosSolicitacao);
+      } catch (err) {
+        console.error("Erro ao enviar email de credenciamento:", err.message);
+      }
+    }
+    client.release();
+  }
+});
+
+// ROTA PARA ATUALIZAR O NOME DA CLÍNICA DE UMA SOLICITAÇÃO DE NOVO EXAME
+app.put("/solicitacoes/novo-exame/:id/salvar-credenciamento", async (req, res) => {
+  const { id } = req.params;
+  const { cod_clinica, nome_clinica } = req.body;
+
+  if (!cod_clinica || !nome_clinica) {
+    return res.status(400).json({ erro: "Clínica inválida" });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    await client.query(
+      `
+      UPDATE novo_exame
+      SET nome_clinica = $1
+      WHERE id = (
+        SELECT novo_exame_id
+        FROM solicitacoes_novo_exame
+        WHERE id = $2
+      )
+      `,
+      [nome_clinica, id]
+    );
+
+    const result = await client.query(
+      `
+      UPDATE solicitacoes_novo_exame
+      SET status = 'PENDENTE'
+      WHERE id = $1
+      RETURNING status
+      `,
+      [id]
+    );
+
+    await client.query("COMMIT");
+
+    res.json({
+      sucesso: true,
+      status_novo: result.rows[0].status
+    });
+
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao salvar credenciamento" });
+
+  } finally {
+    client.release();
+  }
+});
+
+// LISTAR SOLICITAÇÕES (novo cadastro e exame)
+app.get("/solicitacoes", async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT *
+      FROM (
+        SELECT
+          s.id AS solicitacao_id,
+          f.id AS novo_cadastro_id,
+          f.nome_empresa,
+          f.nome_funcionario,
+          f.cpf,
+          s.status,
+          s.solicitado_em,
+          f.solicitar_novo_setor,
+          f.solicitar_novo_cargo,
+          f.solicitar_credenciamento,
+          'NOVO_CADASTRO' AS tipo
+        FROM solicitacoes_novo_cadastro s
+        JOIN novo_cadastro f ON f.id = s.novo_cadastro_id
+
+        UNION ALL
+
+        SELECT
+          s.id AS solicitacao_id,
+          f.id AS novo_exame_id,
+          f.nome_empresa,
+          f.nome_funcionario,
+          f.cpf,
+          s.status,
+          s.solicitado_em,
+          f.solicitar_nova_funcao,
+          f.solicitar_novo_setor,
+          f.solicitar_credenciamento,
+          'NOVO_EXAME' AS tipo      
+        FROM solicitacoes_novo_exame s
+        JOIN novo_exame f ON f.id = s.novo_exame_id
+      ) t
+      ORDER BY t.solicitado_em DESC;
+    `);
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao buscar solicitações" });
   }
 });
 
@@ -1256,28 +1401,39 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
         regime_trabalho = $10,
         nome_empresa = $11,
         nome_unidade = $12,
-        nome_setor = $13,
-        nome_novo_setor = $14,
-        nome_cargo = $15,
-        nome_novo_cargo = $16,
-        descricao_atividade = $17,
-        rac = $18,
-        tipos_rac = $19,
-        tipo_exame = $20,
-        data_exame = $21,
-        cnh = $22,
-        vencimento_cnh = $23,
-        lab_toxicologico = $24,
-        estado_clinica = $25,
-        cidade_clinica = $26,
-        nome_clinica = $27,
-        estado_credenciamento = $28,
-        cidade_credenciamento = $29,
-        observacao = $30
+        nome_fantasia = $13,
+        razao_social = $14,
+        cnpj = $15,
+        cnae = $16,
+        cep = $17,
+        rua = $18,
+        numero = $19,
+        bairro = $20,
+        estado = $21,
+        tipo_faturamento = $22,
+        email = $23,
+        nome_setor = $24,
+        nome_novo_setor = $25,
+        nome_cargo = $26,
+        nome_novo_cargo = $27,
+        descricao_atividade = $28,
+        rac = $29,
+        tipos_rac = $30,
+        tipo_exame = $31,
+        data_exame = $32,
+        cnh = $33,
+        vencimento_cnh = $34,
+        lab_toxicologico = $35,
+        estado_clinica = $36,
+        cidade_clinica = $37,
+        nome_clinica = $38,
+        estado_credenciamento = $39,
+        cidade_credenciamento = $40,
+        observacao = $41
       WHERE id = (
         SELECT novo_cadastro_id
         FROM solicitacoes_novo_cadastro
-        WHERE id = $31
+        WHERE id = $42
       )
     `, [
       f.nome_funcionario,
@@ -1292,6 +1448,17 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
       f.regime_trabalho,
       f.nome_empresa,
       f.nome_unidade,
+      f.nome_fantasia,
+      f.razao_social,
+      f.cnpj,
+      f.cnae,
+      f.cep,
+      f.rua,
+      f.numero,
+      f.bairro,
+      f.estado,
+      f.tipo_faturamento,
+      f.email,
       f.nome_setor,
       f.nome_novo_setor,
       f.nome_cargo,
@@ -1334,67 +1501,6 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
   }
 });
 
-// // EDITAR SOMENTE SETOR E CARGO DE UMA SOLICITAÇÃO DE CADASTRO
-// app.put("/solicitacoes/novo-cadastro/:id/editar-setor-cargo", async (req, res) => {
-//   const { id } = req.params; // id da solicitação
-//   const { cod_setor, nome_setor, cod_cargo, nome_cargo } = req.body;
-
-//   try {
-//     await pool.query("BEGIN");
-
-//     // Pega o funcionário e as flags na tabela novo_cadastro via solicitação
-//     const { rows } = await pool.query(`
-//       SELECT nc.id AS novo_cadastro_id, nc.solicitar_novo_setor, nc.solicitar_novo_cargo
-//       FROM solicitacoes_novo_cadastro s
-//       JOIN novo_cadastro nc ON nc.id = s.novo_cadastro_id
-//       WHERE s.id = $1
-//     `, [id]);
-
-//     if (rows.length === 0) {
-//       await pool.query("ROLLBACK");
-//       return res.status(404).json({ erro: "Solicitação não encontrada" });
-//     }
-
-//     const { novo_cadastro_id, solicitar_novo_setor, solicitar_novo_cargo } = rows[0];
-//     const updates = [];
-//     const values = [];
-
-//     if (solicitar_novo_setor) {
-//       updates.push(`cod_setor = $${updates.length + 1}`);
-//       values.push(cod_setor);
-
-//       updates.push(`nome_setor = $${updates.length + 1}`);
-//       values.push(nome_setor);
-//     }
-
-//     if (solicitar_novo_cargo) {
-//       updates.push(`cod_cargo = $${updates.length + 1}`);
-//       values.push(cod_cargo);
-
-//       updates.push(`nome_cargo = $${updates.length + 1}`);
-//       values.push(nome_cargo);
-//     }
-
-//     if (updates.length > 0) {
-//       const sql = `
-//         UPDATE novo_cadastro
-//         SET ${updates.join(", ")}
-//         WHERE id = $${updates.length + 1}
-//       `;
-//       values.push(novo_cadastro_id);
-
-//       await pool.query(sql, values);
-//     }
-
-//     await pool.query("COMMIT");
-//     res.json({ sucesso: true });
-//   } catch (err) {
-//     await pool.query("ROLLBACK");
-//     console.error(err);
-//     res.status(500).json({ erro: "Erro ao editar setor/cargo" });
-//   }
-// });
-
 // EDITAR SOLICITAÇÃO - NOVO EXAME
 app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
   const { id } = req.params;
@@ -1422,22 +1528,23 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
         funcao_anterior = $14,
         funcao_atual = $15,
         nome_nova_funcao = $16,
-        setor_atual = $17,
-        nome_novo_setor = $18,
-        motivo_consulta = $19,
-        cnh = $20,
-        vencimento_cnh = $21,
-        lab_toxicologico = $22,
-        estado_clinica = $23,
-        cidade_clinica = $24,
-        nome_clinica = $25,
-        estado_credenciamento = $26,
-        cidade_credenciamento = $27,
-        observacao = $28
+        descricao_atividade = $17,
+        setor_atual = $18,
+        nome_novo_setor = $19,
+        motivo_consulta = $20,
+        cnh = $21,
+        vencimento_cnh = $22,
+        lab_toxicologico = $23,
+        estado_clinica = $24,
+        cidade_clinica = $25,
+        nome_clinica = $26,
+        estado_credenciamento = $27,
+        cidade_credenciamento = $28,
+        observacao = $29
       WHERE id = (
         SELECT novo_exame_id
         FROM solicitacoes_novo_exame
-        WHERE id = $29
+        WHERE id = $30
       )
     `, [
       f.nome_funcionario,
@@ -1456,6 +1563,7 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
       f.funcao_anterior,
       f.funcao_atual,
       f.nome_nova_funcao,
+      f.descricao_atividade,
       f.setor_atual,
       f.nome_novo_setor,
       f.motivo_consulta,
@@ -1815,24 +1923,24 @@ app.put("/usuarios/:id", async (req, res) => {
   }
 });
 
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  }
+});
+
 // FUNÇÃO PARA ENVIO DE EMAIL NA HORA DA SOLICITAÇÃO CRIADA
 app.post("/enviar-email-solicitacao", async (req, res) => {
-  const { assunto, mensagem } = req.body;
+  const { destinatario, assunto, mensagem } = req.body;
 
   try {
-    const transporter = nodemailer.createTransport({
-      host: "smtp.mail.yahoo.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: "deborapfonseca@yahoo.com",
-        pass: "nbtijncjpammjbrv"
-      }
-    });
-
     await transporter.sendMail({
-      from: "Teste <deborapfonseca@yahoo.com>",
-      to: "debora.fonseca@salubrita.com.br",
+      from: "Painel Salubritá <naoresponda@salubrita.com.br>",
+      to: destinatario,
       subject: assunto,
       text: mensagem
     });
@@ -1847,6 +1955,44 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
     });
   }
 });
+
+async function enviarEmailSetorCargo(dados) {
+  await transporter.sendMail({
+    from: "Painel Salubritá <naoresponda@salubrita.com.br>",
+    to: "wasidrf@outlook.com", // ENVIAR PAR NICOLLY, PAULINA E RUBIA
+    subject: "Solicitação de criação de setor/cargo",
+    text: `
+      Prezados,
+
+      Gentileza seguir com a criação de setor/cargo referente à solicitação abaixo:
+
+      Empresa: ${dados.nome_empresa}
+      Unidade: ${dados.nome_unidade}
+
+      Atenciosamente,
+      Débora
+    `
+  });
+}
+
+async function enviarEmailCredenciamento(dados) {
+  await transporter.sendMail({
+    from: "Painel Salubritá <naoresponda@salubrita.com.br>",
+    to: "debora.fonseca@salubrita.com.br",
+    subject: "Solicitação de credenciamento",
+    text: `
+      Prezados,
+
+      Gentileza seguir com o credenciamento referente à solicitação abaixo:
+
+      Empresa: ${dados.nome_empresa}
+      Unidade: ${dados.nome_unidade}
+
+      Atenciosamente,
+      Débora
+    `
+  });
+}
 
 const PORT = process.env.NODE_ENV === 'development' ? 3000 : (process.env.PORT || 3003);
 

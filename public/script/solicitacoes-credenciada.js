@@ -80,6 +80,9 @@ document.addEventListener("DOMContentLoaded", () => {
   carregarSolicitacoes();
 });
 
+// BOTAO PARA ATUALIZAR PAGINA
+document.getElementById("btnAtualizar").addEventListener("click", () => {location.reload();});
+
 // FUNÇÃO PARA CARREGAR SOLICITAÇÕES E RENDERIZAR A TABELA
 async function carregarSolicitacoes() {
   const res = await fetch("/solicitacoes");
@@ -152,12 +155,12 @@ function renderizarTabela(lista) {
           ` : ""}
 
           ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO"].includes(s.status)
-            ? `
+        ? `
               <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
                 Cancelar
               </button>
             ` : ""
-          }
+      }
         </div>
       </td>
     `;
@@ -197,15 +200,17 @@ async function cancelarSolicitacao(id, tipo, usuarioLogadoId) {
 // FUNÇÃO PARA APLICAR FILTROS
 function aplicarFiltros() {
   const tipo = document.getElementById("filterTipo").value;
+  const empresa = document.getElementById("filterEmpresa").value.toLowerCase();
   const cpf = document.getElementById("filterCPF").value;
   const status = document.getElementById("filterStatus").value;
 
   const filtradas = solicitacoes.filter(s => {
     const matchTipo = !tipo || s.tipo === tipo;
+    const matchEmpresa = !empresa || (s.nome_empresa && s.nome_empresa.toLowerCase().includes(empresa));
     const matchCPF = !cpf || s.cpf.includes(cpf);
     const matchStatus = !status || s.status === status;
 
-    return matchTipo && matchCPF && matchStatus;
+    return matchTipo && matchEmpresa && matchCPF && matchStatus;
   });
 
   renderizarTabela(filtradas);
@@ -245,30 +250,29 @@ async function verDetalhes(id, tipo) {
 
 // FUNÇÃO PARA MOSTRAR AS UNIDADES ADICIONAIS CASO TENHA
 function preencherMaisUnidades(cadastro) {
-  const inputCadMaisUnidades = document.getElementById("cadastro_mais_unidades");
+  const container = document.getElementById("cadastro_mais_unidades");
+  const bloco = document.getElementById("bloco_mais_unidades");
 
-  inputCadMaisUnidades.innerHTML = "";
+  container.innerHTML = "";
 
-  if (cadastro.solicitar_mais_unidades && Array.isArray(cadastro.mais_unidades) && cadastro.mais_unidades.length > 0) {
-    cadastro.mais_unidades.forEach((u) => {
+  if (Array.isArray(cadastro.unidades_extras) && cadastro.unidades_extras.length > 0) {
+
+    cadastro.unidades_extras.forEach(u => {
       const div = document.createElement("div");
-
       div.classList.add("mb-1");
-
-      div.innerHTML = `${u.cod_unidade} - ${u.nome_unidade}`;
-
-      inputCadMaisUnidades.appendChild(div);
+      div.innerText = `${u.cod_unidade} - ${u.nome_unidade}`;
+      container.appendChild(div);
     });
-  }
-  else {
-    const span = document.createElement("span");
 
-    inputCadMaisUnidades.appendChild(span);
+    bloco?.classList.remove("d-none");
+
+  } else {
+    bloco?.classList.add("d-none");
   }
 }
 
-// FUNÇÃO PARA POPULAR O SELECT DE SETORES NO MODAL
-async function carregarSetores(empresaCodigo, selecionadoNome = "") {
+// FUNÇÃO PARA POPULAR O SELECT DE SETOR DO FUNCIONÁRIO NO MODAL DE NOVO CADASTRO
+async function carregarSetoresSolicitacaoCadastro(empresaCodigo, selecionadoNome = "") {
   if (!empresaCodigo) return;
 
   const select = document.getElementById("setorSelect");
@@ -291,11 +295,59 @@ async function carregarSetores(empresaCodigo, selecionadoNome = "") {
   }
 }
 
-// FUNÇÃO PARA POPULAR O SELECT DE CARGOS NO MODAL
+// FUNÇÃO PARA POPULAR O SELECT DE SETOR ATUAL NO MODAL DE NOVO EXAME
+async function carregarSetoresSolicitacaoExame(empresaCodigo, selecionadoNome = "") {
+  if (!empresaCodigo) return;
+
+  const select = document.getElementById("setorAtualSelect");
+  select.innerHTML = '<option value="">-</option>';
+
+  try {
+    const res = await fetch(`/setores/${empresaCodigo}`);
+    const setores = await res.json();
+
+    setores.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.codigo;
+      opt.textContent = s.nome;
+
+      if (s.nome === selecionadoNome) opt.selected = true;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error("Erro ao carregar setores:", err);
+  }
+}
+
+// FUNÇÃO PARA POPULAR O SELECT DE CARGOS NO MODAL DE NOVO CADASTRO
 async function carregarCargos(empresaCodigo, selecionadoNome = "") {
   if (!empresaCodigo) return;
 
   const select = document.getElementById("cargoSelect");
+  select.innerHTML = '<option value="">-</option>';
+
+  try {
+    const res = await fetch(`/cargos/${empresaCodigo}`);
+    const cargos = await res.json();
+
+    cargos.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.codigo;
+      opt.textContent = c.nome;
+
+      if (c.nome === selecionadoNome) opt.selected = true;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error("Erro ao carregar cargos:", err);
+  }
+}
+
+// FUNÇÃO PARA POPULAR O SELECT DE FUNÇÃO ATUAL NO MODAL DE NOVO EXAME
+async function carregarFuncao(empresaCodigo, selecionadoNome = "") {
+  if (!empresaCodigo) return;
+
+  const select = document.getElementById("funcaoAtualSelect");
   select.innerHTML = '<option value="">-</option>';
 
   try {
@@ -339,25 +391,48 @@ async function carregarUnidades(empresaCodigo, selecionadoNome = "") {
   }
 }
 
-function preencherMaisUnidadesExame(exame) {
-  const container = document.getElementById("exame_mais_unidades");
+function preencherEmailsExtras(cadastro) {
+  const container = document.getElementById("cadastro_emails_extras");
+  const bloco = document.getElementById("bloco_emails_extras");
+
   container.innerHTML = "";
 
-  if (exame.solicitar_mais_unidades && Array.isArray(exame.mais_unidades) && exame.mais_unidades.length > 0) {
-    exame.mais_unidades.forEach((u) => {
+  if (Array.isArray(cadastro.emails_extras) && cadastro.emails_extras.length > 0) {
+
+    cadastro.emails_extras.forEach(email => {
       const div = document.createElement("div");
       div.classList.add("mb-1");
-      div.innerText = `${u.nome_unidade}`;
+      div.innerText = email;
       container.appendChild(div);
     });
 
-    // Mostra o bloco se estiver escondido
-    const bloco = document.getElementById("bloco_exame_mais_unidades");
-    if (bloco) bloco.classList.remove("d-none");
+    bloco?.classList.remove("d-none");
+
   } else {
-    // Se não houver unidades adicionais, mantém o bloco escondido
-    const bloco = document.getElementById("bloco_exame_mais_unidades");
-    if (bloco) bloco.classList.add("d-none");
+    bloco?.classList.add("d-none");
+  }
+}
+
+
+function preencherMaisUnidadesExame(exame) {
+  const container = document.getElementById("exame_mais_unidades");
+  const bloco = document.getElementById("bloco_exame_mais_unidades");
+
+  container.innerHTML = "";
+
+  if (Array.isArray(exame.unidades_extras) && exame.unidades_extras.length > 0) {
+
+    exame.unidades_extras.forEach(u => {
+      const div = document.createElement("div");
+      div.classList.add("mb-1");
+      div.innerText = u.nome_unidade;
+      container.appendChild(div);
+    });
+
+    bloco?.classList.remove("d-none");
+
+  } else {
+    bloco?.classList.add("d-none");
   }
 }
 
@@ -370,13 +445,14 @@ function formatarTiposRac(tipos) {
     .join(", ");
 }
 
-function pegarDadosEdicao(statusAtual) {
+// FUNÇÃO PARA EDIÇÃO DA SOLICITAÇÃO DE CADASTRO
+function pegarDadosEdicaoCadastro(statusAtual) {
   let payload = {};
 
   payload = {
     ...payload,
     ...edicaoUnidade(statusAtual),
-    ...edicaoSC(statusAtual),
+    ...edicaoSetorCargo(statusAtual),
     ...edicaoCredenciamento(statusAtual),
   };
 
@@ -399,7 +475,7 @@ function edicaoUnidade(statusAtual) {
   return payload;
 }
 
-function edicaoSC(statusAtual) {
+function edicaoSetorCargo(statusAtual) {
   const payload = {};
 
   if (statusAtual !== "PENDENTE_SC" && statusAtual !== "PENDENTE_REAVALIACAO") return payload;
@@ -440,14 +516,14 @@ function edicaoCredenciamento(statusAtual) {
   return payload;
 }
 
-async function salvar() {
+async function salvarEdicaoCadastro() {
   if (!solicitacaoAtualId) {
     alert("ID da solicitação não encontrado");
     return;
   }
 
   const statusAtual = window.statusAtualSolicitacao;
-  const dadosEdicao = pegarDadosEdicao(statusAtual);
+  const dadosEdicao = pegarDadosEdicaoCadastro(statusAtual);
 
   let endpoint = "";
 
@@ -490,9 +566,38 @@ async function salvar() {
 
 // FUNÇÃO PARA CARREGAR AS CLÍNICAS E POPULAR O SELECT
 async function carregarClinicas(codEmpresa, clinicaSelecionada) {
+  console.log("Empresa recebida na função:", codEmpresa);
+
   if (!codEmpresa) return;
 
   const select = document.getElementById("clinicaSelect");
+  if (!select) return;
+
+  const res = await fetch(`/prestadores/${codEmpresa}`);
+  const clinicas = await res.json();
+
+  select.innerHTML = '<option value="">-</option>';
+
+  clinicas.forEach(c => {
+    const option = document.createElement("option");
+    option.value = c.nome;
+    option.textContent = c.nome;
+
+    if (c.nome === clinicaSelecionada) {
+      option.selected = true;
+    }
+
+    select.appendChild(option);
+  });
+}
+
+// FUNÇÃO PARA CARREGAR AS CLÍNICAS E POPULAR O SELECT
+async function carregarClinicasExame(codEmpresa, clinicaSelecionada) {
+  console.log("Empresa recebida na função:", codEmpresa);
+
+  if (!codEmpresa) return;
+
+  const select = document.getElementById("clinicaExameSelect");
   if (!select) return;
 
   const res = await fetch(`/prestadores/${codEmpresa}`);
@@ -517,7 +622,17 @@ async function carregarClinicas(codEmpresa, clinicaSelecionada) {
 function preencherModal(s, tipo) {
   window.statusAtualSolicitacao = s.status;
 
+  const tipoFaturamento = s.tipo_faturamento;
+
+  let emails = s.solicitado_por_email;
+
+  if (s.emails_extras && s.emails_extras.length > 0) {
+    emails += "; " + s.emails_extras.join("; ");
+  }
+
   if (tipo === "NOVO_CADASTRO") {
+    document.getElementById("cadastro_solicitado_por_email").innerText = emails;
+
     document.getElementById("cadastro_nome_funcionario").innerText = s.nome_funcionario;
     document.getElementById("cadastro_data_nascimento").innerText = formatarData(s.data_nascimento);
     document.getElementById("cadastro_sexo").innerText = s.sexo;
@@ -539,7 +654,13 @@ function preencherModal(s, tipo) {
     document.getElementById("cadastro_numero").innerText = s.numero;
     document.getElementById("cadastro_bairro").innerText = s.bairro;
     document.getElementById("cadastro_estado").innerText = s.estado;
-    document.getElementById("cadastro_tipo_faturamento").innerText = s.tipo_faturamento;
+
+    if (tipoFaturamento === "JUNTO") {
+      document.getElementById("faturamento_junto").checked = true;
+    } else if (tipoFaturamento === "SEPARADO") {
+      document.getElementById("faturamento_separado").checked = true;
+    }
+
     document.getElementById("cadastro_email").innerText = s.email;
     document.getElementById("cadastro_nome_setor").innerText = s.nome_setor || "-";
     document.getElementById("cadastro_novo_setor").innerText = s.nome_novo_setor;
@@ -577,6 +698,17 @@ function preencherModal(s, tipo) {
       if (btnAprovar) btnAprovar.style.display = "inline-flex";
     }
 
+    const btnReprovar = document.getElementById('btn-reprovar');
+    const blocoMotivoReprovacao = document.getElementById('divCadMotivoReprovacao');
+
+    if (s.status === 'APROVADO' || s.status === "ENVIADO_SOC") {
+        btnReprovar.style.display = 'none';
+        blocoMotivoReprovacao.style.display = 'none';
+    } else {
+        btnReprovar.style.display = 'inline-block';
+        blocoMotivoReprovacao.style.display = 'inline-block';
+    }
+
     // MOSTRAR / ESCONDER BLOCO DE NOVA UNIDADE
     const blocoNomeFantasia = document.getElementById("divNomeFantasia");
     const blocoRazaoSocial = document.getElementById("divRazaoSocial");
@@ -587,7 +719,8 @@ function preencherModal(s, tipo) {
     const blocoNumero = document.getElementById("divNumero");
     const blocoBairro = document.getElementById("divBairro");
     const blocoEstado = document.getElementById("divEstado");
-    const blocoTipoFaturamento = document.getElementById("divTipoFaturamento");
+    const blocoFaturamentoJunto = document.getElementById("divFaturamentoJunto");
+    const blocoFaturamentoSeparado = document.getElementById("divFaturamentoSeparado");
     const blocoEmail = document.getElementById("divEmail");
 
     if (s.solicitar_nova_unidade === true) {
@@ -600,7 +733,8 @@ function preencherModal(s, tipo) {
       blocoNumero.classList.remove("d-none");
       blocoBairro.classList.remove("d-none");
       blocoEstado.classList.remove("d-none");
-      blocoTipoFaturamento.classList.remove("d-none");
+      blocoFaturamentoJunto.classList.remove("d-none");
+      blocoFaturamentoSeparado.classList.remove("d-none");
       blocoEmail.classList.remove("d-none");
     } else {
       blocoNomeFantasia.classList.add("d-none");
@@ -612,7 +746,8 @@ function preencherModal(s, tipo) {
       blocoNumero.classList.add("d-none");
       blocoBairro.classList.add("d-none");
       blocoEstado.classList.add("d-none");
-      blocoTipoFaturamento.classList.add("d-none");
+      blocoFaturamentoJunto.classList.add("d-none");
+      blocoFaturamentoSeparado.classList.add("d-none");
       blocoEmail.classList.add("d-none");
     }
 
@@ -662,7 +797,7 @@ function preencherModal(s, tipo) {
       selectSetor.style.display = "block";
 
       // POPULAR O SELECT COM TODOS OS SETORES DA EMPRESA DA SOLICITAÇÃO
-      carregarSetores(s.cod_empresa, spanSetor.innerText);
+      carregarSetoresSolicitacaoCadastro(s.cod_empresa, spanSetor.innerText);
     } else {
       spanSetor.style.display = "block";
       selectSetor.style.display = "none";
@@ -748,6 +883,8 @@ function preencherModal(s, tipo) {
   }
 
   if (tipo === "NOVO_EXAME") {
+    document.getElementById("exame_solicitado_por_email").innerText = emails;
+
     document.getElementById("exame_nome_funcionario").innerText = s.nome_funcionario;
     document.getElementById("exame_data_nascimento").innerText = formatarData(s.data_nascimento);
     document.getElementById("exame_cpf").innerText = s.cpf;
@@ -783,58 +920,111 @@ function preencherModal(s, tipo) {
     const blocoFuncaoAnterior = document.getElementById("divFuncaoAnterior");
     const blocoFuncaoAtual = document.getElementById("divFuncaoAtual");
     const blocoNovaFuncao = document.getElementById("divNovaFuncao");
-
     const blocoDescricaoAtividade = document.getElementById("divExameDescricaoAtividade");
-
     const blocoSetorAtual = document.getElementById("divSetorAtual");
     const blocoNovoSetor = document.getElementById("divExameNovoSetor");
 
-    // OCULTAR CAMPOS DE FUNÇÃO E SETOR QUANDO NÃO FOR MUDANÇA DE RISCOS OCUPACIONAIS
+    // ESCONDER POR PADRÃO
+    [blocoFuncaoAnterior, blocoFuncaoAtual, blocoNovaFuncao, blocoDescricaoAtividade, blocoSetorAtual, blocoNovoSetor].forEach(el => el?.classList.add("d-none"));
+
     if (s.tipo_exame === "MUDANCA_RISCOS_OCUPACIONAIS") {
-      // MOSTRAR OS BLOCOS DE FUNÇÃO E SETOR
-      blocoFuncaoAnterior.classList.remove("d-none");
-      blocoFuncaoAtual.classList.remove("d-none");
-      blocoSetorAtual.classList.remove("d-none");
 
-      // SE FOR SOLICITAR CRIAÇÃO DE NOVA FUNÇÃO, MOSTRAR CAMPO
       if (s.solicitar_nova_funcao === true) {
-        blocoFuncaoAtual.classList.add("d-none");
-        blocoNovaFuncao.classList.remove("d-none");
+        blocoFuncaoAnterior?.classList.remove("d-none");
+        blocoFuncaoAtual?.classList.remove("d-none");
+        blocoNovaFuncao?.classList.remove("d-none");
+        blocoDescricaoAtividade?.classList.remove("d-none");
 
-        document.getElementById("exame_funcao_atual").innerText = "";
-        document.getElementById("exame_nova_funcao").innerText = s.nome_nova_funcao || "-";
-      } else {
-        blocoFuncaoAtual.classList.remove("d-none");
-        blocoNovaFuncao.classList.add("d-none");
-
+        document.getElementById("exame_funcao_anterior").innerText = s.funcao_anterior || "-";
         document.getElementById("exame_funcao_atual").innerText = s.funcao_atual || "-";
+        document.getElementById("exame_nova_funcao").innerText = s.nome_nova_funcao || "-";
+        document.getElementById("exame_descricao_atividade").innerText = s.descricao_atividade || "-";
       }
 
-      // SE FOR SOLICITAR CRIAÇÃO DE NOVO SETOR, MOSTRAR CAMPO
       if (s.solicitar_novo_setor === true) {
-        blocoSetorAtual.classList.add("d-none");
-        blocoNovoSetor.classList.remove("d-none");
-
-        document.getElementById("exame_setor_atual").innerText = "";
-        document.getElementById("exame_novo_setor").innerText = s.nome_novo_setor || "-";
-      } else {
-        blocoSetorAtual.classList.remove("d-none");
-        blocoNovoSetor.classList.add("d-none");
+        blocoSetorAtual?.classList.remove("d-none");
+        blocoNovoSetor?.classList.remove("d-none");
 
         document.getElementById("exame_setor_atual").innerText = s.setor_atual || "-";
+        document.getElementById("exame_novo_setor").innerText = s.nome_novo_setor || "-";
       }
-    } else {
-      blocoFuncaoAnterior.classList.add("d-none");
-      blocoFuncaoAtual.classList.add("d-none");
-      blocoNovaFuncao.classList.add("d-none");
-      blocoSetorAtual.classList.add("d-none");
-      blocoNovoSetor.classList.add("d-none");
     }
 
-    if (s.solicitar_novo_cargo === true) {
-      blocoDescricaoAtividade.classList.remove("d-none");
+    // MOSTRAR / OCULTAR BOTÕES DE SALVAR E APROVAR
+    const btnSalvar = document.getElementById("btn-salvar-exame");
+    const btnAprovar = document.getElementById("btn-aprovar-exame");
+
+    // ESCONDER TUDO POR PADRÃO
+    if (btnSalvar) btnSalvar.style.display = "none";
+    if (btnAprovar) btnAprovar.style.display = "none";
+
+    // MOSTRAR CONFORME STATUS
+    if (s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || s.status === "PENDENTE_REAVALIACAO") {
+      if (btnSalvar) btnSalvar.style.display = "inline-flex";
+    }
+
+    if (s.status === "PENDENTE") {
+      if (btnAprovar) btnAprovar.style.display = "inline-flex";
+    }
+
+    const btnReprovar = document.getElementById('btn-reprovar-exame');
+    const blocoMotivoReprovacao = document.getElementById('divExameMotivoReprovacao');
+
+    if (s.status === 'APROVADO') {
+        btnReprovar.style.display = 'none';
+        blocoMotivoReprovacao.style.display = 'none';
     } else {
-      blocoDescricaoAtividade.classList.add("d-none");
+        btnReprovar.style.display = 'inline-block';
+        blocoMotivoReprovacao.style.display = 'inline-block';
+    }
+
+    // TRANSFORMAR O CAMPO DE SETOR ATUAL EM SELECT CASO PRECISE CRIAR UM NOVO PARA SER SELECIONADO APÓS CRIADO 
+    const spanSetor = document.getElementById("exame_setor_atual");
+    const selectSetor = document.getElementById("setorAtualSelect");
+
+    if (s.solicitar_novo_setor) {
+      spanSetor.style.display = "none";
+      selectSetor.style.display = "block";
+
+      // POPULAR O SELECT COM TODOS OS SETORES DA EMPRESA DA SOLICITAÇÃO
+      carregarSetoresSolicitacaoExame(s.cod_empresa, spanSetor.innerText);
+    } else {
+      spanSetor.style.display = "block";
+      selectSetor.style.display = "none";
+    }
+
+    // TRANSFORMAR O CAMPO DE SETOR ATUAL EM SELECT CASO PRECISE CRIAR UM NOVO PARA SER SELECIONADO APÓS CRIADO 
+    const spanFuncao = document.getElementById("exame_funcao_atual");
+    const selectFuncao = document.getElementById("funcaoAtualSelect");
+
+    if (s.solicitar_novo_setor) {
+      spanFuncao.style.display = "none";
+      selectFuncao.style.display = "block";
+
+      // POPULAR O SELECT COM TODOS OS SETORES DA EMPRESA DA SOLICITAÇÃO
+      carregarFuncao(s.cod_empresa, spanFuncao.innerText);
+    } else {
+      spanFuncao.style.display = "block";
+      selectFuncao.style.display = "none";
+    }
+
+    // TRANSFORMAR O CAMPO DE NOME DA CLINICA EM SELECT CASO PRECISE CRIAR UM NOVO CREDENCIAMENTO PARA SER SELECIONADO APÓS CRIADO
+    const spanClinica = document.getElementById("exame_nome_clinica");
+    const selectClinica = document.getElementById("clinicaExameSelect");
+
+    if (s.solicitar_credenciamento === true) {
+      spanClinica.style.display = "none";
+
+      selectClinica.classList.remove("d-none");
+      selectClinica.style.display = "block";
+
+      carregarClinicasExame(s.cod_empresa, spanClinica.innerText);
+
+    } else {
+      spanClinica.style.display = "block";
+
+      selectClinica.classList.add("d-none");
+      selectClinica.style.display = "none";
     }
 
     // MOSTRAR / ESCONDER BLOCO DE MAIS UNIDADES
@@ -858,23 +1048,36 @@ function preencherModal(s, tipo) {
       blocoMotivoConsulta.classList.add("d-none");
     }
 
-    // MOSTRAR / ESCONDER SEÇÃO DE NOVO CREDENCIAMENTO
-    const blocoClinica = document.getElementById("blocoExameClinica");
-    const blocoCredenciamento = document.getElementById("blocoExameCredenciamento");
+    // MOSTRAR / ESCONDER BLOCO DE NOVO CREDENCIAMENTO
+    const blocoEstadoClinica = document.getElementById("divExameEstadoClinica");
+    const blocoCidadeClinica = document.getElementById("divExameCidadeClinica");
+    const blocoNomeClinica = document.getElementById("divExameNomeClinica");
+
+    const blocoEstadoCredenciamento = document.getElementById("divExameEstadoCredenciamento");
+    const blocoCidadeCredenciamento = document.getElementById("divExameCidadeCredenciamento");
 
     if (s.solicitar_credenciamento === true) {
-      blocoClinica.classList.add("d-none");
-      blocoCredenciamento.classList.remove("d-none");
+      blocoEstadoClinica.classList.add("d-none");
+      blocoCidadeClinica.classList.add("d-none");
 
-      document.getElementById("exame_estado_credenciamento").innerText = s.estado_credenciamento;
-      document.getElementById("exame_cidade_credenciamento").innerText = s.cidade_credenciamento;
+      // MOSTRA CAMPOS DE CREDENCIAMENTO
+      blocoEstadoCredenciamento.classList.remove("d-none");
+      blocoCidadeCredenciamento.classList.remove("d-none");
+      blocoNomeClinica.classList.remove("d-none");
+
+      document.getElementById("exame_estado_credenciamento").innerText = s.estado_credenciamento || "-";
+      document.getElementById("exame_cidade_credenciamento").innerText = s.cidade_credenciamento || "-";
     } else {
-      blocoClinica.classList.remove("d-none");
-      blocoCredenciamento.classList.add("d-none");
+      blocoEstadoClinica.classList.remove("d-none");
+      blocoCidadeClinica.classList.remove("d-none");
+      blocoNomeClinica.classList.remove("d-none");
 
-      document.getElementById("exame_estado_clinica").innerText = s.estado_clinica;
-      document.getElementById("exame_cidade_clinica").innerText = s.cidade_clinica;
-      document.getElementById("exame_nome_clinica").innerText = s.nome_clinica;
+      // ESCONDE CREDENCIAMENTO
+      blocoEstadoCredenciamento.classList.add("d-none");
+      blocoCidadeCredenciamento.classList.add("d-none");
+
+      document.getElementById("exame_estado_clinica").innerText = s.estado_clinica || "-";
+      document.getElementById("exame_cidade_clinica").innerText = s.cidade_clinica || "-";
     }
   }
 
@@ -979,6 +1182,107 @@ function preencherModal(s, tipo) {
   }
 }
 
+// FUNÇÃO PARA EDIÇÃO DA SOLICITAÇÃO DE EXAMES
+function pegarDadosEdicaoExame(statusAtual) {
+  let payload = {};
+
+  payload = {
+    ...payload,
+    ...edicaoFuncaoSetor(statusAtual),
+    ...edicaoExameCredenciamento(statusAtual),
+  };
+
+  return payload;
+}
+
+function edicaoFuncaoSetor(statusAtual) {
+  const payload = {};
+
+  if (statusAtual !== "PENDENTE_SC" && statusAtual !== "PENDENTE_REAVALIACAO")
+    return payload;
+
+  const selectFuncao = document.getElementById("funcaoAtualSelect");
+  if (selectFuncao && selectFuncao.style.display !== "none" && selectFuncao.value) {
+    const opt = selectFuncao.options[selectFuncao.selectedIndex];
+    payload.cod_funcao = selectFuncao.value;
+    payload.funcao_atual = opt.textContent;
+  }
+
+  const selectSetor = document.getElementById("setorAtualSelect");
+  if (selectSetor && selectSetor.style.display !== "none" && selectSetor.value) {
+    const opt = selectSetor.options[selectSetor.selectedIndex];
+    payload.cod_setor = selectSetor.value;
+    payload.setor_atual = opt.textContent;
+  }
+
+  return payload;
+}
+
+function edicaoExameCredenciamento(statusAtual) {
+  const payload = {};
+
+  if (
+    statusAtual !== "PENDENTE_CREDENCIAMENTO" &&
+    statusAtual !== "PENDENTE_REAVALIACAO"
+  ) return payload;
+
+  const select = document.getElementById("clinicaExameSelect");
+
+  if (select && select.style.display !== "none" && select.value) {
+    const opt = select.options[select.selectedIndex];
+    payload.cod_clinica = select.value;
+    payload.nome_clinica = opt.textContent;
+  }
+
+  return payload;
+}
+
+async function salvarEdicaoExame() {
+  if (!solicitacaoAtualId) {
+    alert("ID da solicitação não encontrado");
+    return;
+  }
+
+  const statusAtual = window.statusAtualSolicitacao;
+  const dadosEdicao = pegarDadosEdicaoExame(statusAtual);
+
+  let endpoint = "";
+
+  if (dadosEdicao.funcao_atual || dadosEdicao.setor_atual) {
+    endpoint = `/solicitacoes/novo-exame/${solicitacaoAtualId}/salvar-sc`;
+  } else if (dadosEdicao.cod_clinica) {
+    endpoint = `/solicitacoes/novo-exame/${solicitacaoAtualId}/salvar-credenciamento`;
+  }
+
+  if (!endpoint) {
+    alert("Nenhum alteração para salvar.");
+    return;
+  }
+
+  try {
+    const res = await fetch(endpoint, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dadosEdicao)
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error(txt);
+      alert("Erro ao salvar (ver console)");
+      return;
+    }
+
+    alert("Salvo com sucesso");
+    bootstrap.Modal.getInstance(document.querySelector(".modal.show")).hide();
+    carregarSolicitacoes();
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro de comunicação com o servidor");
+  }
+}
+
 // FUNÇÃO PARA ENVIAR AO SOC
 async function enviarSOC(id) {
   if (!confirm("Deseja enviar este funcionário ao SOC?")) return;
@@ -1037,8 +1341,8 @@ function formatarDataHora(data) {
 
 // FUNÇÃO PARA APROVAR / REPROVAR SOLICITAÇÃO
 async function analisarSolicitacao(status) {
-   const isExame = document.getElementById("modalDetalhesNovoExame").classList.contains("show");
-   const tipo = isExame ? "NOVO_EXAME" : "NOVO_CADASTRO";
+  const isExame = document.getElementById("modalDetalhesNovoExame").classList.contains("show");
+  const tipo = isExame ? "NOVO_EXAME" : "NOVO_CADASTRO";
 
   const motivoInput = isExame
     ? document.getElementById("motivoReprovacaoExame")

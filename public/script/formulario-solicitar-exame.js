@@ -376,23 +376,17 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// FUNÇÃO PARA CARREGAR O SELECT DAS UNIDADES E DA FUNÇÃO
+// FUNÇÃO PARA CARREGAR O SELECT DAS UNIDADES
 async function carregarUnidades() {
   const res = await fetch(`/unidades/${usuarioLogado.cod_empresa}`);
 
   const dados = await res.json();
 
   const select = document.getElementById("unidadeSelect");
-  const selectFuncaoAtual = document.getElementById("funcao_atual");
 
   select.innerHTML = `<option value="">Selecione...</option>`;
   dados.forEach(u => {
     select.innerHTML += `<option value="${u.codigo}">${u.nome}</option>`;
-  });
-
-  selectFuncaoAtual.innerHTML = `<option value="">Selecione...</option>`;
-  dados.forEach(c => {
-    selectFuncaoAtual.innerHTML += `<option value="${c.codigo}">${c.nome}</option>`;
   });
 }
 
@@ -419,14 +413,17 @@ async function carregarSetores() {
 // FUNÇÃO PARA CARREGAR O SELECT DOS CARGOS
 async function carregarCargos() {
   const res = await fetch(`/cargos/${usuarioLogado.cod_empresa}`);
-
   const dados = await res.json();
 
-  const select = document.getElementById("cargoSelect");
+  const selectCargo = document.getElementById("cargoSelect");
+  const selectFuncaoAtual = document.getElementById("funcao_atual");
 
-  select.innerHTML = `<option value="">Selecione...</option>`;
+  selectCargo.innerHTML = `<option value="">Selecione...</option>`;
+  selectFuncaoAtual.innerHTML = `<option value="">Selecione...</option>`;
+
   dados.forEach(c => {
-    select.innerHTML += `<option value="${c.codigo}">${c.nome}</option>`;
+    selectCargo.innerHTML += `<option value="${c.codigo}">${c.nome}</option>`;
+    selectFuncaoAtual.innerHTML += `<option value="${c.codigo}">${c.nome}</option>`;
   });
 }
 
@@ -580,7 +577,7 @@ async function buscarDetalhesPrestador(codigo) {
 function extrairEstados(prestadores) {
   return [...new Set(
     prestadores
-      .map(p => p.estado)
+      .map(p => p.estado?.trim().toUpperCase())
       .filter(estado => estado)
   )].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 }
@@ -611,7 +608,9 @@ document.getElementById("estado_clinica").addEventListener("change", function ()
 
   const cidadesUnicas = [...new Set(
     prestadoresCache
-      .filter(p => p.estado === estadoSelecionado)
+      .filter(p => 
+        p.estado?.trim().toUpperCase() === estadoSelecionado?.trim().toUpperCase()
+      )
       .map(p => p.cidade)
       .filter(cidade => cidade)
   )].sort((a, b) => a.localeCompare(b, 'pt-BR'));
@@ -636,8 +635,9 @@ document.getElementById("cidade_clinica").addEventListener("change", function ()
 
   const clinicasFiltradas = prestadoresCache
     .filter(p =>
-      p.estado === estadoSelecionado &&
-      p.cidade === cidadeSelecionada)
+      p.estado?.trim().toUpperCase() === estadoSelecionado?.trim().toUpperCase() &&
+      p.cidade?.trim().toUpperCase() === cidadeSelecionada?.trim().toUpperCase()
+    )
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
 
   clinicasFiltradas.forEach(p => {
@@ -675,6 +675,179 @@ document.getElementById("solicitarCredenciamento").addEventListener("change", fu
   }
 });
 
+// CAMPO DE NOVA FUNÇÃO SEMPRE MAIÚSCULO
+const inputNovaFuncao = document.getElementById("novaFuncao");
+
+inputNovaFuncao.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+// CAMPO DE NOVO SETOR SEMPRE MAIÚSCULO
+const inputNovoSetor = document.getElementById("novoSetor");
+
+inputNovoSetor.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+// CAMPO DE NOME LABORATORIO SEMPRE MAIÚSCULO
+const inputLaboratorioToxicologico = document.getElementById("lab_toxicologico");
+
+inputLaboratorioToxicologico.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+// CAMPO DE ESTADO PARA CREDENCIAMENTO SEMPRE MAIÚSCULO
+const inputEstadoCredenciamento = document.getElementById("estado_credenciamento");
+
+inputEstadoCredenciamento.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+// CAMPO DE CIDADE PARA CREDENCIAMENTO SEMPRE MAIÚSCULO
+const inputCidadeCredenciamento = document.getElementById("cidade_credenciamento");
+
+inputCidadeCredenciamento.addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+function definirStatusInicial(s) {
+  const precisaFuncaoSetor = s.solicitar_nova_funcao === true || s.solicitar_novo_setor === true;
+  const precisaCredenciamento = s.solicitar_credenciamento === true;
+
+  if (precisaFuncaoSetor) {
+    return "PENDENTE_SC";
+  }
+
+  if (precisaCredenciamento) {
+    return "PENDENTE_CREDENCIAMENTO";
+  }
+
+  return "PENDENTE";
+}
+
+let contadorEmails = 0;
+const limiteEmails = 2;
+
+function ativarEmails(valor) {
+  const inputHidden = document.getElementById("enviarMaisEmails");
+  const container = document.getElementById("emailsContainer");
+  const btnAdd = document.getElementById("btnAddEmail");
+
+  inputHidden.value = valor;
+
+  if (valor) {
+    container.classList.remove("d-none");
+    btnAdd.classList.remove("d-none");
+
+    if (contadorEmails === 0) {
+      adicionarEmail();
+    }
+  } else {
+    container.classList.add("d-none");
+    btnAdd.classList.add("d-none");
+    container.innerHTML = "";
+    contadorEmails = 0;
+  }
+}
+
+function adicionarEmail() {
+  if (contadorEmails >= limiteEmails) {
+    alert("Você pode adicionar no máximo 2 e-mails extras.");
+    return;
+  }
+
+  contadorEmails++;
+
+  const container = document.getElementById("emailsContainer");
+
+  const div = document.createElement("div");
+  div.classList.add("form-group", "mt-2");
+  div.innerHTML = `
+        <div class="input-wrapper">
+            <div class="input-icon">
+                <i class="fa-solid fa-envelope"></i>
+            </div>
+            <input type="email" name="emailsExtras[]" placeholder="Digite o e-mail adicional" required>
+        </div>
+    `;
+
+  container.appendChild(div);
+}
+
+// FUNÇÃO PARA ENVIAR EMAIL NA HORA DA SOLICITAÇÃO
+async function enviarEmailSolicitacao(dados) {
+  let destinatario = null;
+  let assunto = "";
+  let mensagem = "";
+
+  const precisaFuncaoSetor = dados.solicitar_nova_funcao === true || dados.solicitar_novo_setor === true;
+  const precisaCredenciamento = dados.solicitar_credenciamento === true;
+
+  // PRIORIDADE: FUNÇÃO / SETOR
+  if (precisaFuncaoSetor) {
+    destinatario = "wasidrf@outlook.com"; // EMAIL NICOLLY, PAULINA E RUBIA
+    assunto = "Solicitação de criação de função/setor";
+
+    let solicitacao = "";
+
+    if (dados.solicitar_nova_funcao) {
+      solicitacao += `Função: ${dados.nome_nova_funcao}\n`;
+    }
+
+    if (dados.solicitar_novo_setor) {
+      solicitacao += `Setor: ${dados.nome_novo_setor}\n`;
+    }
+
+    mensagem = `
+      Prezados,
+
+      Gentileza seguir com a criação do(s) item(ns) abaixo:
+
+      ${solicitacao}
+
+      Empresa: ${dados.nome_empresa}
+      Unidade: ${dados.nome_unidade}
+
+      Atenciosamente,
+      Painel Salubritá
+    `;
+  }
+
+  // SOMENTE SE NÃO TIVER FUNÇÃO/SETOR
+  else if (precisaCredenciamento) {
+    destinatario = "fonsecadrf@outlook.com"; // EMAIL MARIA EDUARDA
+    assunto = "Solicitação de credenciamento";
+
+    mensagem = `
+      Prezados,
+
+      Gentileza seguir com o credenciamento solicitado.
+
+      Estado: ${dados.estado_credenciamento}
+      Cidade: ${dados.cidade_credenciamento}
+
+      Empresa: ${dados.nome_empresa}
+
+      Atenciosamente,
+      Painel Salubritá
+    `;
+  }
+
+  if (!destinatario) {
+    return; 
+  }
+
+  await fetch("/enviar-email-solicitacao", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      destinatario,
+      assunto,
+      mensagem
+    })
+  });
+}
+
 // ENVIO DO FORMULÁRIO
 document.getElementById("formCadastro").addEventListener("submit", async function (e) {
   e.preventDefault();
@@ -688,24 +861,20 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   const setorAtualSelect = document.getElementById("setor_atual");
   const nomeNovaFuncao = document.getElementById("novaFuncao")?.value || null;
   const nomeNovoSetor = document.getElementById("novoSetor")?.value || null;
-  const solicitarMaisUnidades = document.getElementById("solicitarMaisUnidades").value === "true";
   const solicitarCredenciamento = document.getElementById("solicitarCredenciamento")?.checked === true;
   const clinicaSelect = document.getElementById("nome_clinica");
   const tiposRacSelecionados = Array.from(document.querySelectorAll('input[name="racValeOpcao"]:checked')).map(el => el.value);
 
-  let unidades = [];
+  const unidades = Array.from(document.querySelectorAll(".unidade-extra-select"))
+    .filter(select => select.value)
+    .map(select => ({
+      cod_unidade: select.value,
+      nome_unidade: select.selectedOptions[0]?.dataset.nome || null
+    }));
 
-  if (solicitarMaisUnidades) {
-    document.querySelectorAll(".unidade-extra-select")
-      .forEach(select => {
-        if (select.value) {
-          unidades.push({
-            cod_unidade: select.value,
-            nome_unidade: select.selectedOptions[0].dataset.nome
-          });
-        }
-      });
-  }
+  const emailsExtras = Array.from(document.querySelectorAll('input[name="emailsExtras[]"]'))
+    .map(input => input.value.trim())
+    .filter(email => email !== "");
 
   const dados = {
     nome_funcionario: document.getElementById("nome").value,
@@ -725,8 +894,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     tipos_rac: tiposRacSelecionados.length ? tiposRacSelecionados : null,
     tipo_exame: document.getElementById("tipo_exame").value,
     data_exame: document.getElementById("data_exame").value || null,
-    solicitar_mais_unidades: solicitarMaisUnidades,
-    mais_unidades: solicitarMaisUnidades ? unidades : [],
+    unidades_extras: unidades,
     funcao_anterior: document.getElementById("funcao_anterior")?.value || null,
     funcao_atual: funcaoSelect.value ? funcaoSelect.options[funcaoSelect.selectedIndex].text : null,
     solicitar_nova_funcao: solicitarNovaFuncao,
@@ -741,6 +909,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     lab_toxicologico: document.getElementById("lab_toxicologico").value || null,
     solicitar_credenciamento: solicitarCredenciamento,
     observacao: document.getElementById("observacao").value || null,
+    emails_extras: emailsExtras,
 
     usuario_id: usuarioLogado.id
   };
@@ -753,6 +922,9 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     dados.cidade_clinica = document.getElementById("cidade_clinica").value;
     dados.nome_clinica = clinicaSelect.options[clinicaSelect.selectedIndex]?.text || null;
   }
+
+  const statusInicial = definirStatusInicial(dados);
+  dados.status = statusInicial;
 
   try {
     const res = await fetch("/solicitar-exame", {
@@ -772,8 +944,9 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
       });
     }
 
-    document.getElementById("formCadastro").reset();
+    await enviarEmailSolicitacao(dados);
 
+    document.getElementById("formCadastro").reset();
   } catch (erro) {
     console.error(erro);
     alert("Erro ao enviar solicitação");

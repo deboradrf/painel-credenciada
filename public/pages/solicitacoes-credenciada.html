@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitações Credenciada</title>
+    <link rel="icon" type="image/png" href="/images/icone.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -98,42 +99,61 @@
                 </p>
             </div>
 
-            <div class="filters mb-4">
-                <div class="filter-group">
-                    <select id="filterTipo" required>
-                        <option value="" disabled selected></option>
-                        <option value="">Todos</option>
-                        <option value="NOVO_CADASTRO">Solicitação de Cadastro</option>
-                        <option value="NOVO_EXAME">Solicitação de Exame</option>
-                    </select>
-                    <label>Tipo</label>
-                </div>
+            <div class="filter-wrapper mb-4">
+                <div class="filters">
+                    <div class="filter-group">
+                        <select id="filterTipo" required>
+                            <option value="" disabled selected></option>
+                            <option value="">Todos</option>
+                            <option value="NOVO_CADASTRO">Solicitação de Cadastro</option>
+                            <option value="NOVO_EXAME">Solicitação de Exame</option>
+                        </select>
+                        <label>Tipo</label>
+                    </div>
 
-                <div class="filter-group">
-                    <input id="filterCPF" type="text" placeholder=" " />
-                    <label>CPF Funcionário</label>
-                </div>
+                    <div class="filter-group">
+                        <input id="filterEmpresa" type="text" placeholder=" " />
+                        <label>Empresa</label>
+                    </div>
 
-                <div class="filter-group">
-                    <select id="filterStatus" required>
-                        <option value="" disabled selected></option>
-                        <option value="">Todos</option>
-                        <option value="PENDENTE">Pendente</option>
-                        <option value="APROVADO">Aprovado</option>
-                        <option value="REPROVADO">Reprovado</option>
-                        <option value="PENDENTE_REAVALIACAO">Pendente Reavaliação</option>
-                        <option value="ENVIADO_SOC">Enviado ao SOC</option>
-                        <option value="ERRO_SOC">Erro</option>
-                    </select>
-                    <label>Status</label>
+                    <div class="filter-group">
+                        <input id="filterCPF" type="text" placeholder=" " />
+                        <label>CPF Funcionário</label>
+                    </div>
+
+                    <div class="filter-group">
+                        <select id="filterStatus" required>
+                            <option value="" disabled selected></option>
+                            <option value="">Todos</option>
+                            <option value="PENDENTE_UNIDADE">Pendente Unidade</option>
+                            <option value="PENDENTE_SC">Pendente Setor/Cargo</option>
+                            <option value="PENDENTE_CREDENCIAMENTO">Pendente Credenciamento</option>
+                            <option value="PENDENTE_REAVALIACAO">Pendente Reavaliação</option>
+                            <option value="PENDENTE">Pendente</option>
+                            <option value="APROVADO">Aprovado</option>
+                            <option value="REPROVADO">Reprovado</option>
+                            <option value="ENVIADO_SOC">Enviado ao SOC</option>
+                            <option value="ERRO_SOC">Erro</option>
+                        </select>
+                        <label>Status</label>
+                    </div>
                 </div>
 
                 <div class="filter-actions">
-                    <button id="btnBuscar" class="btn-search">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        Buscar
-                    </button>
-                    <button id="btnLimpar" class="btn-clear">Limpar Filtros</button>
+                    <div class="divBtn">
+                        <button id="btnBuscar" class="btn-search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            Buscar
+                        </button>
+                        <button id="btnLimpar" class="btn-clear">Limpar Filtros</button>
+                    </div>
+
+                    <div class="divAtualizar">
+                        <button id="btnAtualizar" class="btn-atualizar">
+                            <i class="fa-solid fa-arrows-rotate fa-spin"></i>
+                            Atualizar Solicitações
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -204,6 +224,15 @@
                     <div class="row g-3">
                         <div class="col-12">
                             <p id="linha_aprovacao_cadastro" class="text-muted small"></p>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="detail-item email">
+                                <div class="detail-label">
+                                    <label class="form-label">Enviar ASO para</label>
+                                </div>
+                                <div id="cadastro_solicitado_por_email"></div>
+                            </div>
                         </div>
 
                         <div class="col-12">
@@ -387,7 +416,7 @@
                             </div>
                         </div>
 
-                        <div class="col-6" id="divEstado">
+                        <div class="col-12" id="divEstado">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Estado</span>
@@ -396,12 +425,23 @@
                             </div>
                         </div>
 
-                        <div class="col-6" id="divTipoFaturamento">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Tipo Faturamento</span>
-                                </div>
-                                <span id="cadastro_tipo_faturamento" class="detail-value"></span>
+                        <div class="col-6" id="divFaturamentoJunto">
+                            <div class="form-check my-2">
+                                <input class="form-check-input" type="radio" name="tipo_faturamento"
+                                    id="faturamento_junto" value="JUNTO">
+                                <label class="form-check-label" for="faturamento_junto">
+                                    Essa unidade será faturada junto com a empresa principal, em uma única nota
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divFaturamentoSeparado">
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="radio" name="tipo_faturamento"
+                                    id="faturamento_separado" value="SEPARADO">
+                                <label class="form-check-label" for="faturamento_separado">
+                                    Essa unidade será faturada separadamente da empresa principal, com uma nota separada
+                                </label>
                             </div>
                         </div>
 
@@ -591,28 +631,32 @@
                 </div>
 
                 <div class="modal-footer">
-                    <div class="action-buttons">
-                        <button type="button" class="btn-action" id="btn-aprovar"
+                    <div class="footer-actions">
+                        <button type="button" class="btn-aprovar" id="btn-aprovar"
                             onclick="analisarSolicitacao('APROVADO')">
-                            <i class="fa-solid fa-check"></i>
+                            <i class="fa-solid fa-check mx-1"></i>
                             Aprovar
                         </button>
 
-                        <button type="button" class="btn-action" id="btn-salvar" onclick="salvar()">
+                        <button type="button" class="btn-salvar" id="btn-salvar" onclick="salvarEdicaoCadastro()">
+                            <i class="fa-solid fa-floppy-disk"></i>
                             Salvar
                         </button>
 
-                        <button type="button" class="btn-action" id="btn-reprovar"
+                        <button type="button" class="btn-reprovar" id="btn-reprovar"
                             onclick="analisarSolicitacao('REPROVADO')">
                             <i class="fa-solid fa-xmark"></i>
                             Reprovar
                         </button>
                     </div>
 
-                    <div class="col-12">
-                        <label class="form-label">Motivo da reprovação</label>
-                        <textarea id="motivoReprovacaoCadastro" class="form-control" rows="2"
-                            placeholder="Digite o motivo da reprovação"></textarea>
+                    <div class="col-12" id="divCadMotivoReprovacao">
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <span>Motivo da reprovação</span>
+                            </div>
+                            <textarea id="motivoReprovacaoCadastro" class="form-control" rows="2"></textarea>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -635,6 +679,15 @@
                     <div class="row g-3">
                         <div class="col-12">
                             <p id="linha_aprovacao_exame" class="text-muted small"></p>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="detail-item email">
+                                <div class="detail-label">
+                                    <label class="form-label">Enviar ASO para</label>
+                                </div>
+                                <div id="exame_solicitado_por_email"></div>
+                            </div>
                         </div>
 
                         <div class="col-12">
@@ -763,7 +816,7 @@
                             </div>
                         </div>
 
-                        <div class="col-6" id="divFuncaoAnterior">
+                        <div class="col-12" id="divFuncaoAnterior">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Função exercida atualmente</span>
@@ -778,6 +831,7 @@
                                     <span>Função que irá exercer</span>
                                 </div>
                                 <span id="exame_funcao_atual" class="detail-value"></span>
+                                <select id="funcaoAtualSelect" class="detail-input"></select>
                             </div>
                         </div>
 
@@ -805,6 +859,7 @@
                                     <span>Setor que irá atuar</span>
                                 </div>
                                 <span id="exame_setor_atual" class="detail-value"></span>
+                                <select id="setorAtualSelect" class="detail-input"></select>
                             </div>
                         </div>
 
@@ -853,56 +908,49 @@
                             </div>
                         </div>
 
-                        <div id="blocoExameClinica" class="d-none">
-                            <div class="row g-3">
-                                <div class="col-6">
-                                    <div class="detail-item">
-                                        <div class="detail-label">
-                                            <span>Estado da Clínica</span>
-                                        </div>
-                                        <span id="exame_estado_clinica" class="detail-value"></span>
-                                    </div>
+                        <div class="col-6" id="divExameEstadoClinica">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Estado da Clínica</span>
                                 </div>
-
-                                <div class="col-6">
-                                    <div class="detail-item">
-                                        <div class="detail-label">
-                                            <span>Cidade da Clínica</span>
-                                        </div>
-                                        <span id="exame_cidade_clinica" class="detail-value"></span>
-                                    </div>
-                                </div>
-
-                                <div class="col-12">
-                                    <div class="detail-item">
-                                        <div class="detail-label">
-                                            <span>Nome da Clínica</span>
-                                        </div>
-                                        <span id="exame_nome_clinica" class="detail-value"></span>
-                                    </div>
-                                </div>
+                                <span id="exame_estado_clinica" class="detail-value"></span>
                             </div>
                         </div>
 
-                        <div id="blocoExameCredenciamento" class="d-none">
-                            <div class="row g-3">
-                                <div class="col-6">
-                                    <div class="detail-item">
-                                        <div class="detail-label">
-                                            <span>Estado para Credenciamento</span>
-                                        </div>
-                                        <span id="exame_estado_credenciamento" class="detail-value"></span>
-                                    </div>
+                        <div class="col-6" id="divExameCidadeClinica">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Cidade da Clínica</span>
                                 </div>
+                                <span id="exame_cidade_clinica" class="detail-value"></span>
+                            </div>
+                        </div>
 
-                                <div class="col-6">
-                                    <div class="detail-item">
-                                        <div class="detail-label">
-                                            <span>Cidade para Credenciamento</span>
-                                        </div>
-                                        <span id="exame_cidade_credenciamento" class="detail-value"></span>
-                                    </div>
+                        <div class="col-12" id="divExameNomeClinica">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome da Clínica</span>
                                 </div>
+                                <span id="exame_nome_clinica" class="detail-value"></span>
+                                <select id="clinicaExameSelect" class="detail-input d-none"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameEstadoCredenciamento">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Estado para Credenciamento</span>
+                                </div>
+                                <span id="exame_estado_credenciamento" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameCidadeCredenciamento">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Cidade para Credenciamento</span>
+                                </div>
+                                <span id="exame_cidade_credenciamento" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -918,23 +966,33 @@
                 </div>
 
                 <div class="modal-footer">
-                    <div class="action-buttons">
-                        <button type="button" class="btn-action btn-aprovar" onclick="analisarSolicitacao('APROVADO')">
-                            <i class="fa-solid fa-check"></i>
+                    <div class="footer-actions">
+                        <button type="button" class="btn-aprovar" id="btn-aprovar-exame"
+                            onclick="analisarSolicitacao('APROVADO')">
+                            <i class="fa-solid fa-check mx-1"></i>
                             Aprovar
                         </button>
 
-                        <button type="button" class="btn-action btn-reprovar"
+                        <button type="button" class="btn-salvar" id="btn-salvar-exame" onclick="salvarEdicaoExame()">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Salvar
+                        </button>
+
+                        <button type="button" class="btn-reprovar" id="btn-reprovar-exame"
                             onclick="analisarSolicitacao('REPROVADO')">
                             <i class="fa-solid fa-xmark"></i>
                             Reprovar
                         </button>
                     </div>
 
-                    <div class="col-12">
-                        <label class="form-label">Motivo da reprovação</label>
-                        <textarea id="motivoReprovacaoExame" class="form-control" rows="2"
-                            placeholder="Digite o motivo da reprovação"></textarea>
+                    <div class="col-12 mt-4" id="divExameMotivoReprovacao">
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <span>Motivo da reprovação</span>
+                            </div>
+                            <textarea id="motivoReprovacaoExame" class="form-control modern-textarea"
+                                rows="2"></textarea>
+                        </div>
                     </div>
                 </div>
             </div>
