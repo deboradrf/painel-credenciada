@@ -261,25 +261,27 @@ function adicionarUnidade() {
   const options = Array.from(selectBase.options)
     .filter(opt => opt.value)
     .map(opt =>
-      `<option value="${opt.value}" data-nome="${opt.textContent.trim()}">
-       ${opt.textContent}
-     </option>`
+      `<option value="${opt.value}"
+          data-nome="${opt.dataset.nome}">
+          ${opt.textContent}
+        </option>`
     ).join("");
 
   container.insertAdjacentHTML("beforeend", `
-      <div class="form-group mt-2 unidade-extra">
-          <label>Unidade adicional ${contadorUnidades}</label>
-          <div class="input-wrapper">
-            <div class="input-icon">
-              <i class="fa-solid fa-building"></i>
-            </div>
-            <select class="form-control unidade-extra-select" required>
-              <option value="">Selecione a unidade</option>
-              ${options}
-            </select>
-          </div>
+    <div class="form-group mt-2 unidade-extra">
+      <div class="input-wrapper">
+        <div class="input-icon">
+          <i class="fa-solid fa-building"></i>
+        </div>
+        <select class="form-control unidade-extra-select" required>
+          <option value="" disabled selected>
+            Selecione a unidade adicional ${contadorUnidades}
+          </option>
+          ${options}
+        </select>
       </div>
-    `);
+    </div>
+  `);
 }
 
 // MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE FUNÇÃO E COLOCAR REQUIRED NOS CAMPOS
@@ -725,10 +727,12 @@ function definirStatusInicial(s) {
   return "PENDENTE";
 }
 
+// FUNÇÃO PARA ADICIONAR MAIS EMAIL PARA ENVIO DE ASO
 let contadorEmails = 0;
 const limiteEmails = 2;
 
 function ativarEmails(valor) {
+
   const inputHidden = document.getElementById("enviarMaisEmails");
   const container = document.getElementById("emailsContainer");
   const btnAdd = document.getElementById("btnAddEmail");
@@ -742,9 +746,11 @@ function ativarEmails(valor) {
     if (contadorEmails === 0) {
       adicionarEmail();
     }
+
   } else {
     container.classList.add("d-none");
     btnAdd.classList.add("d-none");
+
     container.innerHTML = "";
     contadorEmails = 0;
   }
@@ -788,28 +794,10 @@ async function enviarEmailSolicitacao(dados) {
     destinatario = "wasidrf@outlook.com"; // EMAIL NICOLLY, PAULINA E RUBIA
     assunto = "Solicitação de criação de função/setor";
 
-    let solicitacao = "";
-
-    if (dados.solicitar_nova_funcao) {
-      solicitacao += `Função: ${dados.nome_nova_funcao}\n`;
-    }
-
-    if (dados.solicitar_novo_setor) {
-      solicitacao += `Setor: ${dados.nome_novo_setor}\n`;
-    }
-
     mensagem = `
-      Prezados,
-
-      Gentileza seguir com a criação do(s) item(ns) abaixo:
-
-      ${solicitacao}
-
-      Empresa: ${dados.nome_empresa}
-      Unidade: ${dados.nome_unidade}
-
-      Atenciosamente,
-      Painel Salubritá
+      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Portal Salubritá.
+      
+      Gentileza dar prosseguimento à solicitação.
     `;
   }
 
@@ -819,17 +807,9 @@ async function enviarEmailSolicitacao(dados) {
     assunto = "Solicitação de credenciamento";
 
     mensagem = `
-      Prezados,
-
-      Gentileza seguir com o credenciamento solicitado.
-
-      Estado: ${dados.estado_credenciamento}
-      Cidade: ${dados.cidade_credenciamento}
-
-      Empresa: ${dados.nome_empresa}
-
-      Atenciosamente,
-      Painel Salubritá
+      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Portal Salubritá.
+      
+      Gentileza dar prosseguimento à solicitação.
     `;
   }
 

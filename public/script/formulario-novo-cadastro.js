@@ -157,19 +157,20 @@ function adicionarUnidade() {
     ).join("");
 
   container.insertAdjacentHTML("beforeend", `
-        <div class="form-group mt-2 unidade-extra">
-            <label>Unidade adicional ${contadorUnidades}</label>
-            <div class="input-wrapper">
-              <div class="input-icon">
-                <i class="fa-solid fa-building"></i>
-              </div>
-              <select class="form-control unidade-extra-select" required>
-                <option value="">Selecione a unidade</option>
-                ${options}
-              </select>
-            </div>
+    <div class="form-group mt-2 unidade-extra">
+      <div class="input-wrapper">
+        <div class="input-icon">
+          <i class="fa-solid fa-building"></i>
         </div>
-    `);
+        <select class="form-control unidade-extra-select" required>
+          <option value="" disabled selected>
+            Selecione a unidade adicional ${contadorUnidades}
+          </option>
+          ${options}
+        </select>
+      </div>
+    </div>
+  `);
 }
 
 // CARREGAR UNIDADES
@@ -859,10 +860,12 @@ racSelect.addEventListener("change", () => {
   }
 });
 
+// FUNÇÃO PARA ADICIONAR MAIS EMAIL PARA ENVIO DE ASO
 let contadorEmails = 0;
 const limiteEmails = 2;
 
 function ativarEmails(valor) {
+
   const inputHidden = document.getElementById("enviarMaisEmails");
   const container = document.getElementById("emailsContainer");
   const btnAdd = document.getElementById("btnAddEmail");
@@ -876,9 +879,11 @@ function ativarEmails(valor) {
     if (contadorEmails === 0) {
       adicionarEmail();
     }
+
   } else {
     container.classList.add("d-none");
     btnAdd.classList.add("d-none");
+
     container.innerHTML = "";
     contadorEmails = 0;
   }
@@ -962,15 +967,9 @@ async function enviarEmailSolicitacao(dados) {
     assunto = "Solicitação de criação de nova unidade";
 
     mensagem = `
-      Prezados,
-
-      Gentileza seguir com a criação de nova unidade solicitada no Painel Salubritá.
-
-      Nome fantasia: ${dados.nome_fantasia}
-      CNPJ: ${dados.cnpj}
-
-      Atenciosamente,
-      Débora
+      Uma solicitação para criação de unidade para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
+      
+      Gentileza dar prosseguimento à solicitação.
     `;
   }
 
@@ -979,27 +978,10 @@ async function enviarEmailSolicitacao(dados) {
     destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de criação de setor/cargo";
 
-    let solicitacao = "";
-
-    if (dados.solicitar_novo_setor) {
-      solicitacao += `Setor: ${dados.nome_novo_setor}\n`;
-    }
-
-    if (dados.solicitar_novo_cargo) {
-      solicitacao += `Cargo: ${dados.nome_novo_cargo}\n`;
-    }
-
     mensagem = `
-      Prezados,
-
-      Gentileza seguir com a criação do(s) item(ns) abaixo:
-
-      ${solicitacao}
-      Empresa: ${dados.nome_empresa}
-      Unidade: ${dados.nome_unidade}
-
-      Atenciosamente,
-      Débora
+      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Portal Salubritá.
+      
+      Gentileza dar prosseguimento à solicitação.
     `;
   }
 
@@ -1009,15 +991,9 @@ async function enviarEmailSolicitacao(dados) {
     assunto = "Solicitação de credenciamento";
 
     mensagem = `
-      Prezados,
-
-      Gentileza seguir com o credenciamento solicitado.
-
-      Estado: ${dados.estado_credenciamento}
-      Cidade: ${dados.cidade_credenciamento}
-
-      Atenciosamente,
-      Débora
+      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Portal Salubritá.
+      
+      Gentileza dar prosseguimento à solicitação.
     `;
   }
 

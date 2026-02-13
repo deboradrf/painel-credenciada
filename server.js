@@ -1287,6 +1287,24 @@ app.post("/solicitacoes/:tipo/:id/analisar", async (req, res) => {
       ]
     );
 
+    // ENVIAR E-MAIL PARA PESSOAS DA SOLICITAÇÃO QUANDO FOR REPROVADO
+    if (status === "REPROVADO") {
+      const resultado = await pool.query(
+        `
+        SELECT u.email
+        FROM ${tabela} s
+        JOIN usuarios u ON u.id = s.solicitado_por
+        WHERE s.id = $1
+        `,
+        [id]
+      );
+
+      if (resultado.rows.length > 0) {
+        const { email } = resultado.rows[0];
+        await enviarEmailReprovacao(email, motivo);
+      }
+    }
+
     res.json({ sucesso: true });
   } catch (err) {
     console.error(err);
@@ -1962,15 +1980,9 @@ async function enviarEmailSetorCargo(dados) {
     to: "wasidrf@outlook.com", // ENVIAR PAR NICOLLY, PAULINA E RUBIA
     subject: "Solicitação de criação de setor/cargo",
     text: `
-      Prezados,
-
-      Gentileza seguir com a criação de setor/cargo referente à solicitação abaixo:
-
-      Empresa: ${dados.nome_empresa}
-      Unidade: ${dados.nome_unidade}
-
-      Atenciosamente,
-      Débora
+      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Portal Salubritá.
+      
+      Gentileza dar prosseguimento à solicitação.
     `
   });
 }
@@ -1981,15 +1993,31 @@ async function enviarEmailCredenciamento(dados) {
     to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de credenciamento",
     text: `
-      Prezados,
+      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Portal Salubritá.
+      
+      Gentileza para dar prosseguimento à solicitação.
+    `
+  });
+}
 
-      Gentileza seguir com o credenciamento referente à solicitação abaixo:
+// FUNÇÃO PRA ENVIAR E-MAIL PRA PESSOA DA SOLICITAÇÃO QUANDO FOR REPROVADA
+async function enviarEmailReprovacao(email, motivo) {
+  await transporter.sendMail({
+    from: "Painel Salubritá <naoresponda@salubrita.com.br>",
+    to: email,
+    subject: "Sua solicitação foi reprovada",
+    text:
+    `
+      Sua solicitação foi REPROVADA pelo seguinte motivo:
 
-      Empresa: ${dados.nome_empresa}
-      Unidade: ${dados.nome_unidade}
+      "${motivo}"
+
+      Ela permanecerá pendente até que as correções necessárias sejam realizadas.
+
+      Por favor, acesse o Portal Salubritá para revisar e editar as informações.
 
       Atenciosamente,
-      Débora
+      Equipe Salubritá
     `
   });
 }

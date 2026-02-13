@@ -283,7 +283,7 @@ h5::after {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 16px;
+    gap: 25px;
 }
 
 .input-wrapper.unidade-wrapper,
@@ -345,11 +345,34 @@ h5::after {
     transform: translateY(-2px);
 }
 
-.label-nao-possui-matricula,
-.label-solicitar-credenciamento,
-.label-solicitar-unidade {
-    color: #F1AE33 !important;
-    font-weight: bold;
+.checkbox-modern {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 0;
+}
+
+.checkbox-modern .form-check-input {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    width: 17px;
+    height: 17px;
+    border: 1px solid #F1AE33;
+    border-radius: 5px;
+    background-color: #FFFFFF;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.checkbox-modern .form-check-label {
+    margin: 0;
+    line-height: 1.2;
+    cursor: pointer;
+    color: #F1AE33;
+    font-weight: 600;
 }
 
 .form-check-input:checked {
@@ -366,11 +389,6 @@ h5::after {
 .card-header {
     border: none;
     background-color: #F1F1F1;
-}
-
-.label-solicitar-setor,
-.label-solicitar-cargo {
-    color: #F1AE33 !important;
 }
 
 .form-group label {
@@ -465,6 +483,47 @@ h5::after {
     color: #9CA3AF;
 }
 
+.rac-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rac-checkbox-group .form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.rac-checkbox {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: #334155;
+}
+
+.rac-checkbox input {
+    accent-color: #F1AE33;
+}
+
+.rac-checkbox:hover {
+    border-color: #F1AE33;
+    background: #FFFFFF;
+    transform: translateY(-1px);
+}
+
+.rac-checkbox input:checked + * {
+    font-weight: 500;
+}
+
 .btn-wrapper {
     display: flex;
     justify-content: flex-end;
@@ -517,50 +576,8 @@ h5::after {
     width: calc(100% - 10px);
 }
 
-/* .action {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.btn-enviar {
-    background-color: #F1AE33;
-    border: 1px solid #E5E7EB;
-    border-radius: 10px;
-    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
-    color: #FFFFFF;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 28px;
-    padding: 0 10px 0 10px;
-    height: 40px;
-    transition: all 0.25s ease;
-}
-
-.btn-enviar:hover {
-    transform: translateY(-2px);
-} */
-
-.btn-sim, .btn-nao {
-    background-color: #FFFFFF;
-    border: 2px solid #8A94A6;
-    border-radius: 8px;
-    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
-    color: #000000;
-    cursor: pointer;
-    font-size: 13px;
-    line-height: 28px;
-    padding: 0 10px 0 10px;
-    width: 60px;
-    transition: all 0.25s ease;
-}
-
-.btn-sim:hover, .btn-nao:hover {
-    transform: translateY(-2px);
-}
-
-.btn-add-unidade {
+.btn-add-unidade,
+.btn-add-email {
     background-color: #53A5A6;
     border: 1px solid #53A5A6;
     border-radius: 8px;
@@ -574,7 +591,8 @@ h5::after {
     transition: all 0.25s ease;
 }
 
-.btn-add-unidade:hover {
+.btn-add-unidade:hover,
+.btn-add-email {
     transform: translateY(-2px);
 }
 

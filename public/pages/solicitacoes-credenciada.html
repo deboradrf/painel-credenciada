@@ -140,18 +140,29 @@
                 </div>
 
                 <div class="filter-actions">
-                    <div class="divBtn">
+                    <div class="grupo-filtros">
                         <button id="btnBuscar" class="btn-search">
                             <i class="fa-solid fa-magnifying-glass"></i>
-                            Buscar
+                            Filtrar
                         </button>
-                        <button id="btnLimpar" class="btn-clear">Limpar Filtros</button>
+
+                        <button id="btnLimpar" class="btn-clear">
+                            <i class="fa-solid fa-broom"></i>
+                            Limpar Filtros
+                        </button>
                     </div>
 
-                    <div class="divAtualizar">
+                    <div class="grupo-opcoes">
+                        <label class="check-container">
+                            <input type="checkbox" class="form-check-input" id="checkMostrarTudo">
+                            Mostrar solicitações concluídas
+                        </label>
+                    </div>
+
+                    <div class="grupo-atualizar">
                         <button id="btnAtualizar" class="btn-atualizar">
                             <i class="fa-solid fa-arrows-rotate fa-spin"></i>
-                            Atualizar Solicitações
+                            Atualizar
                         </button>
                     </div>
                 </div>
@@ -639,7 +650,7 @@
                         </button>
 
                         <button type="button" class="btn-salvar" id="btn-salvar" onclick="salvarEdicaoCadastro()">
-                            <i class="fa-solid fa-floppy-disk"></i>
+                            <i class="fa-solid fa-floppy-disk me-1"></i>
                             Salvar
                         </button>
 
@@ -974,7 +985,7 @@
                         </button>
 
                         <button type="button" class="btn-salvar" id="btn-salvar-exame" onclick="salvarEdicaoExame()">
-                            <i class="fa-solid fa-floppy-disk"></i>
+                            <i class="fa-solid fa-floppy-disk me-1"></i>
                             Salvar
                         </button>
 

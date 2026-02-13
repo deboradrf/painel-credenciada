@@ -81,7 +81,31 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // BOTAO PARA ATUALIZAR PAGINA
-document.getElementById("btnAtualizar").addEventListener("click", () => {location.reload();});
+document.getElementById("btnAtualizar").addEventListener("click", () => { location.reload(); });
+
+// BOTÃO PARA MOSTRAR AS SOLICITAÇÕES CONCLUÍDAS
+document.getElementById("checkMostrarTudo").addEventListener("change", function () {
+  mostrarConcluidos = this.checked;
+  aplicarFiltros();
+});
+
+let mostrarConcluidos = false;
+
+function deveExibir(s) {
+  if (mostrarConcluidos) {
+    return true;
+  }
+
+  if (s.tipo === "NOVO_EXAME" && s.status === "APROVADO") {
+    return false;
+  }
+
+  if (s.tipo === "NOVO_CADASTRO" && s.status === "ENVIADO_SOC") {
+    return false;
+  }
+
+  return true;
+}
 
 // FUNÇÃO PARA CARREGAR SOLICITAÇÕES E RENDERIZAR A TABELA
 async function carregarSolicitacoes() {
@@ -93,7 +117,7 @@ async function carregarSolicitacoes() {
     return new Date(a.solicitado_em) - new Date(b.solicitado_em);
   });
 
-  renderizarTabela(solicitacoes);
+  aplicarFiltros();
 }
 
 // FUNÇÃO PARA RENDERIZAR TABELA COM AS SOLICITAÇÕES
@@ -154,11 +178,11 @@ function renderizarTabela(lista) {
             </button>
           ` : ""}
 
-          ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO"].includes(s.status)
-        ? `
-              <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
-                Cancelar
-              </button>
+          ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
+          ? `
+            <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
+              Cancelar
+            </button>
             ` : ""
       }
         </div>
@@ -209,8 +233,9 @@ function aplicarFiltros() {
     const matchEmpresa = !empresa || (s.nome_empresa && s.nome_empresa.toLowerCase().includes(empresa));
     const matchCPF = !cpf || s.cpf.includes(cpf);
     const matchStatus = !status || s.status === status;
+    const matchVisibilidade = deveExibir(s);
 
-    return matchTipo && matchEmpresa && matchCPF && matchStatus;
+    return matchTipo && matchEmpresa && matchCPF && matchStatus && matchVisibilidade;
   });
 
   renderizarTabela(filtradas);
@@ -702,11 +727,11 @@ function preencherModal(s, tipo) {
     const blocoMotivoReprovacao = document.getElementById('divCadMotivoReprovacao');
 
     if (s.status === 'APROVADO' || s.status === "ENVIADO_SOC") {
-        btnReprovar.style.display = 'none';
-        blocoMotivoReprovacao.style.display = 'none';
+      btnReprovar.style.display = 'none';
+      blocoMotivoReprovacao.style.display = 'none';
     } else {
-        btnReprovar.style.display = 'inline-block';
-        blocoMotivoReprovacao.style.display = 'inline-block';
+      btnReprovar.style.display = 'inline-block';
+      blocoMotivoReprovacao.style.display = 'inline-block';
     }
 
     // MOSTRAR / ESCONDER BLOCO DE NOVA UNIDADE
@@ -971,11 +996,11 @@ function preencherModal(s, tipo) {
     const blocoMotivoReprovacao = document.getElementById('divExameMotivoReprovacao');
 
     if (s.status === 'APROVADO') {
-        btnReprovar.style.display = 'none';
-        blocoMotivoReprovacao.style.display = 'none';
+      btnReprovar.style.display = 'none';
+      blocoMotivoReprovacao.style.display = 'none';
     } else {
-        btnReprovar.style.display = 'inline-block';
-        blocoMotivoReprovacao.style.display = 'inline-block';
+      btnReprovar.style.display = 'inline-block';
+      blocoMotivoReprovacao.style.display = 'inline-block';
     }
 
     // TRANSFORMAR O CAMPO DE SETOR ATUAL EM SELECT CASO PRECISE CRIAR UM NOVO PARA SER SELECIONADO APÓS CRIADO 
@@ -1355,8 +1380,7 @@ async function analisarSolicitacao(status) {
     return;
   }
 
-  const res = await fetch(
-    `/solicitacoes/${tipo}/${solicitacaoAtualId}/analisar`,
+  const res = await fetch(`/solicitacoes/${tipo}/${solicitacaoAtualId}/analisar`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

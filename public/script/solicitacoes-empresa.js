@@ -137,12 +137,41 @@ function renderizarTabela(lista) {
     // AÇÕES
     let acoes = "Nenhuma ação a ser feita";
 
-    if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO") {
-      acoes = `
-        <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
-          Cancelar
-        </button>
-      `;
+    if (
+      s.status === "PENDENTE_UNIDADE" ||
+      s.status === "PENDENTE_SC" ||
+      s.status === "PENDENTE_CREDENCIAMENTO" ||
+      s.status === "PENDENTE"
+    ) {
+      if (s.tipo === "NOVO_EXAME") {
+        acoes = `
+          <button onclick="cancelarSolicitacao(
+            ${s.solicitacao_id},
+            '${s.tipo}',
+            ${usuarioLogado.id},
+            '${s.status}',
+            false,       // solicitarNovaUnidade
+            ${s.solicitar_novo_setor},
+            false,       // solicitarNovoCargo
+            ${s.solicitar_nova_funcao}, // solicitarNovaFuncao
+            ${s.solicitar_credenciamento} // solicitarCredenciamento
+          )">Cancelar</button>
+        `;
+      } else {
+        acoes = `
+          <button onclick="cancelarSolicitacao(
+            ${s.solicitacao_id},
+            '${s.tipo}',
+            ${usuarioLogado.id},
+            '${s.status}',
+            ${s.solicitar_nova_unidade}, // solicitarNovaUnidade
+            ${s.solicitar_novo_setor},   // solicitarNovoSetor
+            ${s.solicitar_novo_cargo},   // solicitarNovoCargo
+            false,                        // solicitarNovaFuncao
+            ${s.solicitar_credenciamento} // solicitarCredenciamento
+          )">Cancelar</button>
+        `;
+      }
     }
 
     if (s.status === "REPROVADO") {
@@ -180,15 +209,41 @@ function renderizarTabela(lista) {
 }
 
 // FUNÇÃO PARA CANCELAR SOLICITAÇÃO PENDENTE
-async function cancelarSolicitacao(id, tipo, usuarioLogadoId) {
+async function cancelarSolicitacao(
+  id,
+  tipo,
+  usuarioLogadoId,
+  status,
+  solicitarNovaUnidade,
+  solicitarNovoSetor,
+  solicitarNovoCargo,
+  solicitarNovaFuncao,
+  solicitarCredenciamento
+) {
   const confirmar = confirm("Tem certeza que deseja cancelar esta solicitação?");
   if (!confirmar) return;
+
+  // Status que sempre mostram aviso
+  const statusComAviso = ["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO"];
+
+  // Flags de aviso por tipo
+  let flagEspecial = false;
+
+  if (tipo === "NOVO_EXAME") {
+    flagEspecial = solicitarNovaFuncao || solicitarNovoSetor || solicitarCredenciamento;
+  } else {
+    flagEspecial = solicitarNovaUnidade || solicitarNovoSetor || solicitarNovoCargo || solicitarCredenciamento;
+  }
+
+  // Determina se deve mostrar aviso
+  const precisaAviso =
+    statusComAviso.includes(status) || (status === "PENDENTE" && flagEspecial);
 
   try {
     const response = await fetch(`/solicitacoes/${tipo}/${id}/cancelar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ usuarioLogado: usuarioLogadoId })
+      body: JSON.stringify({ usuario_id: usuarioLogadoId })
     });
 
     if (!response.ok) throw new Error("Erro na comunicação com o servidor");
@@ -196,7 +251,12 @@ async function cancelarSolicitacao(id, tipo, usuarioLogadoId) {
     const data = await response.json();
 
     if (data.sucesso) {
-      alert("Solicitação cancelada com sucesso!");
+      if (precisaAviso) {
+        alert("Para esta solicitação, o cancelamento deve ser formalizado por e-mail.");
+      } else {
+        alert("Solicitação cancelada com sucesso!");
+      }
+
       carregarSolicitacoes();
     } else {
       alert(data.erro || "Não foi possível cancelar a solicitação.");
@@ -415,7 +475,7 @@ function preencherModalEditarCadastro(s) {
   document.getElementById("editCadNumero").value = s.numero;
   document.getElementById("editCadBairro").value = s.bairro;
   document.getElementById("editCadEstado").value = s.estado;
-  
+
   if (tipoFaturamento === "JUNTO") {
     document.getElementById("faturamento_junto").checked = true;
   } else if (tipoFaturamento === "SEPARADO") {
@@ -429,7 +489,7 @@ function preencherModalEditarCadastro(s) {
   document.getElementById("editCadNovoCargo").value = s.nome_novo_cargo;
   document.getElementById("editCadDescricaoAtividade").value = s.descricao_atividade;
   document.getElementById("editCadRac").value = s.rac,
-  document.getElementById("editCadTiposRac").value = s.tipos_rac;
+    document.getElementById("editCadTiposRac").value = s.tipos_rac;
   document.getElementById("editCadTipoExame").value = s.tipo_exame;
   document.getElementById("editCadDataExame").value = formatarDataParaInput(s.data_exame);
   document.getElementById("editCadMaisUnidades").innerText = s.mais_unidades;

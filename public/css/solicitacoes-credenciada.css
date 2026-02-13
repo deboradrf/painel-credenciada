@@ -294,18 +294,54 @@ h3::after {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 5px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.grupo-filtros {
+    display: flex;
     gap: 10px;
 }
 
-.divBtn {
+.grupo-opcoes {
     display: flex;
-    gap: 10px;
     align-items: center;
 }
 
-.divAtualizar {
+.grupo-atualizar {
+    display: flex;
+}
+
+.label-junto,
+.label-separado {
+    color: #F1AE33 !important;
+    font-weight: bold;
+}
+
+.form-check-input:checked {
+    background-color: #F1AE33 !important;
+    border-color: #F1AE33 !important;
+}
+
+.form-check-input:focus {
+    outline: none;
+    box-shadow: none !important;
+    border-color: #F1AE33;
+}
+
+.check-container {
     display: flex;
     align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.check-container .form-check-input {
+    margin: 0;
+    position: relative;
+    top: 0;
 }
 
 .btn-search {
@@ -317,7 +353,7 @@ h3::after {
     font-size: 14px;
     padding: 0 10px 0 10px;
     width: 100px;
-    height: 35px;
+    height: 30px;
     transition: all 0.25s ease;
 }
 
@@ -333,8 +369,8 @@ h3::after {
     cursor: pointer;
     font-size: 13px;
     padding: 0 10px 0 10px;
-    width: 120px;
-    height: 35px;
+    width: 140px;
+    height: 30px;
 }
 
 .btn-atualizar {
@@ -345,8 +381,8 @@ h3::after {
     cursor: pointer;
     font-size: 13px;
     padding: 0 10px 0 10px;
-    width: 180px;
-    height: 35px;
+    width: 140px;
+    height: 30px;
 }
 
 .table-wrapper {

@@ -102,23 +102,25 @@
                         <h5 class="my-2">Dados do Funcionário</h5>
                     </div>
                     <div class="card-body">
-                        <div class="form-group">
-                            <label>Nome Completo <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-user"></i>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nome Completo <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <input type="text" id="nome" placeholder="Ex: João Fernandes Silva" required>
                                 </div>
-                                <input type="text" id="nome" placeholder="Ex: João Fernandes Silva" required>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Data de Nascimento <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-calendar"></i>
+    
+                            <div class="form-group">
+                                <label>Data de Nascimento <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-calendar"></i>
+                                    </div>
+                                    <input type="date" id="data_nascimento">
                                 </div>
-                                <input type="date" id="data_nascimento">
                             </div>
                         </div>
 
@@ -187,9 +189,10 @@
                                 </div>
                                 <input type="text" id="matricula" required>
                             </div>
-                            <div class="form-check mt-3">
+
+                            <div class="form-check checkbox-modern mt-3">
                                 <input class="form-check-input" type="checkbox" id="naoPossuiMatricula">
-                                <label class="form-check-label label-nao-possui-matricula" for="naoPossuiMatricula">
+                                <label class="form-check-label">
                                     FUNCIONÁRIO NÃO POSSUI MATRÍCULA
                                 </label>
                             </div>
@@ -277,10 +280,9 @@
                                         </select>
                                     </div>
 
-                                    <div class="form-check">
+                                    <div class="form-check checkbox-modern">
                                         <input class="form-check-input" type="checkbox" id="solicitarNovaUnidade">
-                                        <label class="form-check-label label-solicitar-unidade"
-                                            for="solicitarNovaUnidade">
+                                        <label class="form-check-label">
                                             SOLICITAR CRIAÇÃO DE NOVA UNIDADE
                                         </label>
                                     </div>
@@ -437,9 +439,9 @@
                                         </select>
                                     </div>
 
-                                    <div class="form-check">
+                                    <div class="form-check checkbox-modern">
                                         <input class="form-check-input" type="checkbox" id="solicitarNovoSetor">
-                                        <label class="form-check-label label-solicitar-setor" for="solicitarNovoSetor">
+                                        <label class="form-check-label">
                                             SOLICITAR CRIAÇÃO DE NOVO SETOR
                                         </label>
                                     </div>
@@ -472,9 +474,9 @@
                                         </select>
                                     </div>
 
-                                    <div class="form-check">
+                                    <div class="form-check checkbox-modern">
                                         <input class="form-check-input" type="checkbox" id="solicitarNovoCargo">
-                                        <label class="form-check-label label-solicitar-cargo" for="solicitarNovoCargo">
+                                        <label class="form-check-label">
                                             SOLICITAR CRIAÇÃO DE NOVO CARGO
                                         </label>
                                     </div>
@@ -539,38 +541,42 @@
                             <label>Tipo de RAC <span class="required">*</span></label>
 
                             <div class="rac-checkbox-group">
-                                <label class="rac-checkbox">
-                                    <input type="checkbox" name="racValeOpcao" value="RAC_1">
-                                    RAC 1 - Trabalhos em Altura
-                                </label>
+                                <div class="form-row">
+                                    <label class="rac-checkbox">
+                                        <input type="checkbox" name="racValeOpcao" class="form-check-input me-1" value="RAC_1">
+                                        RAC 1 - Trabalhos em Altura
+                                    </label>
+    
+                                    <label class="rac-checkbox">
+                                        <input type="checkbox" name="racValeOpcao" class="form-check-input me-1" value="RAC_2">
+                                        RAC 2 - Veículos Automotores
+                                    </label>
+    
+                                    <label class="rac-checkbox">
+                                        <input type="checkbox" name="racValeOpcao" class="form-check-input me-1" value="RAC_3">
+                                        RAC 3 - Equipamentos Móveis
+                                    </label>
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="rac-checkbox">
+                                        <input type="checkbox" name="racValeOpcao" class="form-check-input me-1" value="RAC_5">
+                                        RAC 5 - Içamento de Cargas
+                                    </label>
+    
+                                    <label class="rac-checkbox">
+                                        <input type="checkbox" name="racValeOpcao" class="form-check-input me-1" value="RAC_6">
+                                        RAC 6 - Espaço Confinado
+                                    </label>
+    
+                                    <label class="rac-checkbox">
+                                        <input type="checkbox" name="racValeOpcao" class="form-check-input me-1" value="RAC_10">
+                                        RAC 10 - Trabalhos em Eletricidade
+                                    </label>
+                                </div>
 
                                 <label class="rac-checkbox">
-                                    <input type="checkbox" name="racValeOpcao" value="RAC_2">
-                                    RAC 2 - Veículos Automotores
-                                </label>
-
-                                <label class="rac-checkbox">
-                                    <input type="checkbox" name="racValeOpcao" value="RAC_3">
-                                    RAC 3 - Equipamentos Móveis
-                                </label>
-
-                                <label class="rac-checkbox">
-                                    <input type="checkbox" name="racValeOpcao" value="RAC_5">
-                                    RAC 5 - Içamento de Cargas
-                                </label>
-
-                                <label class="rac-checkbox">
-                                    <input type="checkbox" name="racValeOpcao" value="RAC_6">
-                                    RAC 6 - Espaço Confinado
-                                </label>
-
-                                <label class="rac-checkbox">
-                                    <input type="checkbox" name="racValeOpcao" value="RAC_10">
-                                    RAC 10 - Trabalhos em Eletricidade
-                                </label>
-
-                                <label class="rac-checkbox">
-                                    <input type="checkbox" name="racValeOpcao" value="RAC_11">
+                                    <input type="checkbox" name="racValeOpcao" class="form-check-input me-1" value="RAC_11">
                                     RAC 11 - Metal Líquido
                                 </label>
                             </div>
@@ -608,15 +614,29 @@
                         </div>
 
                         <div class="form-group mt-2">
-                            <label>Deseja solicitar mais de um ASO para outras unidades?</label>
-
                             <input type="hidden" id="solicitarMaisUnidades" name="solicitar_mais_unidades"
                                 value="false">
 
-                            <div class="d-flex gap-2 mt-2">
-                                <button type="button" class="btn-sim" onclick="ativarUnidades(true)">
-                                    Sim
-                                </button>
+                            <div class="d-flex align-items-center mt-2">
+                                <label class="fw-semibold mb-0 me-4">
+                                    Deseja solicitar mais de um ASO para outras unidades?
+                                </label>
+
+                                <div class="form-check checkbox-modern m-0">
+                                    <input class="form-check-input" type="radio" name="maisUnidades"
+                                        id="radioUnidadeSim" value="true" onchange="ativarUnidades(true)">
+                                    <label class="form-check-label mb-0" for="radioUnidadeSim">
+                                        SIM
+                                    </label>
+                                </div>
+
+                                <div class="form-check checkbox-modern m-0 ms-3">
+                                    <input class="form-check-input" type="radio" name="maisUnidades"
+                                        id="radioUnidadeNao" value="false" onchange="ativarUnidades(false)">
+                                    <label class="form-check-label mb-0" for="radioUnidadeNao">
+                                        NÃO
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -718,10 +738,10 @@
                                         para solicitar um novo credenciamento:</p>
                                 </div>
                             </div>
-                            <div class="form-check mt-2">
+
+                            <div class="form-check checkbox-modern mt-3">
                                 <input class="form-check-input" type="checkbox" id="solicitarCredenciamento">
-                                <label class="form-check-label label-solicitar-credenciamento"
-                                    for="solicitarCredenciamento">
+                                <label class="form-check-label">
                                     SOLICITAR CREDENCIAMENTO
                                 </label>
                             </div>
@@ -776,21 +796,35 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <div class="form-group">
-                            <label>O ASO será enviado para seu e-mail. Deseja enviar para mais algum?</label>
-
                             <input type="hidden" id="enviarMaisEmails" name="enviar_mais_emails" value="false">
 
-                            <div class="d-flex gap-2 mt-2">
-                                <button type="button" class="btn-sim" onclick="ativarEmails(true)">
-                                    Sim
-                                </button>
+                            <div class="d-flex align-items-center mt-3">
+                                <label class="fw-semibold mb-0 me-4">
+                                    Deseja enviar o ASO para outro e-mail além do seu?
+                                </label>
+
+                                <div class="form-check checkbox-modern m-0">
+                                    <input class="form-check-input" type="radio" name="enviarEmails" id="radioSim"
+                                        value="true" onchange="ativarEmails(true)">
+                                    <label class="form-check-label mb-0" for="radioSim">
+                                        SIM
+                                    </label>
+                                </div>
+
+                                <div class="form-check checkbox-modern m-0 ms-3">
+                                    <input class="form-check-input" type="radio" name="enviarEmails" id="radioNao"
+                                        value="false" onchange="ativarEmails(false)">
+                                    <label class="form-check-label mb-0" for="radioNao">
+                                        NÃO
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
                         <div id="emailsContainer" class="d-none mt-3"></div>
 
                         <div id="btnAddEmail" class="d-none mt-2">
-                            <button type="button" class="btn-add-unidade" onclick="adicionarEmail()">
+                            <button type="button" class="btn-add-email" onclick="adicionarEmail()">
                                 <i class="fa-solid fa-plus"></i> Adicionar outro e-mail
                             </button>
                         </div>
