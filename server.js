@@ -416,14 +416,14 @@ app.get("/prestador/:empresa/:codigoPrestador", async (req, res) => {
 // ROTA DE CADASTRO DE USUÁRIO
 app.post("/cadastro", async (req, res) => {
   try {
-    const { nome, cpf, email, senha, perfil, cod_empresa, nome_empresa, cod_unidade, nome_unidade } = req.body;
+    const { nome, cpf, email, senha, perfil, cod_empresa, nome_empresa } = req.body;
 
     await pool.query(
       ` INSERT INTO usuarios
-        (nome, cpf, email, senha, perfil, cod_empresa, nome_empresa, cod_unidade, nome_unidade)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+        (nome, cpf, email, senha, perfil, cod_empresa, nome_empresa)
+        VALUES ($1,$2,$3,$4,$5,$6,$7)
       `,
-      [nome, cpf, email, senha, perfil, cod_empresa, nome_empresa, cod_unidade, nome_unidade]
+      [nome, cpf, email, senha, perfil, cod_empresa, nome_empresa]
     );
 
     res.json({ sucesso: true });
@@ -460,9 +460,7 @@ app.post("/login", async (req, res) => {
         email,
         perfil,
         cod_empresa,
-        nome_empresa,
-        cod_unidade,
-        nome_unidade
+        nome_empresa
       FROM usuarios
       WHERE email = $1
         AND senha = $2
@@ -2001,7 +1999,7 @@ app.get("/usuarios/:id", async (req, res) => {
     const { id } = req.params;
 
     const { rows } = await pool.query(
-      `SELECT id, nome, cpf, email, senha, perfil, cod_empresa, nome_empresa, cod_unidade, nome_unidade
+      `SELECT id, nome, cpf, email, senha, perfil, cod_empresa, nome_empresa
        FROM usuarios
        WHERE id = $1`,
       [id]
@@ -2094,7 +2092,7 @@ async function enviarEmailSetorCargo(dados) {
     to: "wasidrf@outlook.com", // ENVIAR PAR NICOLLY, PAULINA E RUBIA
     subject: "Solicitação de criação de setor/cargo",
     text: `
-      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Portal Salubritá.
+      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `
@@ -2107,7 +2105,7 @@ async function enviarEmailCredenciamento(dados) {
     to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de credenciamento",
     text: `
-      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Portal Salubritá.
+      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
       Gentileza para dar prosseguimento à solicitação.
     `

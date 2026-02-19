@@ -35,10 +35,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // NOME
   userNameDropdown.innerText = usuarioLogado.nome?.trim() || "";
 
-  // EMPRESA E UNIDADE
+  // EMPRESA
   dropdownUserExtra.innerHTML = `
     <div class="company-name">${usuarioLogado.nome_empresa}</div>
-    <div class="unit-name">${usuarioLogado.nome_unidade}</div>
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO

@@ -84,6 +84,10 @@ async function carregarEmpresas(perfil) {
             );
         }
 
+        empresas.sort((a, b) =>
+            a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+        );
+
         select.innerHTML = '<option value="">Selecione...</option>';
 
         if (empresas.length === 0) {
@@ -107,49 +111,49 @@ async function carregarEmpresas(perfil) {
     }
 }
 
-document.getElementById("empresa").addEventListener("change", function () {
-    const empresaCodigo = this.value;
-    carregarUnidades(empresaCodigo);
-});
+// document.getElementById("empresa").addEventListener("change", function () {
+//     const empresaCodigo = this.value;
+//     carregarUnidades(empresaCodigo);
+// });
 
-// FUNÇÃO PARA CARREGAR UNIDADES DA EMPRESA SELECIONADA
-async function carregarUnidades(empresaCodigo) {
-    const select = document.getElementById("unidade");
-    if (!select) return;
+// // FUNÇÃO PARA CARREGAR UNIDADES DA EMPRESA SELECIONADA
+// async function carregarUnidades(empresaCodigo) {
+//     const select = document.getElementById("unidade");
+//     if (!select) return;
 
-    if (!empresaCodigo) {
-        select.disabled = true;
-        return;
-    }
+//     if (!empresaCodigo) {
+//         select.disabled = true;
+//         return;
+//     }
 
-    select.disabled = true;
+//     select.disabled = true;
 
-    try {
-        const res = await fetch(`/unidades/${empresaCodigo}`);
-        const unidades = await res.json();
+//     try {
+//         const res = await fetch(`/unidades/${empresaCodigo}`);
+//         const unidades = await res.json();
 
-        if (!unidades || unidades.length === 0) {
-            select.innerHTML = '<option value="">Nenhuma unidade nesta empresa</option>';
-            select.disabled = true;
-            return;
-        }
+//         if (!unidades || unidades.length === 0) {
+//             select.innerHTML = '<option value="">Nenhuma unidade nesta empresa</option>';
+//             select.disabled = true;
+//             return;
+//         }
 
-        select.innerHTML = '<option value="">Selecione...</option>';
+//         select.innerHTML = '<option value="">Selecione...</option>';
 
-        unidades.forEach(u => {
-            const opt = document.createElement("option");
-            opt.value = u.codigo;
-            opt.textContent = u.nome;
-            opt.dataset.nome = u.nome;
-            select.appendChild(opt);
-        });
+//         unidades.forEach(u => {
+//             const opt = document.createElement("option");
+//             opt.value = u.codigo;
+//             opt.textContent = u.nome;
+//             opt.dataset.nome = u.nome;
+//             select.appendChild(opt);
+//         });
 
-        select.disabled = false;
-    } catch (err) {
-        console.error("Erro ao carregar unidades:", err);
-        select.innerHTML = '<option value="">Erro ao carregar</option>';
-    }
-}
+//         select.disabled = false;
+//     } catch (err) {
+//         console.error("Erro ao carregar unidades:", err);
+//         select.innerHTML = '<option value="">Erro ao carregar</option>';
+//     }
+// }
 
 // CAMPO DE NOME SEMPRE MAIÚSCULO E SEM CARACTERES ESPECIAIS
 const nomeInput = document.getElementById("nome");
@@ -174,8 +178,7 @@ document.getElementById("cadastroForm").addEventListener("submit", async e => {
     e.preventDefault();
 
     const empresaNome = empresa.options[empresa.selectedIndex]?.text || null;
-
-    const unidadeNome = unidade.options[unidade.selectedIndex]?.text || null;
+    // const unidadeNome = unidade.options[unidade.selectedIndex]?.text || null;
 
     const body = {
         nome: nome.value,
@@ -185,8 +188,8 @@ document.getElementById("cadastroForm").addEventListener("submit", async e => {
         perfil: perfil.value,
         cod_empresa: empresa.value,
         nome_empresa: empresaNome,
-        cod_unidade: unidade.value,
-        nome_unidade: unidadeNome
+        // cod_unidade: unidade.value,
+        // nome_unidade: unidadeNome
     };
 
     const res = await fetch(`/cadastro`, {

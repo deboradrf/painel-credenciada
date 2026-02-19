@@ -30,10 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // NOME
   userNameDropdown.innerText = usuarioLogado.nome?.trim() || "";
 
-  // EMPRESA E UNIDADE
+  // EMPRESA
   dropdownUserExtra.innerHTML = `
     <div class="company-name">${usuarioLogado.nome_empresa}</div>
-    <div class="unit-name">${usuarioLogado.nome_unidade}</div>
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO
@@ -1002,7 +1001,7 @@ async function enviarEmailSolicitacao(dados) {
     assunto = "Solicitação de criação de setor/cargo";
 
     mensagem = `
-      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Portal Salubritá.
+      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `;
@@ -1014,7 +1013,7 @@ async function enviarEmailSolicitacao(dados) {
     assunto = "Solicitação de credenciamento";
 
     mensagem = `
-      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Portal Salubritá.
+      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `;

@@ -21,11 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // NOME
     userNameDropdown.innerText = usuarioLogado.nome?.trim() || "";
 
-    // EMPRESA E UNIDADE
+    // EMPRESA
     dropdownUserExtra.innerHTML = `
-    <div class="company-name">${usuarioLogado.nome_empresa}</div>
-    <div class="unit-name">${usuarioLogado.nome_unidade}</div>
-  `;
+        <div class="company-name">${usuarioLogado.nome_empresa}</div>
+    `;
 
     // LÓGICA DOS PERFIS DE ACESSO
     if (usuarioLogado.perfil === "CREDENCIADA") {
@@ -80,10 +79,10 @@ function preencherTela(user) {
     document.getElementById("perfilNome").innerText = user.nome;
 
     if (user.perfil === "EMPRESA") {
-        document.getElementById("perfilTipo").innerText = "Empresa";
+        document.getElementById("perfilTipo").innerText = "Perfil Empresa";
     }
     if (user.perfil === "CREDENCIADA") {
-        document.getElementById("perfilTipo").innerText = "Credenciada";
+        document.getElementById("perfilTipo").innerText = "Perfil Credenciada";
     }
 
     document.getElementById("cpf").value = user.cpf;
@@ -200,7 +199,7 @@ function toggleSenha() {
 
 // FUNÇÃO DE LOGOUT
 function logout() {
-  localStorage.removeItem("usuario");
-  localStorage.removeItem("empresaCodigo");
-  window.location.href = "login.html";
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("empresaCodigo");
+    window.location.href = "login.html";
 }
