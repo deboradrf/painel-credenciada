@@ -26,9 +26,9 @@ app.get("/api/status", (req, res) => {
 });
 
 // SOC – SOAP
-const WSDL_URL = "https://ws1.soc.com.br/WSSoc/FuncionarioModelo2Ws?wsdl";
-const SOC_USUARIO = "U3403088";
-const SOC_TOKEN = "3e3c74848066fe9b39690a37c372a61816696e18";
+const SOC_EXPORTA_FUNCIONARIOMODELO2 = "https://ws1.soc.com.br/WSSoc/FuncionarioModelo2Ws?wsdl";
+const SOC_USUARIO = process.env.SOC_USUARIO;
+const SOC_TOKEN = process.env.SOC_TOKEN;
 
 // SOC – EXPORTA DADOS
 const SOC_EXPORTA_URL = "https://ws1.soc.com.br/WebSoc/exportadados";
@@ -638,6 +638,7 @@ app.get("/solicitacoes/novo-cadastro/:id", async (req, res) => {
         f.*,
         sf.status,
         sf.motivo_reprovacao,
+        sf.observacao_consulta,
         sf.solicitado_em,
         u.nome AS solicitado_por_nome,
         u.email AS solicitado_por_email,
@@ -769,15 +770,15 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
 
     const check = await client.query(
       `
-      SELECT
-        s.status,
-        nc.solicitar_novo_setor,
-        nc.solicitar_novo_cargo,
-        nc.solicitar_credenciamento
-      FROM solicitacoes_novo_cadastro s
-      JOIN novo_cadastro nc ON nc.id = s.novo_cadastro_id
-      WHERE s.id = $1
-    `, [id]);
+        SELECT
+          s.status,
+          nc.solicitar_novo_setor,
+          nc.solicitar_novo_cargo,
+          nc.solicitar_credenciamento
+        FROM solicitacoes_novo_cadastro s
+        JOIN novo_cadastro nc ON nc.id = s.novo_cadastro_id
+        WHERE s.id = $1
+      `, [id]);
 
     if (!check.rows.length) {
       return res.status(404).json({ erro: "Solicitação não encontrada" });
@@ -1077,6 +1078,7 @@ app.get("/solicitacoes/novo-exame/:id", async (req, res) => {
         f.*,
         sf.status,
         sf.motivo_reprovacao,
+        sf.observacao_consulta,
         sf.solicitado_em,
         u.nome AS solicitado_por_nome,
         u.email AS solicitado_por_email,
@@ -1311,6 +1313,11 @@ app.get("/solicitacoes", async (req, res) => {
         SELECT
           s.id AS solicitacao_id,
           f.id AS novo_cadastro_id,
+          CASE
+            WHEN f.solicitar_credenciamento = true
+              THEN f.cidade_credenciamento
+            ELSE f.cidade_clinica
+          END AS cidade,
           f.nome_empresa,
           f.nome_funcionario,
           f.cpf,
@@ -1328,6 +1335,11 @@ app.get("/solicitacoes", async (req, res) => {
         SELECT
           s.id AS solicitacao_id,
           f.id AS novo_exame_id,
+          CASE
+            WHEN f.solicitar_credenciamento = true
+              THEN f.cidade_credenciamento
+            ELSE f.cidade_clinica
+          END AS cidade,
           f.nome_empresa,
           f.nome_funcionario,
           f.cpf,
@@ -1353,7 +1365,7 @@ app.get("/solicitacoes", async (req, res) => {
 // APROVAR / REPROVAR SOLICITAÇÃO
 app.post("/solicitacoes/:tipo/:id/analisar", async (req, res) => {
   const { tipo, id } = req.params;
-  const { status, motivo, usuario_id } = req.body;
+  const { status, motivo, usuario_id, observacao_consulta } = req.body;
 
   if (!["APROVADO", "REPROVADO"].includes(status)) {
     return res.status(400).json({ erro: "Status inválido" });
@@ -1378,18 +1390,20 @@ app.post("/solicitacoes/:tipo/:id/analisar", async (req, res) => {
         status = $1,
         motivo_reprovacao = $2,
         analisado_por = $3,
-        analisado_em = NOW()
-      WHERE id = $4
+        analisado_em = NOW(),
+        observacao_consulta = $4
+      WHERE id = $5
       `,
       [
         status,
         status === "REPROVADO" ? motivo : null,
         usuario_id,
+        observacao_consulta || null,
         id
       ]
     );
 
-    // ENVIAR E-MAIL PARA PESSOAS DA SOLICITAÇÃO QUANDO FOR REPROVADO
+    // ENVIAR E-MAIL PARA PESSOA DA SOLICITAÇÃO QUANDO FOR REPROVADO
     if (status === "REPROVADO") {
       const resultado = await pool.query(
         `
@@ -1407,6 +1421,38 @@ app.post("/solicitacoes/:tipo/:id/analisar", async (req, res) => {
       }
     }
 
+    // ENVIAR E-MAIL PARA PESSOAS DA SOLICITAÇÃO QUANDO FOR ARPROVADO E TIVER O CAMPO
+    // DE OBSERVAÇÃO DA CONSULTA
+    if (status === "APROVADO" && observacao_consulta && observacao_consulta.trim()) {
+      const { rows } = await pool.query(
+        `
+    SELECT 
+      u.email,
+      f.nome_funcionario
+    FROM ${tabela} s
+    JOIN usuarios u ON u.id = s.solicitado_por
+    JOIN ${tipo === "NOVO_EXAME" ? "novo_exame" : "novo_cadastro"
+        } f ON f.id = ${tipo === "NOVO_EXAME" ? "s.novo_exame_id" : "s.novo_cadastro_id"
+        }
+    WHERE s.id = $1
+    `,
+        [id]
+      );
+
+      if (rows.length) {
+        const { email, nome_funcionario } = rows[0];
+
+        try {
+          await enviarEmailObservacaoConsulta({
+            email,
+            nomeFuncionario: nome_funcionario,
+            observacao: observacao_consulta
+          });
+        } catch (e) {
+          console.error("Erro ao enviar email de observação:", e.message);
+        }
+      }
+    }
     res.json({ sucesso: true });
   } catch (err) {
     console.error(err);
@@ -1799,7 +1845,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
 
     const cpf = f.cpf.replace(/\D/g, "");
 
-    const client = await soap.createClientAsync(WSDL_URL);
+    const client = await soap.createClientAsync(SOC_EXPORTA_FUNCIONARIOMODELO2);
 
     const wsSecurity = new soap.WSSecurity(
       SOC_USUARIO,
@@ -2130,6 +2176,24 @@ async function enviarEmailReprovacao(email, motivo) {
 
       Atenciosamente,
       Equipe Salubritá
+    `
+  });
+}
+
+// FUNÇÃO PRA ENVIAR E-MAIL PRA PESSOA DA SOLICITAÇÃO QUANDO FOR APROVADO E TIVER OBSERVAÇÃO
+// SOBRE A CONSULTA
+async function enviarEmailObservacaoConsulta({ email, nomeFuncionario, observacao }) {
+  await transporter.sendMail({
+    to: email,
+    subject: "Consulta médica",
+    html: `
+      <p>A solicitação referente ao colaborador <strong>${nomeFuncionario}</strong> foi aprovada.</p>
+
+      <p><strong>Observação da consulta:</strong></p>
+
+      <div style="background:#f4f4f4;padding:10px;border-left:4px solid #2fa4a9">
+        ${observacao.replace(/\n/g, "<br>")}
+      </div>
     `
   });
 }

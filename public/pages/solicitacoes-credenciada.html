@@ -177,6 +177,7 @@
                             <th>EMPRESA</th>
                             <th>FUNCIONÁRIO</th>
                             <th>CPF</th>
+                            <th>CIDADE</th>
                             <th>STATUS</th>
                             <th>AÇÕES</th>
                         </tr>
@@ -336,7 +337,7 @@
                             </div>
                         </div>
 
-                        <div class="col-6">
+                        <div class="col-12">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Empresa do Funcionário</span>
@@ -662,11 +663,20 @@
                     </div>
 
                     <div class="col-12" id="divCadMotivoReprovacao">
-                        <div class="detail-item">
+                        <div class="detail-item mt-4">
                             <div class="detail-label">
                                 <span>Motivo da reprovação</span>
                             </div>
                             <textarea id="motivoReprovacaoCadastro" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-12 d-none" id="divObsConsultaCadastro">
+                        <div class="detail-item mt-2">
+                            <div class="detail-label">
+                                <span>Observação da consulta</span>
+                            </div>
+                            <textarea id="obsConsultaCadastro" class="form-control" rows="2"></textarea>
                         </div>
                     </div>
                 </div>
@@ -1003,6 +1013,15 @@
                             </div>
                             <textarea id="motivoReprovacaoExame" class="form-control modern-textarea"
                                 rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-12 d-none" id="divObsConsultaExame">
+                        <div class="detail-item mt-2">
+                            <div class="detail-label">
+                                <span>Observação da consulta</span>
+                            </div>
+                            <textarea id="obsConsultaExame" class="form-control" rows="2"></textarea>
                         </div>
                     </div>
                 </div>

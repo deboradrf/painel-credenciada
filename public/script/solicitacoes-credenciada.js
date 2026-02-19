@@ -163,6 +163,7 @@ function renderizarTabela(lista) {
       <td>${s.nome_empresa}</td>
       <td>${s.nome_funcionario}</td>
       <td>${s.cpf}</td>
+      <td>${s.cidade}</td>
       <td>
         <span class="status-pill ${statusClass}">${s.status}</span>
       </td>
@@ -191,6 +192,38 @@ function renderizarTabela(lista) {
 
     tbody.appendChild(tr);
   });
+}
+
+function controlarObservacaoConsulta(cidade, tipo) {
+  let wrapper = null;
+
+  if (tipo === "NOVO_CADASTRO") {
+    wrapper = document.getElementById("divObsConsultaCadastro");
+  }
+
+  if (tipo === "NOVO_EXAME") {
+    wrapper = document.getElementById("divObsConsultaExame");
+  }
+
+  if (!wrapper) return;
+
+  if (cidade?.trim().toLowerCase() === "belo horizonte") {
+    wrapper.classList.remove("d-none");
+  } else {
+    wrapper.classList.add("d-none");
+  }
+}
+
+function getObservacaoConsultaAtual() {
+  const isExame = document
+    .getElementById("modalDetalhesNovoExame")
+    ?.classList.contains("show");
+
+  if (isExame) {
+    return document.querySelector("#divObsConsultaExame:not(.d-none) textarea");
+  } else {
+    return document.querySelector("#divObsConsultaCadastro:not(.d-none) textarea");
+  }
 }
 
 // FUNÇÃO PARA CARREGAR OS SETORES DA UNIDADE DA EMPRESA DA SOLICITAÇÃO NO SELECT
@@ -355,10 +388,28 @@ async function verDetalhes(id, tipo) {
         ? "modalDetalhesNovoExame"
         : "modalDetalhesNovoCadastro";
 
-    new bootstrap.Modal(
-      document.getElementById(modalId)
-    ).show();
+    const modalElement = document.getElementById(modalId);
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
 
+    modalElement.addEventListener(
+      "shown.bs.modal",
+      () => {
+        const cidadeConsulta = dados.solicitar_credenciamento
+          ? dados.cidade_credenciamento
+          : dados.cidade_clinica;
+
+        controlarObservacaoConsulta(cidadeConsulta, tipo);
+
+        // PREENCHER O CAMPO COM A OBSERVAÇÃO CONSULTA
+        const textarea = getObservacaoConsultaAtual();
+
+        if (textarea) {
+          textarea.value = dados.observacao_consulta || "";
+        }
+      },
+      { once: true }
+    );
   } catch (err) {
     console.error(err);
     alert("Erro ao carregar detalhes");
@@ -1294,6 +1345,15 @@ function preencherModal(s, tipo) {
   }
 }
 
+function preencherObservacaoConsulta(s) {
+  const textarea = document.getElementById("obsConsultaExame");
+
+  if (!textarea) return;
+
+  // Preencher o textarea com a observação salva
+  textarea.value = s.observacao_consulta || ""; // substituir "observacao_consulta" pelo nome certo do campo do backend
+}
+
 // FUNÇÃO PARA EDIÇÃO DA SOLICITAÇÃO DE EXAMES
 function pegarDadosEdicaoExame(statusAtual) {
   let payload = {};
@@ -1456,6 +1516,17 @@ async function analisarSolicitacao(status) {
   const isExame = document.getElementById("modalDetalhesNovoExame").classList.contains("show");
   const tipo = isExame ? "NOVO_EXAME" : "NOVO_CADASTRO";
 
+  // observação obrigatória se o campo estiver visível
+  if (status === "APROVADO") {
+    const textareaObs = getObservacaoConsultaAtual();
+
+    if (textareaObs && !textareaObs.value.trim()) {
+      alert("Para Belo Horizonte, é obrigatório preencher a observação da consulta.");
+      textareaObs.focus();
+      return;
+    }
+  }
+
   const motivoInput = isExame
     ? document.getElementById("motivoReprovacaoExame")
     : document.getElementById("motivoReprovacaoCadastro");
@@ -1474,7 +1545,8 @@ async function analisarSolicitacao(status) {
       body: JSON.stringify({
         status,
         motivo,
-        usuario_id: usuarioLogado.id
+        usuario_id: usuarioLogado.id,
+        observacao_consulta: getObservacaoConsultaAtual()?.value || null
       })
     }
   );
