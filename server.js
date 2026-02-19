@@ -2092,7 +2092,7 @@ async function enviarEmailSetorCargo(dados) {
     to: "wasidrf@outlook.com", // ENVIAR PAR NICOLLY, PAULINA E RUBIA
     subject: "Solicitação de criação de setor/cargo",
     text: `
-      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
+      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Painel Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `
@@ -2105,7 +2105,7 @@ async function enviarEmailCredenciamento(dados) {
     to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de credenciamento",
     text: `
-      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
+      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Painel Salubritá.
       
       Gentileza para dar prosseguimento à solicitação.
     `
@@ -2126,7 +2126,7 @@ async function enviarEmailReprovacao(email, motivo) {
 
       Ela permanecerá pendente até que as correções necessárias sejam realizadas.
 
-      Por favor, acesse o Portal Salubritá para revisar e editar as informações.
+      Por favor, acesse o Painel Salubritá para revisar e editar as informações.
 
       Atenciosamente,
       Equipe Salubritá

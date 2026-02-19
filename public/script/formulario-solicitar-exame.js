@@ -569,8 +569,12 @@ document.addEventListener("DOMContentLoaded", () => {
       selectClinica.disabled = false;
 
       cardCredenciamento.style.display = "none";
-
       limparCampos();
+
+      popularSelectEstados(extrairEstados(prestadoresCache));
+
+      resetarSelect(selectCidade);
+      resetarSelect(selectClinica);
     }
   });
 });
@@ -861,7 +865,7 @@ async function enviarEmailSolicitacao(dados) {
     assunto = "Solicitação de criação de função/setor";
 
     mensagem = `
-      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Portal Salubritá.
+      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Painel Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `;
@@ -873,7 +877,7 @@ async function enviarEmailSolicitacao(dados) {
     assunto = "Solicitação de credenciamento";
 
     mensagem = `
-      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Portal Salubritá.
+      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Painel Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `;
