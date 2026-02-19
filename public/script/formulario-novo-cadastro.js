@@ -69,8 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", async () => {
   await carregarNomeEmpresa();
   await carregarUnidades();
-  await carregarSetores();
-  await carregarCargos();
   await carregarPrestadores();
 });
 
@@ -192,45 +190,65 @@ async function carregarUnidades() {
   });
 }
 
-// CARREGAR SETORES
-async function carregarSetores() {
-  if (!empresaCodigo) return;
+// LISTENER NO SELECT DE UNIDADE
+document.getElementById("unidadeSelect").addEventListener("change", async function () {
+  const codUnidade = this.value;
+  const selectSetor = document.getElementById("setorSelect");
+
+  selectSetor.innerHTML = '<option value="">Selecione...</option>';
+
+  if (!codUnidade) return;
 
   try {
-    const res = await fetch(`/setores/${empresaCodigo}`);
+    const res = await fetch(`/hierarquia/${empresaCodigo}/${codUnidade}`);
     const setores = await res.json();
 
-    const select = document.getElementById("setorSelect");
-    select.innerHTML = '<option value="">Selecione...</option>';
+    setores
+      .sort((a, b) => a.nomeSetor.localeCompare(b.nomeSetor, "pt-BR"))
+      .forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s.codigoSetor;
+        opt.textContent = s.nomeSetor;
+        opt.dataset.nome = s.nomeSetor;
+        selectSetor.appendChild(opt);
+      });
 
-    setores.forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s.codigo;
-      opt.textContent = s.ativo ? s.nome : `${s.nome} (inativo)`;
-      opt.dataset.nome = s.nome;
-      select.appendChild(opt);
-    });
   } catch (err) {
-    console.error("Erro ao carregar setores:", err);
+    console.error("Erro ao carregar setores da unidade:", err);
+    alert("Erro ao carregar setores da unidade selecionada");
   }
-}
+});
 
-// CARREGAR CARGOS
-async function carregarCargos() {
-  const res = await fetch(`/cargos/${empresaCodigo}`);
-  const cargos = await res.json();
+// LISTENER NO SELECT DE SETOR
+document.getElementById("setorSelect").addEventListener("change", async function () {
+  const codSetor = this.value;
+  const codUnidade = document.getElementById("unidadeSelect").value;
+  const selectCargo = document.getElementById("cargoSelect");
 
-  const select = document.getElementById("cargoSelect");
-  select.innerHTML = '<option value="">Selecione...</option>';
+  selectCargo.innerHTML = '<option value="">Selecione...</option>';
 
-  cargos.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c.codigo;
-    opt.textContent = c.ativo ? c.nome : `${c.nome} (inativo)`;
-    opt.dataset.nome = c.nome;
-    select.appendChild(opt);
-  });
-}
+  if (!codSetor || !codUnidade) return;
+
+  try {
+    const res = await fetch(
+      `/hierarquia/${empresaCodigo}/${codUnidade}/${codSetor}`
+    );
+
+    const cargos = await res.json();
+
+    cargos.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.codigoCargo;
+      opt.textContent = c.nomeCargo;
+      opt.dataset.nome = c.nomeCargo;
+      selectCargo.appendChild(opt);
+    });
+
+  } catch (err) {
+    console.error("Erro ao carregar cargos:", err);
+    alert("Erro ao carregar cargos do setor");
+  }
+});
 
 // CARREGAR PRESTADORES
 async function carregarPrestadores() {
@@ -258,7 +276,10 @@ async function listarPrestadores() {
 
   for (const p of prestadoresBase) {
     const prestador = await buscarDetalhesPrestador(p.codigo);
-    if (prestador) detalhes.push(prestador);
+
+    if (prestador && prestador.nivelClassificacao?.toUpperCase() === "PREFERENCIAL") {
+      detalhes.push(prestador);
+    }
   }
 
   prestadoresCache = detalhes;
@@ -267,7 +288,8 @@ async function listarPrestadores() {
     prestadoresCache.map(p => ({
       codigo: p.codigo,
       estado: p.estado,
-      cidade: p.cidade
+      cidade: p.cidade,
+      nivel: p.nivelClassificacao
     }))
   );
 
@@ -286,7 +308,8 @@ async function buscarDetalhesPrestador(codigo) {
       codigo,
       nome: dados.nomePrestador || dados.nome || "",
       cidade: dados.cidade || "",
-      estado: dados.estado || ""
+      estado: dados.estado || "",
+      nivelClassificacao: dados.nivelClassificacao || ""
     };
   } catch {
     return null;

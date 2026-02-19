@@ -6,6 +6,14 @@ if (!usuarioLogado) {
   window.location.href = "login.html";
 }
 
+// FUNCIONÁRIO PESQUISADO
+const funcionarioAtual = JSON.parse(localStorage.getItem("funcionario"));
+
+if (!funcionarioAtual) {
+  alert("Pesquise um funcionário primeiro");
+  window.location.href = "solicitar-exame.html";
+}
+
 // DADOS DA EMPRESA
 const empresaCodigo = usuarioLogado.cod_empresa;
 const nomeEmpresa = usuarioLogado.nome_empresa;
@@ -64,29 +72,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // INIT
 document.addEventListener("DOMContentLoaded", async () => {
-  preencherEmpresaUsuario();
-  await carregarUnidades();
-  await carregarSetores();
-  await carregarCargos();
-  preencherFuncionario();
+  preencherDadosFuncionarioSoc();
+  await carregarSetoresDaUnidade();
+  await carregarCargosDoSetor();
   await carregarPrestadores();
 });
 
 // FUNÇÃO PARA PREENCHER O FORMULÁRIO COM OS DADOS ENCONTRADOS NO SOC
-function preencherFuncionario() {
-  const f = JSON.parse(localStorage.getItem("funcionario"));
+function preencherDadosFuncionarioSoc() {
+  const f = funcionarioAtual;
 
-  if (!f) {
-    alert("Pesquise um funcionário primeiro");
-    window.location.href = "solicitar-exame.html";
-    return;
-  }
-
+  // DADOS PESSOAIS (SOC)
   document.getElementById("nome").value = f.nome;
   document.getElementById("cpf").value = formatarCPF(f.cpf);
-  document.getElementById("matricula").value = f.matricula || "NÃO POSSUI MATRÍCULA";
+  document.getElementById("matricula").value = f.matricula || "";
 
-  // FORMATAR DATAS
   if (f.data_nascimento) {
     const [d, m, a] = f.data_nascimento.split("/");
     document.getElementById("data-nascimento").value = `${a}-${m}-${d}`;
@@ -99,22 +99,141 @@ function preencherFuncionario() {
 
   document.getElementById("cpf").readOnly = true;
 
-  setTimeout(() => {
-    const unidadeSelect = document.getElementById("unidadeSelect");
-    const setorSelect = document.getElementById("setorSelect");
-    const cargoSelect = document.getElementById("cargoSelect");
-    const funcaoAnterior = document.getElementById("funcao_anterior");
+  document.getElementById("empresaNome").value = usuarioLogado.nome_empresa;
+  document.getElementById("empresaCodigo").value = funcionarioAtual.cod_empresa;
 
-    unidadeSelect.value = f.cod_unidade;
-    setorSelect.value = f.cod_setor;
-    cargoSelect.value = f.cod_cargo;
+  preencherUnidadeFuncionario();
+  preencherSetorFuncionario();
+  preencherCargoFuncionario();
+}
 
-    unidadeSelect.disabled = true;
-    setorSelect.disabled = true;
-    cargoSelect.disabled = true;
+// FUNÇÃO PARA PREENCHER A UNIDADE DO FUNCIONÁRIO (SOC)
+async function preencherUnidadeFuncionario() {
+  const empresa = usuarioLogado.cod_empresa;
+  const codUnidade = funcionarioAtual.cod_unidade;
 
-    funcaoAnterior.value = cargoSelect.options[cargoSelect.selectedIndex]?.text || "";
-  }, 500);
+  if (!empresa || !codUnidade) {
+    console.warn("Empresa ou unidade inválida");
+    return;
+  }
+
+  const res = await fetch(`/unidades/${empresa}`);
+  const unidades = await res.json();
+
+  const unidade = unidades.find(u => String(u.codigo) === String(codUnidade));
+
+  document.getElementById("unidadeNome").value = unidade.nome;
+  document.getElementById("unidadeCodigo").value = codUnidade;
+}
+
+// FUNÇÃO PARA PREENCHER O SETOR DO FUNCIONÁRIO (SOC)
+async function preencherSetorFuncionario() {
+  const empresa = usuarioLogado.cod_empresa;
+  const codSetor = funcionarioAtual.cod_setor;
+
+  if (!empresa || !codSetor) return;
+
+  const res = await fetch(`/setores/${empresa}`);
+  const setores = await res.json();
+
+  const setor = setores.find(s => String(s.codigo) === String(codSetor));
+
+  document.getElementById("setorNome").value = setor.nome;
+  document.getElementById("setorCodigo").value = codSetor;
+}
+
+// FUNÇÃO PARA PREENCHER O CARGO DO FUNCIONÁRIO (SOC)
+async function preencherCargoFuncionario() {
+  const empresa = usuarioLogado.cod_empresa;
+  const codCargo = funcionarioAtual.cod_cargo;
+
+  if (!empresa || !codCargo) return;
+
+  const res = await fetch(`/cargos/${empresa}`);
+  const cargos = await res.json();
+
+  const cargo = cargos.find(c => String(c.codigo) === String(codCargo));
+
+  document.getElementById("cargoNome").value = cargo.nome;
+  document.getElementById("cargoCodigo").value = codCargo;
+
+  // PREENCHER FUNÇÃO ANTERIOR COM O MESMO VALOR DO CARGO
+  document.getElementById("funcao_anterior").value = cargo.nome;
+}
+
+// FUNÇÃO PARA CARREGAR OS SETORES DE UMA UNIDADE
+async function carregarSetoresDaUnidade() {
+  const empresa = usuarioLogado.cod_empresa;
+  const unidade = funcionarioAtual.cod_unidade;
+
+  if (!empresa || !unidade) {
+    console.warn("Empresa ou unidade não definida", { empresa, unidade });
+    return;
+  }
+
+  const res = await fetch(`/hierarquia/${empresa}/${unidade}`);
+  const setores = await res.json();
+
+  const selectSetor = document.getElementById("setor_atual");
+  selectSetor.innerHTML = `<option value="">Selecione...</option>`;
+
+  const unicos = new Map();
+
+  setores.forEach(s => {
+    if (s.codigoSetor && !unicos.has(s.codigoSetor)) {
+      unicos.set(s.codigoSetor, s.nomeSetor);
+    }
+  });
+
+  unicos.forEach((nome, codigo) => {
+    const opt = document.createElement("option");
+    opt.value = codigo;
+    opt.textContent = nome;
+    selectSetor.appendChild(opt);
+  });
+}
+
+// FUNÇÃO PARA CARREGAR OS CARGOS DE UM SETOR SELECIONADO
+document.getElementById("setor_atual").addEventListener("change", carregarCargosDoSetor);
+
+async function carregarCargosDoSetor() {
+  const empresa = usuarioLogado.cod_empresa;
+  const unidade = funcionarioAtual.cod_unidade;
+
+  const selectSetor = document.getElementById("setor_atual");
+  const codSetor = selectSetor.value;
+
+  const selectCargo = document.getElementById("funcao_atual");
+
+  selectCargo.innerHTML = `<option value="">Selecione...</option>`;
+
+  try {
+    const res = await fetch(`/hierarquia/${empresa}/${unidade}/${codSetor}`);
+
+    const hierarquia = await res.json();
+
+    const cargosUnicos = new Map();
+
+    hierarquia.forEach(item => {
+
+      if (item.codigoCargo && !cargosUnicos.has(item.codigoCargo)) {
+
+        cargosUnicos.set(item.codigoCargo, item.nomeCargo);
+      }
+    });
+
+    cargosUnicos.forEach((nome, codigo) => {
+      const opt = document.createElement("option");
+
+      opt.value = codigo;
+      opt.textContent = nome;
+
+      selectCargo.appendChild(opt);
+    });
+  }
+  catch (erro) {
+    console.error("Erro ao carregar cargos:", erro);
+  }
 }
 
 // FUNÇÃO PARA FORMATAR CPF
@@ -126,12 +245,6 @@ function formatarCPF(cpf) {
   if (numeros.length !== 11) return cpf;
 
   return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-}
-
-// PREENCHER O CAMPO COM O NOME DA EMPRESA DO USUÁRIO LOGADO
-function preencherEmpresaUsuario() {
-  document.getElementById("empresaNomeView").value = usuarioLogado.nome_empresa;
-  document.getElementById("empresaCodigoHidden").value = usuarioLogado.cod_empresa;
 }
 
 // MOSTRAR / OCULTAR TIPO RAC
@@ -378,57 +491,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// FUNÇÃO PARA CARREGAR O SELECT DAS UNIDADES
-async function carregarUnidades() {
-  const res = await fetch(`/unidades/${usuarioLogado.cod_empresa}`);
-
-  const dados = await res.json();
-
-  const select = document.getElementById("unidadeSelect");
-
-  select.innerHTML = `<option value="">Selecione...</option>`;
-  dados.forEach(u => {
-    select.innerHTML += `<option value="${u.codigo}">${u.nome}</option>`;
-  });
-}
-
-// FUNÇÃO PARA CARREGAR O SELECT DOS SETORES
-async function carregarSetores() {
-  const res = await fetch(`/setores/${usuarioLogado.cod_empresa}`);
-
-  const dados = await res.json();
-
-  const select = document.getElementById("setorSelect");
-  const selectSetorAtual = document.getElementById("setor_atual");
-
-  select.innerHTML = `<option value="">Selecione...</option>`;
-  dados.forEach(s => {
-    select.innerHTML += `<option value="${s.codigo}">${s.nome}</option>`;
-  });
-
-  selectSetorAtual.innerHTML = `<option value="">Selecione...</option>`;
-  dados.forEach(c => {
-    selectSetorAtual.innerHTML += `<option value="${c.codigo}">${c.nome}</option>`;
-  });
-}
-
-// FUNÇÃO PARA CARREGAR O SELECT DOS CARGOS
-async function carregarCargos() {
-  const res = await fetch(`/cargos/${usuarioLogado.cod_empresa}`);
-  const dados = await res.json();
-
-  const selectCargo = document.getElementById("cargoSelect");
-  const selectFuncaoAtual = document.getElementById("funcao_atual");
-
-  selectCargo.innerHTML = `<option value="">Selecione...</option>`;
-  selectFuncaoAtual.innerHTML = `<option value="">Selecione...</option>`;
-
-  dados.forEach(c => {
-    selectCargo.innerHTML += `<option value="${c.codigo}">${c.nome}</option>`;
-    selectFuncaoAtual.innerHTML += `<option value="${c.codigo}">${c.nome}</option>`;
-  });
-}
-
 // MOSTRAR / OCULTAR TEXTAREA DE MOTIVO DA CONSULTA E COLOCAR REQUIRED NO CAMPO
 document.addEventListener("DOMContentLoaded", () => {
   const tipoExame = document.getElementById("tipo_exame");
@@ -540,7 +602,10 @@ async function listarPrestadores() {
 
   for (const p of prestadoresBase) {
     const prestador = await buscarDetalhesPrestador(p.codigo);
-    if (prestador) detalhes.push(prestador);
+
+    if (prestador && prestador.nivelClassificacao?.toUpperCase() === "PREFERENCIAL") {
+      detalhes.push(prestador);
+    }
   }
 
   prestadoresCache = detalhes;
@@ -549,7 +614,8 @@ async function listarPrestadores() {
     prestadoresCache.map(p => ({
       codigo: p.codigo,
       estado: p.estado,
-      cidade: p.cidade
+      cidade: p.cidade,
+      nivel: p.nivelClassificacao
     }))
   );
 
@@ -568,7 +634,8 @@ async function buscarDetalhesPrestador(codigo) {
       codigo,
       nome: dados.nomePrestador || dados.nome || "",
       cidade: dados.cidade || "",
-      estado: dados.estado || ""
+      estado: dados.estado || "",
+      nivelClassificacao: dados.nivelClassificacao || ""
     };
   } catch {
     return null;
@@ -610,7 +677,7 @@ document.getElementById("estado_clinica").addEventListener("change", function ()
 
   const cidadesUnicas = [...new Set(
     prestadoresCache
-      .filter(p => 
+      .filter(p =>
         p.estado?.trim().toUpperCase() === estadoSelecionado?.trim().toUpperCase()
       )
       .map(p => p.cidade)
@@ -814,7 +881,7 @@ async function enviarEmailSolicitacao(dados) {
   }
 
   if (!destinatario) {
-    return; 
+    return;
   }
 
   await fetch("/enviar-email-solicitacao", {
@@ -832,9 +899,6 @@ async function enviarEmailSolicitacao(dados) {
 document.getElementById("formCadastro").addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  const unidadeSelect = document.getElementById("unidadeSelect");
-  const setorSelect = document.getElementById("setorSelect");
-  const cargoSelect = document.getElementById("cargoSelect");
   const solicitarNovaFuncao = document.getElementById("solicitarNovaFuncao")?.checked === true;
   const solicitarNovoSetor = document.getElementById("solicitarNovoSetor")?.checked === true;
   const funcaoSelect = document.getElementById("funcao_atual");
@@ -863,13 +927,13 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     matricula: document.getElementById("matricula").value || null,
     data_admissao: document.getElementById("data_admissao").value,
     cod_empresa: usuarioLogado.cod_empresa,
-    nome_empresa: document.getElementById("empresaNomeView").value,
-    cod_unidade: unidadeSelect.value,
-    nome_unidade: unidadeSelect.options[unidadeSelect.selectedIndex]?.text || null,
-    cod_setor: setorSelect.value,
-    nome_setor: setorSelect.options[setorSelect.selectedIndex]?.text || null,
-    cod_cargo: cargoSelect.value,
-    nome_cargo: cargoSelect.options[cargoSelect.selectedIndex]?.text || null,
+    nome_empresa: document.getElementById("empresaNome").value,
+    cod_unidade: document.getElementById("unidadeCodigo").value,
+    nome_unidade: document.getElementById("unidadeNome").value,
+    cod_setor: document.getElementById("setorCodigo").value,
+    nome_setor: document.getElementById("setorNome").value,
+    cod_cargo: document.getElementById("cargoCodigo").value,
+    nome_cargo: document.getElementById("cargoNome").value,
     rac: document.getElementById("racSelect").value || null,
     tipos_rac: tiposRacSelecionados.length ? tiposRacSelecionados : null,
     tipo_exame: document.getElementById("tipo_exame").value,

@@ -1,6 +1,7 @@
 let usuarioLogado = null;
 let solicitacoes = [];
 let solicitacaoAtualId = null;
+let hierarquiaAtual = null;
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
@@ -179,7 +180,7 @@ function renderizarTabela(lista) {
           ` : ""}
 
           ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
-          ? `
+        ? `
             <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
               Cancelar
             </button>
@@ -191,6 +192,98 @@ function renderizarTabela(lista) {
 
     tbody.appendChild(tr);
   });
+}
+
+// FUNÇÃO PARA CARREGAR OS SETORES DA UNIDADE DA EMPRESA DA SOLICITAÇÃO NO SELECT
+async function carregarSetores(empresaCodigo, unidadeCodigo, setorSelecionado = "", selectId = "") {
+  const select = document.getElementById(selectId);
+
+  select.innerHTML = '<option value="">-</option>';
+
+  try {
+    const res = await fetch(`/hierarquia/${empresaCodigo}/${unidadeCodigo}`);
+    const data = await res.json();
+
+    hierarquiaAtual = data;
+
+    hierarquiaAtual.forEach(setor => {
+      const option = document.createElement("option");
+
+      option.value = setor.codigoSetor;
+      option.textContent = setor.nomeSetor;
+
+      if (setor.nomeSetor === setorSelecionado)
+        option.selected = true;
+
+      select.appendChild(option);
+    });
+  }
+  catch (err) {
+    console.error("Erro ao carregar setores:", err);
+  }
+}
+
+// LISTENER DE SELECIONAR O SETOR (NOVO CADASTRO)
+document.getElementById("setorSelect").addEventListener("change", function () {
+  const setorCodigo = this.value;
+
+  if (!setorCodigo) return;
+
+  carregarCargosDoSetorSelecionado(
+    window.empresaAtual,
+    window.unidadeAtual,
+    setorCodigo,
+    "",
+    "cargoSelect"
+  );
+});
+
+// LISTENER DE SELECIONAR O SETOR ATUAL
+document.getElementById("setorAtualSelect").addEventListener("change", function () {
+  const setorCodigo = this.value;
+
+  if (!setorCodigo) return;
+
+  carregarCargosDoSetorSelecionado(
+    window.empresaAtual,
+    window.unidadeAtual,
+    setorCodigo,
+    "",
+    "funcaoAtualSelect"
+  );
+});
+
+// FUNÇÃO PARA CARREGAR OS CARGOS DOS SETORES DA UNIDADE DA SOLICITAÇÃO NO SELECT
+async function carregarCargosDoSetorSelecionado(empresaCodigo, unidadeCodigo, setorCodigo, cargoSelecionado = "", selectId = "cargoSelect") {
+  const selectCargo = document.getElementById(selectId);
+
+  if (!selectCargo) return;
+
+  selectCargo.innerHTML = '<option value="">-</option>';
+
+  try {
+    const response = await fetch(`/hierarquia/${empresaCodigo}/${unidadeCodigo}/${setorCodigo}`);
+
+    const cargos = await response.json();
+
+    console.log("Cargos carregados:", cargos);
+
+    cargos.forEach(cargo => {
+
+      const option = document.createElement("option");
+
+      option.value = cargo.codigoCargo;
+      option.textContent = cargo.nomeCargo;
+
+      if (cargo.nomeCargo === cargoSelecionado)
+        option.selected = true;
+
+      selectCargo.appendChild(option);
+    });
+  }
+  catch (error) {
+    console.error("Erro ao carregar cargos:", error);
+  }
 }
 
 // FUNÇÃO PARA CANCELAR SOLICITAÇÃO PENDENTE
@@ -296,56 +389,56 @@ function preencherMaisUnidades(cadastro) {
   }
 }
 
-// FUNÇÃO PARA POPULAR O SELECT DE SETOR DO FUNCIONÁRIO NO MODAL DE NOVO CADASTRO
-async function carregarSetoresSolicitacaoCadastro(empresaCodigo, selecionadoNome = "") {
-  if (!empresaCodigo) return;
+// // FUNÇÃO PARA POPULAR O SELECT DE SETOR DO FUNCIONÁRIO NO MODAL DE NOVO CADASTRO
+// async function carregarSetoresSolicitacaoCadastro(empresaCodigo, selecionadoNome = "") {
+//   if (!empresaCodigo) return;
 
-  const select = document.getElementById("setorSelect");
-  select.innerHTML = '<option value="">-</option>';
+//   const select = document.getElementById("setorSelect");
+//   select.innerHTML = '<option value="">-</option>';
 
-  try {
-    const res = await fetch(`/setores/${empresaCodigo}`);
-    const setores = await res.json();
+//   try {
+//     const res = await fetch(`/setores/${empresaCodigo}`);
+//     const setores = await res.json();
 
-    setores.forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s.codigo;
-      opt.textContent = s.nome;
+//     setores.forEach(s => {
+//       const opt = document.createElement("option");
+//       opt.value = s.codigo;
+//       opt.textContent = s.nome;
 
-      if (s.nome === selecionadoNome) opt.selected = true;
-      select.appendChild(opt);
-    });
-  } catch (err) {
-    console.error("Erro ao carregar setores:", err);
-  }
-}
+//       if (s.nome === selecionadoNome) opt.selected = true;
+//       select.appendChild(opt);
+//     });
+//   } catch (err) {
+//     console.error("Erro ao carregar setores:", err);
+//   }
+// }
 
-// FUNÇÃO PARA POPULAR O SELECT DE SETOR ATUAL NO MODAL DE NOVO EXAME
-async function carregarSetoresSolicitacaoExame(empresaCodigo, selecionadoNome = "") {
-  if (!empresaCodigo) return;
+// // FUNÇÃO PARA POPULAR O SELECT DE SETOR ATUAL NO MODAL DE NOVO EXAME
+// async function carregarSetoresSolicitacaoExame(empresaCodigo, selecionadoNome = "") {
+//   if (!empresaCodigo) return;
 
-  const select = document.getElementById("setorAtualSelect");
-  select.innerHTML = '<option value="">-</option>';
+//   const select = document.getElementById("setorAtualSelect");
+//   select.innerHTML = '<option value="">-</option>';
 
-  try {
-    const res = await fetch(`/setores/${empresaCodigo}`);
-    const setores = await res.json();
+//   try {
+//     const res = await fetch(`/setores/${empresaCodigo}`);
+//     const setores = await res.json();
 
-    setores.forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s.codigo;
-      opt.textContent = s.nome;
+//     setores.forEach(s => {
+//       const opt = document.createElement("option");
+//       opt.value = s.codigo;
+//       opt.textContent = s.nome;
 
-      if (s.nome === selecionadoNome) opt.selected = true;
-      select.appendChild(opt);
-    });
-  } catch (err) {
-    console.error("Erro ao carregar setores:", err);
-  }
-}
+//       if (s.nome === selecionadoNome) opt.selected = true;
+//       select.appendChild(opt);
+//     });
+//   } catch (err) {
+//     console.error("Erro ao carregar setores:", err);
+//   }
+// }
 
 // FUNÇÃO PARA POPULAR O SELECT DE CARGOS NO MODAL DE NOVO CADASTRO
-async function carregarCargos(empresaCodigo, selecionadoNome = "") {
+async function mostrarCargoAtualDoFuncionario(empresaCodigo, selecionadoNome = "") {
   if (!empresaCodigo) return;
 
   const select = document.getElementById("cargoSelect");
@@ -393,7 +486,7 @@ async function carregarFuncao(empresaCodigo, selecionadoNome = "") {
 }
 
 // FUNÇÃO PARA POPULAR O SELECT DE UNIDADES NO MODAL
-async function carregarUnidades(empresaCodigo, selecionadoNome = "") {
+async function mostrarUnidadeAtualDoFuncionario(empresaCodigo, selecionadoNome = "") {
   if (!empresaCodigo) return;
 
   const select = document.getElementById("unidadeSelect");
@@ -589,63 +682,51 @@ async function salvarEdicaoCadastro() {
   }
 }
 
-// FUNÇÃO PARA CARREGAR AS CLÍNICAS E POPULAR O SELECT
-async function carregarClinicas(codEmpresa, clinicaSelecionada) {
-  console.log("Empresa recebida na função:", codEmpresa);
-
+// FUNÇÃO PARA CARREGAR AS CLÍNICAS COM CLASSIFICAÇÃO 'PREFERENCIAL' E POPULAR O SELECT
+async function carregarPrestadoresPreferenciais(codEmpresa, selectId, clinicaSelecionada = "") {
   if (!codEmpresa) return;
 
-  const select = document.getElementById("clinicaSelect");
+  const select = document.getElementById(selectId);
   if (!select) return;
 
   const res = await fetch(`/prestadores/${codEmpresa}`);
-  const clinicas = await res.json();
+  const prestadores = await res.json();
 
   select.innerHTML = '<option value="">-</option>';
 
-  clinicas.forEach(c => {
-    const option = document.createElement("option");
-    option.value = c.nome;
-    option.textContent = c.nome;
+  for (const p of prestadores) {
+    try {
+      const detalheRes = await fetch(`/prestador/${codEmpresa}/${p.codigo}`);
 
-    if (c.nome === clinicaSelecionada) {
-      option.selected = true;
+      if (!detalheRes.ok) {
+        console.warn("Erro ao buscar detalhe:", p.codigo);
+        continue;
+      }
+
+      const detalhe = await detalheRes.json();
+
+      if (!detalhe.nivelClassificacao || detalhe.nivelClassificacao.toUpperCase() !== "PREFERENCIAL") continue;
+
+      const option = document.createElement("option");
+      option.value = p.codigo;
+      option.textContent = p.nome;
+
+      if (p.nome === clinicaSelecionada)
+        option.selected = true;
+
+      select.appendChild(option);
+
+    } catch (e) {
+      console.error("Erro no prestador:", p.codigo, e);
     }
-
-    select.appendChild(option);
-  });
-}
-
-// FUNÇÃO PARA CARREGAR AS CLÍNICAS E POPULAR O SELECT
-async function carregarClinicasExame(codEmpresa, clinicaSelecionada) {
-  console.log("Empresa recebida na função:", codEmpresa);
-
-  if (!codEmpresa) return;
-
-  const select = document.getElementById("clinicaExameSelect");
-  if (!select) return;
-
-  const res = await fetch(`/prestadores/${codEmpresa}`);
-  const clinicas = await res.json();
-
-  select.innerHTML = '<option value="">-</option>';
-
-  clinicas.forEach(c => {
-    const option = document.createElement("option");
-    option.value = c.nome;
-    option.textContent = c.nome;
-
-    if (c.nome === clinicaSelecionada) {
-      option.selected = true;
-    }
-
-    select.appendChild(option);
-  });
+  }
 }
 
 // FUNÇÃO PARA PREENCHER O MODAL
 function preencherModal(s, tipo) {
   window.statusAtualSolicitacao = s.status;
+  window.empresaAtual = s.cod_empresa;
+  window.unidadeAtual = s.cod_unidade;
 
   const tipoFaturamento = s.tipo_faturamento;
 
@@ -784,7 +865,7 @@ function preencherModal(s, tipo) {
       spanUnidade.style.display = "none";
       selectUnidade.style.display = "block";
 
-      carregarUnidades(s.cod_empresa, s.nome_unidade);
+      mostrarUnidadeAtualDoFuncionario(s.cod_empresa, s.nome_unidade);
     } else {
       spanUnidade.style.display = "block";
       selectUnidade.style.display = "none";
@@ -821,8 +902,8 @@ function preencherModal(s, tipo) {
       spanSetor.style.display = "none";
       selectSetor.style.display = "block";
 
-      // POPULAR O SELECT COM TODOS OS SETORES DA EMPRESA DA SOLICITAÇÃO
-      carregarSetoresSolicitacaoCadastro(s.cod_empresa, spanSetor.innerText);
+      // POPULAR O SELECT COM OS SETORES DA UNIDADE DA EMPRESA DA SOLICITAÇÃO
+      carregarSetores(s.cod_empresa, s.cod_unidade, s.nome_setor, "setorSelect");
     } else {
       spanSetor.style.display = "block";
       selectSetor.style.display = "none";
@@ -837,7 +918,7 @@ function preencherModal(s, tipo) {
       selectCargo.style.display = "block";
 
       // POPULAR O SELECT COM TODOS OS CARGOS DA EMPRESA DA SOLICITAÇÃO
-      carregarCargos(s.cod_empresa, spanCargo.innerText);
+      mostrarCargoAtualDoFuncionario(s.cod_empresa, spanCargo.innerText);
     } else {
       spanCargo.style.display = "block";
       selectCargo.style.display = "none";
@@ -897,8 +978,11 @@ function preencherModal(s, tipo) {
       selectClinica.classList.remove("d-none");
       selectClinica.style.display = "block";
 
-      carregarClinicas(s.cod_empresa, spanClinica.innerText);
-
+      carregarPrestadoresPreferenciais(
+        s.cod_empresa,
+        "clinicaSelect",
+        spanClinica.innerText
+      );
     } else {
       spanClinica.style.display = "block";
 
@@ -1011,8 +1095,8 @@ function preencherModal(s, tipo) {
       spanSetor.style.display = "none";
       selectSetor.style.display = "block";
 
-      // POPULAR O SELECT COM TODOS OS SETORES DA EMPRESA DA SOLICITAÇÃO
-      carregarSetoresSolicitacaoExame(s.cod_empresa, spanSetor.innerText);
+      // POPULAR O SELECT COM OS SETORES DA UNIDADE DA EMPRESA DA SOLICITAÇÃO
+      carregarSetores(s.cod_empresa, s.cod_unidade, s.setor_atual, "setorAtualSelect");
     } else {
       spanSetor.style.display = "block";
       selectSetor.style.display = "none";
@@ -1043,7 +1127,11 @@ function preencherModal(s, tipo) {
       selectClinica.classList.remove("d-none");
       selectClinica.style.display = "block";
 
-      carregarClinicasExame(s.cod_empresa, spanClinica.innerText);
+      carregarPrestadoresPreferenciais(
+        s.cod_empresa,
+        "clinicaExameSelect",
+        spanClinica.innerText
+      );
 
     } else {
       spanClinica.style.display = "block";

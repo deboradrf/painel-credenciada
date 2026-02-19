@@ -46,6 +46,12 @@ const EXPORTA_UNIDADES = {
   tipoSaida: "xml"
 };
 
+const EXPORTA_HIERARQUIA = {
+  codigo: "212432",
+  chave: "854125036a13e406b5dc",
+  tipoSaida: "xml"
+};
+
 const EXPORTA_SETORES = {
   codigo: "211373",
   chave: "a8becfc0b392392557a3",
@@ -112,7 +118,7 @@ app.get("/empresas", async (req, res) => {
   }
 });
 
-// EXPORTA DADOS - UNIDADES DE UMA EMPRESA - (apenas ativos)
+// EXPORTA DADOS - UNIDADES DE UMA EMPRESA
 app.get("/unidades/:empresa", async (req, res) => {
   try {
     const parametro = JSON.stringify({
@@ -142,6 +148,105 @@ app.get("/unidades/:empresa", async (req, res) => {
     );
   } catch {
     res.status(500).json({ erro: "Erro unidades" });
+  }
+});
+
+// EXPORTA DADOS - SETORES DA UNIDADE
+app.get("/hierarquia/:empresa/:unidade", async (req, res) => {
+  try {
+    const { empresa, unidade } = req.params;
+
+    const parametro = JSON.stringify({
+      ...EXPORTA_HIERARQUIA,
+      empresa,
+      empresaTrabalho: empresa
+    });
+
+    const response = await axios.get(SOC_EXPORTA_URL, {
+      params: { parametro },
+      responseType: "arraybuffer"
+    });
+
+    let xml = iconv.decode(response.data, "ISO-8859-1");
+    xml = xml.replace(/&(?!(amp|lt|gt|quot|apos);)/g, "&amp;");
+
+    const json = parser.parse(xml);
+    const registros = json?.root?.record || [];
+
+    const setoresMap = new Map();
+
+    (Array.isArray(registros) ? registros : [registros])
+      .filter(r =>
+        String(r.CODIGOUNIDADE) === String(unidade) &&
+        r.ATIVOSETOR === "Sim" &&
+        r.HIERARQUIAATIVA === "Sim"
+      )
+      .forEach(r => {
+        if (!setoresMap.has(r.CODIGOSETOR)) {
+          setoresMap.set(r.CODIGOSETOR, {
+            codigoSetor: r.CODIGOSETOR,
+            nomeSetor: r.NOMESETOR
+          });
+        }
+      });
+
+    const setores = Array.from(setoresMap.values());
+
+    res.json(setores);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao buscar hierarquia" });
+  }
+});
+
+// EXPORTA DADOS - CARGOS DO SETOR DA UNIDADE
+app.get("/hierarquia/:empresa/:unidade/:setor", async (req, res) => {
+  try {
+    const { empresa, unidade, setor } = req.params;
+
+    const parametro = JSON.stringify({
+      ...EXPORTA_HIERARQUIA,
+      empresa,
+      empresaTrabalho: empresa
+    });
+
+    const response = await axios.get(SOC_EXPORTA_URL, {
+      params: { parametro },
+      responseType: "arraybuffer"
+    });
+
+    let xml = iconv.decode(response.data, "ISO-8859-1");
+    xml = xml.replace(/&(?!(amp|lt|gt|quot|apos);)/g, "&amp;");
+
+    const json = parser.parse(xml);
+    const registros = json?.root?.record || [];
+
+    const cargosMap = new Map();
+
+    (Array.isArray(registros) ? registros : [registros])
+      .filter(r =>
+        String(r.CODIGOUNIDADE) === String(unidade) &&
+        String(r.CODIGOSETOR) === String(setor) &&
+        r.ATIVOCARGO === "Sim" &&
+        r.HIERARQUIAATIVA === "Sim"
+      )
+      .forEach(r => {
+        if (!cargosMap.has(r.CODIGOCARGO)) {
+          cargosMap.set(r.CODIGOCARGO, {
+            codigoCargo: r.CODIGOCARGO,
+            nomeCargo: r.NOMECARGO
+          });
+        }
+      });
+
+    const cargos = Array.from(cargosMap.values()).sort((a, b) =>
+      a.nomeCargo.localeCompare(b.nomeCargo, "pt-BR")
+    );
+
+    res.json(cargos);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao buscar cargos do setor" });
   }
 });
 
@@ -259,7 +364,6 @@ app.get("/prestadores/:empresa", async (req, res) => {
     console.error("Erro ao buscar prestadores:", err);
     res.status(500).json({ erro: "Erro ao buscar prestadores" });
   }
-  /*http://localhost:3001/prestadores/2046368*/
 });
 
 // EXPORTA DADOS - DETALHES DO PRESTADOR - (filtrado pelo codigo)
@@ -1956,6 +2060,14 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
   const { destinatario, assunto, mensagem } = req.body;
 
   try {
+    if (!destinatario) {
+      return res.json({
+        ok: true,
+        enviado: false,
+        motivo: "Sem destinatário"
+      });
+    }
+
     await transporter.sendMail({
       from: "Painel Salubritá <naoresponda@salubrita.com.br>",
       to: destinatario,
@@ -1963,10 +2075,12 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
       text: mensagem
     });
 
-    res.json({ ok: true });
+    res.json({
+      ok: true,
+      enviado: true
+    });
   } catch (err) {
     console.error("Erro nodemailer:", err.message);
-    console.error(err);
     res.status(500).json({
       erro: "Falha ao enviar e-mail",
       detalhe: err.message
@@ -2007,7 +2121,7 @@ async function enviarEmailReprovacao(email, motivo) {
     to: email,
     subject: "Sua solicitação foi reprovada",
     text:
-    `
+      `
       Sua solicitação foi REPROVADA pelo seguinte motivo:
 
       "${motivo}"
