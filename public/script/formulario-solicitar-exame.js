@@ -107,6 +107,7 @@ function preencherDadosFuncionarioSoc() {
 }
 
 // FUNÇÃO PARA PREENCHER A UNIDADE DO FUNCIONÁRIO (SOC)
+// FUNÇÃO PARA PREENCHER A UNIDADE DO FUNCIONÁRIO (SOC)
 async function preencherUnidadeFuncionario() {
   const empresa = usuarioLogado.cod_empresa;
   const codUnidade = funcionarioAtual.cod_unidade;
@@ -119,7 +120,12 @@ async function preencherUnidadeFuncionario() {
   const res = await fetch(`/unidades/${empresa}`);
   const unidades = await res.json();
 
-  const unidade = unidades.find(u => String(u.codigo) === String(codUnidade));
+  const unidade = unidades.find(u => Number(u.codigo) === Number(codUnidade));
+
+  if (!unidade) {
+    console.warn("Unidade não encontrada:", codUnidade);
+    return;
+  }
 
   document.getElementById("unidadeNome").value = unidade.nome;
   document.getElementById("unidadeCodigo").value = codUnidade;
