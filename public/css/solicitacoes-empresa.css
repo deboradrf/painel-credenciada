@@ -235,6 +235,13 @@ h3::after {
     color: #6B7280;
 }
 
+#textoMotivo {
+  white-space: pre-line;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
 .filters {
     display: grid;
     grid-template-columns: 260px 1fr 1fr auto;

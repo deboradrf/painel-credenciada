@@ -175,7 +175,7 @@ function renderizarTabela(lista) {
 
     if (s.status === "REPROVADO") {
       acoes = `
-        <button onclick="verMotivo('${s.motivo_reprovacao}')">
+        <button onclick='verMotivo(${JSON.stringify(s.motivo_reprovacao)})'>
           Ver motivo
         </button>
 
