@@ -2135,7 +2135,7 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
 async function enviarEmailSetorCargo(dados) {
   await transporter.sendMail({
     from: "Painel Salubritá <naoresponda@salubrita.com.br>",
-    to: "wasidrf@outlook.com", // ENVIAR PAR NICOLLY, PAULINA E RUBIA
+    to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
     subject: "Solicitação de criação de setor/cargo",
     text: `
       Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Painel Salubritá.
@@ -2148,12 +2148,12 @@ async function enviarEmailSetorCargo(dados) {
 async function enviarEmailCredenciamento(dados) {
   await transporter.sendMail({
     from: "Painel Salubritá <naoresponda@salubrita.com.br>",
-    to: "debora.fonseca@salubrita.com.br",
+    to: "contratos@salubrita.com.br",
     subject: "Solicitação de credenciamento",
     text: `
       Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Painel Salubritá.
       
-      Gentileza para dar prosseguimento à solicitação.
+      Gentileza dar prosseguimento à solicitação.
     `
   });
 }
@@ -2173,9 +2173,6 @@ async function enviarEmailReprovacao(email, motivo) {
       Ela permanecerá pendente até que as correções necessárias sejam realizadas.
 
       Por favor, acesse o Painel Salubritá para revisar e editar as informações.
-
-      Atenciosamente,
-      Equipe Salubritá
     `
   });
 }
@@ -2184,16 +2181,15 @@ async function enviarEmailReprovacao(email, motivo) {
 // SOBRE A CONSULTA
 async function enviarEmailObservacaoConsulta({ email, nomeFuncionario, observacao }) {
   await transporter.sendMail({
+    from: "Painel Salubritá <naoresponda@salubrita.com.br>",
     to: email,
     subject: "Consulta médica",
     html: `
-      <p>A solicitação referente ao colaborador <strong>${nomeFuncionario}</strong> foi aprovada.</p>
+      <p>A solicitação referente a novo cadastro/novo exame do(a) colaborador(a): ${nomeFuncionario} foi aprovada.</p>
 
       <p><strong>Observação da consulta:</strong></p>
 
-      <div style="background:#f4f4f4;padding:10px;border-left:4px solid #2fa4a9">
-        ${observacao.replace(/\n/g, "<br>")}
-      </div>
+      "${observacao.replace(/\n/g, "<br>")}"
     `
   });
 }

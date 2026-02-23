@@ -866,11 +866,11 @@ async function enviarEmailSolicitacao(dados) {
 
   // PRIORIDADE: FUNÇÃO / SETOR
   if (precisaFuncaoSetor) {
-    destinatario = "wasidrf@outlook.com"; // EMAIL NICOLLY, PAULINA E RUBIA
+    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
     assunto = "Solicitação de criação de função/setor";
 
     mensagem = `
-      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Painel Salubritá.
+      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Painel Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `;
@@ -878,11 +878,11 @@ async function enviarEmailSolicitacao(dados) {
 
   // SOMENTE SE NÃO TIVER FUNÇÃO/SETOR
   else if (precisaCredenciamento) {
-    destinatario = "fonsecadrf@outlook.com"; // EMAIL MARIA EDUARDA
+    destinatario = "contratos@outlook.com";
     assunto = "Solicitação de credenciamento";
 
     mensagem = `
-      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} - Unidade: ${dados.nome_unidade} foi gerada no Painel Salubritá.
+      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Painel Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `;
