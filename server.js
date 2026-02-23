@@ -86,7 +86,11 @@ const EXPORTA_DETALHES_PRESTADOR = {
   tipoSaida: "json"
 }
 
-const parser = new XMLParser({ ignoreAttributes: false });
+const parser = new XMLParser({
+  parseTagValue: false,
+  parseAttributeValue: false,
+  trimValues: false
+});
 
 // EXPORTA DADOS - TODAS EMPRESAS - (apenas ativos)
 app.get("/empresas", async (req, res) => {

@@ -120,7 +120,10 @@ async function preencherUnidadeFuncionario() {
   const res = await fetch(`/unidades/${empresa}`);
   unidadesCache = await res.json();
 
-  const unidade = unidadesCache.find(u => Number(u.codigo) === Number(codUnidade));
+  console.log("UNIDADES RETORNADAS:", unidadesCache);
+  console.table(unidadesCache);
+
+  const unidade = unidadesCache.find(u => String(u.codigo) === String(codUnidade));
 
   if (!unidade) {
     console.warn("Unidade não encontrada:", codUnidade);
@@ -157,12 +160,20 @@ async function preencherCargoFuncionario() {
   const res = await fetch(`/cargos/${empresa}`);
   const cargos = await res.json();
 
+  console.log("codCargo funcionário:", codCargo);
+  console.log("cargos retornados:", cargos);
+
   const cargo = cargos.find(c => String(c.codigo) === String(codCargo));
+
+  console.log("cargo encontrado:", cargo);
+
+  if (!cargo) {
+    console.warn("Cargo não encontrado para código:", codCargo);
+    return;
+  }
 
   document.getElementById("cargoNome").value = cargo.nome;
   document.getElementById("cargoCodigo").value = codCargo;
-
-  // PREENCHER FUNÇÃO ANTERIOR COM O MESMO VALOR DO CARGO
   document.getElementById("funcao_anterior").value = cargo.nome;
 }
 
