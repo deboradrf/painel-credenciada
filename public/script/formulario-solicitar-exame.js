@@ -20,6 +20,7 @@ const nomeEmpresa = usuarioLogado.nome_empresa;
 
 // CACHE
 let prestadoresCache = [];
+let unidadesCache = [];
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
@@ -117,9 +118,9 @@ async function preencherUnidadeFuncionario() {
   }
 
   const res = await fetch(`/unidades/${empresa}`);
-  const unidades = await res.json();
+  unidadesCache = await res.json();
 
-  const unidade = unidades.find(u => Number(u.codigo) === Number(codUnidade));
+  const unidade = unidadesCache.find(u => Number(u.codigo) === Number(codUnidade));
 
   if (!unidade) {
     console.warn("Unidade não encontrada:", codUnidade);
@@ -373,16 +374,17 @@ function adicionarUnidade() {
   contadorUnidades++;
 
   const container = document.getElementById("unidadesContainer");
-  const selectBase = document.getElementById("unidadeSelect");
 
-  const options = Array.from(selectBase.options)
-    .filter(opt => opt.value)
-    .map(opt =>
-      `<option value="${opt.value}"
-          data-nome="${opt.dataset.nome}">
-          ${opt.textContent}
-        </option>`
-    ).join("");
+  if (!unidadesCache || unidadesCache.length === 0) {
+    alert("Nenhuma unidade disponível.");
+    return;
+  }
+
+  const options = unidadesCache.map(u => `
+      <option value="${u.codigo}" data-nome="${u.nome}">
+          ${u.nome}
+      </option>
+  `).join("");
 
   container.insertAdjacentHTML("beforeend", `
     <div class="form-group mt-2 unidade-extra">
