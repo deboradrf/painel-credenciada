@@ -107,7 +107,6 @@ function preencherDadosFuncionarioSoc() {
 }
 
 // FUNÇÃO PARA PREENCHER A UNIDADE DO FUNCIONÁRIO (SOC)
-// FUNÇÃO PARA PREENCHER A UNIDADE DO FUNCIONÁRIO (SOC)
 async function preencherUnidadeFuncionario() {
   const empresa = usuarioLogado.cod_empresa;
   const codUnidade = funcionarioAtual.cod_unidade;
