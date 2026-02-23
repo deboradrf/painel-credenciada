@@ -89,11 +89,17 @@ document.getElementById("checkMostrarTudo").addEventListener("change", function 
   aplicarFiltros();
 });
 
+// FUNÇÃO PARA ESCONDER SOLICITAÇÕES POR PADRÃO
 let mostrarConcluidos = false;
 
 function deveExibir(s) {
   if (mostrarConcluidos) {
     return true;
+  }
+
+  // ESCONDER CANCELADOS
+  if (s.status === "CANCELADO") {
+    return false;
   }
 
   if (s.tipo === "NOVO_EXAME" && s.status === "APROVADO") {
