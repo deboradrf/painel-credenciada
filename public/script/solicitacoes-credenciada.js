@@ -161,7 +161,7 @@ function renderizarTabela(lista) {
     `;
     }
 
-    const podeEnviarSOC = s.tipo === "NOVO_CADASTRO" && s.status === "APROVADO";
+    const podeEnviarSOC = (s.tipo === "NOVO_CADASTRO" && s.status === "APROVADO") || s.status === "ERRO_SOC";
 
     tr.innerHTML = `
       <td>${iconeTipo}</td>
