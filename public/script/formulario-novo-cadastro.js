@@ -115,6 +115,7 @@ function validarDataHoraExame() {
 
 // FUNÇÃO PARA GERAR MAIS UNIDADES PRA SOLICITAR ASO
 let contadorUnidades = 0;
+const limiteUnidades = 5;
 
 function ativarUnidades(ativar) {
   const container = document.getElementById("unidadesContainer");
@@ -139,6 +140,11 @@ function ativarUnidades(ativar) {
 }
 
 function adicionarUnidade() {
+  if (contadorUnidades >= limiteUnidades) {
+    alert("Você pode adicionar no máximo 5 unidades adicionais.");
+    return;
+  }
+  
   contadorUnidades++;
 
   const container = document.getElementById("unidadesContainer");
