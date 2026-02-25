@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("filterCPF").value = "";
     document.getElementById("filterStatus").value = "";
 
-    renderizarTabela(solicitacoes);
+    aplicarFiltros();
   });
 
   carregarSolicitacoes();
@@ -78,11 +78,42 @@ function aplicarFiltros() {
     const matchTipo = !tipo || s.tipo === tipo;
     const matchCPF = !cpf || s.cpf.includes(cpf);
     const matchStatus = !status || s.status === status;
+    const matchVisibilidade = deveExibir(s);
 
-    return matchTipo && matchCPF && matchStatus;
+    return matchTipo && matchCPF && matchStatus && matchVisibilidade;
   });
 
   renderizarTabela(filtradas);
+}
+
+// BOTÃO PARA MOSTRAR AS SOLICITAÇÕES CONCLUÍDAS
+document.getElementById("checkMostrarTudo").addEventListener("change", function () {
+  mostrarConcluidos = this.checked;
+  aplicarFiltros();
+});
+
+// FUNÇÃO PARA ESCONDER SOLICITAÇÕES POR PADRÃO
+let mostrarConcluidos = false;
+
+function deveExibir(s) {
+  if (mostrarConcluidos) {
+    return true;
+  }
+
+  // ESCONDER CANCELADOS
+  if (s.status === "CANCELADO") {
+    return false;
+  }
+
+  if (s.tipo === "NOVO_EXAME" && s.status === "APROVADO") {
+    return false;
+  }
+
+  if (s.tipo === "NOVO_CADASTRO" && s.status === "ENVIADO_SOC") {
+    return false;
+  }
+
+  return true;
 }
 
 // FUNÇÃO PARA CARREGAR HISTÓRICO DAS SOLICITAÇÕES
@@ -95,7 +126,7 @@ async function carregarSolicitacoes() {
     return new Date(a.solicitado_em) - new Date(b.solicitado_em);
   });
 
-  renderizarTabela(solicitacoes);
+  aplicarFiltros();
 }
 
 // FUNÇÃO PARA RENDERIZAR A TABELA E MOSTRAR OS DADOS

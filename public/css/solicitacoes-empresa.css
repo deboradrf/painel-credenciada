@@ -242,6 +242,38 @@ h3::after {
   max-width: 100%;
 }
 
+.grupo-opcoes {
+    grid-column: 1 / -1;   /* ocupa todas as colunas do grid */
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.check-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.check-container .form-check-input {
+    margin: 0;
+    position: relative;
+    top: 0;
+}
+
+.form-check-input:checked {
+    background-color: #F1AE33 !important;
+    border-color: #F1AE33 !important;
+}
+
+.form-check-input:focus {
+    outline: none;
+    box-shadow: none !important;
+    border-color: #F1AE33;
+}
+
 .filters {
     display: grid;
     grid-template-columns: 260px 1fr 1fr auto;
