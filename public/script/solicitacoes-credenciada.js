@@ -587,7 +587,7 @@ function preencherEmailsExtras(cadastro) {
   }
 }
 
-
+// BLOCO PARA MOSTRAR AS UNIDADES EXTRAS
 function preencherMaisUnidadesExame(exame) {
   const container = document.getElementById("exame_mais_unidades");
   const bloco = document.getElementById("bloco_exame_mais_unidades");
@@ -598,15 +598,15 @@ function preencherMaisUnidadesExame(exame) {
 
     exame.unidades_extras.forEach(u => {
       const div = document.createElement("div");
-      div.classList.add("mb-1");
-      div.innerText = u.nome_unidade;
+      div.innerText = `${u.cod_unidade} - ${u.nome_unidade}`;
       container.appendChild(div);
     });
 
-    bloco?.classList.remove("d-none");
+    bloco.classList.remove("d-none");
 
   } else {
-    bloco?.classList.add("d-none");
+
+    bloco.classList.add("d-none");
   }
 }
 
@@ -980,18 +980,6 @@ function preencherModal(s, tipo) {
       selectCargo.style.display = "none";
     }
 
-    // MOSTRAR / ESCONDER BLOCO DE MAIS UNIDADES
-    const blocoMaisUnidades = document.getElementById("bloco_mais_unidades");
-
-    if (blocoMaisUnidades) {
-      if (s.solicitar_mais_unidades && Array.isArray(s.mais_unidades) && s.mais_unidades.length > 0) {
-        blocoMaisUnidades.classList.remove("d-none");
-      }
-      else {
-        blocoMaisUnidades.classList.add("d-none");
-      }
-    }
-
     // MOSTRAR / ESCONDER BLOCO DE NOVO CREDENCIAMENTO
     const blocoEstadoClinica = document.getElementById("divEstadoClinica");
     const blocoCidadeClinica = document.getElementById("divCidadeClinica");
@@ -1194,18 +1182,6 @@ function preencherModal(s, tipo) {
 
       selectClinica.classList.add("d-none");
       selectClinica.style.display = "none";
-    }
-
-    // MOSTRAR / ESCONDER BLOCO DE MAIS UNIDADES
-    const blocoExameMaisUnidades = document.getElementById("bloco_exame_mais_unidades");
-
-    if (blocoExameMaisUnidades) {
-      if (s.solicitar_mais_unidades && Array.isArray(s.mais_unidades) && s.mais_unidades.length > 0) {
-        blocoExameMaisUnidades.classList.remove("d-none");
-      }
-      else {
-        blocoExameMaisUnidades.classList.add("d-none");
-      }
     }
 
     // MOSTRAR / ESCONDER TEXTAREA DE MOTIVO DA CONSULTA

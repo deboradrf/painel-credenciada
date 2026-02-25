@@ -341,19 +341,28 @@ document.addEventListener("DOMContentLoaded", () => {
   const tipoExame = document.getElementById("tipo_exame");
   const blocoMaisUnidades = document.getElementById("blocoSolicitarMaisUnidades");
 
-  tipoExame.addEventListener("change", () => {
-    const tiposPermitidos = ["PERIODICO", "MUDANCA_RISCOS_OCUPACIONAIS", "DEMISSIONAL"];
+  if (!tipoExame || !blocoMaisUnidades) return;
+
+  function verificarTipoExame() {
+
+    const tiposPermitidos = [
+      "PERIODICO",
+      "MUDANCA_RISCOS_OCUPACIONAIS",
+      "DEMISSIONAL"
+    ];
 
     if (tiposPermitidos.includes(tipoExame.value)) {
+
       blocoMaisUnidades.style.display = "block";
     } else {
       blocoMaisUnidades.style.display = "none";
 
       ativarUnidades(false);
     }
-  });
+  }
+  tipoExame.addEventListener("change", verificarTipoExame);
 
-  tipoExame.dispatchEvent(new Event("change"));
+  verificarTipoExame();
 });
 
 // FUNÇÃO PARA GERAR MAIS UNIDADES PRA SOLICITAR ASO

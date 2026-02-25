@@ -599,6 +599,57 @@ h5::after {
     transform: translateY(-2px);
 }
 
+/* ÍCONE DE AJUDA */
+.help-icon {
+  margin-left: 6px;
+  color: #F1AE33;
+  cursor: pointer;
+  position: relative;
+  font-size: 14px;
+}
+
+.help-icon:hover {
+  color: #6c757d;
+}
+
+/* Tooltip */
+.help-icon::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+/* Setinha */
+.help-icon::before {
+  content: "";
+  position: absolute;
+  bottom: 115%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #333;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Mostrar tooltip */
+.help-icon:hover::after,
+.help-icon:hover::before {
+  opacity: 1;
+}
+
 .footer-container {
     filter: drop-shadow(0 -3px 12px rgba(0, 0, 0, 0.12));
 }
