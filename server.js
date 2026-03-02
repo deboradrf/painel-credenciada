@@ -1995,43 +1995,44 @@ app.get("/soc/funcionario-por-cpf/:cpf/:empresaUsuario", async (req, res) => {
 
     const registros = Array.isArray(parsed) ? parsed : [parsed];
 
-    if (!registros.length || !registros[0] || !registros[0].CPFFUNCIONARIO) {
+    if (!registros.length || !registros[0]?.CPFFUNCIONARIO) {
       return res.json({ existe: false });
     }
 
-    const f = registros[0];
+    const funcionarios = registros.map(f => ({
+      codigo_empresa: f.CODIGOEMPRESA,
+      nome_empresa: f.NOMEEMPRESA,
+
+      nome: f.NOME,
+      cpf: f.CPFFUNCIONARIO,
+      matricula: f.MATRICULAFUNCIONARIO,
+      situacao: f.SITUACAO,
+
+      data_nascimento: f.DATA_NASCIMENTO,
+      data_admissao: f.DATA_ADMISSAO,
+      data_demissao: f.DATA_DEMISSAO || null,
+      data_inativacao: f.DATA_INATIVACAO || null,
+
+      unidade: {
+        codigo: f.CODIGOUNIDADE,
+        nome: f.NOMEUNIDADE
+      },
+
+      setor: {
+        codigo: f.CODIGOSETOR,
+        nome: f.NOMESETOR
+      },
+
+      cargo: {
+        codigo: f.CODIGOCARGO,
+        nome: f.NOMECARGO,
+        cbo: f.CBOCARGO
+      }
+    }));
 
     return res.json({
       existe: true,
-      funcionario: {
-        codigo_empresa: f.CODIGOEMPRESA,
-        nome_empresa: f.NOMEEMPRESA,
-
-        nome: f.NOME,
-        cpf: f.CPFFUNCIONARIO,
-        matricula: f.MATRICULAFUNCIONARIO,
-        situacao: f.SITUACAO,
-
-        data_nascimento: f.DATA_NASCIMENTO,
-        data_admissao: f.DATA_ADMISSAO,
-        data_demissao: f.DATA_DEMISSAO || null,
-
-        unidade: {
-          codigo: f.CODIGOUNIDADE,
-          nome: f.NOMEUNIDADE
-        },
-
-        setor: {
-          codigo: f.CODIGOSETOR,
-          nome: f.NOMESETOR
-        },
-
-        cargo: {
-          codigo: f.CODIGOCARGO,
-          nome: f.NOMECARGO,
-          cbo: f.CBOCARGO
-        }
-      }
+      funcionarios
     });
 
   } catch (err) {
@@ -2117,7 +2118,7 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
     }
 
     await transporter.sendMail({
-      from: "Painel Salubritá <naoresponda@salubrita.com.br>",
+      from: "Portal Salubritá <naoresponda@salubrita.com.br>",
       to: destinatario,
       subject: assunto,
       text: mensagem
@@ -2138,11 +2139,12 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
 
 async function enviarEmailSetorCargo(dados) {
   await transporter.sendMail({
-    from: "Painel Salubritá <naoresponda@salubrita.com.br>",
-    to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
+    from: "Portal Salubritá <naoresponda@salubrita.com.br>",
+    //to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de criação de setor/cargo",
     text: `
-      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Painel Salubritá.
+      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `
@@ -2151,11 +2153,12 @@ async function enviarEmailSetorCargo(dados) {
 
 async function enviarEmailCredenciamento(dados) {
   await transporter.sendMail({
-    from: "Painel Salubritá <naoresponda@salubrita.com.br>",
-    to: "contratos@salubrita.com.br",
+    from: "Portal Salubritá <naoresponda@salubrita.com.br>",
+    //to: "contratos@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de credenciamento",
     text: `
-      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Painel Salubritá.
+      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `
@@ -2165,7 +2168,7 @@ async function enviarEmailCredenciamento(dados) {
 // FUNÇÃO PRA ENVIAR E-MAIL PRA PESSOA DA SOLICITAÇÃO QUANDO FOR REPROVADA
 async function enviarEmailReprovacao(email, motivo) {
   await transporter.sendMail({
-    from: "Painel Salubritá <naoresponda@salubrita.com.br>",
+    from: "Portal Salubritá <naoresponda@salubrita.com.br>",
     to: email,
     subject: "Sua solicitação foi reprovada",
     text:
@@ -2176,7 +2179,7 @@ async function enviarEmailReprovacao(email, motivo) {
 
       Ela permanecerá pendente até que as correções necessárias sejam realizadas.
 
-      Por favor, acesse o Painel Salubritá para revisar e editar as informações.
+      Gentileza acessar o Portal Salubritá para revisar e editar as informações.
     `
   });
 }
@@ -2185,7 +2188,7 @@ async function enviarEmailReprovacao(email, motivo) {
 // SOBRE A CONSULTA
 async function enviarEmailObservacaoConsulta({ email, nomeFuncionario, observacao }) {
   await transporter.sendMail({
-    from: "Painel Salubritá <naoresponda@salubrita.com.br>",
+    from: "Portal Salubritá <naoresponda@salubrita.com.br>",
     to: email,
     subject: "Consulta médica",
     html: `

@@ -344,7 +344,7 @@ h3::after {
     color: #17575B;
 }
 
-.alert-encontrou-inativo, .alert-invalido {
+.alert-invalido {
     display: flex;
     align-items: center;
     padding: 0.8rem;
@@ -355,7 +355,8 @@ h3::after {
     color: #7A5A1A;
 }
 
-.alert-nao-encontrou, .alert-erro {
+.alert-nao-encontrou,
+.alert-erro {
     display: flex;
     align-items: center;
     padding: 0.8rem;
@@ -366,15 +367,30 @@ h3::after {
     color: #992525;
 }
 
+.badge-ativo {
+    padding: 5px 10px;
+    background-color: #53A5A6;
+    color: #FFFFFF;
+}
+
+.badge-inativo {
+    padding: 5px 10px;
+    background-color: #F1AE33;
+    color: #FFFFFF;
+}
+
+.card {
+    opacity: 0;
+    animation: fadeInUp 0.8s forwards;
+}
+
 .detail-item {
-    background: #ffffff;
+    background: #F9F9F9;
     border-radius: 0.6rem;
     padding: 8px 12px;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    opacity: 0;
-    animation: fadeInUp 0.5s forwards;
 }
 
 @keyframes fadeInUp {
@@ -387,22 +403,6 @@ h3::after {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-.row.g-2 .col-12:nth-child(1) .detail-item {
-    animation-delay: 0.1s;
-}
-
-.row.g-2 .col-12:nth-child(2) .detail-item {
-    animation-delay: 0.3s;
-}
-
-.row.g-2 .col-12:nth-child(3) .detail-item {
-    animation-delay: 0.5s;
-}
-
-.row.g-2 .col-12:nth-child(4) .detail-item {
-    animation-delay: 0.7s;
 }
 
 .detail-item.horizontal {
@@ -444,7 +444,7 @@ h3::after {
     animation: fadeInUp 0.5s forwards;
 }
 
-.btn-solicitar-exame, .btn-cadastrar-funcionario-inativo {
+.btn-solicitar-exame {
     background-color: #FFFFFF;
     border: 1px solid #E5E7EB;
     border-radius: 8px;
@@ -455,11 +455,6 @@ h3::after {
     padding: 0 10px 0 10px;
     width: 300px;
     height: 40px;
-    transition: all 0.25s ease;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeInUp 0.5s forwards;
-    animation-delay: 1s;
 }
 
 .footer-container {

@@ -67,7 +67,7 @@ async function buscarCPF() {
     resultado.innerHTML = `
       <div class="alerts-container mb-4">
         <div class="alert alert-invalido">
-          <i class="fa-solid fa-circle-xmark fa-lg" style="color: #F1AE33"></i>
+          <i class="fa-solid fa-circle-exclamation fa-lg" style="color: #F1AE33"></i>
           <p class="alert-text">CPF inválido</p>
         </div>
       </div>
@@ -79,183 +79,173 @@ async function buscarCPF() {
 
   try {
     const res = await fetch(`/soc/funcionario-por-cpf/${cpf}/${empresaUsuario}`);
-
     const data = await res.json();
 
-    // CPF NÃO EXISTE NA EMPRESA
-    if (!data.existe) {
+    let funcionarios = [];
+
+    if (Array.isArray(data.funcionarios)) {
+      funcionarios = data.funcionarios;
+    } else if (data.funcionario) {
+      funcionarios = [data.funcionario];
+    }
+
+    // NÃO ENCONTROU NENHUM CADASTRO
+    if (!data.existe || funcionarios.length === 0) {
       resultado.innerHTML = `
         <div class="alerts-container mb-4">
           <div class="alert alert-nao-encontrou">
             <i class="fa-solid fa-circle-xmark fa-lg" style="color: #F05252"></i>
-            <p class="alert-text">Funcionário não encontrado. Solicite um novo cadastro</p>
+            <p class="alert-text">
+              Nenhum cadastro encontrado para este CPF
+            </p>
           </div>
         </div>
 
         <div class="d-flex justify-content-center my-3">
           <button class="btn-cadastrar-funcionario"
-            onclick="window.location.href='formulario-novo-cadastro.html'">
-            Cadastrar funcionário
+             onclick="window.location.href='formulario-novo-cadastro.html'"> Cadastrar funcionário
           </button>
         </div>
       `;
       return;
     }
 
-    const f = data.funcionario;
-
-    // CPF EXISTE MAS ESTÁ INATIVO
-    if (f.situacao?.toLowerCase() === "inativo") {
-      resultado.innerHTML = `
-        <div class="alerts-container mb-2">
-          <div class="alert alert-encontrou-inativo">
-            <i class="fa-solid fa-circle-exclamation fa-lg" style="color: #F1AE33"></i>
-            <p class="alert-text">Funcionário encontrado, porém está INATIVO. Solicite um novo cadastro</p>
-          </div>
-        </div>
-
-        <div class="row g-2">
-          <div class="col-12">
-            <div class="detail-item horizontal">
-              <div class="detail-label">
-                <span>Nome</span>
-              </div>
-              <div class="detail-value">
-                ${f.nome}
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12">
-            <div class="detail-item horizontal">
-              <div class="detail-label">
-                <span>Matrícula eSocial</span>
-              </div>
-              <div class="detail-value">
-                ${f.matricula || "-"}
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12">
-            <div class="detail-item horizontal">
-              <div class="detail-label">
-                <span>Data de Demissão</span>
-              </div>
-              <div class="detail-value">
-                ${f.data_demissao || "-"}
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12">
-            <div class="detail-item horizontal">
-              <div class="detail-label">
-                <span>Situação</span>
-              </div>
-              <div class="detail-value">
-                ${f.situacao}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="d-flex justify-content-center my-3">
-          <button class="btn-cadastrar-funcionario-inativo"
-            onclick="window.location.href='formulario-novo-cadastro.html'">
-            Cadastrar funcionário
-          </button>
-        </div>
-      `;
-      return;
-    }
-
-    // CPF EXISTE E ESTÁ ATIVO
-    const funcionario = {
-      nome: f.nome,
-      cpf: f.cpf,
-      matricula: f.matricula,
-      data_nascimento: f.data_nascimento,
-      data_admissao: f.data_admissao,
-      cod_unidade: f.unidade?.codigo,
-      cod_setor: f.setor?.codigo,
-      cod_cargo: f.cargo?.codigo
-    };
-
-    localStorage.setItem("funcionario", JSON.stringify(funcionario));
-
-    resultado.innerHTML = `      
-      <div class="alerts-container mb-2">
+    // ENCONTROU ALGUM CADASTRO
+    resultado.innerHTML = `
+      <div class="alerts-container mb-3">
         <div class="alert alert-encontrou-ativo">
           <i class="fa-solid fa-circle-check fa-lg" style="color: #53A5A6"></i>
-          <p class="alert-text">Funcionário encontrado</p>
+          <p class="alert-text">
+            Foi encontrado ${funcionarios.length} cadastro(s) para este CPF
+          </p>
         </div>
       </div>
-        
-      <div class="row g-2">
-        <div class="col-12">
-          <div class="detail-item horizontal">
-            <div class="detail-label">
-              <span>Nome</span>
-            </div>
+      
+      ${funcionarios.map((f) => `
+        <div class="card text-center my-4">
+
+          <div class="card-header d-flex justify-content-between align-items-center"">
             <div class="detail-value">
               ${f.nome}
             </div>
-          </div>
-        </div>
-
-        <div class="col-12">
-          <div class="detail-item horizontal">
-            <div class="detail-label">
-              <span>Matrícula eSocial</span>
-            </div>
-            <div class="detail-value">
-              ${f.matricula || "-"}
+            <div class="ms-auto">
+              <span class="${f.situacao?.toLowerCase() === "ativo" ? "badge badge-ativo" : "badge badge-inativo"}">
+                ${f.situacao}
+              </span>
             </div>
           </div>
-        </div>
 
-        <div class="col-12">
-          <div class="detail-item horizontal">
-            <div class="detail-label">
-              <span>Data de Admissão</span>
-            </div>
-            <div class="detail-value">
-              ${f.data_admissao || "-"}
+          <div class="card-body">
+            <div class="row g-2">
+              <div class="col-12">
+                <div class="detail-item horizontal">
+                  <div class="detail-label">
+                    <span>Unidade</span>
+                  </div>
+                  <div class="detail-value">
+                    ${f.unidade?.nome || "-"}
+                    </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="detail-item horizontal">
+                  <div class="detail-label">
+                    <span>Setor</span>
+                  </div>
+                  <div class="detail-value">
+                    ${f.setor?.nome || "-"}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="detail-item horizontal">
+                  <div class="detail-label">
+                    <span>Cargo</span>
+                  </div>
+                  <div class="detail-value">
+                    ${f.cargo?.nome || "-"}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="detail-item horizontal">
+                  <div class="detail-label">
+                    <span>Data de Admissão</span>
+                  </div>
+                  <div class="detail-value">
+                    ${f.data_admissao || "-"}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="detail-item horizontal">
+                  <div class="detail-label">
+                    <span>Data de Demissão</span>
+                  </div>
+                  <div class="detail-value">
+                    ${f.data_demissao || "-"}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="detail-item horizontal">
+                  <div class="detail-label">
+                    <span>Matrícula eSocial</span>
+                  </div>
+                  <div class="detail-value">
+                    ${f.matricula || "-"}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="col-12">
-          <div class="detail-item horizontal">
-            <div class="detail-label">
-              <span>Situação</span>
-            </div>
-            <div class="detail-value">
-              ${f.situacao}
-            </div>
+          <div class="card-footer text-body-secondary">
+            ${f.situacao?.toLowerCase() === "ativo" ? `
+              <div class="d-flex justify-content-center my-3">
+                <button class="btn-solicitar-exame"
+                  onclick="salvarFuncionario(${JSON.stringify(f).replace(/"/g, '&quot;')}); window.location.href='formulario-solicitar-exame.html'">
+                  Solicitar exame para este funcionário
+                </button>
+              </div>
+            ` : "Não é possível solicitar exame para este funcionário. Solicite novo cadastro"}
           </div>
         </div>
-      </div>
-
-      <div class="d-flex justify-content-center my-3">
-        <button class="btn-solicitar-exame"
-          onclick="window.location.href='formulario-solicitar-exame.html'">
-          Solicitar exame para este funcionário
-        </button>
-      </div>
+      `).join("")}
     `;
 
   } catch (err) {
-    console.error(err);
+    console.error("❌ ERRO:", err);
     resultado.innerHTML = `
       <div class="alerts-container mb-4">
         <div class="alert alert-erro">
           <i class="fa-solid fa-circle-xmark fa-lg" style="color: #F05252"></i>
           <p class="alert-text">Erro ao consultar CPF. Tente novamente</p>
         </div>
-      </div>`;
+      </div>
+    `;
   }
+}
+
+// FUNÇÃO PARA SALVAR OS DADOS DO FUNCIONÁRIO SELECIONADO NO LOCALSTORAGE
+function salvarFuncionario(f) {
+  const funcionario = {
+    nome: f.nome,
+    cpf: f.cpf,
+    matricula: f.matricula,
+    data_nascimento: f.data_nascimento,
+    data_admissao: f.data_admissao,
+    cod_unidade: f.unidade?.codigo,
+    cod_setor: f.setor?.codigo,
+    cod_cargo: f.cargo?.codigo
+  };
+
+  localStorage.setItem("funcionario", JSON.stringify(funcionario));
 }
 
 // MÁSCARA DE CPF

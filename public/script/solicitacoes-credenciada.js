@@ -127,7 +127,7 @@ async function carregarSolicitacoes() {
 }
 
 // FUNÇÃO PARA RENDERIZAR TABELA COM AS SOLICITAÇÕES
-function renderizarTabela(lista) {
+async function renderizarTabela(lista) {
   const tbody = document.querySelector("tbody");
   tbody.innerHTML = "";
 
@@ -144,8 +144,11 @@ function renderizarTabela(lista) {
 
   lista.forEach(s => {
     const tr = document.createElement("tr");
+
     const status = (s.status || "PENDENTE").toUpperCase();
     const statusClass = status.toLowerCase();
+
+    const podeEnviarSOC = (s.tipo === "NOVO_CADASTRO" && s.status === "APROVADO") || s.status === "ERRO_SOC";
 
     let iconeTipo = "";
 
@@ -161,8 +164,6 @@ function renderizarTabela(lista) {
     `;
     }
 
-    const podeEnviarSOC = (s.tipo === "NOVO_CADASTRO" && s.status === "APROVADO") || s.status === "ERRO_SOC";
-
     tr.innerHTML = `
       <td>${iconeTipo}</td>
       <td>${formatarDataHora(s.solicitado_em)}</td>
@@ -176,7 +177,7 @@ function renderizarTabela(lista) {
       <td class="actions">
         <div class="actions-wrapper">
           <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
-            Analisar 
+            Analisar
           </button>
 
           ${podeEnviarSOC ? `
@@ -304,8 +305,6 @@ async function carregarCargosDoSetorSelecionado(empresaCodigo, unidadeCodigo, se
 
     const cargos = await response.json();
 
-    console.log("Cargos carregados:", cargos);
-
     cargos.forEach(cargo => {
 
       const option = document.createElement("option");
@@ -416,6 +415,16 @@ async function verDetalhes(id, tipo) {
       },
       { once: true }
     );
+
+    modalElement.addEventListener(
+      "hidden.bs.modal",
+      async () => {
+        await fetch(`/analise/${solicitacaoAtualId}`, { method: "DELETE" });
+        solicitacaoAtualId = null;
+        carregarSolicitacoes();
+      },
+      { once: true }
+    );
   } catch (err) {
     console.error(err);
     alert("Erro ao carregar detalhes");
@@ -445,77 +454,29 @@ function preencherMaisUnidades(cadastro) {
   }
 }
 
-// // FUNÇÃO PARA POPULAR O SELECT DE SETOR DO FUNCIONÁRIO NO MODAL DE NOVO CADASTRO
-// async function carregarSetoresSolicitacaoCadastro(empresaCodigo, selecionadoNome = "") {
+// // FUNÇÃO PARA POPULAR O SELECT DE CARGOS NO MODAL DE NOVO CADASTRO
+// async function mostrarCargoAtualDoFuncionario(empresaCodigo, selecionadoNome = "") {
 //   if (!empresaCodigo) return;
 
-//   const select = document.getElementById("setorSelect");
+//   const select = document.getElementById("cargoSelect");
 //   select.innerHTML = '<option value="">-</option>';
 
 //   try {
-//     const res = await fetch(`/setores/${empresaCodigo}`);
-//     const setores = await res.json();
+//     const res = await fetch(`/cargos/${empresaCodigo}`);
+//     const cargos = await res.json();
 
-//     setores.forEach(s => {
+//     cargos.forEach(c => {
 //       const opt = document.createElement("option");
-//       opt.value = s.codigo;
-//       opt.textContent = s.nome;
+//       opt.value = c.codigo;
+//       opt.textContent = c.nome;
 
-//       if (s.nome === selecionadoNome) opt.selected = true;
+//       if (c.nome === selecionadoNome) opt.selected = true;
 //       select.appendChild(opt);
 //     });
 //   } catch (err) {
-//     console.error("Erro ao carregar setores:", err);
+//     console.error("Erro ao carregar cargos:", err);
 //   }
 // }
-
-// // FUNÇÃO PARA POPULAR O SELECT DE SETOR ATUAL NO MODAL DE NOVO EXAME
-// async function carregarSetoresSolicitacaoExame(empresaCodigo, selecionadoNome = "") {
-//   if (!empresaCodigo) return;
-
-//   const select = document.getElementById("setorAtualSelect");
-//   select.innerHTML = '<option value="">-</option>';
-
-//   try {
-//     const res = await fetch(`/setores/${empresaCodigo}`);
-//     const setores = await res.json();
-
-//     setores.forEach(s => {
-//       const opt = document.createElement("option");
-//       opt.value = s.codigo;
-//       opt.textContent = s.nome;
-
-//       if (s.nome === selecionadoNome) opt.selected = true;
-//       select.appendChild(opt);
-//     });
-//   } catch (err) {
-//     console.error("Erro ao carregar setores:", err);
-//   }
-// }
-
-// FUNÇÃO PARA POPULAR O SELECT DE CARGOS NO MODAL DE NOVO CADASTRO
-async function mostrarCargoAtualDoFuncionario(empresaCodigo, selecionadoNome = "") {
-  if (!empresaCodigo) return;
-
-  const select = document.getElementById("cargoSelect");
-  select.innerHTML = '<option value="">-</option>';
-
-  try {
-    const res = await fetch(`/cargos/${empresaCodigo}`);
-    const cargos = await res.json();
-
-    cargos.forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = c.codigo;
-      opt.textContent = c.nome;
-
-      if (c.nome === selecionadoNome) opt.selected = true;
-      select.appendChild(opt);
-    });
-  } catch (err) {
-    console.error("Erro ao carregar cargos:", err);
-  }
-}
 
 // FUNÇÃO PARA POPULAR O SELECT DE FUNÇÃO ATUAL NO MODAL DE NOVO EXAME
 async function carregarFuncao(empresaCodigo, selecionadoNome = "") {
@@ -778,8 +739,32 @@ async function carregarPrestadoresPreferenciais(codEmpresa, selectId, clinicaSel
   }
 }
 
+async function obterCodigoSetorPorNome(codEmpresa, codUnidade, nomeSetor) {
+
+  if (!hierarquiaAtual) {
+
+    const res = await fetch(`/hierarquia/${codEmpresa}/${codUnidade}`);
+    hierarquiaAtual = await res.json();
+  }
+
+  const setor = hierarquiaAtual.find(s => {
+
+    const nome =
+      s.nomeSetor ||
+      s.nome_setor ||
+      s.descricao ||
+      "";
+
+    return nome.trim().toLowerCase() === nomeSetor.trim().toLowerCase();
+  });
+
+  return setor
+    ? setor.codigoSetor || setor.codigo_setor
+    : null;
+}
+
 // FUNÇÃO PARA PREENCHER O MODAL
-function preencherModal(s, tipo) {
+async function preencherModal(s, tipo) {
   window.statusAtualSolicitacao = s.status;
   window.empresaAtual = s.cod_empresa;
   window.unidadeAtual = s.cod_unidade;
@@ -973,8 +958,10 @@ function preencherModal(s, tipo) {
       spanCargo.style.display = "none";
       selectCargo.style.display = "block";
 
-      // POPULAR O SELECT COM TODOS OS CARGOS DA EMPRESA DA SOLICITAÇÃO
-      mostrarCargoAtualDoFuncionario(s.cod_empresa, spanCargo.innerText);
+      if (s.cod_setor) {
+        carregarCargosDoSetorSelecionado(s.cod_empresa, s.cod_unidade, s.cod_setor, s.nome_cargo, "cargoSelect");
+      }
+
     } else {
       spanCargo.style.display = "block";
       selectCargo.style.display = "none";
@@ -1070,32 +1057,25 @@ function preencherModal(s, tipo) {
     document.getElementById("exame_observacao").innerText = s.observacao || "-";
 
     // MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE RISCOS OCUPACIONAIS
-    const blocoFuncaoAnterior = document.getElementById("divFuncaoAnterior");
-    const blocoFuncaoAtual = document.getElementById("divFuncaoAtual");
     const blocoNovaFuncao = document.getElementById("divNovaFuncao");
     const blocoDescricaoAtividade = document.getElementById("divExameDescricaoAtividade");
-    const blocoSetorAtual = document.getElementById("divSetorAtual");
     const blocoNovoSetor = document.getElementById("divExameNovoSetor");
 
     // ESCONDER POR PADRÃO
-    [blocoFuncaoAnterior, blocoFuncaoAtual, blocoNovaFuncao, blocoDescricaoAtividade, blocoSetorAtual, blocoNovoSetor].forEach(el => el?.classList.add("d-none"));
+    [blocoNovaFuncao, blocoDescricaoAtividade, blocoNovoSetor].forEach(el => el?.classList.add("d-none"));
 
     if (s.tipo_exame === "MUDANCA_RISCOS_OCUPACIONAIS") {
 
       if (s.solicitar_nova_funcao === true) {
-        blocoFuncaoAnterior?.classList.remove("d-none");
-        blocoFuncaoAtual?.classList.remove("d-none");
         blocoNovaFuncao?.classList.remove("d-none");
         blocoDescricaoAtividade?.classList.remove("d-none");
 
-        document.getElementById("exame_funcao_anterior").innerText = s.funcao_anterior || "-";
         document.getElementById("exame_funcao_atual").innerText = s.funcao_atual || "-";
         document.getElementById("exame_nova_funcao").innerText = s.nome_nova_funcao || "-";
         document.getElementById("exame_descricao_atividade").innerText = s.descricao_atividade || "-";
       }
 
       if (s.solicitar_novo_setor === true) {
-        blocoSetorAtual?.classList.remove("d-none");
         blocoNovoSetor?.classList.remove("d-none");
 
         document.getElementById("exame_setor_atual").innerText = s.setor_atual || "-";
@@ -1150,12 +1130,33 @@ function preencherModal(s, tipo) {
     const spanFuncao = document.getElementById("exame_funcao_atual");
     const selectFuncao = document.getElementById("funcaoAtualSelect");
 
-    if (s.solicitar_novo_setor) {
+    if (s.solicitar_nova_funcao === true) {
+
       spanFuncao.style.display = "none";
       selectFuncao.style.display = "block";
 
-      // POPULAR O SELECT COM TODOS OS SETORES DA EMPRESA DA SOLICITAÇÃO
-      carregarFuncao(s.cod_empresa, spanFuncao.innerText);
+      let codigoSetor = null;
+
+      // Se o setor atual já veio preenchido, busca o código dele
+      if (s.setor_atual && s.setor_atual.trim() !== "") {
+        codigoSetor = await obterCodigoSetorPorNome(
+          s.cod_empresa,
+          s.cod_unidade,
+          s.setor_atual
+        );
+      }
+
+      // Carrega os cargos do setor encontrado (ou do setor default se codigoSetor for null)
+      if (codigoSetor) {
+        await carregarCargosDoSetorSelecionado(
+          s.cod_empresa,
+          s.cod_unidade,
+          codigoSetor,
+          s.funcao_atual,
+          "funcaoAtualSelect"
+        );
+      }
+
     } else {
       spanFuncao.style.display = "block";
       selectFuncao.style.display = "none";

@@ -543,6 +543,25 @@ td {
     border: none;
 }
 
+/* CAMPOS MAIÚSCULOS AO EDITAR */
+#editCadNomeFantasia,
+#editCadRazaoSocial,
+#editCadRua,
+#editCadBairro,
+#editCadEstado,
+#editCadNovoSetor,
+#editCadNovoCargo,
+#editCadLabToxicologico,
+#editCadEstadoCredenciamento,
+#editCadCidadeCredenciamento,
+#editExameNovaFuncao,
+#editExameNovoSetor,
+#editExameLabToxicologico,
+#editExameEstadoCredenciamento,
+#editExameCidadeCredenciamento {
+    text-transform: uppercase;
+}
+
 .detail-item {
     background: #F9FAFB;
     border-radius: 14px;

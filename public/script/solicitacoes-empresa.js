@@ -167,12 +167,7 @@ function renderizarTabela(lista) {
     // AÇÕES
     let acoes = "Nenhuma ação a ser feita";
 
-    if (
-      s.status === "PENDENTE_UNIDADE" ||
-      s.status === "PENDENTE_SC" ||
-      s.status === "PENDENTE_CREDENCIAMENTO" ||
-      s.status === "PENDENTE"
-    ) {
+    if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || s.status === "PENDENTE") {
       if (s.tipo === "NOVO_EXAME") {
         acoes = `
           <button onclick="cancelarSolicitacao(
@@ -332,41 +327,6 @@ async function abrirModalEditar(id, tipo) {
   }
 }
 
-// CAMPO DE NOME FANTASIA SEMPRE MAIÚSCULO
-const inputNomeFantasia = document.getElementById("editCadNomeFantasia");
-
-inputNomeFantasia.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE RAZÃO SOCIAL SEMPRE MAIÚSCULO
-const inputRazaoSocial = document.getElementById("editCadRazaoSocial");
-
-inputRazaoSocial.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE RUA SEMPRE MAIÚSCULO
-const inputRua = document.getElementById("editCadRua");
-
-inputRua.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE BAIRRO SEMPRE MAIÚSCULO
-const inputBairro = document.getElementById("editCadBairro");
-
-inputBairro.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE ESTADO SEMPRE MAIÚSCULO
-const inputEstado = document.getElementById("editCadEstado");
-
-inputEstado.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
 // MÁSCARA DE CEP
 const inputCep = document.getElementById("editCadCep");
 
@@ -382,27 +342,6 @@ inputCep.addEventListener("input", function () {
   }
 });
 
-// CAMPO DE NOVO SETOR SEMPRE MAIÚSCULO
-const inputNovoSetor = document.getElementById("editCadNovoSetor");
-
-inputNovoSetor.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE NOVO CARGO SEMPRE MAIÚSCULO
-const inputNovoCargo = document.getElementById("editCadNovoCargo");
-
-inputNovoCargo.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE NOME LABORATÓRIO SEMPRE MAIÚSCULO
-const inputNomeLaboratorio = document.getElementById("editCadLabToxicologico");
-
-inputNomeLaboratorio.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
 // CAMPO DE ESTADO CREDENCIAMENTO SEMPRE MAIÚSCULO
 const inputEstadoCredenciamento = document.getElementById("editCadEstadoCredenciamento");
 
@@ -410,13 +349,7 @@ inputEstadoCredenciamento.addEventListener("input", function () {
   this.value = this.value.toUpperCase();
 });
 
-// CAMPO DE CIDADE CREDENCIAMENTO SEMPRE MAIÚSCULO
-const inputCidadeCredenciamento = document.getElementById("editCadCidadeCredenciamento");
-
-inputCidadeCredenciamento.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
+// FUNÇÃO PARA FORMATAR DATA
 function formatarDataParaInput(dataIso) {
   if (!dataIso) return "";
 
@@ -441,41 +374,6 @@ document.querySelectorAll('.data-mask').forEach(input => {
       e.target.value = valor;
     }
   });
-});
-
-// CAMPO DE NOVA FUNÇÃO SEMPRE MAIÚSCULO
-const inputNovaFuncao = document.getElementById("editExameNovaFuncao");
-
-inputNovaFuncao.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE NOVO SETOR SEMPRE MAIÚSCULO
-const inputExameNovoSetor = document.getElementById("editExameNovoSetor");
-
-inputExameNovoSetor.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE NOME LABORATORIO SEMPRE MAIÚSCULO
-const inputLaboratorioToxicologico = document.getElementById("editExameLabToxicologico");
-
-inputLaboratorioToxicologico.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE ESTADO PARA CREDENCIAMENTO SEMPRE MAIÚSCULO
-const inputExameEstadoCredenciamento = document.getElementById("editExameEstadoCredenciamento");
-
-inputExameEstadoCredenciamento.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE CIDADE PARA CREDENCIAMENTO SEMPRE MAIÚSCULO
-const inputExameCidadeCredenciamento = document.getElementById("editExameCidadeCredenciamento");
-
-inputExameCidadeCredenciamento.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
 });
 
 // FUNÇÃO PARA PREENCHER OS CAMPOS DO MODAL - NOVO CADASTRO
@@ -519,7 +417,7 @@ function preencherModalEditarCadastro(s) {
   document.getElementById("editCadNovoCargo").value = s.nome_novo_cargo;
   document.getElementById("editCadDescricaoAtividade").value = s.descricao_atividade;
   document.getElementById("editCadRac").value = s.rac,
-    document.getElementById("editCadTiposRac").value = s.tipos_rac;
+  document.getElementById("editCadTiposRac").value = s.tipos_rac;
   document.getElementById("editCadTipoExame").value = s.tipo_exame;
   document.getElementById("editCadDataExame").value = formatarDataParaInput(s.data_exame);
   document.getElementById("editCadMaisUnidades").innerText = s.mais_unidades;
@@ -619,16 +517,6 @@ function preencherModalEditarCadastro(s) {
     blocoDescricaoAtividade.classList.add("d-none");
   }
 
-  // MOSTRAR / OCULTAR SEÇÃO DE TIPO RAC
-  const blocoTiposRac = document.getElementById("divCadTiposRac");
-
-  if (s.rac !== "FORMULARIO_RAC_VALE") {
-    blocoTiposRac.classList.add("d-none");
-  }
-  else {
-    blocoTiposRac.classList.remove("d-none");
-  }
-
   // MOSTRAR / ESCONDER SEÇÃO DE NOVO CREDENCIAMENTO
   const blocoClinica = document.getElementById("blocoCadClinica");
   const blocoCredenciamento = document.getElementById("blocoCadCredenciamento");
@@ -688,6 +576,7 @@ function formatarCPF(cpf) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const editCadCPF = document.getElementById("editCadCPF");
+  
   if (editCadCPF) {
     editCadCPF.addEventListener("input", (e) => {
       e.target.value = formatarCPF(e.target.value);
@@ -794,16 +683,6 @@ function preencherModalEditarExame(s) {
   } else {
     editExameMaisUnidades.innerHTML = "";
     blocoMaisUnidades.classList.add("d-none");
-  }
-
-  // MOSTRAR / OCULTAR SEÇÃO DE TIPO RAC
-  const blocoTiposRac = document.getElementById("divExameTiposRac");
-
-  if (s.rac !== "FORMULARIO_RAC_VALE") {
-    blocoTiposRac.classList.add("d-none");
-  }
-  else {
-    blocoTiposRac.classList.remove("d-none");
   }
 
   const blocoDescricaoAtividade = document.getElementById("divExameDescricaoAtividade");

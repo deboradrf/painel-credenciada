@@ -120,7 +120,6 @@ async function preencherUnidadeFuncionario() {
   const res = await fetch(`/unidades/${empresa}`);
   unidadesCache = await res.json();
 
-  console.log("UNIDADES RETORNADAS:", unidadesCache);
   console.table(unidadesCache);
 
   const unidade = unidadesCache.find(u => String(u.codigo) === String(codUnidade));
@@ -160,12 +159,7 @@ async function preencherCargoFuncionario() {
   const res = await fetch(`/cargos/${empresa}`);
   const cargos = await res.json();
 
-  console.log("codCargo funcionário:", codCargo);
-  console.log("cargos retornados:", cargos);
-
   const cargo = cargos.find(c => String(c.codigo) === String(codCargo));
-
-  console.log("cargo encontrado:", cargo);
 
   if (!cargo) {
     console.warn("Cargo não encontrado para código:", codCargo);
@@ -289,30 +283,6 @@ racSelect.addEventListener("change", () => {
   if (!isVale) {
     racValeOpcao.value = "";
   }
-});
-
-// NÃO PERMITIR DATAS MANUAIS COM MAIS DE 4 DÍGITOS NO ANO
-document.addEventListener("DOMContentLoaded", function () {
-  const inputDataExame = document.getElementById("data_exame");
-  const inputVencimentoCNH = document.getElementById("vencimento_cnh");
-
-  function limitarAno(input) {
-    if (!input) return;
-
-    input.addEventListener("input", function () {
-      let valor = input.value;
-      const partes = valor.split("-");
-
-      if (partes[0]) {
-        partes[0] = partes[0].slice(0, 4);
-      }
-
-      input.value = partes.join("-");
-    });
-  }
-
-  limitarAno(inputDataExame);
-  limitarAno(inputVencimentoCNH);
 });
 
 // LISTENER DOS CAMPOS DE DATA/HORA DO EXAME (SÓ PERMITIR MAIS DE 24H DA SOLICITAÇÃO)
@@ -894,11 +864,12 @@ async function enviarEmailSolicitacao(dados) {
 
   // PRIORIDADE: FUNÇÃO / SETOR
   if (precisaFuncaoSetor) {
-    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
+    //destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de criação de função/setor";
 
     mensagem = `
-      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Painel Salubritá.
+      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `;
@@ -906,11 +877,12 @@ async function enviarEmailSolicitacao(dados) {
 
   // SOMENTE SE NÃO TIVER FUNÇÃO/SETOR
   else if (precisaCredenciamento) {
-    destinatario = "contratos@outlook.com";
+    //destinatario = "contratos@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de credenciamento";
 
     mensagem = `
-      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Painel Salubritá.
+      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `;

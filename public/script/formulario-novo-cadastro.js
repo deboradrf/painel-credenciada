@@ -85,7 +85,6 @@ async function carregarNomeEmpresa() {
 
     if (empresaSelecionada) {
       nomeEmpresa = empresaSelecionada.nome;
-      console.log("empresaSelecionada:", empresaSelecionada);
     }
   } catch (err) {
     console.error("Erro ao carregar nome da empresa:", err);
@@ -959,34 +958,6 @@ racSelect.addEventListener("change", () => {
   }
 });
 
-// NÃO PERMITIR DATAS MANUAIS COM MAIS DE 4 DÍGITOS NO ANO
-document.addEventListener("DOMContentLoaded", function () {
-  const inputDataNascimento = document.getElementById("data_nascimento");
-  const inputDataAdmissao = document.getElementById("data_admissao");
-  const inputDataExame = document.getElementById("data_exame");
-  const inputVencimentoCNH = document.getElementById("vencimento_cnh");
-
-  function limitarAno(input) {
-    if (!input) return;
-
-    input.addEventListener("input", function () {
-      let valor = input.value;
-      const partes = valor.split("-");
-
-      if (partes[0]) {
-        partes[0] = partes[0].slice(0, 4);
-      }
-
-      input.value = partes.join("-");
-    });
-  }
-
-  limitarAno(inputDataNascimento);
-  limitarAno(inputDataAdmissao);
-  limitarAno(inputDataExame);
-  limitarAno(inputVencimentoCNH);
-});
-
 // FUNÇÃO PARA ENVIAR EMAIL NA HORA DA SOLICITAÇÃO
 async function enviarEmailSolicitacao(dados) {
   let destinatario = "";
@@ -995,11 +966,12 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CRIAÇÃO DE UNIDADE
   if (dados.solicitar_nova_unidade === true) {
-    destinatario = "clientes@salubrita.com.br";
+    //destinatario = "clientes@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de criação de nova unidade";
 
     mensagem = `
-      Uma solicitação para criação de unidade para Empresa: ${dados.nome_empresa} foi gerada no Painel Salubritá.
+      Uma solicitação para criação de unidade para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `;
@@ -1007,11 +979,12 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CRIAÇÃO DE NOVO SETOR/CARGO
   else if (dados.solicitar_novo_setor === true || dados.solicitar_novo_cargo === true) {
-    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
+    //destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de criação de setor/cargo";
 
     mensagem = `
-      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Painel Salubritá.
+      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `;
@@ -1019,11 +992,12 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CREDENCIAMENTO
   else if (dados.solicitar_credenciamento === true) {
-    destinatario = "contratos@salubrita.com.br";
+    //destinatario = "contratos@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de credenciamento";
 
     mensagem = `
-      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Painel Salubritá.
+      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `;
