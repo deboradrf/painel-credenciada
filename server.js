@@ -1821,7 +1821,6 @@ app.put("/solicitacoes/:tipo/:id/status", async (req, res) => {
       : "solicitacoes_novo_cadastro";
 
   try {
-
     const result = await pool.query(
       `
       UPDATE ${tabela}
@@ -1843,15 +1842,11 @@ app.put("/solicitacoes/:tipo/:id/status", async (req, res) => {
       sucesso: true,
       status_novo: result.rows[0].status
     });
-
   }
   catch (err) {
-
     console.error(err);
     res.status(500).json({ erro: "Erro ao atualizar status" });
-
   }
-
 });
 
 // ENVIO AO SOC
@@ -2127,7 +2122,7 @@ app.put("/usuarios/:id", async (req, res) => {
       `
       UPDATE usuarios
       SET email = $1,
-          senha = $2
+        senha = $2
       WHERE id = $3
       `,
       [email, senha, id]
@@ -2186,8 +2181,8 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
 async function enviarEmailSetorCargo(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    //to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
-    to: "debora.fonseca@salubrita.com.br",
+    to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
+    //to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de criação de setor/cargo",
     text: `
       Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
@@ -2200,8 +2195,8 @@ async function enviarEmailSetorCargo(dados) {
 async function enviarEmailCredenciamento(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    //to: "contratos@salubrita.com.br",
-    to: "debora.fonseca@salubrita.com.br",
+    to: "contratos@salubrita.com.br",
+    //to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de credenciamento",
     text: `
       Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
