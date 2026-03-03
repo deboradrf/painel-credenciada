@@ -1140,7 +1140,6 @@ async function carregarPrestadoresPreferenciais(codEmpresa, selectId, clinicaSel
 
 // LISTENER QUANDO SELECIONA O RADIO DE PENDENTE AGENDAMENTO
 document.querySelectorAll('input[name="statusConsulta"]').forEach(radio => {
-
   radio.addEventListener("change", async function () {
 
     if (this.value !== "PENDENTE_AGENDAMENTO")
@@ -1161,7 +1160,6 @@ document.querySelectorAll('input[name="statusConsulta"]').forEach(radio => {
 
 // FUNÇÃO PARA ATUALZIAR O STATUS PARA PENDENTE_AGENDAMENTO
 async function atualizarStatusParaPendenteAgendamento() {
-
   if (!solicitacaoAtualId || !tipoSolicitacaoAtual) {
     alert("Solicitação não identificada.");
     return;
@@ -1194,10 +1192,17 @@ async function atualizarStatusParaPendenteAgendamento() {
       modalInstance.hide();
     }
 
-    carregarSolicitacoes();
-  }
-  catch (err) {
+    document
+      .querySelectorAll('input[name="statusConsulta"]')
+      .forEach(radio => {
+        if (radio.value === "PENDENTE_AGENDAMENTO") {
+          radio.checked = false;
+        }
+      });
 
+    carregarSolicitacoes();
+
+  } catch (err) {
     console.error(err);
     alert("Erro ao atualizar status");
   }
