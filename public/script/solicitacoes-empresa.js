@@ -208,6 +208,19 @@ function renderizarTabela(lista) {
         <button onclick="abrirModalEditar(${s.solicitacao_id}, '${s.tipo}')">
           Editar
         </button>
+
+        <button onclick="cancelarSolicitacao(
+          ${s.solicitacao_id},
+          '${s.tipo}',
+          ${usuarioLogado.id},
+          '${s.status}',
+          ${s.solicitar_nova_unidade || false},
+          ${s.solicitar_novo_setor || false},
+          ${s.solicitar_novo_cargo || false},
+          ${s.solicitar_nova_funcao || false},
+          ${s.solicitar_credenciamento || false}
+        )">
+        Cancelar </button>
       `;
     }
 

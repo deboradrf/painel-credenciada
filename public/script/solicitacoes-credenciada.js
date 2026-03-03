@@ -1158,7 +1158,7 @@ document.querySelectorAll('input[name="statusConsulta"]').forEach(radio => {
   });
 });
 
-// FUNÇÃO PARA ATUALZIAR O STATUS PARA PENDENTE_AGENDAMENTO
+// FUNÇÃO PARA ATUALIZAR O STATUS PARA PENDENTE_AGENDAMENTO
 async function atualizarStatusParaPendenteAgendamento() {
   if (!solicitacaoAtualId || !tipoSolicitacaoAtual) {
     alert("Solicitação não identificada.");
