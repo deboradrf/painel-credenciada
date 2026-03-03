@@ -641,8 +641,9 @@ app.get("/solicitacoes/novo-cadastro/:id", async (req, res) => {
         sf.id AS solicitacao_id,
         f.*,
         sf.status,
-        sf.motivo_reprovacao,
+        sf.tipo_consulta,
         sf.observacao_consulta,
+        sf.motivo_reprovacao,
         sf.solicitado_em,
         u.nome AS solicitado_por_nome,
         u.email AS solicitado_por_email,
@@ -757,12 +758,7 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-unidade", async (req, res) => {
 app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
   const { id } = req.params;
 
-  const {
-    cod_setor,
-    nome_setor,
-    cod_cargo,
-    nome_cargo
-  } = req.body;
+  const { cod_setor, nome_setor, cod_cargo, nome_cargo } = req.body;
 
   const client = await pool.connect();
 
@@ -790,9 +786,9 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-sc", async (req, res) => {
 
     const { status, solicitar_novo_setor, solicitar_novo_cargo, solicitar_credenciamento } = check.rows[0];
 
-    if (status !== "PENDENTE_SC") {
+    if (status !== "PENDENTE_SC" && status !== "PENDENTE_REAVALIACAO") {
       return res.status(400).json({
-        erro: "Solicitação não está em PENDENTE_SC"
+        erro: "Solicitação não está em PENDENTE_SC ou PENDENTE_REAVALIACAO"
       });
     }
 
@@ -1081,8 +1077,9 @@ app.get("/solicitacoes/novo-exame/:id", async (req, res) => {
         sf.id AS solicitacao_id,
         f.*,
         sf.status,
-        sf.motivo_reprovacao,
+        sf.tipo_consulta,
         sf.observacao_consulta,
+        sf.motivo_reprovacao,
         sf.solicitado_em,
         u.nome AS solicitado_por_nome,
         u.email AS solicitado_por_email,
@@ -1128,7 +1125,7 @@ app.put("/solicitacoes/novo-exame/:id/salvar-sc", async (req, res) => {
     await client.query("BEGIN");
 
     const check = await client.query(
-      `
+    `
       SELECT
         s.status,
         nc.solicitar_nova_funcao,
@@ -1369,7 +1366,7 @@ app.get("/solicitacoes", async (req, res) => {
 // APROVAR / REPROVAR SOLICITAÇÃO
 app.post("/solicitacoes/:tipo/:id/analisar", async (req, res) => {
   const { tipo, id } = req.params;
-  const { status, motivo, usuario_id, observacao_consulta } = req.body;
+  const { status, motivo, usuario_id, tipo_consulta, observacao_consulta } = req.body;
 
   if (!["APROVADO", "REPROVADO"].includes(status)) {
     return res.status(400).json({ erro: "Status inválido" });
@@ -1395,13 +1392,15 @@ app.post("/solicitacoes/:tipo/:id/analisar", async (req, res) => {
         motivo_reprovacao = $2,
         analisado_por = $3,
         analisado_em = NOW(),
-        observacao_consulta = $4
-      WHERE id = $5
+        tipo_consulta = $4,
+        observacao_consulta = $5
+      WHERE id = $6
       `,
       [
         status,
         status === "REPROVADO" ? motivo : null,
         usuario_id,
+        tipo_consulta || null,
         observacao_consulta || null,
         id
       ]
@@ -1430,16 +1429,15 @@ app.post("/solicitacoes/:tipo/:id/analisar", async (req, res) => {
     if (status === "APROVADO" && observacao_consulta && observacao_consulta.trim()) {
       const { rows } = await pool.query(
         `
-    SELECT 
-      u.email,
-      f.nome_funcionario
-    FROM ${tabela} s
-    JOIN usuarios u ON u.id = s.solicitado_por
-    JOIN ${tipo === "NOVO_EXAME" ? "novo_exame" : "novo_cadastro"
-        } f ON f.id = ${tipo === "NOVO_EXAME" ? "s.novo_exame_id" : "s.novo_cadastro_id"
-        }
-    WHERE s.id = $1
-    `,
+          SELECT 
+            u.email,
+            f.nome_funcionario
+          FROM ${tabela} s
+          JOIN usuarios u ON u.id = s.solicitado_por
+          JOIN ${tipo === "NOVO_EXAME" ? "novo_exame" : "novo_cadastro"
+              } f ON f.id = ${tipo === "NOVO_EXAME" ? "s.novo_exame_id" : "s.novo_cadastro_id"}
+          WHERE s.id = $1
+        `,
         [id]
       );
 
@@ -1808,6 +1806,54 @@ function interpretarRetornoSOC(retorno) {
   };
 }
 
+// ROTA PARA ATUALIZAR O STATUS PARA PENDENTE_AGENDAMENTO
+app.put("/solicitacoes/:tipo/:id/status", async (req, res) => {
+  const { tipo, id } = req.params;
+  const { status, usuario_id } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ erro: "Status obrigatório" });
+  }
+
+  const tabela =
+    tipo === "NOVO_EXAME"
+      ? "solicitacoes_novo_exame"
+      : "solicitacoes_novo_cadastro";
+
+  try {
+
+    const result = await pool.query(
+      `
+      UPDATE ${tabela}
+      SET
+        status = $1,
+        analisado_por = $2,
+        analisado_em = NOW()
+      WHERE id = $3
+      RETURNING status
+      `,
+      [status, usuario_id, id]
+    );
+
+    if (!result.rows.length) {
+      return res.status(404).json({ erro: "Solicitação não encontrada" });
+    }
+
+    res.json({
+      sucesso: true,
+      status_novo: result.rows[0].status
+    });
+
+  }
+  catch (err) {
+
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao atualizar status" });
+
+  }
+
+});
+
 // ENVIO AO SOC
 app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
   const { id } = req.params;
@@ -1923,7 +1969,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
         `
         UPDATE solicitacoes_novo_cadastro
         SET status = 'ERRO_SOC',
-            erro_soc = $1
+          erro_soc = $1
         WHERE id = $2
         `,
         [resultadoSOC.mensagem, id]
@@ -1960,7 +2006,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
       `
       UPDATE solicitacoes_novo_cadastro
       SET status = 'ERRO_SOC',
-          erro_soc = $1
+        erro_soc = $1
       WHERE id = $2
       `,
       [err.message, id]
@@ -2140,8 +2186,8 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
 async function enviarEmailSetorCargo(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
-    //to: "debora.fonseca@salubrita.com.br",
+    //to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de criação de setor/cargo",
     text: `
       Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
@@ -2154,8 +2200,8 @@ async function enviarEmailSetorCargo(dados) {
 async function enviarEmailCredenciamento(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    to: "contratos@salubrita.com.br",
-    //to: "debora.fonseca@salubrita.com.br",
+    //to: "contratos@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de credenciamento",
     text: `
       Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.

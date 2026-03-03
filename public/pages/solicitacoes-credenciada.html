@@ -161,7 +161,7 @@
 
                     <div class="grupo-atualizar">
                         <button id="btnAtualizar" class="btn-atualizar">
-                            <i class="fa-solid fa-arrows-rotate fa-spin"></i>
+                            <i class="fa-solid fa-arrows-rotate fa-spin" style="color: #F1AE33"></i>
                             Atualizar
                         </button>
                     </div>
@@ -642,10 +642,53 @@
                     </div>
                 </div>
 
+                <hr>
+
                 <div class="modal-footer">
-                    <div class="footer-actions">
-                        <button type="button" class="btn-aprovar" id="btn-aprovar"
-                            onclick="analisarSolicitacao('APROVADO')">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tipoConsultaCadastro"
+                            id="cadastroOrdemChegada" value="ORDEM_CHEGADA">
+                        <label class="form-check-label" for="cadastroOrdemChegada">
+                            Ordem de chegada
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tipoConsultaCadastro"
+                            id="cadastroHorarioAgendado" value="HORARIO_AGENDADO">
+                        <label class="form-check-label" for="cadastroHorarioAgendado">
+                            Horário agendado
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="statusConsulta"
+                            id="cadastroPendenteAgendamento" value="PENDENTE_AGENDAMENTO">
+                        <label class="form-check-label" for="cadastroPendenteAgendamento">
+                            Pendente agendamento
+                        </label>
+                    </div>
+
+                    <div class="col-12" id="divObsConsultaCadastro">
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <span>Observação da consulta</span>
+                            </div>
+                            <textarea id="obsConsultaCadastro" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-12 div-motivo-reprovacao">
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <span>Motivo da reprovação</span>
+                            </div>
+                            <textarea id="motivoReprovacaoCadastro" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="footer-actions mt-4">
+                        <button type="button" class="btn-aprovar" id="btn-aprovar" onclick="analisarSolicitacao('APROVADO')">
                             <i class="fa-solid fa-check mx-1"></i>
                             Aprovar
                         </button>
@@ -655,29 +698,10 @@
                             Salvar
                         </button>
 
-                        <button type="button" class="btn-reprovar" id="btn-reprovar"
-                            onclick="analisarSolicitacao('REPROVADO')">
+                        <button type="button" class="btn-reprovar" id="btn-reprovar" onclick="analisarSolicitacao('REPROVADO')">
                             <i class="fa-solid fa-xmark"></i>
                             Reprovar
                         </button>
-                    </div>
-
-                    <div class="col-12" id="divCadMotivoReprovacao">
-                        <div class="detail-item mt-4">
-                            <div class="detail-label">
-                                <span>Motivo da reprovação</span>
-                            </div>
-                            <textarea id="motivoReprovacaoCadastro" class="form-control" rows="2"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="col-12 d-none" id="divObsConsultaCadastro">
-                        <div class="detail-item mt-2">
-                            <div class="detail-label">
-                                <span>Observação da consulta</span>
-                            </div>
-                            <textarea id="obsConsultaCadastro" class="form-control" rows="2"></textarea>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -819,21 +843,21 @@
                             </div>
                         </div>
 
-                        <div class="col-12 d-none" id="bloco_exame_mais_unidades">
-                            <div class="detail-item">
-                                <div class="detail-label">
-                                    <span>Solicitar ASO para unidades</span>
-                                </div>
-                                <div id="exame_mais_unidades" class="detail-value"></div>
-                            </div>
-                        </div>
-
                         <div class="col-6">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Data do Exame</span>
                                 </div>
                                 <span id="exame_data_exame" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 d-none" id="bloco_exame_mais_unidades">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Solicitar ASO para unidades</span>
+                                </div>
+                                <div id="exame_mais_unidades" class="detail-value"></div>
                             </div>
                         </div>
 
@@ -893,7 +917,7 @@
                             </div>
                         </div>
 
-                        <div class="col-6" id="divMotivoConsulta">
+                        <div class="col-12" id="divMotivoConsulta">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Motivo Consulta</span>
@@ -986,43 +1010,66 @@
                     </div>
                 </div>
 
+                <hr>
+
                 <div class="modal-footer">
-                    <div class="footer-actions">
-                        <button type="button" class="btn-aprovar" id="btn-aprovar-exame"
-                            onclick="analisarSolicitacao('APROVADO')">
-                            <i class="fa-solid fa-check mx-1"></i>
-                            Aprovar
-                        </button>
-
-                        <button type="button" class="btn-salvar" id="btn-salvar-exame" onclick="salvarEdicaoExame()">
-                            <i class="fa-solid fa-floppy-disk me-1"></i>
-                            Salvar
-                        </button>
-
-                        <button type="button" class="btn-reprovar" id="btn-reprovar-exame"
-                            onclick="analisarSolicitacao('REPROVADO')">
-                            <i class="fa-solid fa-xmark"></i>
-                            Reprovar
-                        </button>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tipoConsultaExame" id="exameOrdemChegada"
+                            value="ORDEM_CHEGADA">
+                        <label class="form-check-label" for="exameOrdemChegada">
+                            Ordem de chegada
+                        </label>
                     </div>
 
-                    <div class="col-12 mt-4" id="divExameMotivoReprovacao">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tipoConsultaExame" id="exameHorarioAgendado"
+                            value="HORARIO_AGENDADO">
+                        <label class="form-check-label" for="exameHorarioAgendado">
+                            Horário agendado
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="statusConsulta" id="examePendenteAgendamento"
+                            value="PENDENTE_AGENDAMENTO">
+                        <label class="form-check-label" for="examePendenteAgendamento">
+                            Pendente agendamento
+                        </label>
+                    </div>
+
+                    <div class="col-12" id="divObsConsultaExame">
                         <div class="detail-item">
-                            <div class="detail-label">
-                                <span>Motivo da reprovação</span>
-                            </div>
-                            <textarea id="motivoReprovacaoExame" class="form-control modern-textarea"
-                                rows="2"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="col-12 d-none" id="divObsConsultaExame">
-                        <div class="detail-item mt-2">
                             <div class="detail-label">
                                 <span>Observação da consulta</span>
                             </div>
                             <textarea id="obsConsultaExame" class="form-control" rows="2"></textarea>
                         </div>
+                    </div>
+
+                    <div class="col-12 div-motivo-reprovacao">
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <span>Motivo da reprovação</span>
+                            </div>
+                            <textarea id="motivoReprovacaoExame" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="footer-actions mt-4">
+                        <button type="button" class="btn-aprovar" onclick="analisarSolicitacao('APROVADO')">
+                            <i class="fa-solid fa-check mx-1"></i>
+                            Aprovar
+                        </button>
+
+                        <button type="button" class="btn-salvar" onclick="salvarEdicaoExame()">
+                            <i class="fa-solid fa-floppy-disk me-1"></i>
+                            Salvar
+                        </button>
+
+                        <button type="button" class="btn-reprovar" onclick="analisarSolicitacao('REPROVADO')">
+                            <i class="fa-solid fa-xmark"></i>
+                            Reprovar
+                        </button>
                     </div>
                 </div>
             </div>

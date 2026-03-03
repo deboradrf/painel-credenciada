@@ -1,5 +1,6 @@
 let usuarioLogado = null;
 let solicitacoes = [];
+let tipoSolicitacaoAtual = null;
 let solicitacaoAtualId = null;
 let hierarquiaAtual = null;
 
@@ -126,6 +127,42 @@ async function carregarSolicitacoes() {
   aplicarFiltros();
 }
 
+// FUNÇÃO PARA FORMATAR DATA E HORA DAS SOLICITAÇÕES
+function formatarDataHoraSolicitacoes(data) {
+  if (!data) return "-";
+
+  const d = new Date(data);
+
+  const dia = String(d.getDate()).padStart(2, "0");
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const ano = d.getFullYear();
+
+  const horas = String(d.getHours()).padStart(2, "0");
+  const minutos = String(d.getMinutes()).padStart(2, "0");
+
+  return `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+}
+
+// FUNÇÃO PARA APLICAR FILTROS
+function aplicarFiltros() {
+  const tipo = document.getElementById("filterTipo").value;
+  const empresa = document.getElementById("filterEmpresa").value.toLowerCase();
+  const cpf = document.getElementById("filterCPF").value;
+  const status = document.getElementById("filterStatus").value;
+
+  const filtradas = solicitacoes.filter(s => {
+    const matchTipo = !tipo || s.tipo === tipo;
+    const matchEmpresa = !empresa || (s.nome_empresa && s.nome_empresa.toLowerCase().includes(empresa));
+    const matchCPF = !cpf || s.cpf.includes(cpf);
+    const matchStatus = !status || s.status === status;
+    const matchVisibilidade = deveExibir(s);
+
+    return matchTipo && matchEmpresa && matchCPF && matchStatus && matchVisibilidade;
+  });
+
+  renderizarTabela(filtradas);
+}
+
 // FUNÇÃO PARA RENDERIZAR TABELA COM AS SOLICITAÇÕES
 async function renderizarTabela(lista) {
   const tbody = document.querySelector("tbody");
@@ -166,11 +203,11 @@ async function renderizarTabela(lista) {
 
     tr.innerHTML = `
       <td>${iconeTipo}</td>
-      <td>${formatarDataHora(s.solicitado_em)}</td>
+      <td>${formatarDataHoraSolicitacoes(s.solicitado_em)}</td>
       <td>${s.nome_empresa}</td>
       <td>${s.nome_funcionario}</td>
       <td>${s.cpf}</td>
-      <td>${s.cidade}</td>
+      <td>${(s.cidade).toUpperCase()}</td>
       <td>
         <span class="status-pill ${statusClass}">${s.status}</span>
       </td>
@@ -180,19 +217,22 @@ async function renderizarTabela(lista) {
             Analisar
           </button>
 
-          ${podeEnviarSOC ? `
+          ${podeEnviarSOC
+          ? `
             <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
               Enviar SOC
             </button>
-          ` : ""}
+            `
+          : ""}
 
           ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
-        ? `
+          ? `
             <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
               Cancelar
             </button>
-            ` : ""
-      }
+            `
+          : ""
+          }
         </div>
       </td>
     `;
@@ -201,179 +241,10 @@ async function renderizarTabela(lista) {
   });
 }
 
-function controlarObservacaoConsulta(cidade, tipo) {
-  let wrapper = null;
-
-  if (tipo === "NOVO_CADASTRO") {
-    wrapper = document.getElementById("divObsConsultaCadastro");
-  }
-
-  if (tipo === "NOVO_EXAME") {
-    wrapper = document.getElementById("divObsConsultaExame");
-  }
-
-  if (!wrapper) return;
-
-  if (cidade?.trim().toLowerCase() === "belo horizonte") {
-    wrapper.classList.remove("d-none");
-  } else {
-    wrapper.classList.add("d-none");
-  }
-}
-
-function getObservacaoConsultaAtual() {
-  const isExame = document
-    .getElementById("modalDetalhesNovoExame")
-    ?.classList.contains("show");
-
-  if (isExame) {
-    return document.querySelector("#divObsConsultaExame:not(.d-none) textarea");
-  } else {
-    return document.querySelector("#divObsConsultaCadastro:not(.d-none) textarea");
-  }
-}
-
-// FUNÇÃO PARA CARREGAR OS SETORES DA UNIDADE DA EMPRESA DA SOLICITAÇÃO NO SELECT
-async function carregarSetores(empresaCodigo, unidadeCodigo, setorSelecionado = "", selectId = "") {
-  const select = document.getElementById(selectId);
-
-  select.innerHTML = '<option value="">-</option>';
-
-  try {
-    const res = await fetch(`/hierarquia/${empresaCodigo}/${unidadeCodigo}`);
-    const data = await res.json();
-
-    hierarquiaAtual = data;
-
-    hierarquiaAtual.forEach(setor => {
-      const option = document.createElement("option");
-
-      option.value = setor.codigoSetor;
-      option.textContent = setor.nomeSetor;
-
-      if (setor.nomeSetor === setorSelecionado)
-        option.selected = true;
-
-      select.appendChild(option);
-    });
-  }
-  catch (err) {
-    console.error("Erro ao carregar setores:", err);
-  }
-}
-
-// LISTENER DE SELECIONAR O SETOR (NOVO CADASTRO)
-document.getElementById("setorSelect").addEventListener("change", function () {
-  const setorCodigo = this.value;
-
-  if (!setorCodigo) return;
-
-  carregarCargosDoSetorSelecionado(
-    window.empresaAtual,
-    window.unidadeAtual,
-    setorCodigo,
-    "",
-    "cargoSelect"
-  );
-});
-
-// LISTENER DE SELECIONAR O SETOR ATUAL
-document.getElementById("setorAtualSelect").addEventListener("change", function () {
-  const setorCodigo = this.value;
-
-  if (!setorCodigo) return;
-
-  carregarCargosDoSetorSelecionado(
-    window.empresaAtual,
-    window.unidadeAtual,
-    setorCodigo,
-    "",
-    "funcaoAtualSelect"
-  );
-});
-
-// FUNÇÃO PARA CARREGAR OS CARGOS DOS SETORES DA UNIDADE DA SOLICITAÇÃO NO SELECT
-async function carregarCargosDoSetorSelecionado(empresaCodigo, unidadeCodigo, setorCodigo, cargoSelecionado = "", selectId = "cargoSelect") {
-  const selectCargo = document.getElementById(selectId);
-
-  if (!selectCargo) return;
-
-  selectCargo.innerHTML = '<option value="">-</option>';
-
-  try {
-    const response = await fetch(`/hierarquia/${empresaCodigo}/${unidadeCodigo}/${setorCodigo}`);
-
-    const cargos = await response.json();
-
-    cargos.forEach(cargo => {
-
-      const option = document.createElement("option");
-
-      option.value = cargo.codigoCargo;
-      option.textContent = cargo.nomeCargo;
-
-      if (cargo.nomeCargo === cargoSelecionado)
-        option.selected = true;
-
-      selectCargo.appendChild(option);
-    });
-  }
-  catch (error) {
-    console.error("Erro ao carregar cargos:", error);
-  }
-}
-
-// FUNÇÃO PARA CANCELAR SOLICITAÇÃO PENDENTE
-async function cancelarSolicitacao(id, tipo, usuarioLogadoId) {
-  const confirmar = confirm("Tem certeza que deseja cancelar esta solicitação?");
-  if (!confirmar) return;
-
-  try {
-    const response = await fetch(`/solicitacoes/${tipo}/${id}/cancelar`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ usuario_id: usuarioLogadoId })
-    });
-
-    if (!response.ok) throw new Error("Erro na comunicação com o servidor");
-
-    const data = await response.json();
-
-    if (data.sucesso) {
-      alert("Solicitação cancelada com sucesso!");
-      carregarSolicitacoes();
-    } else {
-      alert(data.erro || "Não foi possível cancelar a solicitação.");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Erro na comunicação com o servidor.");
-  }
-}
-
-// FUNÇÃO PARA APLICAR FILTROS
-function aplicarFiltros() {
-  const tipo = document.getElementById("filterTipo").value;
-  const empresa = document.getElementById("filterEmpresa").value.toLowerCase();
-  const cpf = document.getElementById("filterCPF").value;
-  const status = document.getElementById("filterStatus").value;
-
-  const filtradas = solicitacoes.filter(s => {
-    const matchTipo = !tipo || s.tipo === tipo;
-    const matchEmpresa = !empresa || (s.nome_empresa && s.nome_empresa.toLowerCase().includes(empresa));
-    const matchCPF = !cpf || s.cpf.includes(cpf);
-    const matchStatus = !status || s.status === status;
-    const matchVisibilidade = deveExibir(s);
-
-    return matchTipo && matchEmpresa && matchCPF && matchStatus && matchVisibilidade;
-  });
-
-  renderizarTabela(filtradas);
-}
-
 // FUNÇÃO PARA VER DETALHES
 async function verDetalhes(id, tipo) {
   solicitacaoAtualId = id;
+  tipoSolicitacaoAtual = tipo;
 
   try {
     const url =
@@ -397,31 +268,15 @@ async function verDetalhes(id, tipo) {
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
 
+    const dadosModal = dados;
+
     modalElement.addEventListener(
       "shown.bs.modal",
       () => {
-        const cidadeConsulta = dados.solicitar_credenciamento
-          ? dados.cidade_credenciamento
-          : dados.cidade_clinica;
-
-        controlarObservacaoConsulta(cidadeConsulta, tipo);
-
-        // PREENCHER O CAMPO COM A OBSERVAÇÃO CONSULTA
         const textarea = getObservacaoConsultaAtual();
+        if (textarea) textarea.value = dadosModal.observacao_consulta || "";
 
-        if (textarea) {
-          textarea.value = dados.observacao_consulta || "";
-        }
-      },
-      { once: true }
-    );
-
-    modalElement.addEventListener(
-      "hidden.bs.modal",
-      async () => {
-        await fetch(`/analise/${solicitacaoAtualId}`, { method: "DELETE" });
-        solicitacaoAtualId = null;
-        carregarSolicitacoes();
+        marcarTipoConsultaSalvo(dadosModal.tipo_consulta, tipo);
       },
       { once: true }
     );
@@ -429,338 +284,6 @@ async function verDetalhes(id, tipo) {
     console.error(err);
     alert("Erro ao carregar detalhes");
   }
-}
-
-// FUNÇÃO PARA MOSTRAR AS UNIDADES ADICIONAIS CASO TENHA
-function preencherMaisUnidades(cadastro) {
-  const container = document.getElementById("cadastro_mais_unidades");
-  const bloco = document.getElementById("bloco_mais_unidades");
-
-  container.innerHTML = "";
-
-  if (Array.isArray(cadastro.unidades_extras) && cadastro.unidades_extras.length > 0) {
-
-    cadastro.unidades_extras.forEach(u => {
-      const div = document.createElement("div");
-      div.classList.add("mb-1");
-      div.innerText = `${u.cod_unidade} - ${u.nome_unidade}`;
-      container.appendChild(div);
-    });
-
-    bloco?.classList.remove("d-none");
-
-  } else {
-    bloco?.classList.add("d-none");
-  }
-}
-
-// // FUNÇÃO PARA POPULAR O SELECT DE CARGOS NO MODAL DE NOVO CADASTRO
-// async function mostrarCargoAtualDoFuncionario(empresaCodigo, selecionadoNome = "") {
-//   if (!empresaCodigo) return;
-
-//   const select = document.getElementById("cargoSelect");
-//   select.innerHTML = '<option value="">-</option>';
-
-//   try {
-//     const res = await fetch(`/cargos/${empresaCodigo}`);
-//     const cargos = await res.json();
-
-//     cargos.forEach(c => {
-//       const opt = document.createElement("option");
-//       opt.value = c.codigo;
-//       opt.textContent = c.nome;
-
-//       if (c.nome === selecionadoNome) opt.selected = true;
-//       select.appendChild(opt);
-//     });
-//   } catch (err) {
-//     console.error("Erro ao carregar cargos:", err);
-//   }
-// }
-
-// FUNÇÃO PARA POPULAR O SELECT DE FUNÇÃO ATUAL NO MODAL DE NOVO EXAME
-async function carregarFuncao(empresaCodigo, selecionadoNome = "") {
-  if (!empresaCodigo) return;
-
-  const select = document.getElementById("funcaoAtualSelect");
-  select.innerHTML = '<option value="">-</option>';
-
-  try {
-    const res = await fetch(`/cargos/${empresaCodigo}`);
-    const cargos = await res.json();
-
-    cargos.forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = c.codigo;
-      opt.textContent = c.nome;
-
-      if (c.nome === selecionadoNome) opt.selected = true;
-      select.appendChild(opt);
-    });
-  } catch (err) {
-    console.error("Erro ao carregar cargos:", err);
-  }
-}
-
-// FUNÇÃO PARA POPULAR O SELECT DE UNIDADES NO MODAL
-async function mostrarUnidadeAtualDoFuncionario(empresaCodigo, selecionadoNome = "") {
-  if (!empresaCodigo) return;
-
-  const select = document.getElementById("unidadeSelect");
-  select.innerHTML = '<option value="">-</option>';
-
-  try {
-    const res = await fetch(`/unidades/${empresaCodigo}`);
-    const unidades = await res.json();
-
-    unidades.forEach(u => {
-      const opt = document.createElement("option");
-      opt.value = u.codigo;
-      opt.textContent = u.nome;
-
-      if (u.nome === selecionadoNome) opt.selected = true;
-      select.appendChild(opt);
-    });
-  } catch (err) {
-    console.error("Erro ao carregar unidades:", err);
-  }
-}
-
-function preencherEmailsExtras(cadastro) {
-  const container = document.getElementById("cadastro_emails_extras");
-  const bloco = document.getElementById("bloco_emails_extras");
-
-  container.innerHTML = "";
-
-  if (Array.isArray(cadastro.emails_extras) && cadastro.emails_extras.length > 0) {
-
-    cadastro.emails_extras.forEach(email => {
-      const div = document.createElement("div");
-      div.classList.add("mb-1");
-      div.innerText = email;
-      container.appendChild(div);
-    });
-
-    bloco?.classList.remove("d-none");
-
-  } else {
-    bloco?.classList.add("d-none");
-  }
-}
-
-// BLOCO PARA MOSTRAR AS UNIDADES EXTRAS
-function preencherMaisUnidadesExame(exame) {
-  const container = document.getElementById("exame_mais_unidades");
-  const bloco = document.getElementById("bloco_exame_mais_unidades");
-
-  container.innerHTML = "";
-
-  if (Array.isArray(exame.unidades_extras) && exame.unidades_extras.length > 0) {
-
-    exame.unidades_extras.forEach(u => {
-      const div = document.createElement("div");
-      div.innerText = `${u.cod_unidade} - ${u.nome_unidade}`;
-      container.appendChild(div);
-    });
-
-    bloco.classList.remove("d-none");
-
-  } else {
-
-    bloco.classList.add("d-none");
-  }
-}
-
-// FUNÇÃO PARA FORMATAR OS TIPOS DE RAC
-function formatarTiposRac(tipos) {
-  if (!Array.isArray(tipos) || tipos.length === 0) return "-";
-
-  return tipos
-    .map(t => t.replace("RAC_", "RAC "))
-    .join(", ");
-}
-
-// FUNÇÃO PARA EDIÇÃO DA SOLICITAÇÃO DE CADASTRO
-function pegarDadosEdicaoCadastro(statusAtual) {
-  let payload = {};
-
-  payload = {
-    ...payload,
-    ...edicaoUnidade(statusAtual),
-    ...edicaoSetorCargo(statusAtual),
-    ...edicaoCredenciamento(statusAtual),
-  };
-
-  return payload;
-}
-
-function edicaoUnidade(statusAtual) {
-  const payload = {};
-
-  if (statusAtual === "PENDENTE_UNIDADE" || statusAtual === "PENDENTE_REAVALIACAO") {
-    const select = document.getElementById("unidadeSelect");
-
-    if (select && select.style.display !== "none" && select.value) {
-      const opt = select.options[select.selectedIndex];
-      payload.cod_unidade = select.value;
-      payload.nome_unidade = opt.textContent;
-    }
-  }
-
-  return payload;
-}
-
-function edicaoSetorCargo(statusAtual) {
-  const payload = {};
-
-  if (statusAtual !== "PENDENTE_SC" && statusAtual !== "PENDENTE_REAVALIACAO") return payload;
-
-  const selectSetor = document.getElementById("setorSelect");
-  if (selectSetor && selectSetor.style.display !== "none" && selectSetor.value) {
-    const opt = selectSetor.options[selectSetor.selectedIndex];
-    payload.cod_setor = selectSetor.value;
-    payload.nome_setor = opt.textContent;
-  }
-
-  const selectCargo = document.getElementById("cargoSelect");
-  if (selectCargo && selectCargo.style.display !== "none" && selectCargo.value) {
-    const opt = selectCargo.options[selectCargo.selectedIndex];
-    payload.cod_cargo = selectCargo.value;
-    payload.nome_cargo = opt.textContent;
-  }
-
-  return payload;
-}
-
-function edicaoCredenciamento(statusAtual) {
-  const payload = {};
-
-  if (
-    statusAtual !== "PENDENTE_CREDENCIAMENTO" &&
-    statusAtual !== "PENDENTE_REAVALIACAO"
-  ) return payload;
-
-  const select = document.getElementById("clinicaSelect");
-
-  if (select && select.style.display !== "none" && select.value) {
-    const opt = select.options[select.selectedIndex];
-    payload.cod_clinica = select.value;
-    payload.nome_clinica = opt.textContent;
-  }
-
-  return payload;
-}
-
-async function salvarEdicaoCadastro() {
-  if (!solicitacaoAtualId) {
-    alert("ID da solicitação não encontrado");
-    return;
-  }
-
-  const statusAtual = window.statusAtualSolicitacao;
-  const dadosEdicao = pegarDadosEdicaoCadastro(statusAtual);
-
-  let endpoint = "";
-
-  if (dadosEdicao.cod_unidade) {
-    endpoint = `/solicitacoes/novo-cadastro/${solicitacaoAtualId}/salvar-unidade`;
-  } else if (dadosEdicao.cod_setor || dadosEdicao.cod_cargo) {
-    endpoint = `/solicitacoes/novo-cadastro/${solicitacaoAtualId}/salvar-sc`;
-  } else if (dadosEdicao.cod_clinica) {
-    endpoint = `/solicitacoes/novo-cadastro/${solicitacaoAtualId}/salvar-credenciamento`;
-  }
-
-  if (!endpoint) {
-    alert("Nenhum alteração para salvar.");
-    return;
-  }
-
-  try {
-    const res = await fetch(endpoint, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dadosEdicao)
-    });
-
-    if (!res.ok) {
-      const txt = await res.text();
-      console.error(txt);
-      alert("Erro ao salvar (ver console)");
-      return;
-    }
-
-    alert("Salvo com sucesso");
-    bootstrap.Modal.getInstance(document.querySelector(".modal.show")).hide();
-    carregarSolicitacoes();
-
-  } catch (err) {
-    console.error(err);
-    alert("Erro de comunicação com o servidor");
-  }
-}
-
-// FUNÇÃO PARA CARREGAR AS CLÍNICAS COM CLASSIFICAÇÃO 'PREFERENCIAL' E POPULAR O SELECT
-async function carregarPrestadoresPreferenciais(codEmpresa, selectId, clinicaSelecionada = "") {
-  if (!codEmpresa) return;
-
-  const select = document.getElementById(selectId);
-  if (!select) return;
-
-  const res = await fetch(`/prestadores/${codEmpresa}`);
-  const prestadores = await res.json();
-
-  select.innerHTML = '<option value="">-</option>';
-
-  for (const p of prestadores) {
-    try {
-      const detalheRes = await fetch(`/prestador/${codEmpresa}/${p.codigo}`);
-
-      if (!detalheRes.ok) {
-        console.warn("Erro ao buscar detalhe:", p.codigo);
-        continue;
-      }
-
-      const detalhe = await detalheRes.json();
-
-      if (!detalhe.nivelClassificacao || detalhe.nivelClassificacao.toUpperCase() !== "PREFERENCIAL") continue;
-
-      const option = document.createElement("option");
-      option.value = p.codigo;
-      option.textContent = p.nome;
-
-      if (p.nome === clinicaSelecionada)
-        option.selected = true;
-
-      select.appendChild(option);
-
-    } catch (e) {
-      console.error("Erro no prestador:", p.codigo, e);
-    }
-  }
-}
-
-async function obterCodigoSetorPorNome(codEmpresa, codUnidade, nomeSetor) {
-
-  if (!hierarquiaAtual) {
-
-    const res = await fetch(`/hierarquia/${codEmpresa}/${codUnidade}`);
-    hierarquiaAtual = await res.json();
-  }
-
-  const setor = hierarquiaAtual.find(s => {
-
-    const nome =
-      s.nomeSetor ||
-      s.nome_setor ||
-      s.descricao ||
-      "";
-
-    return nome.trim().toLowerCase() === nomeSetor.trim().toLowerCase();
-  });
-
-  return setor
-    ? setor.codigoSetor || setor.codigo_setor
-    : null;
 }
 
 // FUNÇÃO PARA PREENCHER O MODAL
@@ -829,33 +352,6 @@ async function preencherModal(s, tipo) {
     document.getElementById("cadastro_cidade_credenciamento").innerText = s.cidade_credenciamento;
     document.getElementById("cadastro_observacao").innerText = s.observacao || "-";
 
-    const btnSalvar = document.getElementById("btn-salvar");
-    const btnAprovar = document.getElementById("btn-aprovar");
-
-    // ESCONDER TUDO POR PADRÃO
-    if (btnSalvar) btnSalvar.style.display = "none";
-    if (btnAprovar) btnAprovar.style.display = "none";
-
-    // MOSTRAR CONFORME STATUS
-    if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || s.status === "PENDENTE_REAVALIACAO") {
-      if (btnSalvar) btnSalvar.style.display = "inline-flex";
-    }
-
-    if (s.status === "PENDENTE") {
-      if (btnAprovar) btnAprovar.style.display = "inline-flex";
-    }
-
-    const btnReprovar = document.getElementById('btn-reprovar');
-    const blocoMotivoReprovacao = document.getElementById('divCadMotivoReprovacao');
-
-    if (s.status === 'APROVADO' || s.status === "ENVIADO_SOC") {
-      btnReprovar.style.display = 'none';
-      blocoMotivoReprovacao.style.display = 'none';
-    } else {
-      btnReprovar.style.display = 'inline-block';
-      blocoMotivoReprovacao.style.display = 'inline-block';
-    }
-
     // MOSTRAR / ESCONDER BLOCO DE NOVA UNIDADE
     const blocoNomeFantasia = document.getElementById("divNomeFantasia");
     const blocoRazaoSocial = document.getElementById("divRazaoSocial");
@@ -906,7 +402,7 @@ async function preencherModal(s, tipo) {
       spanUnidade.style.display = "none";
       selectUnidade.style.display = "block";
 
-      mostrarUnidadeAtualDoFuncionario(s.cod_empresa, s.nome_unidade);
+      carregarUnidades(s.cod_empresa, s.nome_unidade);
     } else {
       spanUnidade.style.display = "block";
       selectUnidade.style.display = "none";
@@ -1057,58 +553,39 @@ async function preencherModal(s, tipo) {
     document.getElementById("exame_observacao").innerText = s.observacao || "-";
 
     // MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE RISCOS OCUPACIONAIS
-    const blocoNovaFuncao = document.getElementById("divNovaFuncao");
-    const blocoDescricaoAtividade = document.getElementById("divExameDescricaoAtividade");
-    const blocoNovoSetor = document.getElementById("divExameNovoSetor");
-
-    // ESCONDER POR PADRÃO
-    [blocoNovaFuncao, blocoDescricaoAtividade, blocoNovoSetor].forEach(el => el?.classList.add("d-none"));
+    const blocosMudancaRisco = [
+      "divFuncaoAnterior",
+      "divSetorAtual",
+      "divExameNovoSetor",
+      "divFuncaoAtual",
+      "divNovaFuncao",
+      "divExameDescricaoAtividade"
+    ];
 
     if (s.tipo_exame === "MUDANCA_RISCOS_OCUPACIONAIS") {
+      // MOSTRAR TUDO
+      blocosMudancaRisco.forEach(id => { document.getElementById(id)?.classList.remove("d-none"); });
+
+      document.getElementById("exame_funcao_anterior").innerText = s.funcao_anterior || "-";
+      document.getElementById("exame_setor_atual").innerText = s.setor_atual || "-";
+      document.getElementById("exame_novo_setor").innerText = s.nome_novo_setor || "-";
+      document.getElementById("exame_funcao_atual").innerText = s.funcao_atual || "-";
+      document.getElementById("exame_nova_funcao").innerText = s.nome_nova_funcao || "-";
+      document.getElementById("exame_descricao_atividade").innerText = s.descricao_atividade || "-";
 
       if (s.solicitar_nova_funcao === true) {
-        blocoNovaFuncao?.classList.remove("d-none");
-        blocoDescricaoAtividade?.classList.remove("d-none");
-
-        document.getElementById("exame_funcao_atual").innerText = s.funcao_atual || "-";
-        document.getElementById("exame_nova_funcao").innerText = s.nome_nova_funcao || "-";
-        document.getElementById("exame_descricao_atividade").innerText = s.descricao_atividade || "-";
+        document.getElementById("divExameNovoSetor")?.classList.add("d-none");
       }
 
-      if (s.solicitar_novo_setor === true) {
-        blocoNovoSetor?.classList.remove("d-none");
-
-        document.getElementById("exame_setor_atual").innerText = s.setor_atual || "-";
-        document.getElementById("exame_novo_setor").innerText = s.nome_novo_setor || "-";
+      if (s.solicitar_nova_funcao === false && s.solicitar_novo_setor === false) {
+        document.getElementById("divExameNovoSetor")?.classList.add("d-none");
+        document.getElementById("divNovaFuncao")?.classList.add("d-none");
+        document.getElementById("divExameDescricaoAtividade")?.classList.add("d-none");
       }
-    }
 
-    // MOSTRAR / OCULTAR BOTÕES DE SALVAR E APROVAR
-    const btnSalvar = document.getElementById("btn-salvar-exame");
-    const btnAprovar = document.getElementById("btn-aprovar-exame");
-
-    // ESCONDER TUDO POR PADRÃO
-    if (btnSalvar) btnSalvar.style.display = "none";
-    if (btnAprovar) btnAprovar.style.display = "none";
-
-    // MOSTRAR CONFORME STATUS
-    if (s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || s.status === "PENDENTE_REAVALIACAO") {
-      if (btnSalvar) btnSalvar.style.display = "inline-flex";
-    }
-
-    if (s.status === "PENDENTE") {
-      if (btnAprovar) btnAprovar.style.display = "inline-flex";
-    }
-
-    const btnReprovar = document.getElementById('btn-reprovar-exame');
-    const blocoMotivoReprovacao = document.getElementById('divExameMotivoReprovacao');
-
-    if (s.status === 'APROVADO') {
-      btnReprovar.style.display = 'none';
-      blocoMotivoReprovacao.style.display = 'none';
     } else {
-      btnReprovar.style.display = 'inline-block';
-      blocoMotivoReprovacao.style.display = 'inline-block';
+      // ESCONDER TUDO
+      blocosMudancaRisco.forEach(id => { document.getElementById(id)?.classList.add("d-none"); });
     }
 
     // TRANSFORMAR O CAMPO DE SETOR ATUAL EM SELECT CASO PRECISE CRIAR UM NOVO PARA SER SELECIONADO APÓS CRIADO 
@@ -1227,6 +704,39 @@ async function preencherModal(s, tipo) {
     }
   }
 
+  // REGRA PARA MOSTRAR/OCULTAR BOTÃO DE SALVAR E APROVAR
+  const botoesSalvar = document.querySelectorAll(".btn-salvar");
+  const botoesAprovar = document.querySelectorAll(".btn-aprovar");
+
+  botoesSalvar.forEach(btn => btn.style.display = "none");
+  botoesAprovar.forEach(btn => btn.style.display = "none");
+
+  if (
+    s.status === "PENDENTE_UNIDADE" ||
+    s.status === "PENDENTE_SC" ||
+    s.status === "PENDENTE_CREDENCIAMENTO" ||
+    s.status === "PENDENTE_REAVALIACAO"
+  ) {
+    botoesSalvar.forEach(btn => btn.style.display = "inline-flex");
+  }
+
+  if (s.status === "PENDENTE" || s.status === "PENDENTE_AGENDAMENTO") {
+    botoesAprovar.forEach(btn => btn.style.display = "inline-flex");
+  }
+
+  // REGRA PARA MOSTRAR/OCULTAR BOTÃO DE REPROVAR E MOTIVO REPROVAÇÃO
+  const botoesReprovar = document.querySelectorAll(".btn-reprovar");
+  const blocosMotivoReprovacao = document.querySelectorAll(".div-motivo-reprovacao");
+
+  if (s.status === 'APROVADO' || s.status === "ENVIADO_SOC") {
+    botoesReprovar.forEach(btn => { btn.style.display = 'none'; });
+    blocosMotivoReprovacao.forEach(bloco => { bloco.style.display = 'none'; });
+
+  } else {
+    botoesReprovar.forEach(btn => { btn.style.display = 'inline-block'; });
+    blocosMotivoReprovacao.forEach(bloco => { bloco.style.display = 'inline-block'; });
+  }
+
   // MOSTRAR MOTIVO DE REPROVAÇÃO NA REAVALIAÇÃO
   const textareaMotivo =
     tipo === "NOVO_EXAME"
@@ -1271,7 +781,7 @@ async function preencherModal(s, tipo) {
         <div class="alert alert-aprovado">
           <i class="fa-solid fa-circle-check fa-lg" style="color: #53A5A6"></i>
           <p class="alert-text">
-            Aprovado por ${s.analisado_por_nome} em ${formatarDataHora(s.analisado_em)}
+            Aprovado por ${s.analisado_por_nome} em ${formatarDataHoraSolicitacoes(s.analisado_em)}
           </p>
         </div>
       </div>
@@ -1287,7 +797,7 @@ async function preencherModal(s, tipo) {
         <div class="alert alert-reprovado">
           <i class="fa-solid fa-circle-xmark fa-lg" style="color: #DC3545"></i>
           <p class="alert-text">
-            Reprovado por ${s.analisado_por_nome} em ${formatarDataHora(s.analisado_em)}
+            Reprovado por ${s.analisado_por_nome} em ${formatarDataHoraSolicitacoes(s.analisado_em)}
           </p>
         </div>
       </div>
@@ -1303,7 +813,7 @@ async function preencherModal(s, tipo) {
         <div class="alert alert-cancelado">
           <i class="fa-solid fa-ban fa-lg" style="color: #6C757D"></i>
           <p class="alert-text">
-            Cancelado por ${s.cancelado_por_nome} em ${formatarDataHora(s.cancelado_em)}
+            Cancelado por ${s.cancelado_por_nome} em ${formatarDataHoraSolicitacoes(s.cancelado_em)}
           </p>
         </div>
       </div>
@@ -1319,7 +829,7 @@ async function preencherModal(s, tipo) {
         <div class="alert alert-enviado">
           <i class="fa-solid fa-paper-plane fa-lg" style="color: #88A6BB"></i>
           <p class="alert-text">
-            Enviado ao SOC por ${s.enviado_soc_por_nome} em ${formatarDataHora(s.enviado_soc_em)}
+            Enviado ao SOC por ${s.enviado_soc_por_nome} em ${formatarDataHoraSolicitacoes(s.enviado_soc_em)}
           </p>
         </div>
       </div>
@@ -1328,16 +838,543 @@ async function preencherModal(s, tipo) {
   }
 }
 
+// FUNÇÃO PARA FORMATAR DATAS
+function formatarData(data) {
+  if (!data) return "-";
+
+  const d = new Date(data);
+  const dia = String(d.getDate()).padStart(2, "0");
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const ano = d.getFullYear();
+
+  return `${dia}/${mes}/${ano}`;
+}
+
+// FORMATAR CPF
+document.getElementById("filterCPF").addEventListener("input", function () {
+  let value = this.value.replace(/\D/g, "");
+
+  if (value.length > 11) value = value.slice(0, 11);
+
+  value = value.replace(/(\d{3})(\d)/, "$1.$2");
+  value = value.replace(/(\d{3})(\d)/, "$1.$2");
+  value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+
+  this.value = value;
+});
+
+// FUNÇÃO PARA MOSTRAR EMAILS EXTRAS
+function preencherEmailsExtras(cadastro) {
+  const container = document.getElementById("cadastro_emails_extras");
+  const bloco = document.getElementById("bloco_emails_extras");
+
+  container.innerHTML = "";
+
+  if (Array.isArray(cadastro.emails_extras) && cadastro.emails_extras.length > 0) {
+
+    cadastro.emails_extras.forEach(email => {
+      const div = document.createElement("div");
+      div.classList.add("mb-1");
+      div.innerText = email;
+      container.appendChild(div);
+    });
+
+    bloco?.classList.remove("d-none");
+
+  } else {
+    bloco?.classList.add("d-none");
+  }
+}
+
+// FUNÇÃO PARA POPULAR O SELECT DE UNIDADES NO MODAL
+async function carregarUnidades(empresaCodigo, selecionadoNome = "") {
+  if (!empresaCodigo) return;
+
+  const select = document.getElementById("unidadeSelect");
+  select.innerHTML = '<option value="">-</option>';
+
+  try {
+    const res = await fetch(`/unidades/${empresaCodigo}`);
+    const unidades = await res.json();
+
+    unidades.forEach(u => {
+      const opt = document.createElement("option");
+      opt.value = u.codigo;
+      opt.textContent = u.nome;
+
+      if (u.nome === selecionadoNome) opt.selected = true;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error("Erro ao carregar unidades:", err);
+  }
+}
+
+// BUSCAR CODIGO DO SETOR PELO NOME CASO ESSE CAMPO JÁ VENHA PREENCHIDO
+async function obterCodigoSetorPorNome(codEmpresa, codUnidade, nomeSetor) {
+  if (!hierarquiaAtual) {
+
+    const res = await fetch(`/hierarquia/${codEmpresa}/${codUnidade}`);
+    hierarquiaAtual = await res.json();
+  }
+
+  const setor = hierarquiaAtual.find(s => {
+    const nome = s.nomeSetor || s.nome_setor || s.descricao || "";
+
+    return nome.trim().toLowerCase() === nomeSetor.trim().toLowerCase();
+  });
+
+  return setor
+    ? setor.codigoSetor || setor.codigo_setor
+    : null;
+}
+
+// FUNÇÃO PARA CARREGAR OS SETORES DA UNIDADE DA EMPRESA DA SOLICITAÇÃO NO SELECT
+async function carregarSetores(empresaCodigo, unidadeCodigo, setorSelecionado = "", selectId = "") {
+  const select = document.getElementById(selectId);
+
+  select.innerHTML = '<option value="">-</option>';
+
+  try {
+    const res = await fetch(`/hierarquia/${empresaCodigo}/${unidadeCodigo}`);
+    const data = await res.json();
+
+    hierarquiaAtual = data;
+
+    hierarquiaAtual.forEach(setor => {
+      const option = document.createElement("option");
+
+      option.value = setor.codigoSetor;
+      option.textContent = setor.nomeSetor;
+
+      if (setor.nomeSetor === setorSelecionado)
+        option.selected = true;
+
+      select.appendChild(option);
+    });
+  }
+  catch (err) {
+    console.error("Erro ao carregar setores:", err);
+  }
+}
+
+// LISTENER DE SELECIONAR O SETOR (NOVO CADASTRO)
+document.getElementById("setorSelect").addEventListener("change", function () {
+  const setorCodigo = this.value;
+
+  if (!setorCodigo) return;
+
+  carregarCargosDoSetorSelecionado(
+    window.empresaAtual,
+    window.unidadeAtual,
+    setorCodigo,
+    "",
+    "cargoSelect"
+  );
+});
+
+// FUNÇÃO PARA CARREGAR OS CARGOS DOS SETORES DA UNIDADE DA SOLICITAÇÃO NO SELECT
+async function carregarCargosDoSetorSelecionado(empresaCodigo, unidadeCodigo, setorCodigo, cargoSelecionado = "", selectId = "cargoSelect") {
+  const selectCargo = document.getElementById(selectId);
+
+  if (!selectCargo) return;
+
+  selectCargo.innerHTML = '<option value="">-</option>';
+
+  try {
+    const response = await fetch(`/hierarquia/${empresaCodigo}/${unidadeCodigo}/${setorCodigo}`);
+
+    const cargos = await response.json();
+
+    cargos.forEach(cargo => {
+
+      const option = document.createElement("option");
+
+      option.value = cargo.codigoCargo;
+      option.textContent = cargo.nomeCargo;
+
+      if (cargo.nomeCargo === cargoSelecionado)
+        option.selected = true;
+
+      selectCargo.appendChild(option);
+    });
+  }
+  catch (error) {
+    console.error("Erro ao carregar cargos:", error);
+  }
+}
+
+// LISTENER DE SELECIONAR O SETOR ATUAL (NOVO EXAME)
+document.getElementById("setorAtualSelect").addEventListener("change", function () {
+  const setorCodigo = this.value;
+
+  if (!setorCodigo) return;
+
+  carregarCargosDoSetorSelecionado(
+    window.empresaAtual,
+    window.unidadeAtual,
+    setorCodigo,
+    "",
+    "funcaoAtualSelect"
+  );
+});
+
+// FUNÇÃO PARA POPULAR O SELECT DE FUNÇÃO ATUAL NO MODAL DE NOVO EXAME
+async function carregarFuncao(empresaCodigo, selecionadoNome = "") {
+  if (!empresaCodigo) return;
+
+  const select = document.getElementById("funcaoAtualSelect");
+  select.innerHTML = '<option value="">-</option>';
+
+  try {
+    const res = await fetch(`/cargos/${empresaCodigo}`);
+    const cargos = await res.json();
+
+    cargos.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.codigo;
+      opt.textContent = c.nome;
+
+      if (c.nome === selecionadoNome) opt.selected = true;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error("Erro ao carregar cargos:", err);
+  }
+}
+
+// FUNÇÃO PARA FORMATAR OS TIPOS DE RAC
+function formatarTiposRac(tipos) {
+  if (!Array.isArray(tipos) || tipos.length === 0) return "-";
+
+  return tipos
+    .map(t => t.replace("RAC_", "RAC "))
+    .join(", ");
+}
+
+// FUNÇÃO PARA MOSTRAR AS UNIDADES ADICIONAIS CASO TENHA
+function preencherMaisUnidades(cadastro) {
+  const container = document.getElementById("cadastro_mais_unidades");
+  const bloco = document.getElementById("bloco_mais_unidades");
+
+  container.innerHTML = "";
+
+  if (Array.isArray(cadastro.unidades_extras) && cadastro.unidades_extras.length > 0) {
+
+    cadastro.unidades_extras.forEach(u => {
+      const div = document.createElement("div");
+      div.classList.add("mb-1");
+      div.innerText = `${u.cod_unidade} - ${u.nome_unidade}`;
+      container.appendChild(div);
+    });
+
+    bloco?.classList.remove("d-none");
+
+  } else {
+    bloco?.classList.add("d-none");
+  }
+}
+
+// BLOCO PARA MOSTRAR AS UNIDADES EXTRAS
+function preencherMaisUnidadesExame(exame) {
+  const container = document.getElementById("exame_mais_unidades");
+  const bloco = document.getElementById("bloco_exame_mais_unidades");
+
+  container.innerHTML = "";
+
+  if (Array.isArray(exame.unidades_extras) && exame.unidades_extras.length > 0) {
+
+    exame.unidades_extras.forEach(u => {
+      const div = document.createElement("div");
+      div.innerText = `${u.cod_unidade} - ${u.nome_unidade}`;
+      container.appendChild(div);
+    });
+
+    bloco.classList.remove("d-none");
+
+  } else {
+
+    bloco.classList.add("d-none");
+  }
+}
+
+// FUNÇÃO PARA CARREGAR AS CLÍNICAS COM CLASSIFICAÇÃO 'PREFERENCIAL' E POPULAR O SELECT
+async function carregarPrestadoresPreferenciais(codEmpresa, selectId, clinicaSelecionada = "") {
+  if (!codEmpresa) return;
+
+  const select = document.getElementById(selectId);
+  if (!select) return;
+
+  const res = await fetch(`/prestadores/${codEmpresa}`);
+  const prestadores = await res.json();
+
+  select.innerHTML = '<option value="">-</option>';
+
+  for (const p of prestadores) {
+    try {
+      const detalheRes = await fetch(`/prestador/${codEmpresa}/${p.codigo}`);
+
+      if (!detalheRes.ok) {
+        console.warn("Erro ao buscar detalhe:", p.codigo);
+        continue;
+      }
+
+      const detalhe = await detalheRes.json();
+
+      if (!detalhe.nivelClassificacao || detalhe.nivelClassificacao.toUpperCase() !== "PREFERENCIAL") continue;
+
+      const option = document.createElement("option");
+      option.value = p.codigo;
+      option.textContent = p.nome;
+
+      if (p.nome === clinicaSelecionada)
+        option.selected = true;
+
+      select.appendChild(option);
+
+    } catch (e) {
+      console.error("Erro no prestador:", p.codigo, e);
+    }
+  }
+}
+
+// LISTENER QUANDO SELECIONA O RADIO DE PENDENTE AGENDAMENTO
+document.querySelectorAll('input[name="statusConsulta"]').forEach(radio => {
+
+  radio.addEventListener("change", async function () {
+
+    if (this.value !== "PENDENTE_AGENDAMENTO")
+      return;
+
+    const confirmado = confirm(
+      "Deseja alterar o status desta solicitação para PENDENTE_AGENDAMENTO?"
+    );
+
+    if (!confirmado) {
+      this.checked = false;
+      return;
+    }
+
+    await atualizarStatusParaPendenteAgendamento();
+  });
+});
+
+// FUNÇÃO PARA ATUALZIAR O STATUS PARA PENDENTE_AGENDAMENTO
+async function atualizarStatusParaPendenteAgendamento() {
+
+  if (!solicitacaoAtualId || !tipoSolicitacaoAtual) {
+    alert("Solicitação não identificada.");
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `/solicitacoes/${tipoSolicitacaoAtual}/${solicitacaoAtualId}/status`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "PENDENTE_AGENDAMENTO",
+          usuario_id: usuarioLogado.id
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok || !data.sucesso) {
+      alert(data.erro || "Erro ao atualizar status");
+      return;
+    }
+
+    const modalAberto = document.querySelector(".modal.show");
+
+    if (modalAberto) {
+      const modalInstance = bootstrap.Modal.getInstance(modalAberto);
+      modalInstance.hide();
+    }
+
+    carregarSolicitacoes();
+  }
+  catch (err) {
+
+    console.error(err);
+    alert("Erro ao atualizar status");
+  }
+}
+
+// FUNÇÃO PARA PEGAR OS DADOS DO CAMPO DE OBSERVAÇÃO CONSULTA
+function getObservacaoConsultaAtual() {
+  const isExame = document
+    .getElementById("modalDetalhesNovoExame")
+    ?.classList.contains("show");
+
+  if (isExame) {
+    return document.querySelector("#divObsConsultaExame:not(.d-none) textarea");
+  } else {
+    return document.querySelector("#divObsConsultaCadastro:not(.d-none) textarea");
+  }
+}
+
+// FUNÇÃO PARA PREENCHER O CAMPO COM A OBSERVAÇÃO CONSULTA SALVA
 function preencherObservacaoConsulta(s) {
   const textarea = document.getElementById("obsConsultaExame");
 
   if (!textarea) return;
 
-  // Preencher o textarea com a observação salva
-  textarea.value = s.observacao_consulta || ""; // substituir "observacao_consulta" pelo nome certo do campo do backend
+  textarea.value = s.observacao_consulta || "";
 }
 
-// FUNÇÃO PARA EDIÇÃO DA SOLICITAÇÃO DE EXAMES
+// SALVAR O TIPO DE CONSULTA SELECIONADO
+function getTipoConsultaSelecionado() {
+  const isExame = document.getElementById("modalDetalhesNovoExame")?.classList.contains("show");
+
+  const name = isExame
+    ? "tipoConsultaExame"
+    : "tipoConsultaCadastro";
+
+  const checked = document.querySelector(
+    `input[name="${name}"]:checked`
+  );
+
+  return checked ? checked.value : null;
+}
+
+// MOSTRAR NO MODAL O TIPO DE CONSULTA SALVO
+function marcarTipoConsultaSalvo(valor, tipo) {
+  const name =
+    tipo === "NOVO_EXAME"
+      ? "tipoConsultaExame"
+      : "tipoConsultaCadastro";
+
+  const radios = document.querySelectorAll(`input[name="${name}"]`);
+
+  radios.forEach(radio => {
+    radio.checked = false;
+
+    if (radio.value === valor) {
+      radio.checked = true;
+    }
+  });
+}
+
+// FUNÇÃO PARA EDIÇÃO DAS SOLICITAÇÕES DE CADASTRO
+function pegarDadosEdicaoCadastro(statusAtual) {
+  let payload = {};
+
+  payload = {
+    ...payload,
+    ...edicaoUnidade(statusAtual),
+    ...edicaoSetorCargo(statusAtual),
+    ...edicaoCredenciamento(statusAtual),
+  };
+
+  return payload;
+}
+
+function edicaoUnidade(statusAtual) {
+  const payload = {};
+
+  if (statusAtual === "PENDENTE_UNIDADE" || statusAtual === "PENDENTE_REAVALIACAO") {
+    const select = document.getElementById("unidadeSelect");
+
+    if (select && select.style.display !== "none" && select.value) {
+      const opt = select.options[select.selectedIndex];
+      payload.cod_unidade = select.value;
+      payload.nome_unidade = opt.textContent;
+    }
+  }
+
+  return payload;
+}
+
+function edicaoSetorCargo(statusAtual) {
+  const payload = {};
+
+  if (statusAtual !== "PENDENTE_SC" && statusAtual !== "PENDENTE_REAVALIACAO") return payload;
+
+  const selectSetor = document.getElementById("setorSelect");
+  if (selectSetor && selectSetor.style.display !== "none" && selectSetor.value) {
+    const opt = selectSetor.options[selectSetor.selectedIndex];
+    payload.cod_setor = selectSetor.value;
+    payload.nome_setor = opt.textContent;
+  }
+
+  const selectCargo = document.getElementById("cargoSelect");
+  if (selectCargo && selectCargo.style.display !== "none" && selectCargo.value) {
+    const opt = selectCargo.options[selectCargo.selectedIndex];
+    payload.cod_cargo = selectCargo.value;
+    payload.nome_cargo = opt.textContent;
+  }
+
+  return payload;
+}
+
+function edicaoCredenciamento(statusAtual) {
+  const payload = {};
+
+  if (statusAtual !== "PENDENTE_CREDENCIAMENTO" && statusAtual !== "PENDENTE_REAVALIACAO") return payload;
+
+  const select = document.getElementById("clinicaSelect");
+
+  if (select && select.style.display !== "none" && select.value) {
+    const opt = select.options[select.selectedIndex];
+    payload.cod_clinica = select.value;
+    payload.nome_clinica = opt.textContent;
+  }
+
+  return payload;
+}
+
+async function salvarEdicaoCadastro() {
+  if (!solicitacaoAtualId) {
+    alert("ID da solicitação não encontrado");
+    return;
+  }
+
+  const statusAtual = window.statusAtualSolicitacao;
+  const dadosEdicao = pegarDadosEdicaoCadastro(statusAtual);
+
+  let endpoint = "";
+
+  if (dadosEdicao.cod_unidade) {
+    endpoint = `/solicitacoes/novo-cadastro/${solicitacaoAtualId}/salvar-unidade`;
+  } else if (dadosEdicao.cod_setor || dadosEdicao.cod_cargo) {
+    endpoint = `/solicitacoes/novo-cadastro/${solicitacaoAtualId}/salvar-sc`;
+  } else if (dadosEdicao.cod_clinica) {
+    endpoint = `/solicitacoes/novo-cadastro/${solicitacaoAtualId}/salvar-credenciamento`;
+  }
+
+  if (!endpoint) {
+    alert("Nenhum alteração para salvar.");
+    return;
+  }
+
+  try {
+    const res = await fetch(endpoint, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dadosEdicao)
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error(txt);
+      alert("Erro ao salvar (ver console)");
+      return;
+    }
+
+    alert("Salvo com sucesso");
+    bootstrap.Modal.getInstance(document.querySelector(".modal.show")).hide();
+    carregarSolicitacoes();
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro de comunicação com o servidor");
+  }
+}
+
+// FUNÇÃO PARA EDIÇÃO DAS SOLICITAÇÕES DE EXAME
 function pegarDadosEdicaoExame(statusAtual) {
   let payload = {};
 
@@ -1403,7 +1440,17 @@ async function salvarEdicaoExame() {
 
   let endpoint = "";
 
-  if (dadosEdicao.funcao_atual || dadosEdicao.setor_atual) {
+  if (dadosEdicao.setor_atual && !dadosEdicao.funcao_atual) {
+    alert("Selecione a função.");
+    return;
+  }
+
+  if (dadosEdicao.funcao_atual && !dadosEdicao.setor_atual) {
+    alert("Selecione o setor.");
+    return;
+  }
+
+  if (dadosEdicao.funcao_atual && dadosEdicao.setor_atual) {
     endpoint = `/solicitacoes/novo-exame/${solicitacaoAtualId}/salvar-sc`;
   } else if (dadosEdicao.cod_clinica) {
     endpoint = `/solicitacoes/novo-exame/${solicitacaoAtualId}/salvar-credenciamento`;
@@ -1438,6 +1485,95 @@ async function salvarEdicaoExame() {
   }
 }
 
+// FUNÇÃO PARA APROVAR / REPROVAR SOLICITAÇÃO
+async function analisarSolicitacao(status) {
+  const isExame = document.getElementById("modalDetalhesNovoExame").classList.contains("show");
+  const tipo = isExame ? "NOVO_EXAME" : "NOVO_CADASTRO";
+
+  if (status === "APROVADO") {
+    const tipoConsulta = getTipoConsultaSelecionado();
+    const observacaoConsulta = getObservacaoConsultaAtual();
+
+    if (!tipoConsulta) {
+      alert("Selecione o tipo da consulta.");
+      return;
+    }
+
+    if (tipoConsulta === "PENDENTE_AGENDAMENTO") {
+      alert("Não é possível aprovar com consulta pendente de agendamento.");
+      return;
+    }
+
+    if (!observacaoConsulta || !observacaoConsulta.value.trim()) {
+      alert("A observação da consulta é obrigatória.");
+      observacaoConsulta?.focus();
+      return;
+    }
+  }
+
+  const motivoInput = isExame
+    ? document.getElementById("motivoReprovacaoExame")
+    : document.getElementById("motivoReprovacaoCadastro");
+
+  const motivo = motivoInput.value;
+
+  if (status === "REPROVADO" && !motivo.trim()) {
+    alert("Informe o motivo da reprovação");
+    return;
+  }
+
+  const res = await fetch(`/solicitacoes/${tipo}/${solicitacaoAtualId}/analisar`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status,
+        motivo,
+        usuario_id: usuarioLogado.id,
+        tipo_consulta: getTipoConsultaSelecionado(),
+        observacao_consulta: getObservacaoConsultaAtual()?.value || null
+      })
+    }
+  );
+
+  if (res.ok) {
+    alert("Solicitação analisada com sucesso");
+    bootstrap.Modal.getInstance(document.querySelector(".modal.show")).hide();
+    motivoInput.value = "";
+    carregarSolicitacoes();
+  } else {
+    alert("Erro ao analisar solicitação");
+  }
+}
+
+// FUNÇÃO PARA CANCELAR SOLICITAÇÃO PENDENTE
+async function cancelarSolicitacao(id, tipo, usuarioLogadoId) {
+  const confirmar = confirm("Tem certeza que deseja cancelar esta solicitação?");
+  if (!confirmar) return;
+
+  try {
+    const response = await fetch(`/solicitacoes/${tipo}/${id}/cancelar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuario_id: usuarioLogadoId })
+    });
+
+    if (!response.ok) throw new Error("Erro na comunicação com o servidor");
+
+    const data = await response.json();
+
+    if (data.sucesso) {
+      alert("Solicitação cancelada com sucesso!");
+      carregarSolicitacoes();
+    } else {
+      alert(data.erro || "Não foi possível cancelar a solicitação.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erro na comunicação com o servidor.");
+  }
+}
+
 // FUNÇÃO PARA ENVIAR AO SOC
 async function enviarSOC(id) {
   if (!confirm("Deseja enviar este funcionário ao SOC?")) return;
@@ -1465,99 +1601,6 @@ async function enviarSOC(id) {
     alert("Falha de comunicação com o servidor");
   }
 }
-
-// FUNÇÃO PARA FORMATAR DATAS
-function formatarData(data) {
-  if (!data) return "-";
-
-  const d = new Date(data);
-  const dia = String(d.getDate()).padStart(2, "0");
-  const mes = String(d.getMonth() + 1).padStart(2, "0");
-  const ano = d.getFullYear();
-
-  return `${dia}/${mes}/${ano}`;
-}
-
-// FUNÇÃO PARA FORMATAR DATA E HORA DAS SOLICITAÇÕES
-function formatarDataHora(data) {
-  if (!data) return "-";
-
-  const d = new Date(data);
-
-  const dia = String(d.getDate()).padStart(2, "0");
-  const mes = String(d.getMonth() + 1).padStart(2, "0");
-  const ano = d.getFullYear();
-
-  const horas = String(d.getHours()).padStart(2, "0");
-  const minutos = String(d.getMinutes()).padStart(2, "0");
-
-  return `${dia}/${mes}/${ano} ${horas}:${minutos}`;
-}
-
-// FUNÇÃO PARA APROVAR / REPROVAR SOLICITAÇÃO
-async function analisarSolicitacao(status) {
-  const isExame = document.getElementById("modalDetalhesNovoExame").classList.contains("show");
-  const tipo = isExame ? "NOVO_EXAME" : "NOVO_CADASTRO";
-
-  // observação obrigatória se o campo estiver visível
-  if (status === "APROVADO") {
-    const textareaObs = getObservacaoConsultaAtual();
-
-    if (textareaObs && !textareaObs.value.trim()) {
-      alert("Para Belo Horizonte, é obrigatório preencher a observação da consulta.");
-      textareaObs.focus();
-      return;
-    }
-  }
-
-  const motivoInput = isExame
-    ? document.getElementById("motivoReprovacaoExame")
-    : document.getElementById("motivoReprovacaoCadastro");
-
-  const motivo = motivoInput.value;
-
-  if (status === "REPROVADO" && !motivo.trim()) {
-    alert("Informe o motivo da reprovação");
-    return;
-  }
-
-  const res = await fetch(`/solicitacoes/${tipo}/${solicitacaoAtualId}/analisar`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        status,
-        motivo,
-        usuario_id: usuarioLogado.id,
-        observacao_consulta: getObservacaoConsultaAtual()?.value || null
-      })
-    }
-  );
-
-  if (res.ok) {
-    alert("Solicitação analisada com sucesso");
-    bootstrap.Modal.getInstance(document.querySelector(".modal.show")).hide();
-    motivoInput.value = "";
-    carregarSolicitacoes();
-  } else {
-    alert("Erro ao analisar solicitação");
-  }
-}
-
-// MÁSCARA DE CPF
-const cpfInput = document.getElementById("filterCPF");
-
-cpfInput.addEventListener("input", function () {
-  let value = this.value.replace(/\D/g, "");
-
-  if (value.length > 11) value = value.slice(0, 11);
-
-  value = value.replace(/(\d{3})(\d)/, "$1.$2");
-  value = value.replace(/(\d{3})(\d)/, "$1.$2");
-  value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-
-  this.value = value;
-});
 
 // FUNÇÃO DE LOGOUT
 function logout() {

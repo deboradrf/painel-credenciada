@@ -462,10 +462,9 @@ td {
 .status-pill.pendente,
 .status-pill.pendente_reavaliacao,
 .status-pill.pendente_unidade,
-.status-pill.pendente_usc_credenciamento,
 .status-pill.pendente_sc,
-.status-pill.pendente_sc_credenciamento,
-.status-pill.pendente_credenciamento {
+.status-pill.pendente_credenciamento,
+.status-pill.pendente_agendamento {
     background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
 }
 
@@ -535,16 +534,6 @@ td {
     gap: 4px;
 }
 
-#divEstadoCredenciamento .detail-item,
-#divCidadeCredenciamento .detail-item,
-#divExameEstadoCredenciamento .detail-item,
-#divExameCidadeCredenciamento .detail-item,
-#divNovoSetor .detail-item,
-#divNovoCargo .detail-item,
-#divNovaFuncao .detail-item,
-#divExameNovoSetor .detail-item,
-#divDescricaoAtividade .detail-item,
-#divExameDescricaoAtividade .detail-item,
 #divNomeFantasia .detail-item,
 #divRazaoSocial .detail-item,
 #divCnpj .detail-item,
@@ -557,7 +546,25 @@ td {
 #divTipoFaturamento .detail-item,
 #divEmail .detail-item {
     background-color: #F9FAFB;
-    border: 2px solid #F1AE33;
+    border: 2px dotted #53A5A6;
+}
+
+#divNovoSetor .detail-item,
+#divNovoCargo .detail-item,
+#divNovaFuncao .detail-item,
+#divExameNovoSetor .detail-item,
+#divDescricaoAtividade .detail-item,
+#divExameDescricaoAtividade .detail-item {
+    background-color: #F9FAFB;
+    border: 2px dotted #F1AE33;
+}
+
+#divEstadoCredenciamento .detail-item,
+#divCidadeCredenciamento .detail-item,
+#divExameEstadoCredenciamento .detail-item,
+#divExameCidadeCredenciamento .detail-item {
+    background-color: #F9FAFB;
+    border: 2px dotted #88A6BB;
 }
 
 .detail-label {
@@ -670,6 +677,18 @@ td {
     color: #4A5568;
 }
 
+hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(0, 0, 0, 0.15),
+        transparent
+    );
+    margin: 20px 0;
+}
+
 .modal-footer {
     display: flex;
     justify-content: center;
@@ -679,14 +698,15 @@ td {
 
 .footer-actions {
     display: flex;
+    justify-content: flex-end;
+    width: 100%;
     gap: 12px;
-    flex-wrap: wrap;
 }
 
 .footer-actions button {
     display: flex;
     align-items: center;
-    justify-content: center; 
+    justify-content: center;
     background-color: #FFFFFF;
     border: 1px solid #E5E7EB;
     border-radius: 8px;
