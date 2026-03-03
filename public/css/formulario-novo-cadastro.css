@@ -600,7 +600,7 @@ h5::after {
 }
 
 /* ÍCONE DE AJUDA */
-.help-icon {
+/* .help-icon {
   margin-left: 6px;
   color: #F1AE33;
   cursor: pointer;
@@ -610,10 +610,10 @@ h5::after {
 
 .help-icon:hover {
   color: #6c757d;
-}
+} */
 
 /* Tooltip */
-.help-icon::after {
+/* .help-icon::after {
   content: attr(data-tooltip);
   position: absolute;
   bottom: 125%;
@@ -629,10 +629,10 @@ h5::after {
   pointer-events: none;
   transition: opacity 0.2s ease;
   z-index: 10;
-}
+} */
 
 /* Setinha */
-.help-icon::before {
+/* .help-icon::before {
   content: "";
   position: absolute;
   bottom: 115%;
@@ -642,12 +642,25 @@ h5::after {
   border-top-color: #333;
   opacity: 0;
   transition: opacity 0.2s ease;
-}
+} */
 
 /* Mostrar tooltip */
-.help-icon:hover::after,
+/* .help-icon:hover::after,
 .help-icon:hover::before {
   opacity: 1;
+} */
+
+#nome_fantasia,
+#razao_social,
+#rua,
+#bairro,
+#estado,
+#novoSetor,
+#novoCargo,
+#lab_toxicologico,
+#estado_credenciamento,
+#cidade_credenciamento {
+    text-transform: uppercase;
 }
 
 .footer-container {

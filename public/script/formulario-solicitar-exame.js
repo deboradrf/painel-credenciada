@@ -866,7 +866,7 @@ async function enviarEmailSolicitacao(dados) {
   if (precisaFuncaoSetor) {
     destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
     //destinatario = "debora.fonseca@salubrita.com.br";
-    assunto = "Solicitação de criação de função/setor";
+    assunto = "Solicitação de criação de setor/função";
 
     mensagem = `
       Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.

@@ -1903,6 +1903,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
     const dataBody = {
       Funcionario: {
         criarFuncionario: true,
+        atualizarFuncionario: false,
 
         identificacaoWsVo: {
           chaveAcesso: SOC_TOKEN,
@@ -1933,7 +1934,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
           regimeTrabalho: f.regime_trabalho,
 
           situacao: "ATIVO",
-          chaveProcuraFuncionario: "CPF"
+          chaveProcuraFuncionario: "CPF_ATIVO"
         },
 
         unidadeWsVo: {
@@ -1958,7 +1959,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
 
     const resultadoSOC = interpretarRetornoSOC(retorno);
 
-    // ❌ ERRO DE NEGÓCIO (CPF duplicado etc)
+    // ERRO DE NEGÓCIO (CPF duplicado etc)
     if (resultadoSOC.tipo !== "SUCESSO") {
       await pool.query(
         `
@@ -1976,7 +1977,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
       });
     }
 
-    // ✅ SUCESSO
+    // SUCESSO
     await pool.query(
       `
       UPDATE solicitacoes_novo_cadastro
@@ -1996,7 +1997,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
     });
 
   } catch (err) {
-    // ❌ ERRO TÉCNICO (SOAP, DB, JS)
+    // ERRO TÉCNICO (SOAP, DB, JS)
     await pool.query(
       `
       UPDATE solicitacoes_novo_cadastro

@@ -71,7 +71,66 @@ document.addEventListener("DOMContentLoaded", async () => {
   await carregarPrestadores();
 });
 
-// FUNÇÃO DE CARREGAMENTO INICIAL
+// CAMPO DE NOME SEMPRE MAIÚSCULO E SEM CARACTERES ESPECIAIS
+const nomeInput = document.getElementById("nome");
+
+nomeInput.addEventListener("input", function () {
+  let valor = this.value.toUpperCase();
+
+  valor = valor.replace(/[^A-ZÇÀ-Ÿ\s]/g, "");
+
+  valor = valor
+    .replace(/[ÁÀÂÃ]/g, "A")
+    .replace(/[ÉÈÊ]/g, "E")
+    .replace(/[ÍÌÎ]/g, "I")
+    .replace(/[ÓÒÔÕ]/g, "O")
+    .replace(/[ÚÙÛ]/g, "U");
+
+  this.value = valor;
+});
+
+// MÁSCARA DE RG
+const rgInput = document.getElementById("doc_identidade");
+
+rgInput.addEventListener("input", function () {
+  let value = rgInput.value.toUpperCase();
+  let uf = value.slice(0, 2).replace(/[^A-Z]/g, "");
+  let numeros = value.slice(2).replace(/\D/g, "");
+  let numerosAntesTraco = numeros.slice(0, 8);
+  let ultimoDigito = numeros.slice(8, 9);
+  let numerosFormatados = numerosAntesTraco;
+
+  if (numerosAntesTraco.length > 5) {
+    numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{3})(\d{1,3})/, "$1.$2.$3");
+  }
+  else if (numerosAntesTraco.length > 2) {
+    numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{1,3})/, "$1.$2");
+  }
+
+  // MONTAR VALOR FINAL
+  let finalValue = uf;
+  if (numerosFormatados) finalValue += " " + numerosFormatados;
+  if (ultimoDigito) finalValue += "-" + ultimoDigito;
+
+  rgInput.value = finalValue;
+});
+
+// MÁSCARA DE CPF
+const cpfInput = document.getElementById("cpf");
+
+cpfInput.addEventListener("input", function () {
+  let value = this.value.replace(/\D/g, "");
+
+  if (value.length > 11) value = value.slice(0, 11);
+
+  value = value.replace(/(\d{3})(\d)/, "$1.$2");
+  value = value.replace(/(\d{3})(\d)/, "$1.$2");
+  value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+
+  this.value = value;
+});
+
+// FUNÇÃO PARA MOSTRAR O NOME DA EMPRESA DO USUÁRIO LOGADO NO CAMPO
 async function carregarNomeEmpresa() {
   if (!empresaCodigo) return;
 
@@ -90,6 +149,406 @@ async function carregarNomeEmpresa() {
     console.error("Erro ao carregar nome da empresa:", err);
   }
 }
+
+// FUNÇÃO PARA CARREGAR UNIDADES DA EMPRESA
+async function carregarUnidades() {
+  if (!empresaCodigo) return;
+
+  const res = await fetch(`/unidades/${empresaCodigo}`);
+  const unidades = await res.json();
+
+  const select = document.getElementById("unidadeSelect");
+  select.innerHTML = '<option value="">Selecione...</option>';
+
+  unidades.forEach(u => {
+    const opt = document.createElement("option");
+    opt.value = u.codigo;
+    opt.textContent = u.ativo ? u.nome : `${u.nome} (inativo)`;
+    opt.dataset.nome = u.nome;
+    select.appendChild(opt);
+  });
+}
+
+// LISTENER NO SELECT DE UNIDADE
+document.getElementById("unidadeSelect").addEventListener("change", async function () {
+  const codUnidade = this.value;
+  const selectSetor = document.getElementById("setorSelect");
+
+  selectSetor.innerHTML = '<option value="">Selecione...</option>';
+
+  if (!codUnidade) return;
+
+  try {
+    const res = await fetch(`/hierarquia/${empresaCodigo}/${codUnidade}`);
+    const setores = await res.json();
+
+    setores
+      .sort((a, b) => a.nomeSetor.localeCompare(b.nomeSetor, "pt-BR"))
+      .forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s.codigoSetor;
+        opt.textContent = s.nomeSetor;
+        opt.dataset.nome = s.nomeSetor;
+        selectSetor.appendChild(opt);
+      });
+
+  } catch (err) {
+    console.error("Erro ao carregar setores da unidade:", err);
+    alert("Erro ao carregar setores da unidade selecionada");
+  }
+});
+
+// LISTENER NO SELECT DE SETOR
+document.getElementById("setorSelect").addEventListener("change", async function () {
+  const codSetor = this.value;
+  const codUnidade = document.getElementById("unidadeSelect").value;
+  const selectCargo = document.getElementById("cargoSelect");
+
+  selectCargo.innerHTML = '<option value="">Selecione...</option>';
+
+  if (!codSetor || !codUnidade) return;
+
+  try {
+    const res = await fetch(
+      `/hierarquia/${empresaCodigo}/${codUnidade}/${codSetor}`
+    );
+
+    const cargos = await res.json();
+
+    cargos.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.codigoCargo;
+      opt.textContent = c.nomeCargo;
+      opt.dataset.nome = c.nomeCargo;
+      selectCargo.appendChild(opt);
+    });
+
+  } catch (err) {
+    console.error("Erro ao carregar cargos:", err);
+    alert("Erro ao carregar cargos do setor");
+  }
+});
+
+// MOSTRAR / OCULTAR SEÇÃO DE NOVA UNIDADE E DEFINIR REQUIRED NOS CAMPOS
+document.addEventListener("DOMContentLoaded", () => {
+  const chkNovaUnidade = document.getElementById("solicitarNovaUnidade");
+  const unidadeSelect = document.getElementById("unidadeSelect");
+  const divNovaUnidade = document.getElementById("divNovaUnidade");
+
+  const camposNovaUnidade = [
+    "nome_fantasia",
+    "razao_social",
+    "cnpj",
+    "cnae",
+    "cep",
+    "rua",
+    "numero",
+    "bairro",
+    "estado",
+    "email"
+  ].map(id => document.getElementById(id));
+
+  const radiosTipoFaturamento = document.querySelectorAll('input[name="tipo_faturamento"]');
+
+  if (!chkNovaUnidade || !unidadeSelect || !divNovaUnidade) return;
+
+  function atualizarNovaUnidade() {
+    if (chkNovaUnidade.checked) {
+      // MOSTRAR DIV DE NOVA UNIDADE
+      divNovaUnidade.style.display = "block";
+
+      // BLOQUEAR O SELECT DE UNIDADE
+      unidadeSelect.value = "";
+      unidadeSelect.disabled = true;
+      unidadeSelect.removeAttribute("required");
+      unidadeSelect.style.cursor = "not-allowed";
+
+      // MARCAR CAMPOS DA NOVA UNIDADE COMO REQUIRED
+      camposNovaUnidade.forEach(campo => {
+        if (campo) campo.required = true;
+      });
+
+      radiosTipoFaturamento.forEach(radio => radio.required = true);
+
+    } else {
+      // OCULTAR DIV DE NOVA UNIDADE
+      divNovaUnidade.style.display = "none";
+
+      // DESBLOQUEAR SELECT DE UNIDADE
+      unidadeSelect.disabled = false;
+      unidadeSelect.setAttribute("required", "required");
+      unidadeSelect.style.cursor = "pointer";
+
+      // REMOVER REQUIRED DOS CAMPOS DE NOVA UNIDADE
+      camposNovaUnidade.forEach(campo => {
+        if (campo) {
+          campo.required = false;
+          campo.value = "";
+        }
+      });
+
+      radiosTipoFaturamento.forEach(radio => {
+        radio.required = false;
+        radio.checked = false;
+      });
+    }
+  }
+
+  chkNovaUnidade.addEventListener("change", atualizarNovaUnidade);
+
+  atualizarNovaUnidade();
+});
+
+// API QUE PREENCHE OS CAMPOS BASEADOS NO CEP
+document.addEventListener("DOMContentLoaded", function () {
+  const cepInput = document.getElementById("cep");
+  const btnBuscar = document.getElementById("btnBuscarCep");
+
+  if (!cepInput || !btnBuscar) return;
+
+  // MÁSCARA DE CEP
+  cepInput.addEventListener("input", function () {
+    let valor = this.value.replace(/\D/g, "");
+
+    if (valor.length > 8) valor = valor.slice(0, 8);
+
+    if (valor.length > 5) {
+      this.value = valor.replace(/^(\d{5})(\d)/, "$1-$2");
+    } else {
+      this.value = valor;
+    }
+  });
+
+  // BUSCAR CEP
+  btnBuscar.addEventListener("click", function () {
+    const cep = cepInput.value.replace(/\D/g, "");
+
+    if (cep.length !== 8) {
+      alert("Digite um CEP válido");
+      return;
+    }
+
+    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.erro) {
+          alert("CEP não encontrado");
+          return;
+        }
+
+        document.getElementById("rua").value = (data.logradouro).toUpperCase();
+        document.getElementById("bairro").value = (data.bairro).toUpperCase();
+        document.getElementById("estado").value = data.uf;
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Erro ao buscar o CEP");
+      });
+  });
+});
+
+// CHECKBOX DE NOVA UNIDADE TORNA OBRIGATORIO A CRIAÇÃO DE NOVO SETOR/CARGO
+document.addEventListener("DOMContentLoaded", () => {
+  const chkNovaUnidade = document.getElementById("solicitarNovaUnidade");
+
+  const selectSetor = document.getElementById("setorSelect");
+  const selectCargo = document.getElementById("cargoSelect");
+
+  function bloquearSelect(e) {
+    if (chkNovaUnidade.checked) {
+      e.preventDefault();
+      e.stopPropagation();
+      alert("Para criação de nova unidade é necessário criar novo setor e cargo.");
+      return false;
+    }
+  }
+
+  // BLOQUEAR INTERAÇÕES
+  selectSetor.addEventListener("mousedown", bloquearSelect);
+  selectCargo.addEventListener("mousedown", bloquearSelect);
+  selectSetor.addEventListener("keydown", bloquearSelect);
+  selectCargo.addEventListener("keydown", bloquearSelect);
+
+  // LIMPAR OS CAMPOS DE SETOR E CARGO SE ESTIVER SELECIONADOS
+  chkNovaUnidade.addEventListener("change", () => {
+    if (chkNovaUnidade.checked) {
+      selectSetor.value = "";
+      selectCargo.value = "";
+    }
+  });
+
+  // VISUAL DE BLOQUEIO
+  function atualizarVisual() {
+    const bloqueado = chkNovaUnidade.checked;
+    selectSetor.style.cursor = bloqueado ? "not-allowed" : "pointer";
+    selectCargo.style.cursor = bloqueado ? "not-allowed" : "pointer";
+  }
+
+  chkNovaUnidade.addEventListener("change", atualizarVisual);
+  atualizarVisual();
+});
+
+// MOSTRAR / OCULTAR SEÇÃO DE NOVO SETOR E DEFINIR REQUIRED NO CAMPO
+document.addEventListener("DOMContentLoaded", () => {
+  const chkSolicitarNovoSetor = document.getElementById("solicitarNovoSetor");
+  const wrapperNovoSetor = document.getElementById("novoSetorWrapper");
+  const selectSetor = document.getElementById("setorSelect");
+  const novoSetor = document.getElementById("novoSetor");
+
+  if (!chkSolicitarNovoSetor || !selectSetor || !wrapperNovoSetor) return;
+
+  function atualizarNovoSetor() {
+    if (chkSolicitarNovoSetor.checked) {
+      // MOSTRAR DIV DO NOVO SETOR
+      wrapperNovoSetor.style.display = "block";
+
+      // BLOQUEAR SELECT DE SETOR
+      selectSetor.value = "";
+      selectSetor.disabled = true;
+      selectSetor.removeAttribute("required");
+      selectSetor.style.cursor = "not-allowed";
+
+      // CAMPO NOVO SETOR OBRIGATÓRIO
+      if (novoSetor) novoSetor.required = true;
+
+    } else {
+      // OCULTAR DIV DO NOVO SETOR
+      wrapperNovoSetor.style.display = "none";
+
+      // DESBLOQUEAR SELECT DE SETOR
+      selectSetor.disabled = false;
+      selectSetor.setAttribute("required", "required");
+      selectSetor.style.cursor = "pointer";
+
+      // CAMPO NOVO SETOR NÃO OBRIGATÓRIO
+      if (novoSetor) {
+        novoSetor.required = false;
+        novoSetor.value = "";
+      }
+    }
+  }
+  chkSolicitarNovoSetor.addEventListener("change", atualizarNovoSetor);
+
+  atualizarNovoSetor();
+});
+
+// CHECKBOX DE NOVO SETOR TORNA OBRIGATORIO A CRIAÇÃO DE NOVO CARGO
+document.addEventListener("DOMContentLoaded", () => {
+  const chkNovoSetor = document.getElementById("solicitarNovoSetor");
+
+  const selectCargo = document.getElementById("cargoSelect");
+
+  function bloquearSelect(e) {
+    if (chkNovoSetor.checked) {
+      e.preventDefault();
+      e.stopPropagation();
+      alert("Para criação de novo setor é necessário criar novo cargo.");
+      return false;
+    }
+  }
+
+  // BLOQUEAR INTERAÇÃO
+  selectCargo.addEventListener("mousedown", bloquearSelect);
+  selectCargo.addEventListener("keydown", bloquearSelect);
+
+  // LIMPAR O CAMPO DE CARGO SE ESTIVER SELECIONADO
+  chkNovoSetor.addEventListener("change", () => {
+    if (chkNovoSetor.checked) {
+      selectCargo.value = "";
+    }
+  });
+
+  // VISUAL DE BLOQUEIO
+  function atualizarVisual() {
+    const bloqueado = chkNovoSetor.checked;
+    selectCargo.style.cursor = bloqueado ? "not-allowed" : "pointer";
+  }
+
+  chkNovoSetor.addEventListener("change", atualizarVisual);
+  atualizarVisual();
+});
+
+// MOSTRAR / OCULTAR SEÇÃO DE NOVO CARGO E DESCRIÇÃO DE ATIVIDADE E DEFINIR REQUIRED NOS CAMPOS
+document.addEventListener("DOMContentLoaded", () => {
+  const chkSolicitarNovoCargo = document.getElementById("solicitarNovoCargo");
+  const wrapperNovoCargo = document.getElementById("novoCargoWrapper");
+  const wrapperDescricaoAtividade = document.getElementById("descricaoAtividadeWrapper");
+  const selectCargo = document.getElementById("cargoSelect");
+  const novoCargo = document.getElementById("novoCargo");
+  const descricaoAtividade = document.getElementById("descricao_atividade");
+
+  if (!chkSolicitarNovoCargo || !selectCargo || !wrapperNovoCargo || !wrapperDescricaoAtividade) return;
+
+  function atualizarNovoCargo() {
+    if (chkSolicitarNovoCargo.checked) {
+      // MOSTRAR DIVS
+      wrapperNovoCargo.style.display = "block";
+      wrapperDescricaoAtividade.style.display = "block";
+
+      // BLOQUEAR SELECT DE CARGO
+      selectCargo.value = "";
+      selectCargo.disabled = true;
+      selectCargo.removeAttribute("required");
+      selectCargo.style.cursor = "not-allowed";
+
+      // CAMPOS OBRIGATÓRIOS
+      if (novoCargo) novoCargo.required = true;
+      if (descricaoAtividade) descricaoAtividade.required = true;
+
+    } else {
+      // OCULTAR DIVS
+      wrapperNovoCargo.style.display = "none";
+      wrapperDescricaoAtividade.style.display = "none";
+
+      // DESBLOQUEAR SELECT DE CARGO
+      selectCargo.disabled = false;
+      selectCargo.setAttribute("required", "required");
+      selectCargo.style.cursor = "pointer";
+
+      // CAMPOS NÃO OBRIGATÓRIOS
+      if (novoCargo) {
+        novoCargo.required = false;
+        novoCargo.value = "";
+      }
+      if (descricaoAtividade) {
+        descricaoAtividade.required = false;
+        descricaoAtividade.value = "";
+      }
+    }
+  }
+
+  chkSolicitarNovoCargo.addEventListener("change", atualizarNovoCargo);
+
+  atualizarNovoCargo();
+});
+
+// MOSTRAR / OCULTAR TIPO RAC
+const racSelect = document.getElementById("racSelect");
+const divRacValeOpcoes = document.getElementById("divRacValeOpcoes");
+
+racSelect.addEventListener("change", () => {
+  if (racSelect.value === "FORMULARIO_RAC_VALE") {
+    divRacValeOpcoes.classList.remove("d-none");
+  } else {
+    divRacValeOpcoes.classList.add("d-none");
+
+    document.getElementById("racValeOpcao").value = "";
+  }
+});
+
+// TORNAR OBRIGATÓRICO QUANDO A OPÇÃO SELECIONADA FOR VALE
+const racValeOpcao = document.getElementById("racValeOpcao");
+
+racSelect.addEventListener("change", () => {
+  const isVale = racSelect.value === "FORMULARIO_RAC_VALE";
+
+  divRacValeOpcoes.classList.toggle("d-none", !isVale);
+  racValeOpcao.required = isVale;
+
+  if (!isVale) {
+    racValeOpcao.value = "";
+  }
+});
 
 // LISTENER DOS CAMPOS DE DATA/HORA DO EXAME (SÓ PERMITIR MAIS DE 24H DA SOLICITAÇÃO)
 const dataInput = document.getElementById("data_exame");
@@ -174,85 +633,6 @@ function adicionarUnidade() {
     </div>
   `);
 }
-
-// CARREGAR UNIDADES
-async function carregarUnidades() {
-  if (!empresaCodigo) return;
-
-  const res = await fetch(`/unidades/${empresaCodigo}`);
-  const unidades = await res.json();
-
-  const select = document.getElementById("unidadeSelect");
-  select.innerHTML = '<option value="">Selecione...</option>';
-
-  unidades.forEach(u => {
-    const opt = document.createElement("option");
-    opt.value = u.codigo;
-    opt.textContent = u.ativo ? u.nome : `${u.nome} (inativo)`;
-    opt.dataset.nome = u.nome;
-    select.appendChild(opt);
-  });
-}
-
-// LISTENER NO SELECT DE UNIDADE
-document.getElementById("unidadeSelect").addEventListener("change", async function () {
-  const codUnidade = this.value;
-  const selectSetor = document.getElementById("setorSelect");
-
-  selectSetor.innerHTML = '<option value="">Selecione...</option>';
-
-  if (!codUnidade) return;
-
-  try {
-    const res = await fetch(`/hierarquia/${empresaCodigo}/${codUnidade}`);
-    const setores = await res.json();
-
-    setores
-      .sort((a, b) => a.nomeSetor.localeCompare(b.nomeSetor, "pt-BR"))
-      .forEach(s => {
-        const opt = document.createElement("option");
-        opt.value = s.codigoSetor;
-        opt.textContent = s.nomeSetor;
-        opt.dataset.nome = s.nomeSetor;
-        selectSetor.appendChild(opt);
-      });
-
-  } catch (err) {
-    console.error("Erro ao carregar setores da unidade:", err);
-    alert("Erro ao carregar setores da unidade selecionada");
-  }
-});
-
-// LISTENER NO SELECT DE SETOR
-document.getElementById("setorSelect").addEventListener("change", async function () {
-  const codSetor = this.value;
-  const codUnidade = document.getElementById("unidadeSelect").value;
-  const selectCargo = document.getElementById("cargoSelect");
-
-  selectCargo.innerHTML = '<option value="">Selecione...</option>';
-
-  if (!codSetor || !codUnidade) return;
-
-  try {
-    const res = await fetch(
-      `/hierarquia/${empresaCodigo}/${codUnidade}/${codSetor}`
-    );
-
-    const cargos = await res.json();
-
-    cargos.forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = c.codigoCargo;
-      opt.textContent = c.nomeCargo;
-      opt.dataset.nome = c.nomeCargo;
-      selectCargo.appendChild(opt);
-    });
-
-  } catch (err) {
-    console.error("Erro ao carregar cargos:", err);
-    alert("Erro ao carregar cargos do setor");
-  }
-});
 
 // CARREGAR PRESTADORES
 async function carregarPrestadores() {
@@ -396,334 +776,6 @@ document.getElementById("cidade_clinica").addEventListener("change", function ()
   });
 });
 
-// MOSTRAR / OCULTAR SEÇÃO DE NOVA UNIDADE E DEFINIR REQUIRED NOS CAMPOS
-document.addEventListener("DOMContentLoaded", () => {
-  const chkNovaUnidade = document.getElementById("solicitarNovaUnidade");
-  const unidadeSelect = document.getElementById("unidadeSelect");
-  const divNovaUnidade = document.getElementById("divNovaUnidade");
-
-  const camposNovaUnidade = [
-    "nome_fantasia",
-    "razao_social",
-    "cnpj",
-    "cnae",
-    "cep",
-    "rua",
-    "numero",
-    "bairro",
-    "estado",
-    "email"
-  ].map(id => document.getElementById(id));
-
-  const radiosTipoFaturamento = document.querySelectorAll('input[name="tipo_faturamento"]');
-
-  if (!chkNovaUnidade || !unidadeSelect || !divNovaUnidade) return;
-
-  function atualizarNovaUnidade() {
-    if (chkNovaUnidade.checked) {
-      // MOSTRAR DIV DE NOVA UNIDADE
-      divNovaUnidade.style.display = "block";
-
-      // BLOQUEAR O SELECT DE UNIDADE
-      unidadeSelect.value = "";
-      unidadeSelect.disabled = true;
-      unidadeSelect.removeAttribute("required");
-      unidadeSelect.style.cursor = "not-allowed";
-
-      // MARCAR CAMPOS DA NOVA UNIDADE COMO REQUIRED
-      camposNovaUnidade.forEach(campo => {
-        if (campo) campo.required = true;
-      });
-
-      radiosTipoFaturamento.forEach(radio => radio.required = true);
-
-    } else {
-      // OCULTAR DIV DE NOVA UNIDADE
-      divNovaUnidade.style.display = "none";
-
-      // DESBLOQUEAR SELECT DE UNIDADE
-      unidadeSelect.disabled = false;
-      unidadeSelect.setAttribute("required", "required");
-      unidadeSelect.style.cursor = "pointer";
-
-      // REMOVER REQUIRED DOS CAMPOS DE NOVA UNIDADE
-      camposNovaUnidade.forEach(campo => {
-        if (campo) {
-          campo.required = false;
-          campo.value = "";
-        }
-      });
-
-      radiosTipoFaturamento.forEach(radio => {
-        radio.required = false;
-        radio.checked = false;
-      });
-    }
-  }
-
-  chkNovaUnidade.addEventListener("change", atualizarNovaUnidade);
-
-  atualizarNovaUnidade();
-});
-
-// CHECKBOX DE NOVA UNIDADE TORNA OBRIGATORIO A CRIAÇÃO DE NOVO SETOR/CARGO
-document.addEventListener("DOMContentLoaded", () => {
-  const chkNovaUnidade = document.getElementById("solicitarNovaUnidade");
-
-  const selectSetor = document.getElementById("setorSelect");
-  const selectCargo = document.getElementById("cargoSelect");
-
-  function bloquearSelect(e) {
-    if (chkNovaUnidade.checked) {
-      e.preventDefault();
-      e.stopPropagation();
-      alert("Para criação de nova unidade é necessário criar novo setor e cargo.");
-      return false;
-    }
-  }
-
-  // 🔒 Intercepta interação
-  selectSetor.addEventListener("mousedown", bloquearSelect);
-  selectCargo.addEventListener("mousedown", bloquearSelect);
-  selectSetor.addEventListener("keydown", bloquearSelect);
-  selectCargo.addEventListener("keydown", bloquearSelect);
-
-  // 🧹 LIMPA CAMPOS quando marcar nova unidade
-  chkNovaUnidade.addEventListener("change", () => {
-    if (chkNovaUnidade.checked) {
-      selectSetor.value = "";
-      selectCargo.value = "";
-    }
-  });
-
-  // Visual opcional
-  function atualizarVisual() {
-    const bloqueado = chkNovaUnidade.checked;
-    selectSetor.style.cursor = bloqueado ? "not-allowed" : "pointer";
-    selectCargo.style.cursor = bloqueado ? "not-allowed" : "pointer";
-  }
-
-  chkNovaUnidade.addEventListener("change", atualizarVisual);
-  atualizarVisual();
-});
-
-// CAMPO DE NOME FANTASIA SEMPRE MAIÚSCULO
-const inputNomeFantasia = document.getElementById("nome_fantasia");
-
-inputNomeFantasia.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE RAZÃO SOCIAL SEMPRE MAIÚSCULO
-const inputRazaoSocial = document.getElementById("razao_social");
-
-inputRazaoSocial.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// API QUE PREENCHE OS CAMPOS BASEADOS NO CEP
-document.addEventListener("DOMContentLoaded", function () {
-  const cepInput = document.getElementById("cep");
-  const btnBuscar = document.getElementById("btnBuscarCep");
-
-  if (!cepInput || !btnBuscar) return;
-
-  // MÁSCARA DE CEP
-  cepInput.addEventListener("input", function () {
-    let valor = this.value.replace(/\D/g, "");
-
-    if (valor.length > 8) valor = valor.slice(0, 8);
-
-    if (valor.length > 5) {
-      this.value = valor.replace(/^(\d{5})(\d)/, "$1-$2");
-    } else {
-      this.value = valor;
-    }
-  });
-
-  // BUSCAR CEP
-  btnBuscar.addEventListener("click", function () {
-    const cep = cepInput.value.replace(/\D/g, "");
-
-    if (cep.length !== 8) {
-      alert("Digite um CEP válido");
-      return;
-    }
-
-    fetch(`https://viacep.com.br/ws/${cep}/json/`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.erro) {
-          alert("CEP não encontrado");
-          return;
-        }
-
-        document.getElementById("rua").value = (data.logradouro).toUpperCase();
-        document.getElementById("bairro").value = (data.bairro).toUpperCase();
-        document.getElementById("estado").value = data.uf;
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Erro ao buscar o CEP");
-      });
-  });
-});
-
-// CAMPO DE NOME LABORATÓRIO SEMPRE MAIÚSCULO
-const inputNomeLaboratorio = document.getElementById("lab_toxicologico");
-
-inputNomeLaboratorio.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE ESTADO CREDENCIAMENTO SEMPRE MAIÚSCULO
-const inputEstadoCredenciamento = document.getElementById("estado_credenciamento");
-
-inputEstadoCredenciamento.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE CIDADE CREDENCIAMENTO SEMPRE MAIÚSCULO
-const inputCidadeCredenciamento = document.getElementById("cidade_credenciamento");
-
-inputCidadeCredenciamento.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE RUA SEMPRE MAIÚSCULO
-const inputRua = document.getElementById("rua");
-
-inputRua.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE BAIRRO SEMPRE MAIÚSCULO
-const inputBairro = document.getElementById("bairro");
-
-inputBairro.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE ESTADO SEMPRE MAIÚSCULO
-const inputEstado = document.getElementById("estado");
-
-inputEstado.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE NOVO SETOR SEMPRE MAIÚSCULO
-const inputNovoSetor = document.getElementById("novoSetor");
-
-inputNovoSetor.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// CAMPO DE NOVO CARGO SEMPRE MAIÚSCULO
-const inputNovoCargo = document.getElementById("novoCargo");
-
-inputNovoCargo.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
-});
-
-// MOSTRAR / OCULTAR SEÇÃO DE NOVO SETOR E DEFINIR REQUIRED NO CAMPO
-document.addEventListener("DOMContentLoaded", () => {
-  const chkSolicitarNovoSetor = document.getElementById("solicitarNovoSetor");
-  const wrapperNovoSetor = document.getElementById("novoSetorWrapper");
-  const selectSetor = document.getElementById("setorSelect");
-  const novoSetor = document.getElementById("novoSetor");
-
-  if (!chkSolicitarNovoSetor || !selectSetor || !wrapperNovoSetor) return;
-
-  function atualizarNovoSetor() {
-    if (chkSolicitarNovoSetor.checked) {
-      // MOSTRAR DIV DO NOVO SETOR
-      wrapperNovoSetor.style.display = "block";
-
-      // BLOQUEAR SELECT DE SETOR
-      selectSetor.value = "";
-      selectSetor.disabled = true;
-      selectSetor.removeAttribute("required");
-      selectSetor.style.cursor = "not-allowed";
-
-      // CAMPO NOVO SETOR OBRIGATÓRIO
-      if (novoSetor) novoSetor.required = true;
-
-    } else {
-      // OCULTAR DIV DO NOVO SETOR
-      wrapperNovoSetor.style.display = "none";
-
-      // DESBLOQUEAR SELECT DE SETOR
-      selectSetor.disabled = false;
-      selectSetor.setAttribute("required", "required");
-      selectSetor.style.cursor = "pointer";
-
-      // CAMPO NOVO SETOR NÃO OBRIGATÓRIO
-      if (novoSetor) {
-        novoSetor.required = false;
-        novoSetor.value = "";
-      }
-    }
-  }
-
-  chkSolicitarNovoSetor.addEventListener("change", atualizarNovoSetor);
-
-  atualizarNovoSetor();
-});
-
-// MOSTRAR / OCULTAR SEÇÃO DE NOVO CARGO E DESCRIÇÃO DE ATIVIDADE E DEFINIR REQUIRED NOS CAMPOS
-document.addEventListener("DOMContentLoaded", () => {
-  const chkSolicitarNovoCargo = document.getElementById("solicitarNovoCargo");
-  const wrapperNovoCargo = document.getElementById("novoCargoWrapper");
-  const wrapperDescricaoAtividade = document.getElementById("descricaoAtividadeWrapper");
-  const selectCargo = document.getElementById("cargoSelect");
-  const novoCargo = document.getElementById("novoCargo");
-  const descricaoAtividade = document.getElementById("descricao_atividade");
-
-  if (!chkSolicitarNovoCargo || !selectCargo || !wrapperNovoCargo || !wrapperDescricaoAtividade) return;
-
-  function atualizarNovoCargo() {
-    if (chkSolicitarNovoCargo.checked) {
-      // MOSTRAR DIVS
-      wrapperNovoCargo.style.display = "block";
-      wrapperDescricaoAtividade.style.display = "block";
-
-      // BLOQUEAR SELECT DE CARGO
-      selectCargo.value = "";
-      selectCargo.disabled = true;
-      selectCargo.removeAttribute("required");
-      selectCargo.style.cursor = "not-allowed";
-
-      // CAMPOS OBRIGATÓRIOS
-      if (novoCargo) novoCargo.required = true;
-      if (descricaoAtividade) descricaoAtividade.required = true;
-
-    } else {
-      // OCULTAR DIVS
-      wrapperNovoCargo.style.display = "none";
-      wrapperDescricaoAtividade.style.display = "none";
-
-      // DESBLOQUEAR SELECT DE CARGO
-      selectCargo.disabled = false;
-      selectCargo.setAttribute("required", "required");
-      selectCargo.style.cursor = "pointer";
-
-      // CAMPOS NÃO OBRIGATÓRIOS
-      if (novoCargo) {
-        novoCargo.required = false;
-        novoCargo.value = "";
-      }
-      if (descricaoAtividade) {
-        descricaoAtividade.required = false;
-        descricaoAtividade.value = "";
-      }
-    }
-  }
-
-  chkSolicitarNovoCargo.addEventListener("change", atualizarNovoCargo);
-
-  atualizarNovoCargo();
-});
-
 // MOSTRAR / OCULTAR SEÇÃO DE NOVO CREDENCIAMENTO
 document.addEventListener("DOMContentLoaded", () => {
   const chkCredenciamento = document.getElementById("solicitarCredenciamento");
@@ -797,59 +849,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// MAPA DAS CATEGORIAS DO ESOCIAL
-const codCategoriaMap = {
-  CLT: "101",
-  COOPERADO: "741",
-  TERCEIRIZADO: "102",
-  AUTONOMO: "701",
-  TEMPORARIO: "106",
-  PESSOA_JURIDICA: "701",
-  ESTAGIARIO: "901",
-  MENOR_APRENDIZ: "103"
-};
-
-// MÁSCARA DE CPF
-const cpfInput = document.getElementById("cpf");
-
-cpfInput.addEventListener("input", function () {
-  let value = this.value.replace(/\D/g, "");
-
-  if (value.length > 11) value = value.slice(0, 11);
-
-  value = value.replace(/(\d{3})(\d)/, "$1.$2");
-  value = value.replace(/(\d{3})(\d)/, "$1.$2");
-  value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-
-  this.value = value;
-});
-
-// MÁSCARA DE RG
-const rgInput = document.getElementById("doc_identidade");
-
-rgInput.addEventListener("input", function () {
-  let value = rgInput.value.toUpperCase();
-  let uf = value.slice(0, 2).replace(/[^A-Z]/g, "");
-  let numeros = value.slice(2).replace(/\D/g, "");
-  let numerosAntesTraco = numeros.slice(0, 8);
-  let ultimoDigito = numeros.slice(8, 9);
-  let numerosFormatados = numerosAntesTraco;
-
-  if (numerosAntesTraco.length > 5) {
-    numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{3})(\d{1,3})/, "$1.$2.$3");
-  }
-  else if (numerosAntesTraco.length > 2) {
-    numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{1,3})/, "$1.$2");
-  }
-
-  // MONTAR VALOR FINAL
-  let finalValue = uf;
-  if (numerosFormatados) finalValue += " " + numerosFormatados;
-  if (ultimoDigito) finalValue += "-" + ultimoDigito;
-
-  rgInput.value = finalValue;
-});
-
 // COLOCAR REQUIRED NO CAMPO DE ESTADO CLÍNICA E CIDADE CLÍNICA PARA CREDENCIAMENTO
 document.getElementById("solicitarCredenciamento").addEventListener("change", function () {
   const estadoSelect = document.getElementById("estado_clinica");
@@ -877,21 +876,7 @@ document.getElementById("solicitarCredenciamento").addEventListener("change", fu
   }
 });
 
-// MOSTRAR / OCULTAR TIPO RAC
-const racSelect = document.getElementById("racSelect");
-const divRacValeOpcoes = document.getElementById("divRacValeOpcoes");
-
-racSelect.addEventListener("change", () => {
-  if (racSelect.value === "FORMULARIO_RAC_VALE") {
-    divRacValeOpcoes.classList.remove("d-none");
-  } else {
-    divRacValeOpcoes.classList.add("d-none");
-
-    document.getElementById("racValeOpcao").value = "";
-  }
-});
-
-// FUNÇÃO PARA ADICIONAR MAIS EMAIL PARA ENVIO DE ASO
+// FUNÇÃO PARA ADICIONAR MAIS EMAILS PARA ENVIO DE ASO
 let contadorEmails = 0;
 const limiteEmails = 2;
 
@@ -944,95 +929,17 @@ function adicionarEmail() {
   container.appendChild(div);
 }
 
-// TORNAR OBRIGATÓRICO QUANDO A OPÇÃO SELECIONADA FOR VALE
-const racValeOpcao = document.getElementById("racValeOpcao");
-
-racSelect.addEventListener("change", () => {
-  const isVale = racSelect.value === "FORMULARIO_RAC_VALE";
-
-  divRacValeOpcoes.classList.toggle("d-none", !isVale);
-  racValeOpcao.required = isVale;
-
-  if (!isVale) {
-    racValeOpcao.value = "";
-  }
-});
-
-// FUNÇÃO PARA ENVIAR EMAIL NA HORA DA SOLICITAÇÃO
-async function enviarEmailSolicitacao(dados) {
-  let destinatario = "";
-  let assunto = "";
-  let mensagem = "";
-
-  // EMAIL PARA CRIAÇÃO DE UNIDADE
-  if (dados.solicitar_nova_unidade === true) {
-    destinatario = "clientes@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
-    assunto = "Solicitação de criação de nova unidade";
-
-    mensagem = `
-      Uma solicitação para criação de unidade para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
-      
-      Gentileza dar prosseguimento à solicitação.
-    `;
-  }
-
-  // EMAIL PARA CRIAÇÃO DE NOVO SETOR/CARGO
-  else if (dados.solicitar_novo_setor === true || dados.solicitar_novo_cargo === true) {
-    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
-    assunto = "Solicitação de criação de setor/cargo";
-
-    mensagem = `
-      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
-      
-      Gentileza dar prosseguimento à solicitação.
-    `;
-  }
-
-  // EMAIL PARA CREDENCIAMENTO
-  else if (dados.solicitar_credenciamento === true) {
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
-    assunto = "Solicitação de credenciamento";
-
-    mensagem = `
-      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
-      
-      Gentileza dar prosseguimento à solicitação.
-    `;
-  }
-
-  await fetch("/enviar-email-solicitacao", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      destinatario,
-      assunto,
-      mensagem
-    })
-  });
-}
-
-function definirStatusInicial(s) {
-  const precisaUnidade = s.solicitar_nova_unidade === true;
-  const precisaSetorCargo = s.solicitar_novo_setor === true || s.solicitar_novo_cargo === true;
-  const precisaCredenciamento = s.solicitar_credenciamento === true;
-
-  if (precisaUnidade) {
-    return "PENDENTE_UNIDADE";
-  }
-
-  if (precisaSetorCargo) {
-    return "PENDENTE_SC";
-  }
-
-  if (precisaCredenciamento) {
-    return "PENDENTE_CREDENCIAMENTO";
-  }
-
-  return "PENDENTE";
-}
+// MAPA DAS CATEGORIAS DO ESOCIAL
+const codCategoriaMap = {
+  CLT: "101",
+  COOPERADO: "741",
+  TERCEIRIZADO: "102",
+  AUTONOMO: "701",
+  TEMPORARIO: "106",
+  PESSOA_JURIDICA: "701",
+  ESTAGIARIO: "901",
+  MENOR_APRENDIZ: "103"
+};
 
 // ENVIO DO FORMULÁRIO
 document.getElementById("formCadastro").addEventListener("submit", async function (e) {
@@ -1178,23 +1085,82 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   }
 });
 
-// CAMPO DE NOME SEMPRE MAIÚSCULO E SEM CARACTERES ESPECIAIS
-const nomeInput = document.getElementById("nome");
+// FUNÇÃO PARA ENVIAR EMAIL NA HORA DA SOLICITAÇÃO
+async function enviarEmailSolicitacao(dados) {
+  let destinatario = "";
+  let assunto = "";
+  let mensagem = "";
 
-nomeInput.addEventListener("input", function () {
-  let valor = this.value.toUpperCase();
+  // EMAIL PARA CRIAÇÃO DE UNIDADE
+  if (dados.solicitar_nova_unidade === true) {
+    destinatario = "clientes@salubrita.com.br";
+    //destinatario = "debora.fonseca@salubrita.com.br";
+    assunto = "Solicitação de criação de nova unidade";
 
-  valor = valor.replace(/[^A-ZÇÀ-Ÿ\s]/g, "");
+    mensagem = `
+      Uma solicitação para criação de unidade para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
+      
+      Gentileza dar prosseguimento à solicitação.
+    `;
+  }
 
-  valor = valor
-    .replace(/[ÁÀÂÃ]/g, "A")
-    .replace(/[ÉÈÊ]/g, "E")
-    .replace(/[ÍÌÎ]/g, "I")
-    .replace(/[ÓÒÔÕ]/g, "O")
-    .replace(/[ÚÙÛ]/g, "U");
+  // EMAIL PARA CRIAÇÃO DE NOVO SETOR/CARGO
+  else if (dados.solicitar_novo_setor === true || dados.solicitar_novo_cargo === true) {
+    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
+    //destinatario = "debora.fonseca@salubrita.com.br";
+    assunto = "Solicitação de criação de setor/cargo";
 
-  this.value = valor;
-});
+    mensagem = `
+      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
+      
+      Gentileza dar prosseguimento à solicitação.
+    `;
+  }
+
+  // EMAIL PARA CREDENCIAMENTO
+  else if (dados.solicitar_credenciamento === true) {
+    destinatario = "contratos@salubrita.com.br";
+    //destinatario = "debora.fonseca@salubrita.com.br";
+    assunto = "Solicitação de credenciamento";
+
+    mensagem = `
+      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
+      
+      Gentileza dar prosseguimento à solicitação.
+    `;
+  }
+
+  await fetch("/enviar-email-solicitacao", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      destinatario,
+      assunto,
+      mensagem
+    })
+  });
+}
+
+// FUNÇÃO PARA DEFINIR OS STATUS INICIAIS DAS SOLICITAÇÕES
+function definirStatusInicial(s) {
+  const precisaUnidade = s.solicitar_nova_unidade === true;
+  const precisaSetorCargo = s.solicitar_novo_setor === true || s.solicitar_novo_cargo === true;
+  const precisaCredenciamento = s.solicitar_credenciamento === true;
+
+  if (precisaUnidade) {
+    return "PENDENTE_UNIDADE";
+  }
+
+  if (precisaSetorCargo) {
+    return "PENDENTE_SC";
+  }
+
+  if (precisaCredenciamento) {
+    return "PENDENTE_CREDENCIAMENTO";
+  }
+
+  return "PENDENTE";
+}
 
 // FUNÇÃO DE LOGOUT
 function logout() {

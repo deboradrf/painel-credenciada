@@ -677,7 +677,7 @@ td {
     color: #4A5568;
 }
 
-hr {
+.divisor-footer {
     border: none;
     height: 2px;
     background: linear-gradient(

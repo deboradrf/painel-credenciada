@@ -213,7 +213,11 @@ async function buscarCPF() {
                   Solicitar exame para este funcionário
                 </button>
               </div>
-            ` : "Não é possível solicitar exame para este funcionário. Solicite novo cadastro"}
+            ` : `
+                <small>
+                  Não é possível solicitar exames para este funcionário. Realize um novo cadastro ou entre em contato para solicitar a reativação.
+                </small>
+              `}
           </div>
         </div>
       `).join("")}
