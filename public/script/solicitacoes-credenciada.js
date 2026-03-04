@@ -337,7 +337,7 @@ async function preencherModal(s, tipo) {
     document.getElementById("cadastro_nome_cargo").innerText = s.nome_cargo || "-";
     document.getElementById("cadastro_novo_cargo").innerText = s.nome_novo_cargo;
     document.getElementById("cadastro_descricao_atividade").innerText = s.descricao_atividade;
-    document.getElementById("cadastro_rac").innerText = s.rac || "-";
+    document.getElementById("cadastro_rac").innerText = formatarRac(s.rac) || "-";
     document.getElementById("cadastro_tipos_rac").innerText = formatarTiposRac(s.tipos_rac);
     document.getElementById("cadastro_tipo_exame").innerText = s.tipo_exame;
     document.getElementById("cadastro_data_exame").innerText = formatarData(s.data_exame);
@@ -530,7 +530,7 @@ async function preencherModal(s, tipo) {
     document.getElementById("exame_nome_unidade").innerText = s.nome_unidade;
     document.getElementById("exame_nome_setor").innerText = s.nome_setor;
     document.getElementById("exame_nome_cargo").innerText = s.nome_cargo;
-    document.getElementById("exame_rac").innerText = s.rac || "-";
+    document.getElementById("exame_rac").innerText = formatarRac(s.rac) || "-";
     document.getElementById("exame_tipos_rac").innerText = formatarTiposRac(s.tipos_rac);
     document.getElementById("exame_tipo_exame").innerText = s.tipo_exame;
     document.getElementById("exame_data_exame").innerText = formatarData(s.data_exame);
@@ -572,10 +572,6 @@ async function preencherModal(s, tipo) {
       document.getElementById("exame_funcao_atual").innerText = s.funcao_atual || "-";
       document.getElementById("exame_nova_funcao").innerText = s.nome_nova_funcao || "-";
       document.getElementById("exame_descricao_atividade").innerText = s.descricao_atividade || "-";
-
-      if (s.solicitar_nova_funcao === true) {
-        document.getElementById("divExameNovoSetor")?.classList.add("d-none");
-      }
 
       if (s.solicitar_nova_funcao === false && s.solicitar_novo_setor === false) {
         document.getElementById("divExameNovoSetor")?.classList.add("d-none");
@@ -1041,6 +1037,25 @@ async function carregarFuncao(empresaCodigo, selecionadoNome = "") {
   } catch (err) {
     console.error("Erro ao carregar cargos:", err);
   }
+}
+
+// FUNÇÃO PARA FORMATAR RAC
+const RAC_LABELS = {
+  FORMULARIO_RAC_VALE: "FORMULÁRIO RAC VALE",
+  FORMULARIO_UNIDADE_CSN: "FORMULÁRIO UNIDADE CSN",
+  FORMULARIO_UNIDADE_VALLOUREC: "FORMULÁRIO UNIDADE VALLOUREC"
+};
+
+function formatarRac(rac) {
+  if (!rac) return "-";
+
+  const lista = Array.isArray(rac)
+    ? rac
+    : rac.split(",");
+
+  return lista
+    .map(item => RAC_LABELS[item] || item)
+    .join(", ");
 }
 
 // FUNÇÃO PARA FORMATAR OS TIPOS DE RAC

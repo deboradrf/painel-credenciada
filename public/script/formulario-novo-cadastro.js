@@ -523,31 +523,49 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // MOSTRAR / OCULTAR TIPO RAC
-const racSelect = document.getElementById("racSelect");
-const divRacValeOpcoes = document.getElementById("divRacValeOpcoes");
+// const racSelect = document.getElementById("racSelect");
+// const divRacValeOpcoes = document.getElementById("divRacValeOpcoes");
 
-racSelect.addEventListener("change", () => {
-  if (racSelect.value === "FORMULARIO_RAC_VALE") {
-    divRacValeOpcoes.classList.remove("d-none");
-  } else {
-    divRacValeOpcoes.classList.add("d-none");
+// racSelect.addEventListener("change", () => {
+//   if (racSelect.value === "FORMULARIO_RAC_VALE") {
+//     divRacValeOpcoes.classList.remove("d-none");
+//   } else {
+//     divRacValeOpcoes.classList.add("d-none");
 
-    document.getElementById("racValeOpcao").value = "";
-  }
-});
+//     document.getElementById("racValeOpcao").value = "";
+//   }
+// });
 
 // TORNAR OBRIGATÓRICO QUANDO A OPÇÃO SELECIONADA FOR VALE
-const racValeOpcao = document.getElementById("racValeOpcao");
+// const racValeOpcao = document.getElementById("racValeOpcao");
 
-racSelect.addEventListener("change", () => {
-  const isVale = racSelect.value === "FORMULARIO_RAC_VALE";
+// racSelect.addEventListener("change", () => {
+//   const isVale = racSelect.value === "FORMULARIO_RAC_VALE";
 
-  divRacValeOpcoes.classList.toggle("d-none", !isVale);
-  racValeOpcao.required = isVale;
+//   divRacValeOpcoes.classList.toggle("d-none", !isVale);
+//   racValeOpcao.required = isVale;
 
-  if (!isVale) {
-    racValeOpcao.value = "";
-  }
+//   if (!isVale) {
+//     racValeOpcao.value = "";
+//   }
+// });
+
+const racCheckboxes = document.querySelectorAll('input[name="form_rac"]');
+const divRacValeOpcoes = document.getElementById("divRacValeOpcoes");
+
+racCheckboxes.forEach(cb => {
+  cb.addEventListener("change", () => {
+    // se algum checkbox selecionado for RAC Vale
+    const racValeSelecionado = Array.from(racCheckboxes)
+      .some(input => input.checked && input.value === "FORMULARIO_RAC_VALE");
+
+    divRacValeOpcoes.classList.toggle("d-none", !racValeSelecionado);
+
+    if (!racValeSelecionado) {
+      // limpa seleção dos tipos RAC Vale
+      document.querySelectorAll('input[name="racValeOpcao"]').forEach(cb => cb.checked = false);
+    }
+  });
 });
 
 // LISTENER DOS CAMPOS DE DATA/HORA DO EXAME (SÓ PERMITIR MAIS DE 24H DA SOLICITAÇÃO)
@@ -973,6 +991,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   const solicitarNovoCargo = document.getElementById("solicitarNovoCargo")?.checked === true;
   const nomeNovoSetor = document.getElementById("novoSetor")?.value || null;
   const nomeNovoCargo = document.getElementById("novoCargo")?.value || null;
+  const racSelecionados = Array.from(document.querySelectorAll('input[name="form_rac"]:checked')).map(el => el.value);
   const tiposRacSelecionados = Array.from(document.querySelectorAll('input[name="racValeOpcao"]:checked')).map(el => el.value);
   const solicitarCredenciamento = document.getElementById("solicitarCredenciamento")?.checked === true;
 
@@ -1025,7 +1044,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     solicitar_novo_cargo: solicitarNovoCargo,
     nome_novo_cargo: solicitarNovoCargo ? nomeNovoCargo : null,
     descricao_atividade: document.getElementById("descricao_atividade").value,
-    rac: document.getElementById("racSelect").value || null,
+    rac: racSelecionados.length ? racSelecionados : null,
     tipos_rac: tiposRacSelecionados.length ? tiposRacSelecionados : null,
     tipo_exame: document.getElementById("tipo_exame").value,
     data_exame: document.getElementById("data_exame").value || null,

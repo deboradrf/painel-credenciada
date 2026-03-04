@@ -246,6 +246,34 @@ function renderizarTabela(lista) {
   });
 }
 
+// FUNÇÃO PARA FORMATAR RAC
+const RAC_LABELS = {
+  FORMULARIO_RAC_VALE: "FORMULÁRIO RAC VALE",
+  FORMULARIO_UNIDADE_CSN: "FORMULÁRIO UNIDADE CSN",
+  FORMULARIO_UNIDADE_VALLOUREC: "FORMULÁRIO UNIDADE VALLOUREC"
+};
+
+function formatarRac(rac) {
+  if (!rac) return "-";
+
+  const lista = Array.isArray(rac)
+    ? rac
+    : rac.split(",");
+
+  return lista
+    .map(item => RAC_LABELS[item] || item)
+    .join(", ");
+}
+
+// FUNÇÃO PARA FORMATAR OS TIPOS DE RAC
+function formatarTiposRac(tipos) {
+  if (!Array.isArray(tipos) || tipos.length === 0) return "-";
+
+  return tipos
+    .map(t => t.replace("RAC_", "RAC "))
+    .join(", ");
+}
+
 // FUNÇÃO PARA CANCELAR SOLICITAÇÃO PENDENTE
 async function cancelarSolicitacao(
   id,
@@ -429,8 +457,8 @@ function preencherModalEditarCadastro(s) {
   document.getElementById("editCadNomeCargo").value = s.nome_cargo;
   document.getElementById("editCadNovoCargo").value = s.nome_novo_cargo;
   document.getElementById("editCadDescricaoAtividade").value = s.descricao_atividade;
-  document.getElementById("editCadRac").value = s.rac,
-  document.getElementById("editCadTiposRac").value = s.tipos_rac;
+  document.getElementById("editCadRac").value = formatarRac(s.rac),
+  document.getElementById("editCadTiposRac").value = formatarTiposRac(s.tipos_rac);
   document.getElementById("editCadTipoExame").value = s.tipo_exame;
   document.getElementById("editCadDataExame").value = formatarDataParaInput(s.data_exame);
   document.getElementById("editCadMaisUnidades").innerText = s.mais_unidades;
@@ -553,14 +581,28 @@ function preencherModalEditarCadastro(s) {
   const blocoMaisUnidades = document.getElementById("bloco_mais_unidades");
   const editCadMaisUnidades = document.getElementById("editCadMaisUnidades");
 
-  if (s.solicitar_mais_unidades && Array.isArray(s.mais_unidades) && s.mais_unidades.length > 0) {
+  let unidadesExtras = [];
+
+  if (Array.isArray(s.unidades_extras)) {
+    unidadesExtras = s.unidades_extras;
+  } else if (typeof s.unidades_extras === "string") {
+    try {
+      unidadesExtras = JSON.parse(s.unidades_extras);
+    } catch {
+      unidadesExtras = [];
+    }
+  }
+
+  if (unidadesExtras.length > 0) {
     editCadMaisUnidades.innerHTML = "";
-    s.mais_unidades.forEach(u => {
+
+    unidadesExtras.forEach(u => {
       const div = document.createElement("div");
       div.classList.add("mb-1");
-      div.innerText = `${u.nome_unidade}`;
+      div.textContent = u.nome_unidade;
       editCadMaisUnidades.appendChild(div);
     });
+
     blocoMaisUnidades.classList.remove("d-none");
   } else {
     editCadMaisUnidades.innerHTML = "";
@@ -613,8 +655,8 @@ function preencherModalEditarExame(s) {
   document.getElementById("editExameTipoExame").value = s.tipo_exame;
   document.getElementById("editExameDataExame").value = formatarDataParaInput(s.data_exame);
   document.getElementById("editExameMaisUnidades").innerText = s.mais_unidades;
-  document.getElementById("editExameRac").value = s.rac;
-  document.getElementById("editExameTiposRac").value = s.tipos_rac;
+  document.getElementById("editExameRac").value = formatarRac(s.rac);
+  document.getElementById("editExameTiposRac").value = formatarTiposRac(s.tipos_rac);
   document.getElementById("editExameFuncaoAnterior").value = s.funcao_anterior;
   document.getElementById("editExameFuncaoAtual").value = s.funcao_atual;
   document.getElementById("editExameNovaFuncao").value = s.nome_nova_funcao;
@@ -682,19 +724,33 @@ function preencherModalEditarExame(s) {
   }
 
   const blocoMaisUnidades = document.getElementById("bloco_exame_mais_unidades");
-  const editExameMaisUnidades = document.getElementById("editExameMaisUnidades");
+  const editCadMaisUnidades = document.getElementById("editExameMaisUnidades");
 
-  if (s.solicitar_mais_unidades && Array.isArray(s.mais_unidades) && s.mais_unidades.length > 0) {
-    editExameMaisUnidades.innerHTML = "";
-    s.mais_unidades.forEach(u => {
+  let unidadesExtras = [];
+
+  if (Array.isArray(s.unidades_extras)) {
+    unidadesExtras = s.unidades_extras;
+  } else if (typeof s.unidades_extras === "string") {
+    try {
+      unidadesExtras = JSON.parse(s.unidades_extras);
+    } catch {
+      unidadesExtras = [];
+    }
+  }
+
+  if (unidadesExtras.length > 0) {
+    editCadMaisUnidades.innerHTML = "";
+
+    unidadesExtras.forEach(u => {
       const div = document.createElement("div");
       div.classList.add("mb-1");
-      div.innerText = `${u.nome_unidade}`;
-      editExameMaisUnidades.appendChild(div);
+      div.textContent = u.nome_unidade;
+      editCadMaisUnidades.appendChild(div);
     });
+
     blocoMaisUnidades.classList.remove("d-none");
   } else {
-    editExameMaisUnidades.innerHTML = "";
+    editCadMaisUnidades.innerHTML = "";
     blocoMaisUnidades.classList.add("d-none");
   }
 
@@ -781,8 +837,6 @@ async function salvarEdicaoCadastro() {
     tipo_contratacao: document.getElementById("editCadTipoContratacao").value,
     cod_categoria: codCategoriaMap[tipoContratacaoValue],
     regime_trabalho: document.getElementById("editCadRegimeTrabalho").value,
-    nome_empresa: document.getElementById("editCadNomeEmpresa").value,
-    nome_unidade: document.getElementById("editCadNomeUnidade").value,
     nome_fantasia: document.getElementById("editCadNomeFantasia").value,
     razao_social: document.getElementById("editCadRazaoSocial").value,
     cnpj: document.getElementById("editCadCnpj").value,
@@ -794,21 +848,12 @@ async function salvarEdicaoCadastro() {
     estado: document.getElementById("editCadEstado").value,
     tipo_faturamento: tipoFaturamentoSelecionado,
     email: document.getElementById("editCadEmail").value,
-    nome_setor: document.getElementById("editCadNomeSetor").value,
     nome_novo_setor: document.getElementById("editCadNovoSetor").value,
-    nome_cargo: document.getElementById("editCadNomeCargo").value,
     nome_novo_cargo: document.getElementById("editCadNovoCargo").value,
     descricao_atividade: document.getElementById("editCadDescricaoAtividade").value,
-    rac: document.getElementById("editCadRac").value,
-    tipos_rac: stringParaArrayRac(document.getElementById("editCadTiposRac").value),
-    tipo_exame: document.getElementById("editCadTipoExame").value,
-    data_exame: dataParaFormatoBanco(document.getElementById("editCadDataExame").value),
     cnh: document.getElementById("editCadCNH").value,
     vencimento_cnh: dataParaFormatoBanco(document.getElementById("editCadVencimentoCNH").value),
     lab_toxicologico: document.getElementById("editCadLabToxicologico").value,
-    estado_clinica: document.getElementById("editCadEstadoClinica").value,
-    cidade_clinica: document.getElementById("editCadCidadeClinica").value,
-    nome_clinica: document.getElementById("editCadNomeClinica").value,
     estado_credenciamento: document.getElementById("editCadEstadoCredenciamento").value,
     cidade_credenciamento: document.getElementById("editCadCidadeCredenciamento").value,
     observacao: document.getElementById("editCadObservacao").value
@@ -839,32 +884,13 @@ async function salvarEdicaoExame() {
   const id = document.getElementById("editExameId").value;
 
   const dados = {
-    nome_funcionario: document.getElementById("editExameNomeFuncionario").value,
-    data_nascimento: dataParaFormatoBanco(document.getElementById("editExameDataNascimento").value),
-    cpf: document.getElementById("editExameCPF").value,
-    matricula: document.getElementById("editExameMatricula").value,
-    data_admissao: dataParaFormatoBanco(document.getElementById("editExameDataAdmissao").value),
-    nome_empresa: document.getElementById("editExameNomeEmpresa").value,
-    nome_unidade: document.getElementById("editExameNomeUnidade").value,
-    nome_setor: document.getElementById("editExameNomeSetor").value,
-    nome_cargo: document.getElementById("editExameNomeCargo").value,
-    rac: document.getElementById("editExameRac").value,
-    tipos_rac: stringParaArrayRac(document.getElementById("editExameTiposRac").value),
-    tipo_exame: document.getElementById("editExameTipoExame").value,
-    data_exame: dataParaFormatoBanco(document.getElementById("editExameDataExame").value),
-    funcao_anterior: document.getElementById("editExameFuncaoAnterior").value,
-    funcao_atual: document.getElementById("editExameFuncaoAtual").value || null,
     nome_nova_funcao: document.getElementById("editExameNovaFuncao").value || null,
     descricao_atividade: document.getElementById("editExameDescricaoAtividade").value,
-    setor_atual: document.getElementById("editExameSetorAtual").value || null,
     nome_novo_setor: document.getElementById("editExameNovoSetor").value || null,
     motivo_consulta: document.getElementById("editExameMotivoConsulta").value || null,
     cnh: document.getElementById("editExameCNH").value || null,
     vencimento_cnh: dataParaFormatoBanco(document.getElementById("editExameVencimentoCNH").value),
     lab_toxicologico: document.getElementById("editExameLabToxicologico").value || null,
-    estado_clinica: document.getElementById("editExameEstadoClinica").value || null,
-    cidade_clinica: document.getElementById("editExameCidadeClinica").value || null,
-    nome_clinica: document.getElementById("editExameNomeClinica").value || null,
     estado_credenciamento: document.getElementById("editExameEstadoCredenciamento").value || null,
     cidade_credenciamento: document.getElementById("editExameCidadeCredenciamento").value || null,
     observacao: document.getElementById("editExameObservacao").value || null

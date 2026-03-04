@@ -524,22 +524,29 @@
                                 <div class="alert alert-warning">
                                     <i class="fa-solid fa-circle-info fa-lg" style="color: #F1AE33"></i>
                                     <p class="alert-text">Em caso de colaborador mapeado em Atividades Críticas,
-                                        selecione o campo abaixo:</p>
+                                        selecione o(s) formulário(s) correspondente(s):</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-group mt-3" id="divRac">
-                            <div class="input-wrapper">
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-diagram-project"></i>
+                            <div class="rac-checkbox-group">
+                                <div class="form-row">
+                                    <label class="rac-checkbox">
+                                        <input type="checkbox" name="form_rac" class="form-check-input me-1" value="FORMULARIO_RAC_VALE">
+                                        Formulário RAC Vale
+                                    </label>
+    
+                                    <label class="rac-checkbox">
+                                        <input type="checkbox" name="form_rac" class="form-check-input me-1" value="FORMULARIO_UNIDADE_CSN">
+                                        Formulário unidade CSN
+                                    </label>
+    
+                                    <label class="rac-checkbox">
+                                        <input type="checkbox" name="form_rac" class="form-check-input me-1" value="FORMULARIO_UNIDADE_VALLOUREC">
+                                        Formulário unidade Vallourec
+                                    </label>
                                 </div>
-                                <select id="racSelect">
-                                    <option value="">Selecione...</option>
-                                    <option value="FORMULARIO_RAC_VALE">Formulário RAC Vale</option>
-                                    <option value="FORMULARIO_UNIDADE_CSN">Formulário unidade CSN</option>
-                                    <option value="FORMULARIO_UNIDADE_VALLOUREC">Formulário unidade Vallourec</option>
-                                </select>
                             </div>
                         </div>
 
