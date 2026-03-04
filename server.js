@@ -645,11 +645,13 @@ app.get("/solicitacoes/novo-cadastro/:id", async (req, res) => {
         sf.observacao_consulta,
         sf.motivo_reprovacao,
         sf.solicitado_em,
+        sf.em_analise_por,
         u.nome AS solicitado_por_nome,
         u.email AS solicitado_por_email,
         ua.nome AS analisado_por_nome,
         ue.nome AS enviado_soc_por_nome,
         uc.nome AS cancelado_por_nome,
+        ulock.nome AS em_analise_por_nome,
         sf.analisado_em,
         sf.enviado_soc_em,
         sf.cancelado_em
@@ -659,6 +661,7 @@ app.get("/solicitacoes/novo-cadastro/:id", async (req, res) => {
       LEFT JOIN usuarios ua ON ua.id = sf.analisado_por
       LEFT JOIN usuarios ue ON ue.id = sf.enviado_soc_por
       LEFT JOIN usuarios uc ON uc.id = sf.cancelado_por
+      LEFT JOIN usuarios ulock ON ulock.id = sf.em_analise_por
       WHERE sf.id = $1
     `, [id]);
 
@@ -1081,10 +1084,12 @@ app.get("/solicitacoes/novo-exame/:id", async (req, res) => {
         sf.observacao_consulta,
         sf.motivo_reprovacao,
         sf.solicitado_em,
+        sf.em_analise_por,
         u.nome AS solicitado_por_nome,
         u.email AS solicitado_por_email,
         ua.nome AS analisado_por_nome,
         uc.nome AS cancelado_por_nome,
+        ulock.nome AS em_analise_por_nome,
         sf.analisado_em,
         sf.cancelado_em 
       FROM solicitacoes_novo_exame sf
@@ -1092,6 +1097,7 @@ app.get("/solicitacoes/novo-exame/:id", async (req, res) => {
       JOIN usuarios u ON u.id = sf.solicitado_por
       LEFT JOIN usuarios ua ON ua.id = sf.analisado_por
       LEFT JOIN usuarios uc ON uc.id = sf.cancelado_por
+      LEFT JOIN usuarios ulock ON ulock.id = sf.em_analise_por
       WHERE sf.id = $1
     `, [id]);
 
@@ -1327,9 +1333,12 @@ app.get("/solicitacoes", async (req, res) => {
           f.solicitar_novo_setor,
           f.solicitar_novo_cargo,
           f.solicitar_credenciamento,
+          s.em_analise_por,
+          ulock.nome AS em_analise_por_nome,
           'NOVO_CADASTRO' AS tipo
         FROM solicitacoes_novo_cadastro s
         JOIN novo_cadastro f ON f.id = s.novo_cadastro_id
+        LEFT JOIN usuarios ulock ON ulock.id = s.em_analise_por
 
         UNION ALL
 
@@ -1349,9 +1358,12 @@ app.get("/solicitacoes", async (req, res) => {
           f.solicitar_nova_funcao,
           f.solicitar_novo_setor,
           f.solicitar_credenciamento,
+          s.em_analise_por,
+          ulock.nome AS em_analise_por_nome,
           'NOVO_EXAME' AS tipo      
         FROM solicitacoes_novo_exame s
         JOIN novo_exame f ON f.id = s.novo_exame_id
+        LEFT JOIN usuarios ulock ON ulock.id = s.em_analise_por
       ) t
       ORDER BY t.solicitado_em DESC;
     `);
@@ -1496,7 +1508,7 @@ app.post("/solicitacoes/:tipo/:id/cancelar", async (req, res) => {
   }
 });
 
-// SOLICITAÇÕES DO USUÁRIO LOGADO - novo cadastro e novo exame
+// SOLICITAÇÕES DA EMPRESA - novo cadastro e novo exame
 app.get("/solicitacoes-empresa/:usuarioId", async (req, res) => {
   const { usuarioId } = req.params;
 
@@ -1957,6 +1969,96 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
   }
 });
 
+// INICIAR ANÁLISE DE UMA SOLICITAÇÃO
+app.post("/solicitacoes/:tipo/:id/iniciar-analise", async (req, res) => {
+  const { tipo, id } = req.params;
+  const { usuario_id } = req.body;
+
+  if (!usuario_id) {
+    return res.status(400).json({ erro: "Usuário não informado" });
+  }
+
+  const tabela =
+    tipo === "NOVO_EXAME"
+      ? "solicitacoes_novo_exame"
+      : "solicitacoes_novo_cadastro";
+
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT 
+        s.em_analise_por,
+        u.nome AS nome_usuario
+      FROM ${tabela} s
+      LEFT JOIN usuarios u ON u.id = s.em_analise_por
+      WHERE s.id = $1
+      `,
+      [id]
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({ erro: "Solicitação não encontrada" });
+    }
+
+    const solicitacao = rows[0];
+
+    // 🚫 Já está em análise por outro usuário
+    if (
+      solicitacao.em_analise_por &&
+      solicitacao.em_analise_por !== usuario_id
+    ) {
+      return res.status(409).json({
+        erro: `Em análise por ${solicitacao.nome_usuario}`
+      });
+    }
+
+    // 🔐 Cria / renova lock
+    await pool.query(
+      `
+      UPDATE ${tabela}
+      SET em_analise_por = $1
+      WHERE id = $2
+      `,
+      [usuario_id, id]
+    );
+
+    res.json({ sucesso: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao iniciar análise" });
+  }
+});
+
+// FINALIZAR ANÁLISE DE UMA SOLICITAÇÃO
+app.post("/solicitacoes/:tipo/:id/finalizar-analise", async (req, res) => {
+  const { tipo, id } = req.params;
+  const { usuario_id } = req.body;
+
+  const tabela =
+    tipo === "NOVO_EXAME"
+      ? "solicitacoes_novo_exame"
+      : "solicitacoes_novo_cadastro";
+
+  try {
+    await pool.query(
+      `
+      UPDATE ${tabela}
+      SET em_analise_por = NULL
+      WHERE id = $1
+        AND em_analise_por = $2
+      `,
+      [id, usuario_id]
+    );
+
+    res.json({ sucesso: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao finalizar análise" });
+  }
+});
+
 // VERIFICAR FUNCIONÁRIO NO SOC POR CPF DENTRO DA EMPRESA LOGADA (EXPORTA DADOS)
 app.get("/soc/funcionario-por-cpf/:cpf/:empresaUsuario", async (req, res) => {
   try {
@@ -1974,8 +2076,23 @@ app.get("/soc/funcionario-por-cpf/:cpf/:empresaUsuario", async (req, res) => {
       responseType: "arraybuffer"
     });
 
-    const decoded = iconv.decode(response.data, "ISO-8859-1");
-    const parsed = JSON.parse(decoded);
+    const decoded = iconv.decode(response.data, "ISO-8859-1").trim();
+
+    // SOC NÃO ACHOU FUNCIONÁRIO
+    if (!decoded || decoded.toLowerCase().includes("sem resultado")) {
+      return res.json({ existe: false });
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(decoded);
+    } catch (e) {
+      console.error("Retorno inesperado do SOC:", decoded);
+      return res.status(500).json({
+        erro: "Retorno inválido do SOC",
+        detalhe: decoded
+      });
+    }
 
     const registros = Array.isArray(parsed) ? parsed : [parsed];
 

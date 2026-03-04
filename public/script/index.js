@@ -64,17 +64,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// FUNÇÃO PARA ACESSAR FORMULÁRIO
-function acessarFormulario() {
-    if (!usuarioLogado || !usuarioLogado.cod_empresa) {
-        alert("Empresa não encontrada no usuário logado");
-        return;
-    }
-
-    localStorage.setItem("empresaCodigo", usuarioLogado.cod_empresa);
-    window.location.href = "formulario-novo-cadastro.html";
-}
-
 // FUNÇÃO DE LOGOUT
 function logout() {
     localStorage.removeItem("usuario");

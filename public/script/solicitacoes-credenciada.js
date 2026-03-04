@@ -186,6 +186,8 @@ async function renderizarTabela(lista) {
     const statusClass = status.toLowerCase();
 
     const podeEnviarSOC = (s.tipo === "NOVO_CADASTRO" && s.status === "APROVADO") || s.status === "ERRO_SOC";
+    
+    const estaEmAnalise = s.em_analise_por && s.em_analise_por !== usuarioLogado.id;
 
     let iconeTipo = "";
 
@@ -213,25 +215,35 @@ async function renderizarTabela(lista) {
       </td>
       <td class="actions">
         <div class="actions-wrapper">
-          <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
-            Analisar
-          </button>
-
-          ${podeEnviarSOC
+          ${estaEmAnalise
           ? `
-            <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
-              Enviar SOC
-            </button>
+            <small style="opacity:0.6;">
+              Em análise por ${s.em_analise_por_nome?.split(' ')[0]}
+            </small>
             `
-          : ""}
+          : `
+            <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
+              Analisar
+            </button>
 
-          ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
-          ? `
-            <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
-              Cancelar
-            </button>
-            `
-          : ""
+            ${podeEnviarSOC
+              ? `
+                <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
+                  Enviar SOC
+                </button>
+                `
+              : ""
+            }
+
+            ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
+              ? `
+                <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
+                  Cancelar
+                </button>
+                `
+              : ""
+            }
+          `
           }
         </div>
       </td>
@@ -241,12 +253,41 @@ async function renderizarTabela(lista) {
   });
 }
 
+// LIBERAR O LOCK AO ATUALIZAR A PAGINA
+window.addEventListener("beforeunload", function () {
+  if (solicitacaoAtualId && tipoSolicitacaoAtual) {
+    navigator.sendBeacon(
+      `/solicitacoes/${tipoSolicitacaoAtual}/${solicitacaoAtualId}/finalizar-analise`,
+      new Blob(
+        [JSON.stringify({ usuario_id: usuarioLogado.id })],
+        { type: "application/json" }
+      )
+    );
+  }
+});
+
 // FUNÇÃO PARA VER DETALHES
 async function verDetalhes(id, tipo) {
   solicitacaoAtualId = id;
   tipoSolicitacaoAtual = tipo;
 
   try {
+    // INICIAR LOCK PARA SOLICITAÇÃO EM ANÁLISE
+    const lockRes = await fetch(`/solicitacoes/${tipo}/${id}/iniciar-analise`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuario_id: usuarioLogado.id })
+      }
+    );
+
+    const lockData = await lockRes.json();
+
+    if (!lockRes.ok || !lockData.sucesso) {
+      alert(lockData.erro || "Esta solicitação já está em análise.");
+      return;
+    }
+
     const url =
       tipo === "NOVO_EXAME"
         ? `/solicitacoes/novo-exame/${id}`
@@ -268,18 +309,36 @@ async function verDetalhes(id, tipo) {
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
 
-    const dadosModal = dados;
-
+    // QUANDO MODAL ABRIR
     modalElement.addEventListener(
       "shown.bs.modal",
       () => {
         const textarea = getObservacaoConsultaAtual();
-        if (textarea) textarea.value = dadosModal.observacao_consulta || "";
+        if (textarea) textarea.value = dados.observacao_consulta || "";
 
-        marcarTipoConsultaSalvo(dadosModal.tipo_consulta, tipo);
+        marcarTipoConsultaSalvo(dados.tipo_consulta, tipo);
       },
       { once: true }
     );
+
+    // LIBERAR LOCK QUANDO MODAL FECHAR
+    modalElement.addEventListener(
+      "hidden.bs.modal",
+      async () => {
+        await fetch(`/solicitacoes/${tipo}/${id}/finalizar-analise`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usuario_id: usuarioLogado.id })
+          }
+        );
+
+        solicitacaoAtualId = null;
+        tipoSolicitacaoAtual = null;
+      },
+      { once: true }
+    );
+
   } catch (err) {
     console.error(err);
     alert("Erro ao carregar detalhes");

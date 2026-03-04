@@ -89,134 +89,94 @@ async function buscarCPF() {
       funcionarios = [data.funcionario];
     }
 
-    // NÃO ENCONTROU NENHUM CADASTRO
-    if (!data.existe || funcionarios.length === 0) {
+    // BUSCA O FUNCIONÁRIO ATIVO (se existir)
+    const funcionarioAtivo = funcionarios.find(
+      f => f.situacao?.toLowerCase() === "ativo"
+    );
+
+    // NÃO EXISTE NENHUM CADASTRO ATIVO
+    if (!funcionarioAtivo) {
       resultado.innerHTML = `
-        <div class="alerts-container mb-4">
-          <div class="alert alert-nao-encontrou">
-            <i class="fa-solid fa-circle-xmark fa-lg" style="color: #F05252"></i>
-            <p class="alert-text">
-              Nenhum cadastro encontrado para este CPF. Solicite novo cadastro
-            </p>
+        <div class="alerts-container mb-3">
+          <div class="alert alert-encontrou-ativo">
+            <i class="fa-solid fa-circle-check fa-lg" style="color: #53A5A6"></i>
+            <p class="alert-text">Nenhum cadastro ativo encontrado para este CPF</p>
           </div>
+        </div>
+
+        <div class="d-flex justify-content-center my-3">
+          <button class="btn-cadastrar-funcionario"
+            onclick="window.location.href='formulario-novo-cadastro.html'">
+            Solicitar cadastro
+          </button>
         </div>
       `;
       return;
     }
 
-    // ENCONTROU ALGUM CADASTRO
+    const f = funcionarioAtivo;
+
     resultado.innerHTML = `
-      <div class="alerts-container mb-3">
-        <div class="alert alert-encontrou-ativo">
-          <i class="fa-solid fa-circle-check fa-lg" style="color: #53A5A6"></i>
-          <p class="alert-text">
-            Foi encontrado ${funcionarios.length} cadastro(s) para este CPF
-          </p>
+      <div class="alerts-container mb-4">
+        <div class="alert alert-erro">
+          <i class="fa-solid fa-circle-xmark fa-lg" style="color: #F05252"></i>
+          <p class="alert-text">CPF ativo encontrado. Não é possível solicitar novo cadastro</p>
         </div>
       </div>
-      
-      ${funcionarios.map((f) => `
-        <div class="card text-center my-4">
 
-          <div class="card-header d-flex justify-content-between align-items-center"">
-            <div class="detail-value">
-              ${f.nome}
-            </div>
-            <div class="ms-auto">
-              <span class="${f.situacao?.toLowerCase() === "ativo" ? "badge badge-ativo" : "badge badge-inativo"}">
-                ${f.situacao}
-              </span>
-            </div>
+      <div class="card text-center my-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="detail-value">
+            ${f.nome}
           </div>
-
-          <div class="card-body">
-            <div class="row g-2">
-              <div class="col-12">
-                <div class="detail-item horizontal">
-                  <div class="detail-label">
-                    <span>Unidade</span>
-                  </div>
-                  <div class="detail-value">
-                    ${f.unidade?.nome}
-                    </div>
-                </div>
-              </div>
-
-              <div class="col-6">
-                <div class="detail-item horizontal">
-                  <div class="detail-label">
-                    <span>Setor</span>
-                  </div>
-                  <div class="detail-value">
-                    ${f.setor?.nome}
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-6">
-                <div class="detail-item horizontal">
-                  <div class="detail-label">
-                    <span>Cargo</span>
-                  </div>
-                  <div class="detail-value">
-                    ${f.cargo?.nome}
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-6">
-                <div class="detail-item horizontal">
-                  <div class="detail-label">
-                    <span>Data de Admissão</span>
-                  </div>
-                  <div class="detail-value">
-                    ${f.data_admissao || "-"}
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-6">
-                <div class="detail-item horizontal">
-                  <div class="detail-label">
-                    <span>Data de Demissão</span>
-                  </div>
-                  <div class="detail-value">
-                    ${f.data_demissao || "-"}
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-12">
-                <div class="detail-item horizontal">
-                  <div class="detail-label">
-                    <span>Matrícula eSocial</span>
-                  </div>
-                  <div class="detail-value">
-                    ${f.matricula || "-"}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card-footer text-body-secondary">
-            ${f.situacao?.toLowerCase() === "ativo"
-              ? `
-                <div class="d-flex justify-content-center my-3">
-                  <button class="btn-solicitar-exame"
-                    onclick="salvarFuncionario(${JSON.stringify(f).replace(/"/g, '&quot;')}); window.location.href='formulario-solicitar-exame.html'">
-                    Solicitar exame para este funcionário
-                  </button>
-                </div> `
-              : ` <small>Não é possível solicitar exame para este funcionário</small> `
-            }
+          <div class="ms-auto">
+            <span class="badge badge-ativo">ATIVO</span>
           </div>
         </div>
-      `).join("")}
+
+        <div class="card-body">
+          <div class="row g-2">
+            <div class="col-12">
+              <div class="detail-item horizontal">
+                <div class="detail-label"><span>Unidade</span></div>
+                <div class="detail-value">${f.unidade?.nome}</div>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div class="detail-item horizontal">
+                <div class="detail-label"><span>Setor</span></div>
+                <div class="detail-value">${f.setor?.nome}</div>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div class="detail-item horizontal">
+                <div class="detail-label"><span>Cargo</span></div>
+                <div class="detail-value">${f.cargo?.nome}</div>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div class="detail-item horizontal">
+                <div class="detail-label"><span>Data de Admissão</span></div>
+                <div class="detail-value">${f.data_admissao}</div>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div class="detail-item horizontal">
+                <div class="detail-label"><span>Matrícula eSocial</span></div>
+                <div class="detail-value">${f.matricula || "-"}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     `;
 
   } catch (err) {
-    console.error("❌ ERRO:", err);
+    console.error("ERRO:", err);
     resultado.innerHTML = `
       <div class="alerts-container mb-4">
         <div class="alert alert-erro">
