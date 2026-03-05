@@ -1,14 +1,13 @@
-let usuarioLogado = null;
+// USUÁRIO LOGADO
+const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
+
+if (!usuarioLogado) {
+  alert("Sessão expirada. Faça login novamente.");
+  window.location.href = "login.html";
+}
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
-  usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
-
-  if (!usuarioLogado) {
-    window.location.href = "login.html";
-    return;
-  }
-
   const userNameDropdown = document.getElementById("userNameDropdown");
   const dropdownUserExtra = document.getElementById("dropdownUserExtra");
 
@@ -201,15 +200,15 @@ async function buscarCPF() {
 
           <div class="card-footer text-body-secondary">
             ${f.situacao?.toLowerCase() === "ativo"
-              ? `
+        ? `
                 <div class="d-flex justify-content-center my-3">
                   <button class="btn-solicitar-exame"
                     onclick="salvarFuncionario(${JSON.stringify(f).replace(/"/g, '&quot;')}); window.location.href='formulario-solicitar-exame.html'">
                     Solicitar exame para este funcionário
                   </button>
                 </div> `
-              : ` <small>Não é possível solicitar exame para este funcionário</small> `
-            }
+        : ` <small>Não é possível solicitar exame para este funcionário</small> `
+      }
           </div>
         </div>
       `).join("")}
@@ -261,7 +260,7 @@ cpfInput.addEventListener("input", function () {
 
 // FUNÇÃO DE LOGOUT
 function logout() {
-  localStorage.removeItem("usuario");
-  localStorage.removeItem("empresaCodigo");
+  sessionStorage.removeItem("usuario");
+  sessionStorage.removeItem("empresaCodigo");
   window.location.href = "login.html";
 }

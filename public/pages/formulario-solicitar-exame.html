@@ -104,6 +104,7 @@
                     <div class="p-3">
                         <h5 class="my-2">Dados do Funcionário</h5>
                     </div>
+                    
                     <div class="card-body">
                         <div class="form-group">
                             <label>Nome do funcionário</label>
@@ -122,7 +123,7 @@
                                     <div class="input-icon">
                                         <i class="fa-solid fa-calendar"></i>
                                     </div>
-                                    <input type="date" id="data-nascimento" readonly>
+                                    <input type="date" id="dataNascimento" readonly>
                                 </div>
                             </div>
 
@@ -154,7 +155,7 @@
                                     <div class="input-icon">
                                         <i class="fa-solid fa-calendar-plus"></i>
                                     </div>
-                                    <input type="date" id="data_admissao" readonly>
+                                    <input type="date" id="dataAdmissao" readonly>
                                 </div>
                             </div>
                         </div>
@@ -165,6 +166,7 @@
                     <div class="p-3">
                         <h5 class="my-2">Lotação do Funcionário</h5>
                     </div>
+
                     <div class="card-body">
                         <div class="form-row">
                             <div class="form-group">
@@ -177,6 +179,7 @@
                                     <input type="hidden" id="empresaCodigo">
                                 </div>
                             </div>
+
                             <div class="form-group">
                                 <label>Unidade do Funcionário</label>
                                 <div class="input-wrapper">
@@ -188,6 +191,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Setor do Funcionário</label>
@@ -199,6 +203,7 @@
                                     <input type="hidden" id="setorCodigo">
                                 </div>
                             </div>
+                            
                             <div class="form-group">
                                 <label>Cargo do Funcionário</label>
                                 <div class="input-wrapper">
@@ -246,25 +251,25 @@
                             </div>
                         </div>
 
-                        <div class="form-group mt-3 d-none" id="divRacValeOpcoes">
+                        <div class="form-group mt-3 d-none" id="divTipoRac">
                             <label>Tipo de RAC <span class="required">*</span></label>
 
                             <div class="rac-checkbox-group">
                                 <div class="form-row">
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="racValeOpcao" class="form-check-input me-1"
+                                        <input type="checkbox" name="tipo_rac" class="form-check-input me-1"
                                             value="RAC_1">
                                         RAC 1 - Trabalhos em Altura
                                     </label>
 
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="racValeOpcao" class="form-check-input me-1"
+                                        <input type="checkbox" name="tipo_rac" class="form-check-input me-1"
                                             value="RAC_2">
                                         RAC 2 - Veículos Automotores
                                     </label>
 
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="racValeOpcao" class="form-check-input me-1"
+                                        <input type="checkbox" name="tipo_rac" class="form-check-input me-1"
                                             value="RAC_3">
                                         RAC 3 - Equipamentos Móveis
                                     </label>
@@ -272,26 +277,26 @@
 
                                 <div class="form-row">
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="racValeOpcao" class="form-check-input me-1"
+                                        <input type="checkbox" name="tipo_rac" class="form-check-input me-1"
                                             value="RAC_5">
                                         RAC 5 - Içamento de Cargas
                                     </label>
 
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="racValeOpcao" class="form-check-input me-1"
+                                        <input type="checkbox" name="tipo_rac" class="form-check-input me-1"
                                             value="RAC_6">
                                         RAC 6 - Espaço Confinado
                                     </label>
 
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="racValeOpcao" class="form-check-input me-1"
+                                        <input type="checkbox" name="tipo_rac" class="form-check-input me-1"
                                             value="RAC_10">
                                         RAC 10 - Trabalhos em Eletricidade
                                     </label>
                                 </div>
 
                                 <label class="rac-checkbox">
-                                    <input type="checkbox" name="racValeOpcao" class="form-check-input me-1"
+                                    <input type="checkbox" name="tipo_rac" class="form-check-input me-1"
                                         value="RAC_11">
                                     RAC 11 - Metal Líquido
                                 </label>
@@ -304,6 +309,7 @@
                     <div class="p-3">
                         <h5 class="my-2">Informações sobre o Exame</h5>
                     </div>
+
                     <div class="card-body">
                         <div class="form-row">
                             <div class="form-group">
@@ -312,7 +318,8 @@
                                     <div class="input-icon">
                                         <i class="fa-solid fa-file"></i>
                                     </div>
-                                    <select id="tipo_exame" required>
+
+                                    <select id="tipoExame" required>
                                         <option value="">Selecione...</option>
                                         <option value="PERIODICO">Periódico</option>
                                         <option value="MUDANCA_RISCOS_OCUPACIONAIS">Mudança de Função / Riscos
@@ -331,7 +338,7 @@
                                     <div class="input-icon">
                                         <i class="fa-solid fa-calendar"></i>
                                     </div>
-                                    <input type="date" id="data_exame" max="9999-12-31">
+                                    <input type="date" id="dataExame" max="9999-12-31">
                                 </div>
                             </div>
                         </div>
@@ -373,18 +380,17 @@
                             </button>
                         </div>
 
-                        <div class="form-group" id="cardMotivoConsulta" style="display: none;">
+                        <div class="form-group" id="divMotivoConsulta" style="display: none;">
                             <label>Informe o motivo da consulta <span class="required">*</span></label>
                             <div class="input-wrapper textarea-wrapper">
                                 <div class="input-icon">
                                     <i class="fa-solid fa-comment-dots"></i>
                                 </div>
-
-                                <textarea id="motivo_consulta" rows="2"></textarea>
+                                <textarea id="motivoConsulta" rows="2"></textarea>
                             </div>
                         </div>
 
-                        <div class="form-group" id="cardRetornoTrabalho" style="display: none;">
+                        <div class="form-group" id="divRetornoTrabalho" style="display: none;">
                             <div class="alerts-container mb-2">
                                 <div class="alert alert-warning">
                                     <i class="fa-solid fa-circle-info fa-lg" style="color: #F1AE33"></i>
@@ -396,10 +402,11 @@
                     </div>
                 </div>
 
-                <div class="card mb-4" id="cardMudancaFuncao" style="display: none;">
+                <div class="card mb-4" id="divMudancaFuncao" style="display: none;">
                     <div class="p-3">
                         <h5 class="my-2">Informações para Mudança de Função</h5>
                     </div>
+
                     <div class="card-body">
                         <div class="form-group">
                             <label>Função exercida atualmente</label>
@@ -407,19 +414,19 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-user-tie"></i>
                                 </div>
-                                <input type="text" id="funcao_anterior" readonly>
+                                <input type="text" id="funcaoAnterior" readonly>
                             </div>
                         </div>
 
-                        <!-- <div class="form-group">
-                            <label>Unidade que será transferido</label>
+                        <div class="form-group">
+                            <label>Unidade onde irá atuar</label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
                                     <i class="fa-solid fa-building"></i>
                                 </div>
-                                <select id="funcao_anterior"></select>
+                                <select id="unidadeDestinoSelect"></select>
                             </div>
-                        </div> -->
+                        </div>
 
                         <div class="form-row">
                             <div class="form-group">
@@ -429,7 +436,7 @@
                                         <div class="input-icon">
                                             <i class="fa-solid fa-sitemap"></i>
                                         </div>
-                                        <select id="setor_atual"></select>
+                                        <select id="setorAtual"></select>
                                     </div>
 
                                     <div class="form-check checkbox-modern">
@@ -462,7 +469,7 @@
                                         <div class="input-icon">
                                             <i class="fa-solid fa-user-tie"></i>
                                         </div>
-                                        <select id="funcao_atual"></select>
+                                        <select id="funcaoAtual"></select>
                                     </div>
 
                                     <div class="form-check checkbox-modern">
@@ -492,7 +499,7 @@
                                         <i class="fa-solid fa-user-pen"></i>
                                     </div>
 
-                                    <textarea id="descricao_atividade" rows="2" maxlength="999"></textarea>
+                                    <textarea id="descricaoAtividade" rows="2" maxlength="999"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -526,17 +533,18 @@
                                     <div class="input-icon">
                                         <i class="fa-solid fa-credit-card"></i>
                                     </div>
-                                    <input type="date" id="vencimento_cnh" max="9999-12-31">
+                                    <input type="date" id="vencimentoCnh" max="9999-12-31">
                                 </div>
                             </div>
                         </div>
+
                         <div class="form-group">
                             <label>Nome do laboratório ou município para realização do exame toxicológico</label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
                                     <i class="fa-solid fa-vial"></i>
                                 </div>
-                                <input type="text" id="lab_toxicologico">
+                                <input type="text" id="labToxicologico">
                             </div>
                         </div>
                     </div>
@@ -546,6 +554,7 @@
                     <div class="p-3">
                         <h5 class="my-2">Dados da Clínica Credenciada para a realização do exame</h5>
                     </div>
+
                     <div class="card-body">
                         <div class="form-group">
                             <label>Estado da Clínica <span class="required">*</span></label>
@@ -553,33 +562,36 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </div>
-                                <select id="estado_clinica" required>
+                                <select id="estadoClinica" required>
                                     <option value="">Carregando...</option>
                                 </select>
                             </div>
                         </div>
+
                         <div class="form-group">
                             <label>Cidade da Clínica <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </div>
-                                <select id="cidade_clinica" required>
+                                <select id="cidadeClinica" required>
                                     <option value="">Carregando...</option>
                                 </select>
                             </div>
                         </div>
+
                         <div class="form-group">
                             <label>Nome da Clínica <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
                                     <i class="fa-solid fa-house-medical"></i>
                                 </div>
-                                <select id="nome_clinica" required>
+                                <select id="nomeClinica" required>
                                     <option value="">Carregando...</option>
                                 </select>
                             </div>
                         </div>
+
                         <div class="form-group">
                             <div class="alerts-container mb-2">
                                 <div class="alert alert-warning">
@@ -591,18 +603,17 @@
 
                             <div class="form-check checkbox-modern mt-3">
                                 <input class="form-check-input" type="checkbox" id="solicitarCredenciamento">
-                                <label class="form-check-label">
-                                    SOLICITAR CREDENCIAMENTO
-                                </label>
+                                <label class="form-check-label">SOLICITAR CREDENCIAMENTO</label>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card mb-4" id="cardCredenciamento" style="display: none;">
+                <div class="card mb-4" id="divCredenciamento" style="display: none;">
                     <div class="p-3">
                         <h5 class="my-2">Dados para Credenciamento</h5>
                     </div>
+
                     <div class="card-body">
                         <div class="form-group">
                             <label>Estado para Credenciamento <span class="required">*</span></label>
@@ -610,16 +621,17 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </div>
-                                <input type="text" id="estado_credenciamento">
+                                <input type="text" id="estadoCredenciamento">
                             </div>
                         </div>
+
                         <div class="form-group">
                             <label>Cidade para Credenciamento <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </div>
-                                <input type="text" id="cidade_credenciamento">
+                                <input type="text" id="cidadeCredenciamento">
                             </div>
                         </div>
                     </div>
@@ -715,11 +727,6 @@
         <div class="div-space"></div>
 
         <section class="extra-section">
-            <!-- <div class="socials">
-                <a href="https://www.instagram.com/salubritasso/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://salubrita.com.br/" target="_blank"><i class="fa-solid fa-globe"></i></a>
-                <a href="https://wa.me/553131669006" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-            </div> -->
             <p>© 2026 • Salubritá Saúde e Segurança no Trabalho</p>
         </section>
     </div>

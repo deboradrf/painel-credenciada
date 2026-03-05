@@ -21,10 +21,19 @@
     display: block;
 }
 
-.mascote {
+.mascote-saude {
     position: fixed;
     bottom: 0;
     right: 0;
+    width: 200px;
+    height: auto;
+    z-index: 1000;
+}
+
+.mascote-engenharia {
+    position: fixed;
+    bottom: 0;
+    left: 5px;
     width: 200px;
     height: auto;
     z-index: 1000;
@@ -216,14 +225,16 @@ input:-webkit-autofill:active {
 }
 
 @media (max-width: 1120px) {
-    .mascote {
+    .mascote-saude,
+    .mascote-engenharia {
         width: 30%;
         max-width: 150px;
     }
 }
 
 @media (max-width: 785px) {
-    .mascote {
+    .mascote-saude,
+    .mascote-engenharia {
         display: none;
     }
 }

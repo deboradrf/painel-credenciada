@@ -416,6 +416,14 @@ h5::after {
     color: #9CA3AF;
 }
 
+#novaFuncao,
+#novoSetor,
+#labToxicologico,
+#estadoCredenciamento,
+#cidadeCredenciamento {
+    text-transform: uppercase;
+}
+
 #nome,
 #cpf,
 #matricula,
@@ -648,35 +656,6 @@ h5::after {
     font-size: 14px;
     font-weight: 500;
 }
-
-/*
-.socials {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.socials a {
-    width: 36px;
-    height: 36px;
-    text-decoration: none;
-    background: rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(4px);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #FFFFFF;
-    font-size: 16px;
-    transition: transform 0.2s ease;
-}
-
-.socials a:hover {
-    transform: translateY(-3px) scale(1.05);
-    background: rgba(255, 255, 255, 0.3);
-}*/
 
 input:-webkit-autofill,
 input:-webkit-autofill:focus,

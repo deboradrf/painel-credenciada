@@ -1,15 +1,15 @@
-let usuarioLogado = null;
+// USUÁRIO LOGADO
+const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
+
+if (!usuarioLogado) {
+  alert("Sessão expirada. Faça login novamente.");
+  window.location.href = "login.html";
+}
+
 let solicitacoes = [];
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
-  usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
-
-  if (!usuarioLogado) {
-    window.location.href = "login.html";
-    return;
-  }
-
   const userNameDropdown = document.getElementById("userNameDropdown");
   const dropdownUserExtra = document.getElementById("dropdownUserExtra");
 
@@ -159,6 +159,7 @@ function renderizarTabela(lista) {
     if (s.status === "PENDENTE_CREDENCIAMENTO") situacao = "Aguardando credenciamento";
     if (s.status === "PENDENTE") situacao = "Solicitação em análise";
     if (s.status === "PENDENTE_REAVALIACAO") situacao = "Solicitação em análise";
+    if (s.status === "PENDENTE_AGENDAMENTO") situacao = "Aguardando agendamento";
     if (s.status === "APROVADO") situacao = "Solicitação aprovada";
     if (s.status === "REPROVADO") situacao = "Ajustes necessários";
     if (s.status === "ENVIADO_SOC") situacao = "Solicitação finalizada";
@@ -458,7 +459,7 @@ function preencherModalEditarCadastro(s) {
   document.getElementById("editCadNovoCargo").value = s.nome_novo_cargo;
   document.getElementById("editCadDescricaoAtividade").value = s.descricao_atividade;
   document.getElementById("editCadRac").value = formatarRac(s.rac),
-  document.getElementById("editCadTiposRac").value = formatarTiposRac(s.tipos_rac);
+    document.getElementById("editCadTiposRac").value = formatarTiposRac(s.tipos_rac);
   document.getElementById("editCadTipoExame").value = s.tipo_exame;
   document.getElementById("editCadDataExame").value = formatarDataParaInput(s.data_exame);
   document.getElementById("editCadMaisUnidades").innerText = s.mais_unidades;
@@ -550,7 +551,7 @@ function preencherModalEditarCadastro(s) {
     blocoNovoCargo.classList.add("d-none");
   }
 
-  const blocoDescricaoAtividade = document.getElementById("divCadDescricaoAtividade");
+  const blocoDescricaoAtividade = document.getElementById("divDescricaoAtividade");
 
   if (s.solicitar_novo_cargo === true) {
     blocoDescricaoAtividade.classList.remove("d-none");
@@ -631,7 +632,7 @@ function formatarCPF(cpf) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const editCadCPF = document.getElementById("editCadCPF");
-  
+
   if (editCadCPF) {
     editCadCPF.addEventListener("input", (e) => {
       e.target.value = formatarCPF(e.target.value);
@@ -658,6 +659,7 @@ function preencherModalEditarExame(s) {
   document.getElementById("editExameRac").value = formatarRac(s.rac);
   document.getElementById("editExameTiposRac").value = formatarTiposRac(s.tipos_rac);
   document.getElementById("editExameFuncaoAnterior").value = s.funcao_anterior;
+  document.getElementById("editExameUnidadeDestino").value = s.unidade_destino;
   document.getElementById("editExameFuncaoAtual").value = s.funcao_atual;
   document.getElementById("editExameNovaFuncao").value = s.nome_nova_funcao;
   document.getElementById("editExameDescricaoAtividade").value = s.descricao_atividade;
@@ -754,6 +756,7 @@ function preencherModalEditarExame(s) {
     blocoMaisUnidades.classList.add("d-none");
   }
 
+  // MOSTRAR / ESCONDER TEXTAREA DE DESCRIÇÃO DA ATIVIDADE
   const blocoDescricaoAtividade = document.getElementById("divExameDescricaoAtividade");
 
   if (s.solicitar_nova_funcao === true) {
@@ -916,7 +919,7 @@ async function salvarEdicaoExame() {
   carregarSolicitacoes();
 }
 
-// MÁSCARA DE CPF
+// MÁSCARA DE CPF 
 const cpfInput = document.getElementById("filterCPF");
 
 cpfInput.addEventListener("input", function () {
@@ -999,7 +1002,7 @@ nomeInput.addEventListener("input", function () {
 
 // FUNÇÃO DE LOGOUT
 function logout() {
-  localStorage.removeItem("usuario");
-  localStorage.removeItem("empresaCodigo");
+  sessionStorage.removeItem("usuario");
+  sessionStorage.removeItem("empresaCodigo");
   window.location.href = "login.html";
 }

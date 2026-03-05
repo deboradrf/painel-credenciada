@@ -417,6 +417,60 @@ app.get("/prestador/:empresa/:codigoPrestador", async (req, res) => {
   }
 });
 
+// EXPORTA DADOS - GERENTE DE CONTA
+// app.get("/gerentes-conta", async (req, res) => {
+//   try {
+//     const parametro = JSON.stringify(EXPORTA_USUARIOS);
+
+//     const response = await axios.get(SOC_EXPORTA_URL, {
+//       params: { parametro }
+//     });
+
+//     const registros = response.data?.root?.record || response.data || [];
+
+//     const gerentes = (Array.isArray(registros) ? registros : [registros])
+//       .filter(r => r.GERENTE_CONTAS === "1")
+//       .map(r => ({
+//         empresa: r.EMPRESA,
+//         codigoPessoa: r.CODIGO,
+//         nome: r.NOME,
+//         email: r.EMAIL,
+//         login: r.LOGIN_USUARIO
+//       }));
+
+//     res.json(gerentes);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ erro: "Erro ao buscar gerentes de conta" });
+//   }
+// });
+
+// DEBUG - EXPORTA DADOS USUÁRIOS (RETORNO BRUTO)
+// app.get("/debug/exporta-usuarios", async (req, res) => {
+//   try {
+//     const parametro = JSON.stringify({
+//       empresa: "412429",
+//       codigo: "212989",
+//       chave: "ddd3b8f7709521eed6b8",
+//       tipoSaida: "json",
+//       ativo: "1"
+//     });
+
+//     const response = await axios.get(SOC_EXPORTA_URL, {
+//       params: { parametro }
+//     });
+
+//     // RETORNA EXATAMENTE O QUE O SOC MANDAR
+//     res.json(response.data);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({
+//       erro: "Erro no exporta dados",
+//       detalhe: err.response?.data || err.message
+//     });
+//   }
+// });
+
 // ROTA DE CADASTRO DE USUÁRIO
 app.post("/cadastro", async (req, res) => {
   try {
@@ -983,6 +1037,7 @@ app.post("/solicitar-exame", async (req, res) => {
         data_exame,
         unidades_extras,
         funcao_anterior,
+        unidade_destino,
         funcao_atual,
         solicitar_nova_funcao,
         nome_nova_funcao,
@@ -1003,7 +1058,7 @@ app.post("/solicitar-exame", async (req, res) => {
         observacao,
         emails_extras
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39)
       RETURNING id
       `,
       [
@@ -1026,6 +1081,7 @@ app.post("/solicitar-exame", async (req, res) => {
         f.data_exame,
         JSON.stringify(f.unidades_extras || []),
         f.funcao_anterior,
+        f.unidade_destino,
         f.funcao_atual,
         f.solicitar_nova_funcao,
         f.nome_nova_funcao,
@@ -2241,8 +2297,8 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
 async function enviarEmailSetorCargo(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
-    //to: "debora.fonseca@salubrita.com.br",
+    //to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de criação de setor/cargo",
     text: `
       Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
@@ -2255,8 +2311,8 @@ async function enviarEmailSetorCargo(dados) {
 async function enviarEmailCredenciamento(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    to: "contratos@salubrita.com.br",
-    //to: "debora.fonseca@salubrita.com.br",
+    //to: "contratos@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de credenciamento",
     text: `
       Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.

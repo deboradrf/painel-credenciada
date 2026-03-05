@@ -1,14 +1,13 @@
-let usuarioLogado = null;
+// USUÁRIO LOGADO
+const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
+
+if (!usuarioLogado) {
+  alert("Sessão expirada. Faça login novamente.");
+  window.location.href = "login.html";
+}
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
-  usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
-
-  if (!usuarioLogado) {
-    window.location.href = "login.html";
-    return;
-  }
-
   const userNameDropdown = document.getElementById("userNameDropdown");
   const dropdownUserExtra = document.getElementById("dropdownUserExtra");
 
@@ -221,7 +220,7 @@ cpfInput.addEventListener("input", function () {
 
 // FUNÇÃO DE LOGOUT
 function logout() {
-  localStorage.removeItem("usuario");
-  localStorage.removeItem("empresaCodigo");
+  sessionStorage.removeItem("usuario");
+  sessionStorage.removeItem("empresaCodigo");
   window.location.href = "login.html";
 }

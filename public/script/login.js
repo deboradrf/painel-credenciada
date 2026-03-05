@@ -17,7 +17,7 @@ document.getElementById("loginForm").onsubmit = async e => {
         return;
     }
 
-    localStorage.setItem("usuario", JSON.stringify(data));
+    sessionStorage.setItem("usuario", JSON.stringify(data));
 
     window.location.href = "index.html";
 };

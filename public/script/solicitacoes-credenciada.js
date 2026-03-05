@@ -1,4 +1,11 @@
-let usuarioLogado = null;
+// USUÁRIO LOGADO
+const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
+
+if (!usuarioLogado) {
+  alert("Sessão expirada. Faça login novamente.");
+  window.location.href = "login.html";
+}
+
 let solicitacoes = [];
 let tipoSolicitacaoAtual = null;
 let solicitacaoAtualId = null;
@@ -6,13 +13,6 @@ let hierarquiaAtual = null;
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
-  usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
-
-  if (!usuarioLogado) {
-    window.location.href = "login.html";
-    return;
-  }
-
   const userNameDropdown = document.getElementById("userNameDropdown");
   const dropdownUserExtra = document.getElementById("dropdownUserExtra");
 
@@ -594,6 +594,7 @@ async function preencherModal(s, tipo) {
     document.getElementById("exame_tipo_exame").innerText = s.tipo_exame;
     document.getElementById("exame_data_exame").innerText = formatarData(s.data_exame);
     preencherMaisUnidadesExame(s);
+    document.getElementById("exame_unidade_destino").innerText = s.unidade_destino || "-";
     document.getElementById("exame_funcao_anterior").innerText = s.funcao_anterior;
     document.getElementById("exame_funcao_atual").innerText = s.funcao_atual;
     document.getElementById("exame_nova_funcao").innerText = s.nome_nova_funcao;
@@ -1683,7 +1684,7 @@ async function enviarSOC(id) {
 
 // FUNÇÃO DE LOGOUT
 function logout() {
-  localStorage.removeItem("usuario");
-  localStorage.removeItem("empresaCodigo");
+  sessionStorage.removeItem("usuario");
+  sessionStorage.removeItem("empresaCodigo");
   window.location.href = "login.html";
 }

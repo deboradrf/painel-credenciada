@@ -1,16 +1,16 @@
-// DADOS DA EMPRESA LOGADA
-let empresaCodigo = localStorage.getItem("empresaCodigo");
-let nomeEmpresa = localStorage.getItem("empresaNome");
-
 let prestadoresCache = [];
 
 // USUÁRIO LOGADO
-const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
+const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
 
 if (!usuarioLogado) {
   alert("Sessão expirada. Faça login novamente.");
   window.location.href = "login.html";
 }
+
+// DADOS DA EMPRESA LOGADA
+let empresaCodigo = usuarioLogado.cod_empresa;
+let nomeEmpresa = usuarioLogado.nome_empresa;
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
@@ -620,7 +620,7 @@ function adicionarUnidade() {
     alert("Você pode adicionar no máximo 5 unidades adicionais.");
     return;
   }
-  
+
   contadorUnidades++;
 
   const container = document.getElementById("unidadesContainer");
@@ -1112,8 +1112,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CRIAÇÃO DE UNIDADE
   if (dados.solicitar_nova_unidade === true) {
-    destinatario = "clientes@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "clientes@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de criação de nova unidade";
 
     mensagem = `
@@ -1125,8 +1125,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CRIAÇÃO DE NOVO SETOR/CARGO
   else if (dados.solicitar_novo_setor === true || dados.solicitar_novo_cargo === true) {
-    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de criação de setor/cargo";
 
     mensagem = `
@@ -1138,8 +1138,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CREDENCIAMENTO
   else if (dados.solicitar_credenciamento === true) {
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "contratos@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de credenciamento";
 
     mensagem = `
@@ -1183,7 +1183,7 @@ function definirStatusInicial(s) {
 
 // FUNÇÃO DE LOGOUT
 function logout() {
-  localStorage.removeItem("usuario");
-  localStorage.removeItem("empresaCodigo");
+  sessionStorage.removeItem("usuario");
+  sessionStorage.removeItem("empresaCodigo");
   window.location.href = "login.html";
 }

@@ -3,10 +3,11 @@ let dadosOriginais = {};
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
-    const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
+    usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
 
     if (!usuarioLogado) {
         window.location.href = "login.html";
+        return;
     }
 
     const userNameDropdown = document.getElementById("userNameDropdown");
@@ -53,16 +54,12 @@ document.addEventListener("DOMContentLoaded", () => {
     profileBtn.addEventListener("hide.bs.dropdown", () => {
         document.body.classList.remove("blur-main");
     });
+
+    carregarPerfil();
 });
 
-carregarPerfil();
-
 async function carregarPerfil() {
-    const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
-
-    if (!usuarioLogado) {
-        window.location.href = "login.html";
-    }
+    const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
 
     const res = await fetch(`/usuarios/${usuarioLogado.id}`);
     const user = await res.json();
@@ -159,7 +156,7 @@ function cancelarEdicao() {
 
 // FUNÇÃO PARA SALVAR EDIÇÃO
 async function salvarEdicao() {
-    const usuarioLogado = JSON.parse(localStorage.getItem("usuario"));
+    const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
 
     const email = document.getElementById("email").value;
     const senha = document.getElementById("senha").value;
@@ -199,7 +196,7 @@ function toggleSenha() {
 
 // FUNÇÃO DE LOGOUT
 function logout() {
-    localStorage.removeItem("usuario");
-    localStorage.removeItem("empresaCodigo");
+    sessionStorage.removeItem("usuario");
+    sessionStorage.removeItem("empresaCodigo");
     window.location.href = "login.html";
 }

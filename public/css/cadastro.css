@@ -21,10 +21,19 @@
     display: block;
 }
 
-.mascote {
+.mascote-saude {
     position: fixed;
     bottom: 0;
     right: 0;
+    width: 200px;
+    height: auto;
+    z-index: 1000;
+}
+
+.mascote-engenharia {
+    position: fixed;
+    bottom: 0;
+    left: 5px;
     width: 200px;
     height: auto;
     z-index: 1000;
