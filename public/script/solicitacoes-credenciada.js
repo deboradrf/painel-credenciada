@@ -727,6 +727,15 @@ async function preencherModal(s, tipo) {
       blocoMotivoConsulta.classList.add("d-none");
     }
 
+    // MOSTARA / OCULTAR BLOCO DE UNIDADE DESTINO
+    const blocoUnidadeDestino = document.getElementById("divExameUnidadeDestino");
+
+    if (s.unidade_destino !== "") {
+      blocoUnidadeDestino.classList.remove("d-none");
+    } else {
+      blocoUnidadeDestino.classList.add("d-none");
+    }
+
     // MOSTRAR / ESCONDER BLOCO DE NOVO CREDENCIAMENTO
     const blocoEstadoClinica = document.getElementById("divExameEstadoClinica");
     const blocoCidadeClinica = document.getElementById("divExameCidadeClinica");
