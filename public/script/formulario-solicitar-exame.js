@@ -901,8 +901,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // PRIORIDADE: FUNÇÃO / SETOR
   if (precisaFuncaoSetor) {
-    //destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
-    destinatario = "debora.fonseca@salubrita.com.br";
+    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
+    //destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de criação de setor/função";
 
     mensagem = `
@@ -914,8 +914,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // SOMENTE SE NÃO TIVER FUNÇÃO/SETOR
   else if (precisaCredenciamento) {
-    //destinatario = "contratos@salubrita.com.br";
-    destinatario = "debora.fonseca@salubrita.com.br";
+    destinatario = "contratos@salubrita.com.br";
+    //destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de credenciamento";
 
     mensagem = `
