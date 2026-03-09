@@ -982,15 +982,14 @@ app.post("/solicitar-exame", async (req, res) => {
         tipo_exame,
         data_exame,
         unidades_extras,
-        funcao_anterior,
         unidade_destino,
-        funcao_atual,
+        setor_destino,
+        solicitar_novo_setor,
+        nome_novo_setor,
+        funcao_destino,
         solicitar_nova_funcao,
         nome_nova_funcao,
         descricao_atividade,
-        setor_atual,
-        solicitar_novo_setor,
-        nome_novo_setor,
         motivo_consulta,
         cnh,
         vencimento_cnh,
@@ -1004,7 +1003,7 @@ app.post("/solicitar-exame", async (req, res) => {
         observacao,
         emails_extras
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38)
       RETURNING id
       `,
       [
@@ -1026,15 +1025,14 @@ app.post("/solicitar-exame", async (req, res) => {
         f.tipo_exame,
         f.data_exame,
         JSON.stringify(f.unidades_extras || []),
-        f.funcao_anterior,
         f.unidade_destino,
-        f.funcao_atual,
+        f.setor_destino,
+        f.solicitar_novo_setor,
+        f.nome_novo_setor,
+        f.funcao_destino,
         f.solicitar_nova_funcao,
         f.nome_nova_funcao,
         f.descricao_atividade,
-        f.setor_atual,
-        f.solicitar_novo_setor,
-        f.nome_novo_setor,
         f.motivo_consulta,
         f.cnh,
         f.vencimento_cnh,
@@ -1122,7 +1120,7 @@ app.get("/solicitacoes/novo-exame/:id", async (req, res) => {
 app.put("/solicitacoes/novo-exame/:id/salvar-sc", async (req, res) => {
   const { id } = req.params;
 
-  const { funcao_atual, setor_atual } = req.body;
+  const { funcao_destino, setor_destino } = req.body;
 
   const client = await pool.connect();
 
@@ -1164,7 +1162,7 @@ app.put("/solicitacoes/novo-exame/:id/salvar-sc", async (req, res) => {
 
     // ATUALIZA FUNÇÃO
     if (solicitar_nova_funcao) {
-      if (!funcao_atual) {
+      if (!funcao_destino) {
         return res.status(400).json({
           erro: "Função obrigatória para esta solicitação"
         });
@@ -1173,20 +1171,20 @@ app.put("/solicitacoes/novo-exame/:id/salvar-sc", async (req, res) => {
       await client.query(
         `
         UPDATE novo_exame
-        SET funcao_atual = $1
+        SET funcao_destino = $1
         WHERE id = (
           SELECT novo_exame_id
           FROM solicitacoes_novo_exame
           WHERE id = $2
         )
         `,
-        [funcao_atual, id]
+        [funcao_destino, id]
       );
     }
 
     // ATUALIZA SETOR
     if (solicitar_novo_setor) {
-      if (!setor_atual) {
+      if (!setor_destino) {
         return res.status(400).json({
           erro: "Setor obrigatório para esta solicitação"
         });
@@ -1195,14 +1193,14 @@ app.put("/solicitacoes/novo-exame/:id/salvar-sc", async (req, res) => {
       await client.query(
         `
         UPDATE novo_exame
-        SET setor_atual = $1
+        SET setor_destino = $1
         WHERE id = (
           SELECT novo_exame_id
           FROM solicitacoes_novo_exame
           WHERE id = $2
         )
         `,
-        [setor_atual, id]
+        [setor_destino, id]
       );
     }
 
@@ -2243,8 +2241,8 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
 async function enviarEmailSetorCargo(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
-    //to: "debora.fonseca@salubrita.com.br",
+    //to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de criação de setor/cargo",
     text: `
       Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
@@ -2257,8 +2255,8 @@ async function enviarEmailSetorCargo(dados) {
 async function enviarEmailCredenciamento(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    to: "contratos@salubrita.com.br",
-    //to: "debora.fonseca@salubrita.com.br",
+    //to: "contratos@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de credenciamento",
     text: `
       Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.

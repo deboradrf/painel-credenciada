@@ -169,7 +169,6 @@ async function preencherCargoFuncionario() {
 
   document.getElementById("cargoNome").value = cargo.nome;
   document.getElementById("cargoCodigo").value = codCargo;
-  document.getElementById("funcaoAnterior").value = cargo.nome;
 }
 
 // FUNÇÃO PARA POPULAR O SELECT DE UNIDADE ATUAL
@@ -178,7 +177,7 @@ async function popularSelectUnidadeAtual() {
 
   if (!empresa) return;
 
-  const select = document.getElementById("unidadeDestinoSelect");
+  const unidadeDestino = document.getElementById("unidadeDestino");
 
   try {
     // SE AINDA NÃO TIVER UNIDADES NO CACHE, BUSCA
@@ -187,7 +186,7 @@ async function popularSelectUnidadeAtual() {
       unidadesCache = await res.json();
     }
 
-    select.innerHTML = `<option value="">Selecione...</option>`;
+    unidadeDestino.innerHTML = `<option value="">Selecione...</option>`;
 
     unidadesCache.forEach(u => {
       const opt = document.createElement("option");
@@ -195,7 +194,7 @@ async function popularSelectUnidadeAtual() {
       opt.value = u.codigo;
       opt.textContent = u.nome;
 
-      select.appendChild(opt);
+      unidadeDestino.appendChild(opt);
     });
 
   } catch (erro) {
@@ -205,22 +204,22 @@ async function popularSelectUnidadeAtual() {
 
 // FUNÇÃO PARA PEGAR A UNIDADE QUE FOI SELECIONADA
 function getUnidadeSelecionada() {
-  const unidadeSelecionada = document.getElementById("unidadeDestinoSelect").value;
+  const unidadeDestino = document.getElementById("unidadeDestino").value;
 
-  if (unidadeSelecionada) {
-    return unidadeSelecionada;
+  if (unidadeDestino) {
+    return unidadeDestino;
   }
 
   return funcionarioAtual.cod_unidade;
 }
 
 // QUANDO MUDAR A UNIDADE, LIMPA OS CAMPOS E RECARREGA OS SETORES
-document.getElementById("unidadeDestinoSelect").addEventListener("change", () => {
-  const selectSetor = document.getElementById("setorAtual");
-  selectSetor.innerHTML = `<option value="">Selecione...</option>`;
+document.getElementById("unidadeDestino").addEventListener("change", () => {
+  const setorDestino = document.getElementById("setorDestino");
+  setorDestino.innerHTML = `<option value="">Selecione...</option>`;
 
-  const selectFuncao = document.getElementById("funcaoAtual");
-  selectFuncao.innerHTML = `<option value="">Selecione...</option>`;
+  const funcaoDestino = document.getElementById("funcaoDestino");
+  funcaoDestino.innerHTML = `<option value="">Selecione...</option>`;
 
   carregarSetoresDaUnidade();
 });
@@ -238,8 +237,8 @@ async function carregarSetoresDaUnidade() {
   const res = await fetch(`/hierarquia/${empresa}/${unidade}`);
   const setores = await res.json();
 
-  const selectSetor = document.getElementById("setorAtual");
-  selectSetor.innerHTML = `<option value="">Selecione...</option>`;
+  const setorDestino = document.getElementById("setorDestino");
+  setorDestino.innerHTML = `<option value="">Selecione...</option>`;
 
   const unicos = new Map();
 
@@ -253,23 +252,23 @@ async function carregarSetoresDaUnidade() {
     const opt = document.createElement("option");
     opt.value = codigo;
     opt.textContent = nome;
-    selectSetor.appendChild(opt);
+    setorDestino.appendChild(opt);
   });
 }
 
 // FUNÇÃO PARA CARREGAR OS CARGOS DE UM SETOR SELECIONADO
-document.getElementById("setorAtual").addEventListener("change", carregarCargosDoSetor);
+document.getElementById("setorDestino").addEventListener("change", carregarCargosDoSetor);
 
 async function carregarCargosDoSetor() {
   const empresa = usuarioLogado.cod_empresa;
   const unidade = getUnidadeSelecionada();
 
-  const selectSetor = document.getElementById("setorAtual");
-  const codSetor = selectSetor.value;
+  const setorDestino = document.getElementById("setorDestino");
+  const codSetor = setorDestino.value;
 
-  const selectCargo = document.getElementById("funcaoAtual");
+  const funcaoDestino = document.getElementById("funcaoDestino");
 
-  selectCargo.innerHTML = `<option value="">Selecione...</option>`;
+  funcaoDestino.innerHTML = `<option value="">Selecione...</option>`;
 
   try {
     const res = await fetch(`/hierarquia/${empresa}/${unidade}/${codSetor}`);
@@ -282,7 +281,7 @@ async function carregarCargosDoSetor() {
         opt.value = item.codigoCargo;
         opt.textContent = item.nomeCargo;
 
-        selectCargo.appendChild(opt);
+        funcaoDestino.appendChild(opt);
       }
     });
   }
@@ -440,8 +439,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const tipoExame = document.getElementById("tipoExame");
   const divMudancaFuncao = document.getElementById("divMudancaFuncao");
 
-  const funcaoAtual = document.getElementById("funcaoAtual");
-  const setorAtual = document.getElementById("setorAtual");
+  const funcaoDestino = document.getElementById("funcaoDestino");
+  const setorDestino = document.getElementById("setorDestino");
 
   const solicitarNovaFuncao = document.getElementById("solicitarNovaFuncao");
   const novaFuncaoWrapper = document.getElementById("novaFuncaoWrapper");
@@ -458,13 +457,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (tipoExame.value === "MUDANCA_RISCOS_OCUPACIONAIS") {
       divMudancaFuncao.style.display = "block";
 
-      funcaoAtual.required = true;
-      setorAtual.required = true;
+      funcaoDestino.required = true;
+      setorDestino.required = true;
     } else {
       divMudancaFuncao.style.display = "none";
 
-      funcaoAtual.required = false;
-      setorAtual.required = false;
+      funcaoDestino.required = false;
+      setorDestino.required = false;
 
       solicitarNovaFuncao.checked = false;
       solicitarNovoSetor.checked = false;
@@ -472,8 +471,8 @@ document.addEventListener("DOMContentLoaded", () => {
       novaFuncaoWrapper.style.display = "none";
       novoSetorWrapper.style.display = "none";
 
-      funcaoAtual.disabled = false;
-      setorAtual.disabled = false;
+      funcaoDestino.disabled = false;
+      setorDestino.disabled = false;
 
       novaFuncao.required = false;
       novoSetor.required = false;
@@ -488,17 +487,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (this.checked) {
       novaFuncaoWrapper.style.display = "block";
 
-      funcaoAtual.value = "";
-      funcaoAtual.disabled = true;
-      funcaoAtual.required = false;
+      funcaoDestino.value = "";
+      funcaoDestino.disabled = true;
+      funcaoDestino.required = false;
 
       novaFuncao.required = true;
       descricaoAtividade.required = true;
     } else {
       novaFuncaoWrapper.style.display = "none";
 
-      funcaoAtual.disabled = false;
-      funcaoAtual.required = true;
+      funcaoDestino.disabled = false;
+      funcaoDestino.required = true;
 
       novaFuncao.required = false;
       novaFuncao.value = "";
@@ -512,16 +511,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (this.checked) {
       novoSetorWrapper.style.display = "block";
 
-      setorAtual.value = "";
-      setorAtual.disabled = true;
-      setorAtual.required = false;
+      setorDestino.value = "";
+      setorDestino.disabled = true;
+      setorDestino.required = false;
 
       novoSetor.required = true;
     } else {
       novoSetorWrapper.style.display = "none";
 
-      setorAtual.disabled = false;
-      setorAtual.required = true;
+      setorDestino.disabled = false;
+      setorDestino.required = true;
 
       novoSetor.required = false;
       novoSetor.value = "";
@@ -806,7 +805,7 @@ function definirStatusInicial(s) {
 document.addEventListener("DOMContentLoaded", () => {
   const chkNovoSetor = document.getElementById("solicitarNovoSetor");
 
-  const selectFuncao = document.getElementById("funcaoAtual");
+  const funcaoDestino = document.getElementById("funcaoDestino");
 
   function bloquearSelect(e) {
     if (chkNovoSetor.checked) {
@@ -818,20 +817,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // BLOQUEAR INTERAÇÃO
-  selectFuncao.addEventListener("mousedown", bloquearSelect);
-  selectFuncao.addEventListener("keydown", bloquearSelect);
+  funcaoDestino.addEventListener("mousedown", bloquearSelect);
+  funcaoDestino.addEventListener("keydown", bloquearSelect);
 
   // LIMPAR O CAMPO DE CARGO SE ESTIVER SELECIONADO
   chkNovoSetor.addEventListener("change", () => {
     if (chkNovoSetor.checked) {
-      selectFuncao.value = "";
+      funcaoDestino.value = "";
     }
   });
 
   // VISUAL DE BLOQUEIO
   function atualizarVisual() {
     const bloqueado = chkNovoSetor.checked;
-    selectFuncao.style.cursor = bloqueado ? "not-allowed" : "pointer";
+    funcaoDestino.style.cursor = bloqueado ? "not-allowed" : "pointer";
   }
 
   chkNovoSetor.addEventListener("change", atualizarVisual);
@@ -902,8 +901,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // PRIORIDADE: FUNÇÃO / SETOR
   if (precisaFuncaoSetor) {
-    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de criação de setor/função";
 
     mensagem = `
@@ -915,8 +914,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // SOMENTE SE NÃO TIVER FUNÇÃO/SETOR
   else if (precisaCredenciamento) {
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "contratos@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de credenciamento";
 
     mensagem = `
@@ -945,11 +944,11 @@ async function enviarEmailSolicitacao(dados) {
 document.getElementById("formCadastro").addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  const unidadeDestinoSelect = document.getElementById("unidadeDestinoSelect");
+  const unidadeDestino = document.getElementById("unidadeDestino");
   const solicitarNovaFuncao = document.getElementById("solicitarNovaFuncao")?.checked === true;
   const solicitarNovoSetor = document.getElementById("solicitarNovoSetor")?.checked === true;
-  const funcaoSelect = document.getElementById("funcaoAtual");
-  const setorAtualSelect = document.getElementById("setorAtual");
+  const funcaoDestino = document.getElementById("funcaoDestino");
+  const setorDestino = document.getElementById("setorDestino");
   const nomeNovaFuncao = document.getElementById("novaFuncao")?.value || null;
   const nomeNovoSetor = document.getElementById("novoSetor")?.value || null;
   const solicitarCredenciamento = document.getElementById("solicitarCredenciamento")?.checked === true;
@@ -987,15 +986,14 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     tipo_exame: document.getElementById("tipoExame").value,
     data_exame: document.getElementById("dataExame").value || null,
     unidades_extras: unidades,
-    funcao_anterior: document.getElementById("funcaoAnterior").value,
-    unidade_destino: unidadeDestinoSelect.value ? unidadeDestinoSelect.options[unidadeDestinoSelect.selectedIndex].text : null,
-    funcao_atual: funcaoSelect.value ? funcaoSelect.options[funcaoSelect.selectedIndex].text : null,
+    unidade_destino: unidadeDestino.value ? unidadeDestino.options[unidadeDestino.selectedIndex].text : null,
+    setor_destino: setorDestino.value ? setorDestino.options[setorDestino.selectedIndex].text : null,
+    solicitar_novo_setor: solicitarNovoSetor,
+    nome_novo_setor: solicitarNovoSetor ? nomeNovoSetor : null,
+    funcao_destino: funcaoDestino.value ? funcaoDestino.options[funcaoDestino.selectedIndex].text : null,
     solicitar_nova_funcao: solicitarNovaFuncao,
     nome_nova_funcao: solicitarNovaFuncao ? nomeNovaFuncao : null,
     descricao_atividade: document.getElementById("descricaoAtividade").value,
-    setor_atual: setorAtualSelect.value ? setorAtualSelect.options[setorAtualSelect.selectedIndex].text : null,
-    solicitar_novo_setor: solicitarNovoSetor,
-    nome_novo_setor: solicitarNovoSetor ? nomeNovoSetor : null,
     motivo_consulta: document.getElementById("motivoConsulta").value || null,
     cnh: document.getElementById("cnh").value || null,
     vencimento_cnh: document.getElementById("vencimentoCnh").value || null,

@@ -549,12 +549,12 @@ td {
     border: 2px dotted #53A5A6;
 }
 
-#divNovoSetor .detail-item,
-#divNovoCargo .detail-item,
-#divNovaFuncao .detail-item,
-#divExameNovoSetor .detail-item,
-#divDescricaoAtividade .detail-item,
-#divExameDescricaoAtividade .detail-item {
+#blocoCadNovoSetor .detail-item,
+#blocoCadNovoCargo .detail-item,
+#blocoCadDescricaoAtividade .detail-item,
+#blocoExameNovoSetor .detail-item,
+#blocoExameNovaFuncao .detail-item,
+#blocoExameDescricaoAtividade .detail-item {
     background-color: #F9FAFB;
     border: 2px dotted #F1AE33;
 }

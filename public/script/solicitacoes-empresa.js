@@ -658,12 +658,11 @@ function preencherModalEditarExame(s) {
   document.getElementById("editExameMaisUnidades").innerText = s.mais_unidades;
   document.getElementById("editExameRac").value = formatarRac(s.rac);
   document.getElementById("editExameTiposRac").value = formatarTiposRac(s.tipos_rac);
-  document.getElementById("editExameFuncaoAnterior").value = s.funcao_anterior;
   document.getElementById("editExameUnidadeDestino").value = s.unidade_destino;
-  document.getElementById("editExameFuncaoAtual").value = s.funcao_atual;
+  document.getElementById("editExameFuncaoDestino").value = s.funcao_destino;
   document.getElementById("editExameNovaFuncao").value = s.nome_nova_funcao;
   document.getElementById("editExameDescricaoAtividade").value = s.descricao_atividade;
-  document.getElementById("editExameSetorAtual").value = s.setor_atual;
+  document.getElementById("editExameSetorDestino").value = s.setor_destino;
   document.getElementById("editExameNovoSetor").value = s.nome_novo_setor;
   document.getElementById("editExameMotivoConsulta").value = s.motivo_consulta;
   document.getElementById("editExameCNH").value = s.cnh;
@@ -677,51 +676,48 @@ function preencherModalEditarExame(s) {
   document.getElementById("editExameObservacao").value = s.observacao;
 
   // MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE RISCOS OCUPACIONAIS
-  const blocoFuncaoAnterior = document.getElementById("divFuncaoAnterior");
-  const blocoFuncaoAtual = document.getElementById("divFuncaoAtual");
+  const blocoFuncaoDestino = document.getElementById("divFuncaoDestino");
   const blocoNovaFuncao = document.getElementById("divNovaFuncao");
-  const blocoSetorAtual = document.getElementById("divExameSetorAtual");
+  const blocoSetorDestino = document.getElementById("divExameSetorDestino");
   const blocoNovoSetor = document.getElementById("divExameNovoSetor");
 
   // OCULTAR CAMPOS DE FUNÇÃO E SETOR QUANDO NÃO FOR MUDANÇA DE RISCOS OCUPACIONAIS
   if (s.tipo_exame === "MUDANCA_RISCOS_OCUPACIONAIS") {
     // MOSTRAR OS BLOCOS DE FUNÇÃO E SETOR
-    blocoFuncaoAnterior.classList.remove("d-none");
-    blocoFuncaoAtual.classList.remove("d-none");
-    blocoSetorAtual.classList.remove("d-none");
+    blocoFuncaoDestino.classList.remove("d-none");
+    blocoSetorDestino.classList.remove("d-none");
 
     // SE FOR SOLICITAR CRIAÇÃO DE NOVA FUNÇÃO, MOSTRAR CAMPO
     if (s.solicitar_nova_funcao === true) {
-      blocoFuncaoAtual.classList.add("d-none");
+      blocoFuncaoDestino.classList.add("d-none");
       blocoNovaFuncao.classList.remove("d-none");
 
-      document.getElementById("editExameFuncaoAtual").innerText = "";
+      document.getElementById("editExameFuncaoDestino").innerText = "";
       document.getElementById("editExameNovaFuncao").innerText = s.nome_nova_funcao;
     } else {
-      blocoFuncaoAtual.classList.remove("d-none");
+      blocoFuncaoDestino.classList.remove("d-none");
       blocoNovaFuncao.classList.add("d-none");
 
-      document.getElementById("editExameFuncaoAtual").innerText = s.funcao_atual;
+      document.getElementById("editExameFuncaoDestino").innerText = s.funcao_destino;
     }
 
     // SE FOR SOLICITAR CRIAÇÃO DE NOVO SETOR, MOSTRAR CAMPO
     if (s.solicitar_novo_setor === true) {
-      blocoSetorAtual.classList.add("d-none");
+      blocoSetorDestino.classList.add("d-none");
       blocoNovoSetor.classList.remove("d-none");
 
-      document.getElementById("editExameSetorAtual").innerText = "";
+      document.getElementById("editExameSetorDestino").innerText = "";
       document.getElementById("editExameNovoSetor").innerText = s.nome_novo_setor;
     } else {
-      blocoSetorAtual.classList.remove("d-none");
+      blocoSetorDestino.classList.remove("d-none");
       blocoNovoSetor.classList.add("d-none");
 
-      document.getElementById("editExameSetorAtual").innerText = s.setor_atual;
+      document.getElementById("editExameSetorDestino").innerText = s.setor_destino;
     }
   } else {
-    blocoFuncaoAnterior.classList.add("d-none");
-    blocoFuncaoAtual.classList.add("d-none");
+    blocoFuncaoDestino.classList.add("d-none");
     blocoNovaFuncao.classList.add("d-none");
-    blocoSetorAtual.classList.add("d-none");
+    blocoSetorDestino.classList.add("d-none");
     blocoNovoSetor.classList.add("d-none");
   }
 
