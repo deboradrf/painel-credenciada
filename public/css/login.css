@@ -191,6 +191,14 @@ h3::after {
     outline: none;
 }
 
+.esqueceu-senha {
+    text-align: center;
+}
+
+.esqueceu-senha a {
+    color: #000000;
+}
+
 /* BLOCO COLORIDO DAS REDES SOCIAIS */
 .social-footer {
     display: flex;
@@ -225,6 +233,7 @@ input:-webkit-autofill:active {
 }
 
 @media (max-width: 1120px) {
+
     .mascote-saude,
     .mascote-engenharia {
         width: 30%;
@@ -233,6 +242,7 @@ input:-webkit-autofill:active {
 }
 
 @media (max-width: 785px) {
+
     .mascote-saude,
     .mascote-engenharia {
         display: none;

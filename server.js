@@ -417,60 +417,6 @@ app.get("/prestador/:empresa/:codigoPrestador", async (req, res) => {
   }
 });
 
-// EXPORTA DADOS - GERENTE DE CONTA
-// app.get("/gerentes-conta", async (req, res) => {
-//   try {
-//     const parametro = JSON.stringify(EXPORTA_USUARIOS);
-
-//     const response = await axios.get(SOC_EXPORTA_URL, {
-//       params: { parametro }
-//     });
-
-//     const registros = response.data?.root?.record || response.data || [];
-
-//     const gerentes = (Array.isArray(registros) ? registros : [registros])
-//       .filter(r => r.GERENTE_CONTAS === "1")
-//       .map(r => ({
-//         empresa: r.EMPRESA,
-//         codigoPessoa: r.CODIGO,
-//         nome: r.NOME,
-//         email: r.EMAIL,
-//         login: r.LOGIN_USUARIO
-//       }));
-
-//     res.json(gerentes);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ erro: "Erro ao buscar gerentes de conta" });
-//   }
-// });
-
-// DEBUG - EXPORTA DADOS USUÁRIOS (RETORNO BRUTO)
-// app.get("/debug/exporta-usuarios", async (req, res) => {
-//   try {
-//     const parametro = JSON.stringify({
-//       empresa: "412429",
-//       codigo: "212989",
-//       chave: "ddd3b8f7709521eed6b8",
-//       tipoSaida: "json",
-//       ativo: "1"
-//     });
-
-//     const response = await axios.get(SOC_EXPORTA_URL, {
-//       params: { parametro }
-//     });
-
-//     // RETORNA EXATAMENTE O QUE O SOC MANDAR
-//     res.json(response.data);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({
-//       erro: "Erro no exporta dados",
-//       detalhe: err.response?.data || err.message
-//     });
-//   }
-// });
-
 // ROTA DE CADASTRO DE USUÁRIO
 app.post("/cadastro", async (req, res) => {
   try {
@@ -1187,7 +1133,7 @@ app.put("/solicitacoes/novo-exame/:id/salvar-sc", async (req, res) => {
     await client.query("BEGIN");
 
     const check = await client.query(
-    `
+      `
       SELECT
         s.status,
         nc.solicitar_nova_funcao,
@@ -1503,7 +1449,7 @@ app.post("/solicitacoes/:tipo/:id/analisar", async (req, res) => {
           FROM ${tabela} s
           JOIN usuarios u ON u.id = s.solicitado_por
           JOIN ${tipo === "NOVO_EXAME" ? "novo_exame" : "novo_cadastro"
-              } f ON f.id = ${tipo === "NOVO_EXAME" ? "s.novo_exame_id" : "s.novo_cadastro_id"}
+        } f ON f.id = ${tipo === "NOVO_EXAME" ? "s.novo_exame_id" : "s.novo_cadastro_id"}
           WHERE s.id = $1
         `,
         [id]

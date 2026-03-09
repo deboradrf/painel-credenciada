@@ -159,7 +159,7 @@ function renderizarTabela(lista) {
     if (s.status === "PENDENTE_CREDENCIAMENTO") situacao = "Aguardando credenciamento";
     if (s.status === "PENDENTE") situacao = "Solicitação em análise";
     if (s.status === "PENDENTE_REAVALIACAO") situacao = "Solicitação em análise";
-    if (s.status === "PENDENTE_AGENDAMENTO") situacao = "Aguardando agendamento";
+    if (s.status === "PENDENTE_AGENDAMENTO") situacao = "Aguardando horário de agendamento da clínica credenciada";
     if (s.status === "APROVADO") situacao = "Solicitação aprovada";
     if (s.status === "REPROVADO") situacao = "Ajustes necessários";
     if (s.status === "ENVIADO_SOC") situacao = "Solicitação finalizada";
@@ -229,7 +229,7 @@ function renderizarTabela(lista) {
       <tr>
         <td>${iconeTipo}</td>
         <td>${formatarDataHora(s.solicitado_em)}</td>
-        <td>${s.nome_funcionario}</td>
+        <td>${(s.nome_funcionario).toUpperCase()}</td>
         <td>${s.cpf}</td>
         <td>
           <span class="status-pill ${s.status.toLowerCase()}">

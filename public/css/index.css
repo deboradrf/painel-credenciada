@@ -296,6 +296,41 @@ h3::after {
     color: #2B2B2F;
 }
 
+.modal-aviso {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.modal-header {
+    background-color: #F1AE33;
+    color: #fff;
+    border-bottom: none;
+}
+
+.modal-body {
+    font-size: 15px;
+    line-height: 1.6;
+    text-align: justify;
+}
+
+.modal-body a {
+    color: #53A5A6;
+}
+
+.btn-aviso {
+    background-color: #F1AE33;
+    color: #fff;
+    border: none;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.btn-aviso:hover {
+    background-color: #d99b2d;
+    color: #fff;
+}
+
 .subtitle {
     font-weight: 600;
     font-size: 13px;

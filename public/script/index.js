@@ -2,8 +2,8 @@
 const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
 
 if (!usuarioLogado) {
-  alert("Sessão expirada. Faça login novamente.");
-  window.location.href = "login.html";
+    alert("Sessão expirada. Faça login novamente.");
+    window.location.href = "login.html";
 }
 
 // DROPDOWN DO PERFIL
@@ -61,6 +61,21 @@ document.addEventListener("DOMContentLoaded", () => {
     profileBtn.addEventListener("hide.bs.dropdown", () => {
         document.body.classList.remove("blur-main");
     });
+});
+
+// MODAL DE AVISO
+document.addEventListener("DOMContentLoaded", function () {
+    const hoje = new Date().toISOString().split("T")[0];
+    const ultimaExibicao = localStorage.getItem("modalManutencaoData");
+
+    if (ultimaExibicao !== hoje) {
+        const modal = new bootstrap.Modal(
+            document.getElementById("modalManutencao")
+        );
+        modal.show();
+
+        localStorage.setItem("modalManutencaoData", hoje);
+    }
 });
 
 // FUNÇÃO DE LOGOUT

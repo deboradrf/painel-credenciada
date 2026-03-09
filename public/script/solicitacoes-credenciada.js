@@ -207,7 +207,7 @@ async function renderizarTabela(lista) {
       <td>${iconeTipo}</td>
       <td>${formatarDataHoraSolicitacoes(s.solicitado_em)}</td>
       <td>${s.nome_empresa}</td>
-      <td>${s.nome_funcionario}</td>
+      <td>${(s.nome_funcionario).toUpperCase()}</td>
       <td>${s.cpf}</td>
       <td>${(s.cidade).toUpperCase()}</td>
       <td>
