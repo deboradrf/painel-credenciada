@@ -1,10 +1,6 @@
-// USUÁRIO LOGADO
-const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
-
-if (!usuarioLogado) {
-  alert("Sessão expirada. Faça login novamente.");
-  window.location.href = "login.html";
-}
+const usuarioLogado = getUsuario();
+const codigoEmpresa = getEmpresaCodigo();
+const nomeEmpresa = getEmpresaNome();
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
@@ -22,7 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // EMPRESA
   dropdownUserExtra.innerHTML = `
-    <div class="company-name">${usuarioLogado.nome_empresa}</div>
+    <div class="company-name">
+      <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+    </div>
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO
@@ -60,7 +58,7 @@ async function buscarCPF() {
   const resultado = document.getElementById("resultadoCPF");
 
   const cpf = cpfInput.value.replace(/\D/g, "");
-  const empresaUsuario = usuarioLogado.cod_empresa;
+  const empresaUsuario = getEmpresaCodigo();
 
   if (cpf.length !== 11) {
     resultado.innerHTML = `
@@ -200,15 +198,15 @@ async function buscarCPF() {
 
           <div class="card-footer text-body-secondary">
             ${f.situacao?.toLowerCase() === "ativo"
-        ? `
-                <div class="d-flex justify-content-center my-3">
+            ? `
+                <div class="d-flex justify-content-center">
                   <button class="btn-solicitar-exame"
                     onclick="salvarFuncionario(${JSON.stringify(f).replace(/"/g, '&quot;')}); window.location.href='formulario-solicitar-exame.html'">
                     Solicitar exame para este funcionário
                   </button>
                 </div> `
-        : ` <small>Não é possível solicitar exame para este funcionário</small> `
-      }
+            : ` <small>Não é possível solicitar exame para este funcionário</small> `
+            }
           </div>
         </div>
       `).join("")}
@@ -257,10 +255,3 @@ cpfInput.addEventListener("input", function () {
 
   this.value = value;
 });
-
-// FUNÇÃO DE LOGOUT
-function logout() {
-  sessionStorage.removeItem("usuario");
-  sessionStorage.removeItem("empresaCodigo");
-  window.location.href = "login.html";
-}

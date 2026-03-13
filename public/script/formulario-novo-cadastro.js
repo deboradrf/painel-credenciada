@@ -1,22 +1,15 @@
 let prestadoresCache = [];
 
-// USUÁRIO LOGADO
-const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
-
-if (!usuarioLogado) {
-  alert("Sessão expirada. Faça login novamente.");
-  window.location.href = "login.html";
-}
-
-// DADOS DA EMPRESA LOGADA
-let empresaCodigo = usuarioLogado.cod_empresa;
-let nomeEmpresa = usuarioLogado.nome_empresa;
+const usuarioLogado = getUsuario();
+const codigoEmpresa = getEmpresaCodigo();
+const nomeEmpresa = getEmpresaNome();
+const unidadesEmpresa = getEmpresaUnidades();
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
   // PREENCHE O CAMPO DE EMPRESA NO FORMULÁRIO
-  document.getElementById("empresaNomeView").value = usuarioLogado.nome_empresa;
-  document.getElementById("empresaCodigoHidden").value = usuarioLogado.cod_empresa;
+  document.getElementById("empresaNomeView").value = nomeEmpresa;
+  document.getElementById("empresaCodigoHidden").value = codigoEmpresa;
 
   const avatarIcon = document.getElementById("avatarIcon");
   const avatarIconDropdown = document.getElementById("avatarIconDropdown");
@@ -32,7 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // EMPRESA
   dropdownUserExtra.innerHTML = `
-    <div class="company-name">${usuarioLogado.nome_empresa}</div>
+    <div class="company-name">
+      <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+    </div>
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO
@@ -66,7 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // INIT
 document.addEventListener("DOMContentLoaded", async () => {
-  await carregarNomeEmpresa();
   await carregarUnidades();
   await carregarPrestadores();
 });
@@ -130,43 +124,47 @@ cpfInput.addEventListener("input", function () {
   this.value = value;
 });
 
-// FUNÇÃO PARA MOSTRAR O NOME DA EMPRESA DO USUÁRIO LOGADO NO CAMPO
-async function carregarNomeEmpresa() {
-  if (!empresaCodigo) return;
+// FUNÇÃO PARA CARREGAR UNIDADES DA EMPRESA FILTRANDO PELO USUÁRIO LOGADO
+async function carregarUnidades() {
+  const select = document.getElementById("unidadeSelect");
+
+  if (!codigoEmpresa) return;
 
   try {
-    const res = await fetch("/empresas");
-    const empresas = await res.json();
+    const res = await fetch(`/unidades/${codigoEmpresa}`);
+    const unidadesBackend = await res.json();
 
-    const empresaSelecionada = empresas.find(
-      e => String(e.codigo) === String(empresaCodigo)
-    );
+    let unidadesParaMostrar = [];
 
-    if (empresaSelecionada) {
-      nomeEmpresa = empresaSelecionada.nome;
+    const possuiTodas = unidadesEmpresa.some(u => u.cod_unidade === "TODAS");
+
+    if (possuiTodas) {
+      unidadesParaMostrar = unidadesBackend;
     }
+    else {
+      const codUnidadesUsuario = unidadesEmpresa.map(u => String(u.cod_unidade));
+
+      unidadesParaMostrar = unidadesBackend.filter(u =>
+        codUnidadesUsuario.includes(String(u.codigo))
+      );
+    }
+
+    select.innerHTML = '<option value="">Selecione...</option>';
+
+    unidadesParaMostrar.forEach(u => {
+      const opt = document.createElement("option");
+
+      opt.value = u.codigo;
+      opt.textContent = u.ativo ? u.nome : `${u.nome} (inativo)`;
+      opt.dataset.nome = u.nome;
+
+      select.appendChild(opt);
+    });
+
   } catch (err) {
-    console.error("Erro ao carregar nome da empresa:", err);
+    console.error("Erro ao carregar unidades:", err);
+    select.innerHTML = '<option value="">Erro ao carregar</option>';
   }
-}
-
-// FUNÇÃO PARA CARREGAR UNIDADES DA EMPRESA
-async function carregarUnidades() {
-  if (!empresaCodigo) return;
-
-  const res = await fetch(`/unidades/${empresaCodigo}`);
-  const unidades = await res.json();
-
-  const select = document.getElementById("unidadeSelect");
-  select.innerHTML = '<option value="">Selecione...</option>';
-
-  unidades.forEach(u => {
-    const opt = document.createElement("option");
-    opt.value = u.codigo;
-    opt.textContent = u.ativo ? u.nome : `${u.nome} (inativo)`;
-    opt.dataset.nome = u.nome;
-    select.appendChild(opt);
-  });
 }
 
 // LISTENER NO SELECT DE UNIDADE
@@ -179,7 +177,7 @@ document.getElementById("unidadeSelect").addEventListener("change", async functi
   if (!codUnidade) return;
 
   try {
-    const res = await fetch(`/hierarquia/${empresaCodigo}/${codUnidade}`);
+    const res = await fetch(`/hierarquia/${codigoEmpresa}/${codUnidade}`);
     const setores = await res.json();
 
     setores
@@ -210,7 +208,7 @@ document.getElementById("setorSelect").addEventListener("change", async function
 
   try {
     const res = await fetch(
-      `/hierarquia/${empresaCodigo}/${codUnidade}/${codSetor}`
+      `/hierarquia/${codigoEmpresa}/${codUnidade}/${codSetor}`
     );
 
     const cargos = await res.json();
@@ -299,54 +297,6 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarNovaUnidade();
 });
 
-// API QUE PREENCHE OS CAMPOS BASEADOS NO CEP
-document.addEventListener("DOMContentLoaded", function () {
-  const cepInput = document.getElementById("cep");
-  const btnBuscar = document.getElementById("btnBuscarCep");
-
-  if (!cepInput || !btnBuscar) return;
-
-  // MÁSCARA DE CEP
-  cepInput.addEventListener("input", function () {
-    let valor = this.value.replace(/\D/g, "");
-
-    if (valor.length > 8) valor = valor.slice(0, 8);
-
-    if (valor.length > 5) {
-      this.value = valor.replace(/^(\d{5})(\d)/, "$1-$2");
-    } else {
-      this.value = valor;
-    }
-  });
-
-  // BUSCAR CEP
-  btnBuscar.addEventListener("click", function () {
-    const cep = cepInput.value.replace(/\D/g, "");
-
-    if (cep.length !== 8) {
-      alert("Digite um CEP válido");
-      return;
-    }
-
-    fetch(`https://viacep.com.br/ws/${cep}/json/`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.erro) {
-          alert("CEP não encontrado");
-          return;
-        }
-
-        document.getElementById("rua").value = (data.logradouro).toUpperCase();
-        document.getElementById("bairro").value = (data.bairro).toUpperCase();
-        document.getElementById("estado").value = data.uf;
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Erro ao buscar o CEP");
-      });
-  });
-});
-
 // CHECKBOX DE NOVA UNIDADE TORNA OBRIGATORIO A CRIAÇÃO DE NOVO SETOR/CARGO
 document.addEventListener("DOMContentLoaded", () => {
   const chkNovaUnidade = document.getElementById("solicitarNovaUnidade");
@@ -386,6 +336,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   chkNovaUnidade.addEventListener("change", atualizarVisual);
   atualizarVisual();
+});
+
+const inputCep = document.getElementById("cep");
+
+inputCep.addEventListener("input", function () {
+
+  let valor = this.value.replace(/\D/g, ""); // remove tudo que não é número
+
+  if (valor.length > 5) {
+    valor = valor.slice(0, 5) + "-" + valor.slice(5, 8);
+  }
+
+  this.value = valor;
+
 });
 
 // MOSTRAR / OCULTAR SEÇÃO DE NOVO SETOR E DEFINIR REQUIRED NO CAMPO
@@ -523,33 +487,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // MOSTRAR / OCULTAR TIPO RAC
-// const racSelect = document.getElementById("racSelect");
-// const divRacValeOpcoes = document.getElementById("divRacValeOpcoes");
-
-// racSelect.addEventListener("change", () => {
-//   if (racSelect.value === "FORMULARIO_RAC_VALE") {
-//     divRacValeOpcoes.classList.remove("d-none");
-//   } else {
-//     divRacValeOpcoes.classList.add("d-none");
-
-//     document.getElementById("racValeOpcao").value = "";
-//   }
-// });
-
-// TORNAR OBRIGATÓRICO QUANDO A OPÇÃO SELECIONADA FOR VALE
-// const racValeOpcao = document.getElementById("racValeOpcao");
-
-// racSelect.addEventListener("change", () => {
-//   const isVale = racSelect.value === "FORMULARIO_RAC_VALE";
-
-//   divRacValeOpcoes.classList.toggle("d-none", !isVale);
-//   racValeOpcao.required = isVale;
-
-//   if (!isVale) {
-//     racValeOpcao.value = "";
-//   }
-// });
-
 const racCheckboxes = document.querySelectorAll('input[name="form_rac"]');
 const divRacValeOpcoes = document.getElementById("divRacValeOpcoes");
 
@@ -652,15 +589,15 @@ function adicionarUnidade() {
   `);
 }
 
-// CARREGAR PRESTADORES
+// FUNÇÃO PARA CARREGAR OS PRESTADORES VINCULADOS À EMPRESA LOGADA
 async function carregarPrestadores() {
-  if (!empresaCodigo) return;
+  if (!codigoEmpresa) return;
 
   const select = document.getElementById("nome_clinica");
   if (!select) return;
 
   try {
-    await fetch(`/prestadores/${empresaCodigo}`);
+    await fetch(`/prestadores/${codigoEmpresa}`);
 
     await listarPrestadores();
 
@@ -671,7 +608,7 @@ async function carregarPrestadores() {
 
 // LISTAR OS PRESTADORES
 async function listarPrestadores() {
-  const res = await fetch(`/prestadores/${empresaCodigo}`);
+  const res = await fetch(`/prestadores/${codigoEmpresa}`);
   const prestadoresBase = await res.json();
 
   const detalhes = [];
@@ -686,14 +623,14 @@ async function listarPrestadores() {
 
   prestadoresCache = detalhes;
 
-  console.table(
-    prestadoresCache.map(p => ({
-      codigo: p.codigo,
-      estado: p.estado,
-      cidade: p.cidade,
-      nivel: p.nivelClassificacao
-    }))
-  );
+  // console.table(
+  //   prestadoresCache.map(p => ({
+  //     codigo: p.codigo,
+  //     estado: p.estado,
+  //     cidade: p.cidade,
+  //     nivel: p.nivelClassificacao
+  //   }))
+  // );
 
   popularSelectEstados(extrairEstados(prestadoresCache));
 }
@@ -701,7 +638,7 @@ async function listarPrestadores() {
 // PEGAR OS DETALHES DO PRESTADOR
 async function buscarDetalhesPrestador(codigo) {
   try {
-    const res = await fetch(`/prestador/${empresaCodigo}/${codigo}`);
+    const res = await fetch(`/prestador/${codigoEmpresa}/${codigo}`);
     if (!res.ok) throw new Error();
 
     const dados = await res.json();
@@ -1019,7 +956,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     tipo_contratacao: tipoContratacaoValue,
     cod_categoria: codCategoriaMap[tipoContratacaoValue],
     regime_trabalho: document.getElementById("regime_trabalho").value,
-    cod_empresa: empresaCodigo,
+    cod_empresa: codigoEmpresa,
     nome_empresa: nomeEmpresa,
     cod_unidade: solicitarNovaUnidade ? null : unidadeSelect.value,
     nome_unidade: solicitarNovaUnidade ? null : unidadeSelect.selectedOptions[0].dataset.nome,
@@ -1112,8 +1049,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CRIAÇÃO DE UNIDADE
   if (dados.solicitar_nova_unidade === true) {
-    destinatario = "clientes@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "clientes@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de criação de nova unidade";
 
     mensagem = `
@@ -1125,8 +1062,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CRIAÇÃO DE NOVO SETOR/CARGO
   else if (dados.solicitar_novo_setor === true || dados.solicitar_novo_cargo === true) {
-    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de criação de setor/cargo";
 
     mensagem = `
@@ -1138,8 +1075,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CREDENCIAMENTO
   else if (dados.solicitar_credenciamento === true) {
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "contratos@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de credenciamento";
 
     mensagem = `
@@ -1179,11 +1116,4 @@ function definirStatusInicial(s) {
   }
 
   return "PENDENTE";
-}
-
-// FUNÇÃO DE LOGOUT
-function logout() {
-  sessionStorage.removeItem("usuario");
-  sessionStorage.removeItem("empresaCodigo");
-  window.location.href = "login.html";
 }

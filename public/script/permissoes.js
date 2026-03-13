@@ -1,8 +1,14 @@
 const usuarioLogado = getUsuario();
 const nomeEmpresa = getEmpresaNome();
 
-// DROPDOWN DO PERFIL
-document.addEventListener("DOMContentLoaded", () => {
+// INIT
+document.addEventListener("DOMContentLoaded", async () => {
+    await dropdownPerfil();
+    await carregarPermissoes();
+});
+
+// FUNÇÃO DO DROPDOWN DO PERFIL
+async function dropdownPerfil() {
     const userNameDropdown = document.getElementById("userNameDropdown");
     const dropdownUserExtra = document.getElementById("dropdownUserExtra");
 
@@ -57,4 +63,43 @@ document.addEventListener("DOMContentLoaded", () => {
     profileBtn.addEventListener("hide.bs.dropdown", () => {
         document.body.classList.remove("blur-main");
     });
-});
+};
+
+// FUNÇÃO PARA MOSTRAR AS PERMISSÕES DO USUÁRIO
+async function carregarPermissoes() {
+    const usuario = JSON.parse(sessionStorage.getItem("usuario"));
+
+    const res = await fetch(`/permissoes/${usuario.id}`);
+    const dados = await res.json();
+
+    const container = document.getElementById("listaPermissoes");
+    container.innerHTML = "";
+
+    dados.empresas.forEach(empresa => {
+        const card = document.createElement("div");
+        card.className = "col-md-4 mb-4";
+
+        let unidadesHtml = "";
+        empresa.unidades.forEach(un => {
+            unidadesHtml += `
+                <li class="unit-item">
+                    <span>${un.nome_unidade}</span>
+                </li>
+            `;
+        });
+
+        card.innerHTML = `
+            <div class="card-permissao">
+                <div class="empresa-header">
+                    <h6>${empresa.nome_empresa}</h6>
+                </div>
+
+                <ul class="lista-unidades">
+                    ${unidadesHtml}
+                </ul>
+            </div>
+        `;
+
+        container.appendChild(card);
+    });
+}

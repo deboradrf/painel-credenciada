@@ -1,15 +1,10 @@
-let usuarioLogado = null;
+const usuarioLogado = getUsuario();
+const nomeEmpresa = getEmpresaNome();
+
 let dadosOriginais = {};
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
-    usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
-
-    if (!usuarioLogado) {
-        window.location.href = "login.html";
-        return;
-    }
-
     const userNameDropdown = document.getElementById("userNameDropdown");
     const dropdownUserExtra = document.getElementById("dropdownUserExtra");
 
@@ -24,7 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // EMPRESA
     dropdownUserExtra.innerHTML = `
-        <div class="company-name">${usuarioLogado.nome_empresa}</div>
+        <div class="company-name">
+            <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+        </div>
     `;
 
     // LÓGICA DOS PERFIS DE ACESSO
@@ -42,6 +39,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         avatarBtn.classList.add("empresa");
         avatarDrop.classList.add("empresa");
+    }
+
+    if (usuarioLogado.perfil === "ADMINISTRADOR") {
+        avatarIcon.classList.add("fa-users-gear");
+        avatarIconDropdown.classList.add("fa-users-gear");
+
+        avatarBtn.classList.add("administrador");
+        avatarDrop.classList.add("administrador");
     }
 
     // BLUR
@@ -78,8 +83,13 @@ function preencherTela(user) {
     if (user.perfil === "EMPRESA") {
         document.getElementById("perfilTipo").innerText = "Perfil Empresa";
     }
+
     if (user.perfil === "CREDENCIADA") {
         document.getElementById("perfilTipo").innerText = "Perfil Credenciada";
+    }
+
+    if (user.perfil === "ADMINISTRADOR") {
+        document.getElementById("perfilTipo").innerText = "Perfil Administrador";
     }
 
     document.getElementById("cpf").value = user.cpf;
@@ -96,7 +106,7 @@ function ajustarIcone(perfil) {
     if (!iconCard || !avatarCard) return;
 
     iconCard.className = "fa-solid";
-    avatarCard.classList.remove("empresa", "credenciada");
+    avatarCard.classList.remove("empresa", "credenciada", "administrador");
 
     if (perfil === "EMPRESA") {
         iconCard.classList.add("fa-city");
@@ -106,6 +116,11 @@ function ajustarIcone(perfil) {
     if (perfil === "CREDENCIADA") {
         iconCard.classList.add("fa-hospital");
         avatarCard.classList.add("credenciada");
+    }
+
+    if (perfil === "ADMINISTRADOR") {
+        iconCard.classList.add("fa-users-gear");
+        avatarCard.classList.add("administrador");
     }
 }
 
@@ -192,11 +207,4 @@ function toggleSenha() {
         input.type = "password";
         icon.classList.replace("fa-eye-slash", "fa-eye");
     }
-}
-
-// FUNÇÃO DE LOGOUT
-function logout() {
-    sessionStorage.removeItem("usuario");
-    sessionStorage.removeItem("empresaCodigo");
-    window.location.href = "login.html";
 }

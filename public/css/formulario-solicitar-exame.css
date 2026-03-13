@@ -111,6 +111,10 @@ body.blur-main header {
     color: #F1AE33;
 }
 
+.avatar-circle:not(.large).administrador i {
+    color: #F1AE33;
+}
+
 .user-name {
     font-weight: 400;
     font-size: 14px;
@@ -119,7 +123,7 @@ body.blur-main header {
 }
 
 .profile-menu {
-    width: 280px;
+    width: 300px;
     background: #FFFFFF;
     border-radius: 10px;
     padding: 14px;
@@ -306,6 +310,7 @@ h5::after {
     margin-bottom: 20px;
 }
 
+.unidade-group,
 .funcao-group,
 .setor-group {
     display: flex;
@@ -314,6 +319,7 @@ h5::after {
     gap: 16px;
 }
 
+.input-wrapper.unidade-wrapper,
 .input-wrapper.funcao-wrapper,
 .input-wrapper.setor-wrapper {
     width: 68%;
@@ -556,11 +562,12 @@ h5::after {
 .rac-checkbox-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 15px;
 }
 
 .rac-checkbox-group .form-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 15px;
 }
 

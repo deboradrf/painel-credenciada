@@ -111,6 +111,10 @@ body.blur-main header {
     color: #F1AE33;
 }
 
+.avatar-circle:not(.large).administrador i {
+    color: #F1AE33;
+}
+
 .user-name {
     font-weight: 400;
     font-size: 14px;
@@ -119,7 +123,7 @@ body.blur-main header {
 }
 
 .profile-menu {
-    width: 280px;
+    width: 300px;
     background: #FFFFFF;
     border-radius: 10px;
     padding: 14px;
@@ -236,14 +240,15 @@ h3::after {
 }
 
 #textoMotivo {
-  white-space: pre-line;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  max-width: 100%;
+    white-space: pre-line;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .grupo-opcoes {
-    grid-column: 1 / -1;   /* ocupa todas as colunas do grid */
+    grid-column: 1 / -1;
+    /* ocupa todas as colunas do grid */
     display: flex;
     justify-content: center;
     margin-top: 10px;
@@ -411,6 +416,38 @@ td {
     border-bottom: 1px solid #E5E7EB;
 }
 
+.col-data {
+    width: 180px;
+    max-width: 180px;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.col-funcionario {
+    width: 250px;
+    max-width: 250px;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.actions .btn-consulta {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #000000;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
+    width: 120px;
+    transition: all 0.25s ease;
+}
+
+.actions .btn-consulta:hover {
+    transform: translateY(-2px);
+}
+
 .status-pill {
     padding: 4px 12px;
     color: #FFFFFF;
@@ -495,6 +532,7 @@ td {
     padding: 20px;
 }
 
+#modalConsulta .modal-header,
 #modalMotivo .modal-header {
     background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
     border-bottom: none;
@@ -511,6 +549,7 @@ td {
     margin-bottom: 15px;
 }
 
+#modalConsulta .modal-header h3,
 #modalMotivo .modal-header h3 {
     position: relative;
     font-weight: 600;
@@ -530,6 +569,7 @@ td {
     background: #FFFFFF;
 }
 
+#modalConsulta .modal-header h3::after,
 #modalMotivo .modal-header h3::after {
     content: "";
     position: absolute;
@@ -694,35 +734,6 @@ td {
     font-size: 14px;
     font-weight: 500;
 }
-
-/*
-.socials {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.socials a {
-    width: 36px;
-    height: 36px;
-    text-decoration: none;
-    background: rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(4px);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #FFFFFF;
-    font-size: 16px;
-    transition: transform 0.2s ease;
-}
-
-.socials a:hover {
-    transform: translateY(-3px) scale(1.05);
-    background: rgba(255, 255, 255, 0.3);
-}*/
 
 input:-webkit-autofill,
 input:-webkit-autofill:focus,

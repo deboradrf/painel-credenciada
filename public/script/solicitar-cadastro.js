@@ -1,10 +1,6 @@
-// USUÁRIO LOGADO
-const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
-
-if (!usuarioLogado) {
-  alert("Sessão expirada. Faça login novamente.");
-  window.location.href = "login.html";
-}
+const usuarioLogado = getUsuario();
+const codigoEmpresa = getEmpresaCodigo();
+const nomeEmpresa = getEmpresaNome();
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
@@ -22,7 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // EMPRESA
   dropdownUserExtra.innerHTML = `
-    <div class="company-name">${usuarioLogado.nome_empresa}</div>
+    <div class="company-name">
+      <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+    </div>
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO
@@ -60,14 +58,14 @@ async function buscarCPF() {
   const resultado = document.getElementById("resultadoCPF");
 
   const cpf = cpfInput.value.replace(/\D/g, "");
-  const empresaUsuario = usuarioLogado.cod_empresa;
+  const empresaUsuario = getEmpresaCodigo();
 
   if (cpf.length !== 11) {
     resultado.innerHTML = `
       <div class="alerts-container mb-4">
         <div class="alert alert-invalido">
           <i class="fa-solid fa-circle-exclamation fa-lg" style="color: #F1AE33"></i>
-          <p class="alert-text">CPF inválido</p>
+          <p class="alert-text">CPF inválido. Tente novamente.</p>
         </div>
       </div>
     `;
@@ -99,7 +97,7 @@ async function buscarCPF() {
         <div class="alerts-container mb-3">
           <div class="alert alert-encontrou-ativo">
             <i class="fa-solid fa-circle-check fa-lg" style="color: #53A5A6"></i>
-            <p class="alert-text">Nenhum cadastro ativo encontrado para este CPF</p>
+            <p class="alert-text">Nenhum cadastro ativo encontrado para este CPF.</p>
           </div>
         </div>
 
@@ -119,7 +117,7 @@ async function buscarCPF() {
       <div class="alerts-container mb-4">
         <div class="alert alert-erro">
           <i class="fa-solid fa-circle-xmark fa-lg" style="color: #F05252"></i>
-          <p class="alert-text">CPF ativo encontrado. Não é possível solicitar novo cadastro</p>
+          <p class="alert-text">CPF ativo encontrado. Não é possível solicitar novo cadastro.</p>
         </div>
       </div>
 
@@ -142,14 +140,14 @@ async function buscarCPF() {
               </div>
             </div>
 
-            <div class="col-6">
+            <div class="col-12">
               <div class="detail-item horizontal">
                 <div class="detail-label"><span>Setor</span></div>
                 <div class="detail-value">${f.setor?.nome}</div>
               </div>
             </div>
 
-            <div class="col-6">
+            <div class="col-12">
               <div class="detail-item horizontal">
                 <div class="detail-label"><span>Cargo</span></div>
                 <div class="detail-value">${f.cargo?.nome}</div>
@@ -171,6 +169,15 @@ async function buscarCPF() {
             </div>
           </div>
         </div>
+
+        <div class="card-footer text-body-secondary">
+          <div class="d-flex justify-content-center">
+            <button class="btn-solicitar-exame"
+              onclick="salvarFuncionario(${JSON.stringify(f).replace(/"/g, '&quot;')}); window.location.href='formulario-solicitar-exame.html'">
+              Solicitar exame para este funcionário
+            </button>
+          </div>
+        </div>
       </div>
     `;
 
@@ -180,7 +187,7 @@ async function buscarCPF() {
       <div class="alerts-container mb-4">
         <div class="alert alert-erro">
           <i class="fa-solid fa-circle-xmark fa-lg" style="color: #F05252"></i>
-          <p class="alert-text">Erro ao consultar CPF. Tente novamente</p>
+          <p class="alert-text">Erro ao consultar CPF. Tente novamente.</p>
         </div>
       </div>
     `;
@@ -217,10 +224,3 @@ cpfInput.addEventListener("input", function () {
 
   this.value = value;
 });
-
-// FUNÇÃO DE LOGOUT
-function logout() {
-  sessionStorage.removeItem("usuario");
-  sessionStorage.removeItem("empresaCodigo");
-  window.location.href = "login.html";
-}

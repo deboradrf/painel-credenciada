@@ -1,12 +1,7 @@
-// USUÁRIO LOGADO
-const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
-
-if (!usuarioLogado) {
-  alert("Sessão expirada. Faça login novamente.");
-  window.location.href = "login.html";
-}
-
 let solicitacoes = [];
+
+const usuarioLogado = getUsuario();
+const nomeEmpresa = getEmpresaNome();
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
@@ -24,7 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // EMPRESA
   dropdownUserExtra.innerHTML = `
-    <div class="company-name">${usuarioLogado.nome_empresa}</div>
+    <div class="company-name">
+      <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+    </div>
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO
@@ -165,10 +162,61 @@ function renderizarTabela(lista) {
     if (s.status === "ENVIADO_SOC") situacao = "Solicitação finalizada";
     if (s.status === "CANCELADO") situacao = "Solicitação cancelada";
 
-    // AÇÕES
-    let acoes = "Nenhuma ação a ser feita";
+    // // AÇÕES
+    // let acoes = "Nenhuma ação a ser feita";
 
-    if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || s.status === "PENDENTE") {
+    // if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || s.status === "PENDENTE") {
+    //   if (s.tipo === "NOVO_EXAME") {
+    //     acoes = `
+    //       <button onclick="cancelarSolicitacao(
+    //         ${s.solicitacao_id},
+    //         '${s.tipo}',
+    //         ${usuarioLogado.id},
+    //         '${s.status}',
+    //         false,       // solicitarNovaUnidade
+    //         ${s.solicitar_novo_setor},
+    //         false,       // solicitarNovoCargo
+    //         ${s.solicitar_nova_funcao}, // solicitarNovaFuncao
+    //         ${s.solicitar_credenciamento} // solicitarCredenciamento
+    //       )">Cancelar</button>
+    //     `;
+    //   } else {
+    //     acoes = `
+    //       <button onclick="cancelarSolicitacao(
+    //         ${s.solicitacao_id},
+    //         '${s.tipo}',
+    //         ${usuarioLogado.id},
+    //         '${s.status}',
+    //         ${s.solicitar_nova_unidade}, // solicitarNovaUnidade
+    //         ${s.solicitar_novo_setor},   // solicitarNovoSetor
+    //         ${s.solicitar_novo_cargo},   // solicitarNovoCargo
+    //         false,                        // solicitarNovaFuncao
+    //         ${s.solicitar_credenciamento} // solicitarCredenciamento
+    //       )">Cancelar</button>
+    //     `;
+    //   }
+    // }
+
+    // AÇÕES
+    let acoes = "";
+
+    // STATUS QUE MOSTRAM CONSULTA
+    if (s.status === "APROVADO" || s.status === "ENVIADO_SOC") {
+      acoes = `
+        <button class="btn-consulta"
+          onclick="verConsulta(${s.solicitacao_id}, '${s.tipo}')">
+          Ver Consulta
+        </button>
+      `;
+    }
+    // STATUS QUE PODEM CANCELAR
+    else if (
+      s.status === "PENDENTE_UNIDADE" ||
+      s.status === "PENDENTE_SC" ||
+      s.status === "PENDENTE_CREDENCIAMENTO" ||
+      s.status === "PENDENTE"
+    ) {
+
       if (s.tipo === "NOVO_EXAME") {
         acoes = `
           <button onclick="cancelarSolicitacao(
@@ -176,11 +224,11 @@ function renderizarTabela(lista) {
             '${s.tipo}',
             ${usuarioLogado.id},
             '${s.status}',
-            false,       // solicitarNovaUnidade
+            false,
             ${s.solicitar_novo_setor},
-            false,       // solicitarNovoCargo
-            ${s.solicitar_nova_funcao}, // solicitarNovaFuncao
-            ${s.solicitar_credenciamento} // solicitarCredenciamento
+            false,
+            ${s.solicitar_nova_funcao},
+            ${s.solicitar_credenciamento}
           )">Cancelar</button>
         `;
       } else {
@@ -190,11 +238,11 @@ function renderizarTabela(lista) {
             '${s.tipo}',
             ${usuarioLogado.id},
             '${s.status}',
-            ${s.solicitar_nova_unidade}, // solicitarNovaUnidade
-            ${s.solicitar_novo_setor},   // solicitarNovoSetor
-            ${s.solicitar_novo_cargo},   // solicitarNovoCargo
-            false,                        // solicitarNovaFuncao
-            ${s.solicitar_credenciamento} // solicitarCredenciamento
+            ${s.solicitar_nova_unidade},
+            ${s.solicitar_novo_setor},
+            ${s.solicitar_novo_cargo},
+            false,
+            ${s.solicitar_credenciamento}
           )">Cancelar</button>
         `;
       }
@@ -228,8 +276,8 @@ function renderizarTabela(lista) {
     tbody.innerHTML += `
       <tr>
         <td>${iconeTipo}</td>
-        <td>${formatarDataHora(s.solicitado_em)}</td>
-        <td>${(s.nome_funcionario).toUpperCase()}</td>
+        <td class="col-data">${formatarDataHora(s.solicitado_em)}</td>
+        <td class="col-funcionario">${(s.nome_funcionario).toUpperCase()}</td>
         <td>${s.cpf}</td>
         <td>
           <span class="status-pill ${s.status.toLowerCase()}">
@@ -266,9 +314,37 @@ function formatarRac(rac) {
     .join(", ");
 }
 
+// MODAL DE VER CONSULTA
+async function verConsulta(id, tipo) {
+  let url = "";
+
+  if (tipo === "NOVO_EXAME") {
+    url = `/solicitacoes/novo-exame/${id}`;
+  }
+
+  if (tipo === "NOVO_CADASTRO") {
+    url = `/solicitacoes/novo-cadastro/${id}`;
+  }
+
+  try {
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    document.getElementById("obsConsulta").innerText =
+      data.dados.observacao_consulta || "Nenhuma observação registrada.";
+
+    const modal = new bootstrap.Modal(document.getElementById("modalConsulta"));
+    modal.show();
+
+  } catch (error) {
+    console.error("Erro ao buscar consulta:", error);
+  }
+}
+
 // FUNÇÃO PARA FORMATAR OS TIPOS DE RAC
 function formatarTiposRac(tipos) {
-  if (!Array.isArray(tipos) || tipos.length === 0) return "-";
+  if (!Array.isArray(tipos) || tipos.length === 0) return "";
 
   return tipos
     .map(t => t.replace("RAC_", "RAC "))
@@ -642,6 +718,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // FUNÇÃO PARA PREENHCER OS CAMPOS DO MODAL - NOVO EXAME
 function preencherModalEditarExame(s) {
+  const tipoFaturamento = s.tipo_faturamento;
+
   document.getElementById("editExameId").value = s.solicitacao_id;
 
   document.getElementById("editExameNomeFuncionario").value = s.nome_funcionario;
@@ -651,6 +729,23 @@ function preencherModalEditarExame(s) {
   document.getElementById("editExameDataAdmissao").value = formatarDataParaInput(s.data_admissao);
   document.getElementById("editExameNomeEmpresa").value = s.nome_empresa;
   document.getElementById("editExameNomeUnidade").value = s.nome_unidade;
+  document.getElementById("editExameNomeFantasia").value = s.nome_fantasia;
+  document.getElementById("editExameRazaoSocial").value = s.razao_social;
+  document.getElementById("editExameCnpj").value = s.cnpj;
+  document.getElementById("editExameCnae").value = s.cnae;
+  document.getElementById("editExameCep").value = s.cep;
+  document.getElementById("editExameRua").value = s.rua;
+  document.getElementById("editExameNumero").value = s.numero;
+  document.getElementById("editExameBairro").value = s.bairro;
+  document.getElementById("editExameEstado").value = s.estado;
+
+  if (tipoFaturamento === "JUNTO") {
+    document.getElementById("exame_faturamento_junto").checked = true;
+  } else if (tipoFaturamento === "SEPARADO") {
+    document.getElementById("exame_faturamento_separado").checked = true;
+  }
+
+  document.getElementById("editExameEmail").value = s.email;
   document.getElementById("editExameNomeSetor").value = s.nome_setor;
   document.getElementById("editExameNomeCargo").value = s.nome_cargo;
   document.getElementById("editExameTipoExame").value = s.tipo_exame;
@@ -674,6 +769,58 @@ function preencherModalEditarExame(s) {
   document.getElementById("editExameEstadoCredenciamento").value = s.estado_credenciamento;
   document.getElementById("editExameCidadeCredenciamento").value = s.cidade_credenciamento;
   document.getElementById("editExameObservacao").value = s.observacao;
+
+  // MOSTRAR / OCULTAR SEÇÃO DE NOVA UNIDADE
+  const blocoUnidade = document.getElementById("divUnidadeDestino");
+
+  const blocoNomeFantasia = document.getElementById("divExameNomeFantasia");
+  const blocoRazaoSocial = document.getElementById("divExameRazaoSocial");
+  const blocoCnpj = document.getElementById("divExameCnpj");
+  const blocoCnae = document.getElementById("divExameCnae");
+  const blocoCep = document.getElementById("divExameCep");
+  const blocoRua = document.getElementById("divExameRua");
+  const blocoNumero = document.getElementById("divExameNumero");
+  const blocoBairro = document.getElementById("divExameBairro");
+  const blocoEstado = document.getElementById("divExameEstado");
+  const blocoFaturamentoJunto = document.getElementById("divExameFaturamentoJunto");
+  const blocoFaturamentoSeparado = document.getElementById("divExameFaturamentoSeparado");
+  const blocoEmail = document.getElementById("divExameEmail");
+
+  if (s.solicitar_nova_unidade === true) {
+    blocoUnidade.classList.add("d-none");
+  }
+  else {
+    blocoUnidade.classList.remove("d-none");
+  }
+
+  if (s.solicitar_nova_unidade === false) {
+    blocoNomeFantasia.classList.add("d-none");
+    blocoRazaoSocial.classList.add("d-none");
+    blocoCnpj.classList.add("d-none");
+    blocoCnae.classList.add("d-none");
+    blocoCep.classList.add("d-none");
+    blocoRua.classList.add("d-none");
+    blocoNumero.classList.add("d-none");
+    blocoBairro.classList.add("d-none");
+    blocoEstado.classList.add("d-none");
+    blocoFaturamentoJunto.classList.add("d-none");
+    blocoFaturamentoSeparado.classList.add("d-none");
+    blocoEmail.classList.add("d-none");
+  }
+  else {
+    blocoNomeFantasia.classList.remove("d-none");
+    blocoRazaoSocial.classList.remove("d-none");
+    blocoCnpj.classList.remove("d-none");
+    blocoCnae.classList.remove("d-none");
+    blocoCep.classList.remove("d-none");
+    blocoRua.classList.remove("d-none");
+    blocoNumero.classList.remove("d-none");
+    blocoBairro.classList.remove("d-none");
+    blocoEstado.classList.remove("d-none");
+    blocoFaturamentoJunto.classList.remove("d-none");
+    blocoFaturamentoSeparado.classList.remove("d-none");
+    blocoEmail.classList.remove("d-none");
+  }
 
   // MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE RISCOS OCUPACIONAIS
   const blocoFuncaoDestino = document.getElementById("divFuncaoDestino");
@@ -719,6 +866,16 @@ function preencherModalEditarExame(s) {
     blocoNovaFuncao.classList.add("d-none");
     blocoSetorDestino.classList.add("d-none");
     blocoNovoSetor.classList.add("d-none");
+  }
+
+  // MOSTRAR / ESCONDER SEÇÃO DE UNIDADE DESTINO
+  const blocoUnidadeDestino = document.getElementById("divUnidadeDestino");
+
+  if (!s.unidade_destino || s.unidade_destino.trim() === "") {
+    blocoUnidadeDestino.classList.add("d-none");
+  } else {
+    blocoUnidadeDestino.classList.remove("d-none");
+    document.getElementById("editExameUnidadeDestino").innerText = s.unidade_destino;
   }
 
   const blocoMaisUnidades = document.getElementById("bloco_exame_mais_unidades");
@@ -881,8 +1038,20 @@ async function salvarEdicaoCadastro() {
 // FUNÇÃO PARA SALVAR EDIÇÃO - NOVO EXAME
 async function salvarEdicaoExame() {
   const id = document.getElementById("editExameId").value;
+  const tipoFaturamentoSelecionado = document.querySelector('input[name="exame_tipo_faturamento"]:checked')?.value;
 
   const dados = {
+    nome_fantasia: document.getElementById("editExameNomeFantasia").value,
+    razao_social: document.getElementById("editExameRazaoSocial").value,
+    cnpj: document.getElementById("editExameCnpj").value,
+    cnae: document.getElementById("editExameCnae").value,
+    cep: document.getElementById("editExameCep").value,
+    rua: document.getElementById("editExameRua").value,
+    numero: document.getElementById("editExameNumero").value,
+    bairro: document.getElementById("editExameBairro").value,
+    estado: document.getElementById("editExameEstado").value,
+    tipo_faturamento: tipoFaturamentoSelecionado,
+    email: document.getElementById("editExameEmail").value,
     nome_nova_funcao: document.getElementById("editExameNovaFuncao").value || null,
     descricao_atividade: document.getElementById("editExameDescricaoAtividade").value,
     nome_novo_setor: document.getElementById("editExameNovoSetor").value || null,
@@ -995,10 +1164,3 @@ nomeInput.addEventListener("input", function () {
 
   this.value = valor;
 });
-
-// FUNÇÃO DE LOGOUT
-function logout() {
-  sessionStorage.removeItem("usuario");
-  sessionStorage.removeItem("empresaCodigo");
-  window.location.href = "login.html";
-}

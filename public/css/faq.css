@@ -21,6 +21,38 @@ body.blur-main header {
     filter: none;
 }
 
+.title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+h3 {
+    position: relative;
+    font-weight: 600;
+    font-size: 23px;
+    color: #000000;
+    margin-bottom: 15px;
+}
+
+h3::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #000000;
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 15px;
+    color: #6B7280;
+    margin-top: 4px;
+}
+
 .header-container {
     color: #FFFFFF;
     padding: 24px 24px;
@@ -111,6 +143,10 @@ body.blur-main header {
     color: #F1AE33;
 }
 
+.avatar-circle:not(.large).administrador i {
+    color: #F1AE33;
+}
+
 .user-name {
     font-weight: 400;
     font-size: 14px;
@@ -119,7 +155,7 @@ body.blur-main header {
 }
 
 .profile-menu {
-    width: 280px;
+    width: 300px;
     background: #FFFFFF;
     border-radius: 10px;
     padding: 14px;
@@ -342,32 +378,3 @@ main {
     font-size: 14px;
     font-weight: 500;
 }
-
-/*
-.socials {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.socials a {
-    width: 36px;
-    height: 36px;
-    text-decoration: none;
-    background: rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(4px);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #FFFFFF;
-    font-size: 16px;
-    transition: transform 0.2s ease;
-}
-
-.socials a:hover {
-    transform: translateY(-3px) scale(1.05);
-    background: rgba(255, 255, 255, 0.3);
-}*/

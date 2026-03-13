@@ -373,6 +373,7 @@ app.get("/prestadores/:empresa", async (req, res) => {
 // EXPORTA DADOS - DETALHES DO PRESTADOR - (filtrado pelo codigo)
 app.get("/prestador/:empresa/:codigoPrestador", async (req, res) => {
   try {
+
     const { codigoPrestador } = req.params;
 
     const parametro = JSON.stringify({
@@ -395,6 +396,18 @@ app.get("/prestador/:empresa/:codigoPrestador", async (req, res) => {
 
     const decoded = iconv.decode(socResponse.data, "ISO-8859-1");
 
+    // 🔎 verifica se o retorno parece JSON
+    if (!decoded.trim().startsWith("[") && !decoded.trim().startsWith("{")) {
+
+      console.warn("SOC retornou texto:", decoded);
+
+      return res.status(500).json({
+        erro: "SOC retornou resposta inválida",
+        detalhe: decoded
+      });
+
+    }
+
     const data = JSON.parse(decoded);
 
     const lista = Array.isArray(data) ? data : [];
@@ -412,27 +425,40 @@ app.get("/prestador/:empresa/:codigoPrestador", async (req, res) => {
     res.json(prestador);
 
   } catch (err) {
+
     console.error("Erro SOC:", err.response?.data || err.message);
-    res.status(500).json({ erro: "Erro ao consultar SOC" });
+
+    res.status(500).json({
+      erro: "Erro ao consultar SOC"
+    });
   }
 });
 
 // ROTA DE CADASTRO DE USUÁRIO
 app.post("/cadastro", async (req, res) => {
   try {
-    const { nome, cpf, email, senha, perfil, cod_empresa, nome_empresa } = req.body;
+    const { nome, cpf, email, senha, perfil, cod_empresa, nome_empresa, unidades } = req.body;
 
     await pool.query(
-      ` INSERT INTO usuarios
-        (nome, cpf, email, senha, perfil, cod_empresa, nome_empresa)
-        VALUES ($1,$2,$3,$4,$5,$6,$7)
-      `,
-      [nome, cpf, email, senha, perfil, cod_empresa, nome_empresa]
+      `INSERT INTO usuarios
+       (nome, cpf, email, senha, perfil, cod_empresa, nome_empresa, unidades)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [
+        nome,
+        cpf,
+        email,
+        senha,
+        perfil,
+        cod_empresa || null,
+        nome_empresa || null,
+        JSON.stringify(unidades || [])
+      ]
     );
 
     res.json({ sucesso: true });
-  }
-  catch (err) {
+
+  } catch (err) {
+
     if (err.code === "23505") {
 
       if (err.constraint === "usuarios_email_key") {
@@ -448,15 +474,49 @@ app.post("/cadastro", async (req, res) => {
 
     console.error(err);
     res.status(500).json({ erro: "Erro ao cadastrar usuário" });
+
   }
 });
 
 // ROTA DE LOGIN DE USUÁRIO
+// app.post("/login", async (req, res) => {
+//   try {
+//     const { email, senha } = req.body;
+
+//     const { rows } = await pool.query(
+//       `
+//       SELECT
+//         id,
+//         nome,
+//         email,
+//         perfil,
+//         cod_empresa,
+//         nome_empresa,
+//         unidades
+//       FROM usuarios
+//       WHERE email = $1
+//         AND senha = $2
+//       `,
+//       [email, senha]
+//     );
+
+//     if (!rows.length) {
+//       return res.status(401).json({ erro: "Email ou senha inválidos" });
+//     }
+
+//     res.json(rows[0]);
+
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ erro: "Erro no login" });
+//   }
+// });
+
 app.post("/login", async (req, res) => {
   try {
     const { email, senha } = req.body;
 
-    const { rows } = await pool.query(
+    const usuario = await pool.query(
       `
       SELECT
         id,
@@ -464,19 +524,32 @@ app.post("/login", async (req, res) => {
         email,
         perfil,
         cod_empresa,
-        nome_empresa
+        nome_empresa,
+        unidades
       FROM usuarios
       WHERE email = $1
-        AND senha = $2
+      AND senha = $2
       `,
       [email, senha]
     );
 
-    if (!rows.length) {
+    if (!usuario.rows.length) {
       return res.status(401).json({ erro: "Email ou senha inválidos" });
     }
 
-    res.json(rows[0]);
+    const empresasExtras = await pool.query(
+      `
+      SELECT cod_empresa, nome_empresa, unidades
+      FROM usuarios_empresas
+      WHERE usuario_id = $1
+      `,
+      [usuario.rows[0].id]
+    );
+
+    res.json({
+      ...usuario.rows[0],
+      empresas_extras: empresasExtras.rows
+    });
 
   } catch (err) {
     console.error(err);
@@ -983,6 +1056,18 @@ app.post("/solicitar-exame", async (req, res) => {
         data_exame,
         unidades_extras,
         unidade_destino,
+        solicitar_nova_unidade,
+        nome_fantasia,
+        razao_social,
+        cnpj,
+        cnae,
+        cep,
+        rua,
+        numero,
+        bairro,
+        estado,
+        tipo_faturamento,
+        email,
         setor_destino,
         solicitar_novo_setor,
         nome_novo_setor,
@@ -1003,7 +1088,7 @@ app.post("/solicitar-exame", async (req, res) => {
         observacao,
         emails_extras
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50)
       RETURNING id
       `,
       [
@@ -1026,6 +1111,18 @@ app.post("/solicitar-exame", async (req, res) => {
         f.data_exame,
         JSON.stringify(f.unidades_extras || []),
         f.unidade_destino,
+        f.solicitar_nova_unidade,
+        f.nome_fantasia,
+        f.razao_social,
+        f.cnpj,
+        f.cnae,
+        f.cep,
+        f.rua,
+        f.numero,
+        f.bairro,
+        f.estado,
+        f.tipo_faturamento,
+        f.email,
         f.setor_destino,
         f.solicitar_novo_setor,
         f.nome_novo_setor,
@@ -1113,6 +1210,82 @@ app.get("/solicitacoes/novo-exame/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: "Erro ao buscar detalhes do exame" });
+  }
+});
+
+// ROTA PARA ATUALIZAR A UNIDADE DE UMA SOLICITAÇÃO DE NOVO EXAME
+app.put("/solicitacoes/novo-exame/:id/salvar-unidade", async (req, res) => {
+  const { id } = req.params;
+  const { unidade_destino } = req.body;
+
+  if (!unidade_destino) {
+    return res.status(400).json({ erro: "Unidade inválida" });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    await client.query(
+      `
+      UPDATE novo_exame
+      SET unidade_destino = $1
+      WHERE id = (
+        SELECT novo_exame_id
+        FROM solicitacoes_novo_exame
+        WHERE id = $2
+      )
+      `,
+      [unidade_destino, id]
+    );
+
+    const result = await client.query(
+      `
+      UPDATE solicitacoes_novo_exame
+      SET status = 'PENDENTE_SC'
+      WHERE id = $1
+      RETURNING status
+      `,
+      [id]
+    );
+
+    // PEGAR OS DADOS DA SOLICITAÇÃO
+    const dados = await client.query(
+      `
+      SELECT
+        nc.nome_empresa,
+        nc.unidade_destino
+      FROM solicitacoes_novo_exame s
+      JOIN novo_exame nc ON nc.id = s.novo_exame_id
+      WHERE s.id = $1
+      `,
+      [id]
+    );
+
+    dadosSolicitacao = dados.rows[0];
+
+    await client.query("COMMIT");
+
+    res.json({
+      sucesso: true,
+      status_novo: result.rows[0].status
+    });
+
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error(err);
+    return res.status(500).json({ erro: "Erro ao salvar unidade" });
+
+  } finally {
+    client.release();
+  }
+
+  // ENVIAR EMAIL PARA CRIAÇÃO DE SETOR/FUNÇÃO
+  try {
+    await enviarEmailSetorFuncao(dadosSolicitacao);
+  } catch (err) {
+    console.error("Erro ao enviar email SC:", err.message);
   }
 });
 
@@ -1672,22 +1845,44 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
     await pool.query(`
       UPDATE novo_exame
       SET
-        nome_nova_funcao = $1,
-        descricao_atividade = $2,
-        nome_novo_setor = $3,
-        motivo_consulta = $4,
-        cnh = $5,
-        vencimento_cnh = $6,
-        lab_toxicologico = $7,
-        estado_credenciamento = $8,
-        cidade_credenciamento = $9,
-        observacao = $10
+        nome_fantasia = $1,
+        razao_social = $2,
+        cnpj = $3,
+        cnae = $4,
+        cep = $5,
+        rua = $6,
+        numero = $7,
+        bairro = $8,
+        estado = $9,
+        tipo_faturamento = $10,
+        email = $11,
+        nome_nova_funcao = $12,
+        descricao_atividade = $13,
+        nome_novo_setor = $14,
+        motivo_consulta = $15,
+        cnh = $16,
+        vencimento_cnh = $17,
+        lab_toxicologico = $18,
+        estado_credenciamento = $19,
+        cidade_credenciamento = $20,
+        observacao = $21
       WHERE id = (
         SELECT novo_exame_id
         FROM solicitacoes_novo_exame
-        WHERE id = $11
+        WHERE id = $22
       )
     `, [
+      f.nome_fantasia,
+      f.razao_social,
+      f.cnpj,
+      f.cnae,
+      f.cep,
+      f.rua,
+      f.numero,
+      f.bairro,
+      f.estado,
+      f.tipo_faturamento,
+      f.email,
       f.nome_nova_funcao,
       f.descricao_atividade,
       f.nome_novo_setor,
@@ -2145,6 +2340,207 @@ app.get("/soc/funcionario-por-cpf/:cpf/:empresaUsuario", async (req, res) => {
   }
 });
 
+// ROTA PARA LISTAR TODOS OS USUÁRIOS DO SISTEMA (PERFIL ACESSO)
+app.get("/usuarios", async (req, res) => {
+  const { rows } = await pool.query(`
+    SELECT 
+        u.id,
+        u.nome,
+        u.cpf,
+        u.cod_empresa,
+        u.nome_empresa,
+        (
+            SELECT json_agg(ue)
+            FROM usuarios_empresas ue
+            WHERE ue.usuario_id = u.id
+        ) AS empresas_extras
+    FROM usuarios u
+  `);
+
+  res.json(rows);
+});
+
+// ROTA PARA BUSCAR AS UNIDADES DE ACESSO DO USUÁRIO (PERFIL ACESSO)
+app.get("/usuarios/:id/unidades/:empresa", async (req, res) => {
+
+  const { id, empresa } = req.params;
+
+  const { rows } = await pool.query(`
+    SELECT 
+      (jsonb_array_elements(unidades)->>'cod_unidade') AS codigo,
+      (jsonb_array_elements(unidades)->>'nome_unidade') AS nome
+    FROM usuarios
+    WHERE id = $1
+    AND cod_empresa = $2
+
+    UNION ALL
+
+    SELECT 
+      (jsonb_array_elements(unidades)->>'cod_unidade') AS codigo,
+      (jsonb_array_elements(unidades)->>'nome_unidade') AS nome
+    FROM usuarios_empresas
+    WHERE usuario_id = $1
+    AND cod_empresa = $2
+  `, [id, empresa]);
+
+  res.json(rows);
+});
+
+// ROTA PARA SALVAR AS UNIDADES DE ACESSO DO USUÁRIO (PERFIL ACESSO)
+app.post("/usuarios/salvar-unidades", async (req, res) => {
+  const { usuario_id, cod_empresa, unidades } = req.body;
+
+  try {
+    // VERIFICA SE É A EMPRESA PRINCIPAL
+    const empresaPrincipal = await pool.query(`
+      SELECT 1
+      FROM usuarios
+      WHERE id = $1
+      AND cod_empresa = $2
+    `, [usuario_id, cod_empresa]);
+
+    if (empresaPrincipal.rowCount > 0) {
+
+      // SALVA NA TABELA USUARIOS
+      await pool.query(`
+        UPDATE usuarios
+        SET unidades = $1
+        WHERE id = $2
+        AND cod_empresa = $3
+      `, [JSON.stringify(unidades), usuario_id, cod_empresa]);
+
+    } else {
+
+      // SALVA NA TABELA USUARIOS_EMPRESAS
+      await pool.query(`
+        UPDATE usuarios_empresas
+        SET unidades = $1
+        WHERE usuario_id = $2
+        AND cod_empresa = $3
+      `, [JSON.stringify(unidades), usuario_id, cod_empresa]);
+    }
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao salvar unidades" });
+  }
+});
+
+// ROTA PARA BUSCAR AS EMPRESAS DE ACESSO DO USUÁRIO (PERFIL ACESSO)
+app.get("/usuarios/:id/empresas", async (req, res) => {
+
+  const { id } = req.params;
+
+  try {
+
+    const { rows } = await pool.query(`
+
+      SELECT 
+        cod_empresa,
+        nome_empresa,
+        true AS principal
+      FROM usuarios
+      WHERE id = $1
+
+      UNION ALL
+
+      SELECT
+        cod_empresa,
+        nome_empresa,
+        false AS principal
+      FROM usuarios_empresas
+      WHERE usuario_id = $1
+
+    `, [id]);
+
+    res.json(rows);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao buscar empresas do usuário" });
+  }
+
+});
+
+// ROTA PARA SALVAR AS EMPRESAS DE ACESSO DO USUÁRIO (PERFIL ACESSO)
+app.post("/usuarios/salvar-empresas", async (req, res) => {
+  const { usuario_id, empresas } = req.body;
+
+  await pool.query(`
+    DELETE FROM usuarios_empresas
+    WHERE usuario_id = $1
+  `, [usuario_id]);
+
+  for (const e of empresas) {
+    await pool.query(`
+      INSERT INTO usuarios_empresas
+      (usuario_id, cod_empresa, nome_empresa, unidades)
+      VALUES ($1,$2,$3,'[]')
+    `, [usuario_id, e.cod_empresa, e.nome_empresa]);
+
+  }
+
+  res.json({ success: true });
+});
+
+// ROTA PARA MOSTRAR AS PERMISSÕES DE ACESSO DO USUÁRIO (EMPRESAS E UNIDADES)
+app.get("/permissoes/:usuarioId", async (req, res) => {
+  try {
+    const { usuarioId } = req.params;
+
+    // Pega a empresa principal do usuário
+    const { rows: principalRows } = await pool.query(
+      `
+      SELECT
+        cod_empresa,
+        nome_empresa,
+        unidades
+      FROM usuarios
+      WHERE id = $1
+      `,
+      [usuarioId]
+    );
+
+    if (principalRows.length === 0) {
+      return res.status(404).json({ erro: "Usuário não encontrado" });
+    }
+
+    const principal = principalRows[0];
+
+    // Pega as empresas adicionais na tabela usuarios_empresas
+    const { rows: adicionaisRows } = await pool.query(
+      `
+      SELECT cod_empresa, nome_empresa, unidades
+      FROM usuarios_empresas
+      WHERE usuario_id = $1
+      `,
+      [usuarioId]
+    );
+
+    // Monta o array de empresas
+    const empresas = [
+      {
+        cod_empresa: principal.cod_empresa,
+        nome_empresa: principal.nome_empresa,
+        unidades: principal.unidades || []
+      },
+      ...adicionaisRows.map(e => ({
+        cod_empresa: e.cod_empresa,
+        nome_empresa: e.nome_empresa,
+        unidades: e.unidades || []
+      }))
+    ];
+
+    res.json({ empresas });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ erro: "Erro ao buscar permissões" });
+  }
+});
+
 // BUSCAR DADOS DO USUÁRIO PRA TELA DE PERFIL
 app.get("/usuarios/:id", async (req, res) => {
   try {
@@ -2238,11 +2634,25 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
   }
 });
 
+async function enviarEmailSetorFuncao(dados) {
+  await transporter.sendMail({
+    from: "Portal Salubritá <naoresponda@salubrita.com.br>",
+    //to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
+    subject: "Solicitação de criação de setor/função",
+    text: `
+      Uma solicitação para criação de setor/função para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
+      
+      Gentileza dar prosseguimento à solicitação.
+    `
+  });
+}
+
 async function enviarEmailSetorCargo(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
-    //to: "debora.fonseca@salubrita.com.br",
+    //to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de criação de setor/cargo",
     text: `
       Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
@@ -2255,8 +2665,8 @@ async function enviarEmailSetorCargo(dados) {
 async function enviarEmailCredenciamento(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    to: "contratos@salubrita.com.br",
-    //to: "debora.fonseca@salubrita.com.br",
+    //to: "contratos@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de credenciamento",
     text: `
       Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.

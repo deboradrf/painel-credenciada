@@ -1,15 +1,10 @@
-// USUÁRIO LOGADO
-const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
-
-if (!usuarioLogado) {
-  alert("Sessão expirada. Faça login novamente.");
-  window.location.href = "login.html";
-}
-
 let solicitacoes = [];
 let tipoSolicitacaoAtual = null;
 let solicitacaoAtualId = null;
 let hierarquiaAtual = null;
+
+const usuarioLogado = getUsuario();
+const nomeEmpresa = getEmpresaNome();
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
@@ -37,7 +32,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // EMPRESA
   dropdownUserExtra.innerHTML = `
-    <div class="company-name">${usuarioLogado.nome_empresa}</div>
+    <div class="company-name">
+      <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+    </div>
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO
@@ -186,7 +183,7 @@ async function renderizarTabela(lista) {
     const statusClass = status.toLowerCase();
 
     const podeEnviarSOC = (s.tipo === "NOVO_CADASTRO" && s.status === "APROVADO") || s.status === "ERRO_SOC";
-    
+
     const estaEmAnalise = s.em_analise_por && s.em_analise_por !== usuarioLogado.id;
 
     let iconeTipo = "";
@@ -205,9 +202,9 @@ async function renderizarTabela(lista) {
 
     tr.innerHTML = `
       <td>${iconeTipo}</td>
-      <td>${formatarDataHoraSolicitacoes(s.solicitado_em)}</td>
-      <td>${s.nome_empresa}</td>
-      <td>${(s.nome_funcionario).toUpperCase()}</td>
+      <td class="col-data">${formatarDataHoraSolicitacoes(s.solicitado_em)}</td>
+      <td class="col-empresa">${s.nome_empresa}</td>
+      <td class="col-funcionario">${(s.nome_funcionario).toUpperCase()}</td>
       <td>${s.cpf}</td>
       <td>${(s.cidade).toUpperCase()}</td>
       <td>
@@ -217,31 +214,31 @@ async function renderizarTabela(lista) {
         <div class="actions-wrapper">
           ${estaEmAnalise
           ? `
-            <small style="opacity:0.6;">
-              Em análise por ${s.em_analise_por_nome?.split(' ')[0]}
-            </small>
-            `
+              <small style="opacity:0.6;">
+                Em análise por ${s.em_analise_por_nome?.split(' ')[0]}
+              </small>
+              `
           : `
             <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
               Analisar
             </button>
 
             ${podeEnviarSOC
-              ? `
-                <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
-                  Enviar SOC
-                </button>
-                `
-              : ""
+            ? `
+                  <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
+                    Enviar SOC
+                  </button>
+                  `
+            : ""
             }
 
             ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
-              ? `
-                <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
-                  Cancelar
-                </button>
-                `
-              : ""
+            ? `
+                  <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
+                    Cancelar
+                  </button>
+                  `
+            : ""
             }
           `
           }
@@ -360,6 +357,8 @@ async function preencherModal(s, tipo) {
   }
 
   if (tipo === "NOVO_CADASTRO") {
+    document.getElementById("cadastro_solicitacao_id").innerHTML = `${s.solicitacao_id}`;
+
     document.getElementById("cadastro_solicitado_por_email").innerText = emails;
 
     document.getElementById("cadastro_nome_funcionario").innerText = s.nome_funcionario;
@@ -578,6 +577,8 @@ async function preencherModal(s, tipo) {
   }
 
   if (tipo === "NOVO_EXAME") {
+    document.getElementById("exame_solicitacao_id").innerHTML = `${s.solicitacao_id}`;
+
     document.getElementById("exame_solicitado_por_email").innerText = emails;
 
     document.getElementById("exame_nome_funcionario").innerText = s.nome_funcionario;
@@ -595,6 +596,23 @@ async function preencherModal(s, tipo) {
     document.getElementById("exame_data_exame").innerText = formatarData(s.data_exame);
     preencherMaisUnidadesExame(s);
     document.getElementById("exame_unidade_destino").innerText = s.unidade_destino || "-";
+    document.getElementById("exame_nome_fantasia").innerText = s.nome_fantasia;
+    document.getElementById("exame_razao_social").innerText = s.razao_social;
+    document.getElementById("exame_cnpj").innerText = s.cnpj;
+    document.getElementById("exame_cnae").innerText = s.cnae;
+    document.getElementById("exame_cep").innerText = s.cep;
+    document.getElementById("exame_rua").innerText = s.rua;
+    document.getElementById("exame_numero").innerText = s.numero;
+    document.getElementById("exame_bairro").innerText = s.bairro;
+    document.getElementById("exame_estado").innerText = s.estado;
+
+    if (tipoFaturamento === "JUNTO") {
+      document.getElementById("exame_faturamento_junto").checked = true;
+    } else if (tipoFaturamento === "SEPARADO") {
+      document.getElementById("exame_faturamento_separado").checked = true;
+    }
+
+    document.getElementById("exame_email").innerText = s.email;
     document.getElementById("exameFuncaoDestino").innerText = s.funcao_destino;
     document.getElementById("exameNovaFuncao").innerText = s.nome_nova_funcao;
     document.getElementById("exame_descricao_atividade").innerText = s.descricao_atividade;
@@ -611,7 +629,51 @@ async function preencherModal(s, tipo) {
     document.getElementById("exame_cidade_credenciamento").innerText = s.cidade_credenciamento;
     document.getElementById("exame_observacao").innerText = s.observacao || "-";
 
+    // MOSTRAR / ESCONDER BLOCO DE NOVA UNIDADE
+    const blocoNomeFantasia = document.getElementById("blocoExameNomeFantasia");
+    const blocoRazaoSocial = document.getElementById("blocoExameRazaoSocial");
+    const blocoCnpj = document.getElementById("blocoExameCnpj");
+    const blocoCnae = document.getElementById("blocoExameCnae");
+    const blocoCep = document.getElementById("blocoExameCep");
+    const blocoRua = document.getElementById("blocoExameRua");
+    const blocoNumero = document.getElementById("blocoExameNumero");
+    const blocoBairro = document.getElementById("blocoExameBairro");
+    const blocoEstado = document.getElementById("blocoExameEstado");
+    const blocoFaturamentoJunto = document.getElementById("blocoExameFaturamentoJunto");
+    const blocoFaturamentoSeparado = document.getElementById("blocoExameFaturamentoSeparado");
+    const blocoEmail = document.getElementById("blocoExameEmail");
+
+    if (s.solicitar_nova_unidade === true) {
+      blocoNomeFantasia.classList.remove("d-none");
+      blocoRazaoSocial.classList.remove("d-none");
+      blocoCnpj.classList.remove("d-none");
+      blocoCnae.classList.remove("d-none");
+      blocoCep.classList.remove("d-none");
+      blocoRua.classList.remove("d-none");
+      blocoNumero.classList.remove("d-none");
+      blocoBairro.classList.remove("d-none");
+      blocoEstado.classList.remove("d-none");
+      blocoFaturamentoJunto.classList.remove("d-none");
+      blocoFaturamentoSeparado.classList.remove("d-none");
+      blocoEmail.classList.remove("d-none");
+    } else {
+      blocoNomeFantasia.classList.add("d-none");
+      blocoRazaoSocial.classList.add("d-none");
+      blocoCnpj.classList.add("d-none");
+      blocoCnae.classList.add("d-none");
+      blocoCep.classList.add("d-none");
+      blocoRua.classList.add("d-none");
+      blocoNumero.classList.add("d-none");
+      blocoBairro.classList.add("d-none");
+      blocoEstado.classList.add("d-none");
+      blocoFaturamentoJunto.classList.add("d-none");
+      blocoFaturamentoSeparado.classList.add("d-none");
+      blocoEmail.classList.add("d-none");
+    }
+
     // MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE RISCOS OCUPACIONAIS
+    const divUnidadeDestino = document.getElementById("divExameUnidadeDestino");
+
     const blocosMudancaRisco = [
       "blocoExameSetorDestino",
       "blocoExameNovoSetor",
@@ -630,6 +692,27 @@ async function preencherModal(s, tipo) {
       document.getElementById("exameNovaFuncao").innerText = s.nome_nova_funcao || "-";
       document.getElementById("exame_descricao_atividade").innerText = s.descricao_atividade || "-";
 
+      // ESCONDER UNIDADE DESTINO SE NÃO FOI SOLICITADO
+      if (!s.solicitar_nova_unidade) {
+        document.getElementById("blocoExameNovoSetor")?.classList.add("d-none");
+      } else {
+        document.getElementById("blocoExameNovoSetor")?.classList.remove("d-none");
+      }
+
+      if ((!s.unidade_destino || s.unidade_destino.trim() === "") && !s.solicitar_nova_unidade) {
+        divUnidadeDestino?.classList.add("d-none");
+      } else {
+        divUnidadeDestino?.classList.remove("d-none");
+      }
+
+      // ESCONDER NOVO SETOR SE NÃO FOI SOLICITADO
+      if (!s.solicitar_novo_setor) {
+        document.getElementById("blocoExameNovoSetor")?.classList.add("d-none");
+      } else {
+        document.getElementById("blocoExameNovoSetor")?.classList.remove("d-none");
+      }
+
+      // ESCONDER NOVA FUNÇÃO SE NÃO FOI SOLICITADO
       if (s.solicitar_nova_funcao === false && s.solicitar_novo_setor === false) {
         document.getElementById("blocoExameNovoSetor")?.classList.add("d-none");
         document.getElementById("blocoExameNovaFuncao")?.classList.add("d-none");
@@ -641,7 +724,68 @@ async function preencherModal(s, tipo) {
       blocosMudancaRisco.forEach(id => { document.getElementById(id)?.classList.add("d-none"); });
     }
 
-    // TRANSFORMAR O CAMPO DE SETOR ATUAL EM SELECT CASO PRECISE CRIAR UM NOVO PARA SER SELECIONADO APÓS CRIADO 
+    // 🔵 RESETAR UNIDADE DESTINO AO ABRIR A SOLICITAÇÃO
+    if (!s.unidade_destino || s.unidade_destino.trim() === "") {
+      window.unidadeDestinoCodigo = null;
+    }
+
+    // salvar unidade original da solicitação
+    window.codUnidadeSolicitacao = s.cod_unidade;
+
+    // TRANSFORMAR O CAMPO DE UNIDADE DESTINO EM SELECT CASO PRECISE CRIAR UMA NOVA UNIDADE PARA SER SELECIONADA APÓS CRIADA
+    const spanUnidadeDestino = document.getElementById("exame_unidade_destino");
+    const selectUnidadeDestino = document.getElementById("unidadeDestinoSelect");
+
+    if (s.solicitar_nova_unidade === true) {
+
+      spanUnidadeDestino.style.display = "none";
+
+      selectUnidadeDestino.classList.remove("d-none");
+      selectUnidadeDestino.style.display = "block";
+
+      carregarUnidadesNovoExame(s.cod_empresa, s.unidade_destino);
+
+    } else {
+
+      spanUnidadeDestino.style.display = "block";
+
+      selectUnidadeDestino.classList.add("d-none");
+      selectUnidadeDestino.style.display = "none";
+
+    }
+
+
+    // 👇 COLOQUE AQUI A LÓGICA DA SITUAÇÃO 3
+    if (s.unidade_destino && s.setor_destino) {
+      const codigoUnidade = await obterCodigoUnidadePorNome(
+        s.cod_empresa,
+        s.unidade_destino
+      );
+
+      window.unidadeDestinoCodigo = codigoUnidade;
+
+      const codigoSetor = await obterCodigoSetorPorNome(
+        s.cod_empresa,
+        codigoUnidade,
+        s.setor_destino
+      );
+
+      if (codigoSetor) {
+
+        await carregarCargosDoSetorSelecionado(
+          s.cod_empresa,
+          codigoUnidade,
+          codigoSetor,
+          s.funcao_destino || "",
+          "exameFuncaoDestinoSelect"
+        );
+
+      } else {
+        console.warn("SETOR NÃO ENCONTRADO NA UNIDADE");
+      }
+    }
+
+    // TRANSFORMAR O CAMPO DE SETOR DESTINO EM SELECT CASO PRECISE CRIAR UM NOVO PARA SER SELECIONADO APÓS CRIADO 
     const spanSetorDestino = document.getElementById("exameSetorDestino");
     const selectSetorDestino = document.getElementById("exameSetorDestinoSelect");
 
@@ -650,13 +794,30 @@ async function preencherModal(s, tipo) {
       selectSetorDestino.style.display = "block";
 
       // POPULAR O SELECT COM OS SETORES DA UNIDADE DA EMPRESA DA SOLICITAÇÃO
-      carregarSetores(s.cod_empresa, s.cod_unidade, s.setor_destino, "exameSetorDestinoSelect");
+      let unidadeParaBuscar = s.cod_unidade;
+
+      if (s.unidade_destino && s.unidade_destino.trim() !== "") {
+
+        unidadeParaBuscar = await obterCodigoUnidadePorNome(
+          s.cod_empresa,
+          s.unidade_destino
+        );
+
+        window.unidadeDestinoCodigo = unidadeParaBuscar;
+      }
+
+      carregarSetores(
+        s.cod_empresa,
+        unidadeParaBuscar,
+        s.setor_destino,
+        "exameSetorDestinoSelect"
+      );
     } else {
       spanSetorDestino.style.display = "block";
       selectSetorDestino.style.display = "none";
     }
 
-    // TRANSFORMAR O CAMPO DE SETOR ATUAL EM SELECT CASO PRECISE CRIAR UM NOVO PARA SER SELECIONADO APÓS CRIADO 
+    // TRANSFORMAR O CAMPO DE FUNÇÃO DESTINO EM SELECT CASO PRECISE CRIAR UM NOVO PARA SER SELECIONADO APÓS CRIADO 
     const spanFuncaoDestino = document.getElementById("exameFuncaoDestino");
     const selectFuncaoDestino = document.getElementById("exameFuncaoDestinoSelect");
 
@@ -671,7 +832,7 @@ async function preencherModal(s, tipo) {
       if (s.setor_destino && s.setor_destino.trim() !== "") {
         codigoSetor = await obterCodigoSetorPorNome(
           s.cod_empresa,
-          s.cod_unidade,
+          window.unidadeDestinoCodigo,
           s.setor_destino
         );
       }
@@ -680,7 +841,7 @@ async function preencherModal(s, tipo) {
       if (codigoSetor) {
         await carregarCargosDoSetorSelecionado(
           s.cod_empresa,
-          s.cod_unidade,
+          window.unidadeDestinoCodigo,
           codigoSetor,
           s.funcao_destino,
           "exameFuncaoDestinoSelect"
@@ -724,15 +885,6 @@ async function preencherModal(s, tipo) {
       blocoMotivoConsulta.classList.add("d-none");
     }
 
-    // MOSTRAR / OCULTAR BLOCO DE UNIDADE DESTINO
-    const blocoUnidadeDestino = document.getElementById("divExameUnidadeDestino");
-
-    if (s.unidade_destino && s.unidade_destino.trim() !== "") {
-      blocoUnidadeDestino.classList.remove("d-none");
-    } else {
-      blocoUnidadeDestino.classList.add("d-none");
-    }
-
     // MOSTRAR / ESCONDER BLOCO DE NOVO CREDENCIAMENTO
     const blocoEstadoClinica = document.getElementById("divExameEstadoClinica");
     const blocoCidadeClinica = document.getElementById("divExameCidadeClinica");
@@ -773,16 +925,13 @@ async function preencherModal(s, tipo) {
   botoesSalvar.forEach(btn => btn.style.display = "none");
   botoesAprovar.forEach(btn => btn.style.display = "none");
 
-  if (
-    s.status === "PENDENTE_UNIDADE" ||
-    s.status === "PENDENTE_SC" ||
-    s.status === "PENDENTE_CREDENCIAMENTO" ||
-    s.status === "PENDENTE_REAVALIACAO"
-  ) {
+  const temEdicao = s.solicitar_nova_unidade || s.solicitar_novo_setor || s.solicitar_novo_cargo || s.solicitar_nova_funcao || s.solicitar_credenciamento;
+
+  if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || (s.status === "PENDENTE_REAVALIACAO" && temEdicao)) {
     botoesSalvar.forEach(btn => btn.style.display = "inline-flex");
   }
 
-  if (s.status === "PENDENTE" || s.status === "PENDENTE_AGENDAMENTO") {
+  if (s.status === "PENDENTE" || s.status === "PENDENTE_AGENDAMENTO" || (s.status === "PENDENTE_REAVALIACAO" && !temEdicao)) {
     botoesAprovar.forEach(btn => btn.style.display = "inline-flex");
   }
 
@@ -900,6 +1049,17 @@ async function preencherModal(s, tipo) {
   }
 }
 
+async function obterCodigoUnidadePorNome(codEmpresa, nomeUnidade) {
+  const res = await fetch(`/unidades/${codEmpresa}`);
+  const unidades = await res.json();
+
+  const unidade = unidades.find(u =>
+    u.nome.trim().toLowerCase() === nomeUnidade.trim().toLowerCase()
+  );
+
+  return unidade ? unidade.codigo : null;
+}
+
 // FUNÇÃO PARA FORMATAR DATAS
 function formatarData(data) {
   if (!data) return "-";
@@ -948,7 +1108,7 @@ function preencherEmailsExtras(cadastro) {
   }
 }
 
-// FUNÇÃO PARA POPULAR O SELECT DE UNIDADES NO MODAL
+// FUNÇÃO PARA POPULAR O SELECT DE UNIDADES NO MODAL (NOVO CADASTRO)
 async function carregarUnidades(empresaCodigo, selecionadoNome = "") {
   if (!empresaCodigo) return;
 
@@ -972,23 +1132,46 @@ async function carregarUnidades(empresaCodigo, selecionadoNome = "") {
   }
 }
 
+// FUNÇÃO PARA POPULAR O SELECT DE UNIDADES NO MODAL
+async function carregarUnidadesNovoExame(empresaCodigo, unidadeSelecionada = "") {
+  if (!empresaCodigo) return;
+
+  const select = document.getElementById("unidadeDestinoSelect");
+  select.innerHTML = '<option value="">-</option>';
+
+  try {
+    const res = await fetch(`/unidades/${empresaCodigo}`);
+    const unidades = await res.json();
+
+    unidades.forEach(u => {
+      const opt = document.createElement("option");
+      opt.value = u.codigo;
+      opt.textContent = u.nome;
+
+      if (u.nome === unidadeSelecionada) {
+        opt.selected = true;
+      }
+
+      select.appendChild(opt);
+    });
+
+  } catch (err) {
+    console.error("Erro ao carregar unidades:", err);
+  }
+}
+
 // BUSCAR CODIGO DO SETOR PELO NOME CASO ESSE CAMPO JÁ VENHA PREENCHIDO
 async function obterCodigoSetorPorNome(codEmpresa, codUnidade, nomeSetor) {
-  if (!hierarquiaAtual) {
+  const res = await fetch(`/hierarquia/${codEmpresa}/${codUnidade}`);
 
-    const res = await fetch(`/hierarquia/${codEmpresa}/${codUnidade}`);
-    hierarquiaAtual = await res.json();
-  }
+  const setores = await res.json();
 
-  const setor = hierarquiaAtual.find(s => {
-    const nome = s.nomeSetor || s.nome_setor || s.descricao || "";
+  const setor = setores.find(s =>
+    (s.nomeSetor || "").trim().toLowerCase() ===
+    nomeSetor.trim().toLowerCase()
+  );
 
-    return nome.trim().toLowerCase() === nomeSetor.trim().toLowerCase();
-  });
-
-  return setor
-    ? setor.codigoSetor || setor.codigo_setor
-    : null;
+  return setor ? setor.codigoSetor : null;
 }
 
 // FUNÇÃO PARA CARREGAR OS SETORES DA UNIDADE DA EMPRESA DA SOLICITAÇÃO NO SELECT
@@ -1036,15 +1219,26 @@ document.getElementById("setorSelect").addEventListener("change", function () {
 });
 
 // FUNÇÃO PARA CARREGAR OS CARGOS DOS SETORES DA UNIDADE DA SOLICITAÇÃO NO SELECT
-async function carregarCargosDoSetorSelecionado(empresaCodigo, unidadeCodigo, setorCodigo, cargoSelecionado = "", selectId = "cargoSelect") {
+async function carregarCargosDoSetorSelecionado(
+  empresaCodigo,
+  unidadeCodigo,
+  setorCodigo,
+  cargoSelecionado = "",
+  selectId = "cargoSelect"
+) {
+
   const selectCargo = document.getElementById(selectId);
 
-  if (!selectCargo) return;
+  if (!selectCargo) {
+    return;
+  }
 
   selectCargo.innerHTML = '<option value="">-</option>';
 
   try {
-    const response = await fetch(`/hierarquia/${empresaCodigo}/${unidadeCodigo}/${setorCodigo}`);
+    const response = await fetch(
+      `/hierarquia/${empresaCodigo}/${unidadeCodigo}/${setorCodigo}`
+    );
 
     const cargos = await response.json();
 
@@ -1059,22 +1253,26 @@ async function carregarCargosDoSetorSelecionado(empresaCodigo, unidadeCodigo, se
         option.selected = true;
 
       selectCargo.appendChild(option);
+
     });
-  }
-  catch (error) {
+
+  } catch (error) {
     console.error("Erro ao carregar cargos:", error);
   }
 }
 
-// LISTENER DE SELECIONAR O SETOR ATUAL (NOVO EXAME)
+// LISTENER DE SELECIONAR O SETOR DESTINO (NOVO EXAME)
 document.getElementById("exameSetorDestinoSelect").addEventListener("change", function () {
   const setorCodigo = this.value;
 
   if (!setorCodigo) return;
 
+  // usa unidade destino se existir, senão usa unidade da solicitação
+  let unidadeCodigo = window.unidadeDestinoCodigo || window.codUnidadeSolicitacao;
+
   carregarCargosDoSetorSelecionado(
     window.empresaAtual,
-    window.unidadeAtual,
+    unidadeCodigo,
     setorCodigo,
     "",
     "exameFuncaoDestinoSelect"
@@ -1466,9 +1664,25 @@ function pegarDadosEdicaoExame(statusAtual) {
 
   payload = {
     ...payload,
+    ...edicaoExameUnidade(statusAtual),
     ...edicaoFuncaoSetor(statusAtual),
     ...edicaoExameCredenciamento(statusAtual),
   };
+
+  return payload;
+}
+
+function edicaoExameUnidade(statusAtual) {
+  const payload = {};
+
+  if (statusAtual === "PENDENTE_UNIDADE" || statusAtual === "PENDENTE_REAVALIACAO") {
+    const select = document.getElementById("unidadeDestinoSelect");
+
+    if (select && select.style.display !== "none" && select.value) {
+      const opt = select.options[select.selectedIndex];
+      payload.unidade_destino = opt.textContent;
+    }
+  }
 
   return payload;
 }
@@ -1526,19 +1740,13 @@ async function salvarEdicaoExame() {
 
   let endpoint = "";
 
-  if (dadosEdicao.setor_destino && !dadosEdicao.funcao_destino) {
-    alert("Selecione a função.");
-    return;
+  if (dadosEdicao.unidade_destino) {
+    endpoint = `/solicitacoes/novo-exame/${solicitacaoAtualId}/salvar-unidade`;
   }
-
-  if (dadosEdicao.funcao_destino && !dadosEdicao.setor_destino) {
-    alert("Selecione o setor.");
-    return;
-  }
-
-  if (dadosEdicao.funcao_destino && dadosEdicao.setor_destino) {
+  else if (dadosEdicao.funcao_destino || dadosEdicao.setor_destino) {
     endpoint = `/solicitacoes/novo-exame/${solicitacaoAtualId}/salvar-sc`;
-  } else if (dadosEdicao.cod_clinica) {
+  }
+  else if (dadosEdicao.cod_clinica) {
     endpoint = `/solicitacoes/novo-exame/${solicitacaoAtualId}/salvar-credenciamento`;
   }
 
@@ -1686,11 +1894,4 @@ async function enviarSOC(id) {
   } catch (err) {
     alert("Falha de comunicação com o servidor");
   }
-}
-
-// FUNÇÃO DE LOGOUT
-function logout() {
-  sessionStorage.removeItem("usuario");
-  sessionStorage.removeItem("empresaCodigo");
-  window.location.href = "login.html";
 }

@@ -21,38 +21,6 @@ body.blur-main header {
     filter: none;
 }
 
-.title {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-h3 {
-    position: relative;
-    font-weight: 600;
-    font-size: 23px;
-    color: #000000;
-    margin-bottom: 15px;
-}
-
-h3::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -5px;
-    width: 50px;
-    height: 3px;
-    background: #000000;
-}
-
-.subtitle {
-    text-align: center;
-    font-size: 15px;
-    color: #6B7280;
-    margin-top: 4px;
-}
-
 .header-container {
     color: #FFFFFF;
     padding: 24px 24px;
@@ -231,77 +199,124 @@ main {
     flex: 1;
 }
 
-.container-fluid {
+.title {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    background-color: #F1F1F1;
-    padding: 48px 32px 20px;
-}
-
-.contact-card {
-    width: 100%;
-    max-width: 1000px;
-    background-color: #FFFFFF;
-    border-radius: 10px;
-    padding: 20px;
     margin-bottom: 20px;
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+h3 {
+    position: relative;
+    font-weight: 600;
+    font-size: 23px;
+    color: #000000;
+    margin-bottom: 15px;
+}
+
+h3::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #000000;
+}
+
+.subtitle {
+    font-size: 15px;
+    color: #6B7280;
+    margin-top: 4px;
+}
+
+li {
+    margin-bottom: 5px;
+}
+
+.list-group-item {
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+.usuario-card {
     display: flex;
     align-items: center;
-    gap: 15px;
-    transition: transform 0.2s ease;
+    justify-content: space-between;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 16px 20px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.04);
 }
 
-.contact-card:hover {
-    transform: translateY(-3px);
-}
-
-.contact-card i {
-    color: #53A5A6;
-    text-align: center;
-}
-
-.contact-info {
+.usuario-info {
     display: flex;
     flex-direction: column;
 }
 
-.contact-info span {
-    font-weight: 600;
+.usuario-info b {
     font-size: 15px;
 }
 
-.contact-info small {
+.usuario-info small {
+    font-size: 12px;
     color: #6B7280;
-    font-size: 13px;
 }
 
-.socials {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 30px;
+.empresas-wrapper {
+    margin-top: 10px;
 }
 
-.socials a {
-    width: 50px;
-    height: 50px;
-    background: #53A5A6;
+.btn-empresa {
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-empresa.principal {
+    background: #E6F4FF;
+    border: 1px solid #BFDBFE;
+}
+
+.btn-empresa.extra {
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+}
+
+.btn-empresa:hover {
+    transform: translateY(-1px);
+}
+
+/* EMPRESA PRINCIPAL */
+.btn-empresa.principal {
+    background: #fcffee;
+    border: 1px solid #F1AE33;
+}
+
+/* EMPRESAS EXTRAS */
+.btn-empresa.extra {
+    background: #f0f6fd;
+    border: 1px solid #88A6BB;
+}
+
+.usuario-acoes {
     display: flex;
     align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 20px;
-    transition: transform 0.2s, background 0.2s;
-    text-decoration: none;
 }
 
-.socials a:hover {
-    background: #4A8F90;
-    transform: translateY(-3px) scale(1.1);
+.btn-empresas {
+    background: #53A5A6;
+    border: none;
+    color: white;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
 .footer-container {

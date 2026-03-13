@@ -217,10 +217,9 @@ h3::after {
     border: none;
     padding: 8px;
     border-radius: 8px;
-    background-color: #F1AE33;
+    background-color: #88A6BB;
     color: #FFFFFF;
     font-size: 1rem;
-    font-weight: 500;
     cursor: pointer;
     transition: all 0.25s ease;
     width: 50px;
@@ -229,6 +228,39 @@ h3::after {
 .btn-gerar-senha:hover,
 .btn-copiar-senha:hover {
     transform: translateY(-2px);
+}
+
+.btn-add-unidade {
+    background-color: #88A6BB;
+    border: 1px solid #88A6BB;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
+    width: 200px;
+    margin-top: 5px;
+    transition: all 0.25s ease;
+}
+
+.btn-add-unidade:hover {
+    transform: translateY(-2px);
+}
+
+#unidadesContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.unidade-container {
+    margin-bottom: 10px;
+}
+.unidade-select {
+    min-width: 200px;
+    margin-right: 5px;
 }
 
 .btn-cadastrar {
@@ -240,7 +272,7 @@ h3::after {
     color: #FFFFFF;
     font-size: 1rem;
     font-weight: 500;
-    margin-top: 10px;
+    margin-top: 20px;
     cursor: pointer;
     transition: all 0.25s ease;
 }

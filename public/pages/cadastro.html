@@ -112,12 +112,13 @@
                                             <option value="">Selecione...</option>
                                             <option value="EMPRESA">Empresa</option>
                                             <option value="CREDENCIADA">Credenciada</option>
+                                            <option value="ADMINISTRADOR">Administrador</option>
                                         </select>
                                     </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <label>Empresa <span class="required">*</span></label>
+                                <div class="form-group" id="empresaGroup">
+                                    <label>Empresa Principal <span class="required">*</span></label>
                                     <div class="input-wrapper">
                                         <div class="input-icon">
                                             <i class="fa-solid fa-city"></i>
@@ -128,17 +129,23 @@
                                     </div>
                                 </div>
 
-                                <!-- <div class="form-group">
-                                    <label>Unidade <span class="required">*</span></label>
-                                    <div class="input-wrapper">
-                                        <div class="input-icon">
-                                            <i class="fa-solid fa-building"></i>
+                                <div class="form-group">
+                                    <label>Unidades da Empresa Principal <span class="required">*</span></label>
+                                    <div id="unidadesContainer">
+                                        <div class="input-wrapper unidade-item">
+                                            <div class="input-icon">
+                                                <i class="fa-solid fa-building"></i>
+                                            </div>
+                                            <select class="unidade-select" required>
+                                                <option value="">Carregando...</option>
+                                            </select>
                                         </div>
-                                        <select id="unidade" required>
-                                            <option value="">Carregando...</option>
-                                        </select>
                                     </div>
-                                </div> -->
+
+                                    <button type="button" class="btn-add-unidade" id="btnAddUnidade">
+                                        <i class="fa-solid fa-plus"></i> Adicionar outra unidade
+                                    </button>
+                                </div>
 
                                 <div class="text-center">
                                     <button type="submit" class="btn-cadastrar">Cadastrar</button>

@@ -69,9 +69,9 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
-                                <i class="fa-solid fa-bell"></i>
-                                Notificações
+                            <a href="permissoes.html">
+                                <i class="fa-solid fa-unlock"></i>
+                                Permissões
                             </a>
                         </li>
                         <li onclick="logout()">
@@ -210,11 +210,6 @@
         <div class="div-space"></div>
 
         <section class="extra-section">
-            <!-- <div class="socials">
-                <a href="https://www.instagram.com/salubritasso/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://salubrita.com.br/" target="_blank"><i class="fa-solid fa-globe"></i></a>
-                <a href="https://wa.me/553131669006" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-            </div> -->
             <p>© 2026 • Salubritá Saúde e Segurança no Trabalho</p>
         </section>
     </div>
@@ -225,7 +220,10 @@
             <div class="modal-content">
 
                 <div class="modal-header">
-                    <h3 class="modal-title">Detalhes da Solicitação</h3>
+                    <div class="title-wrapper">
+                        <h3 class="modal-title">Detalhes da Solicitação</h3>
+                        <small id="cadastro_solicitacao_id"></small>
+                    </div>
                     <a data-bs-dismiss="modal">
                         <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
                     </a>
@@ -713,7 +711,7 @@
             <div class="modal-content">
 
                 <div class="modal-header">
-                    <h3 class="modal-title">Detalhes da Solicitação</h3>
+                    <h3 class="modal-title">Detalhes da Solicitação - <small id="exame_solicitacao_id"></small></h3>
                     <a data-bs-dismiss="modal">
                         <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
                     </a>
@@ -866,6 +864,117 @@
                                     <span>Unidade onde irá atuar</span>
                                 </div>
                                 <span id="exame_unidade_destino" class="detail-value"></span>
+                                <select id="unidadeDestinoSelect" class="detail-input" style="display:none"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="blocoExameNomeFantasia">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome Fantasia</span>
+                                </div>
+                                <span id="exame_nome_fantasia" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="blocoExameRazaoSocial">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Razão Social</span>
+                                </div>
+                                <span id="exame_razao_social" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="blocoExameCnpj">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>CNPJ</span>
+                                </div>
+                                <span id="exame_cnpj" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="blocoExameCnae">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>CNAE</span>
+                                </div>
+                                <span id="exame_cnae" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="blocoExameCep">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>CEP</span>
+                                </div>
+                                <span id="exame_cep" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="blocoExameRua">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Rua</span>
+                                </div>
+                                <span id="exame_rua" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="blocoExameNumero">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Número</span>
+                                </div>
+                                <span id="exame_numero" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="blocoExameBairro">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Bairro</span>
+                                </div>
+                                <span id="exame_bairro" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="blocoExameEstado">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Estado</span>
+                                </div>
+                                <span id="exame_estado" class="detail-value"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="blocoExameFaturamentoJunto">
+                            <div class="form-check my-2">
+                                <input class="form-check-input" type="radio" name="tipo_faturamento"
+                                    id="exame_faturamento_junto" value="JUNTO">
+                                <label class="form-check-label" for="exame_faturamento_junto">
+                                    Essa unidade será faturada junto com a empresa principal, em uma única nota
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="blocoExameFaturamentoSeparado">
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="radio" name="tipo_faturamento"
+                                    id="exame_faturamento_separado" value="SEPARADO">
+                                <label class="form-check-label" for="exame_faturamento_separado">
+                                    Essa unidade será faturada separadamente da empresa principal, com uma nota separada
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="blocoExameEmail">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>E-mail</span>
+                                </div>
+                                <span id="exame_email" class="detail-value"></span>
                             </div>
                         </div>
 
@@ -1076,6 +1185,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../script/session.js"></script>
     <script src="../script/solicitacoes-credenciada.js"></script>
 </body>
 

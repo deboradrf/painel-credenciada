@@ -1,26 +1,17 @@
-// USUÁRIO LOGADO
-const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
-
-if (!usuarioLogado) {
-  alert("Sessão expirada. Faça login novamente.");
-  window.location.href = "login.html";
-}
-
-// FUNCIONÁRIO PESQUISADO
-const funcionarioAtual = JSON.parse(localStorage.getItem("funcionario"));
-
-if (!funcionarioAtual) {
-  alert("Pesquise um funcionário primeiro");
-  window.location.href = "solicitar-exame.html";
-}
-
-// DADOS DA EMPRESA
-const empresaCodigo = usuarioLogado.cod_empresa;
-const nomeEmpresa = usuarioLogado.nome_empresa;
-
-// CACHE
 let prestadoresCache = [];
 let unidadesCache = [];
+
+const usuarioLogado = getUsuario();
+const codigoEmpresa = getEmpresaCodigo();
+const nomeEmpresa = getEmpresaNome();
+const unidadesEmpresa = getEmpresaUnidades();
+
+// FUNCIONÁRIO SELECIONADO NA TELA ANTERIOR
+const funcionarioAtual = JSON.parse(localStorage.getItem("funcionario"));
+if (!funcionarioAtual) {
+  alert("Nenhum funcionário selecionado.");
+  window.location.href = "buscar-cpf.html";
+}
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
@@ -38,7 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // EMPRESA
   dropdownUserExtra.innerHTML = `
-    <div class="company-name">${usuarioLogado.nome_empresa}</div>
+    <div class="company-name">
+      <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+    </div>
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO
@@ -73,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // INIT
 document.addEventListener("DOMContentLoaded", async () => {
   preencherDadosFuncionarioSoc();
-  await popularSelectUnidadeAtual();
+  await popularSelectUnidadeDestino();
   await carregarSetoresDaUnidade();
   await carregarCargosDoSetor();
   await carregarPrestadores();
@@ -100,8 +93,8 @@ function preencherDadosFuncionarioSoc() {
 
   document.getElementById("cpf").readOnly = true;
 
-  document.getElementById("empresaNome").value = usuarioLogado.nome_empresa;
-  document.getElementById("empresaCodigo").value = funcionarioAtual.cod_empresa;
+  document.getElementById("empresaNome").value = nomeEmpresa;
+  document.getElementById("empresaCodigo").value = codigoEmpresa;
 
   preencherUnidadeFuncionario();
   preencherSetorFuncionario();
@@ -110,7 +103,7 @@ function preencherDadosFuncionarioSoc() {
 
 // FUNÇÃO PARA PREENCHER A UNIDADE DO FUNCIONÁRIO (SOC)
 async function preencherUnidadeFuncionario() {
-  const empresa = usuarioLogado.cod_empresa;
+  const empresa = codigoEmpresa;
   const codUnidade = funcionarioAtual.cod_unidade;
 
   if (!empresa || !codUnidade) {
@@ -120,8 +113,6 @@ async function preencherUnidadeFuncionario() {
 
   const res = await fetch(`/unidades/${empresa}`);
   unidadesCache = await res.json();
-
-  console.table(unidadesCache);
 
   const unidade = unidadesCache.find(u => String(u.codigo) === String(codUnidade));
 
@@ -136,7 +127,7 @@ async function preencherUnidadeFuncionario() {
 
 // FUNÇÃO PARA PREENCHER O SETOR DO FUNCIONÁRIO (SOC)
 async function preencherSetorFuncionario() {
-  const empresa = usuarioLogado.cod_empresa;
+  const empresa = codigoEmpresa;
   const codSetor = funcionarioAtual.cod_setor;
 
   if (!empresa || !codSetor) return;
@@ -152,7 +143,7 @@ async function preencherSetorFuncionario() {
 
 // FUNÇÃO PARA PREENCHER O CARGO DO FUNCIONÁRIO (SOC)
 async function preencherCargoFuncionario() {
-  const empresa = usuarioLogado.cod_empresa;
+  const empresa = codigoEmpresa;
   const codCargo = funcionarioAtual.cod_cargo;
 
   if (!empresa || !codCargo) return;
@@ -172,32 +163,51 @@ async function preencherCargoFuncionario() {
 }
 
 // FUNÇÃO PARA POPULAR O SELECT DE UNIDADE ATUAL
-async function popularSelectUnidadeAtual() {
-  const empresa = usuarioLogado.cod_empresa;
+async function popularSelectUnidadeDestino() {
+  const empresa = codigoEmpresa;
 
   if (!empresa) return;
 
   const unidadeDestino = document.getElementById("unidadeDestino");
 
   try {
-    // SE AINDA NÃO TIVER UNIDADES NO CACHE, BUSCA
     if (!unidadesCache || unidadesCache.length === 0) {
       const res = await fetch(`/unidades/${empresa}`);
       unidadesCache = await res.json();
     }
 
+    const unidadesPermitidas = unidadesEmpresa;
+
+    const possuiTodas = unidadesPermitidas?.some(
+      u => u.cod_unidade === "TODAS"
+    );
+
+    let unidadesParaMostrar;
+
+    if (possuiTodas) {
+      unidadesParaMostrar = unidadesCache;
+
+    } else {
+      unidadesParaMostrar = unidadesCache.filter(u =>
+        unidadesPermitidas.some(
+          userU => String(userU.cod_unidade) === String(u.codigo)
+        )
+      );
+    }
+
     unidadeDestino.innerHTML = `<option value="">Selecione...</option>`;
 
-    unidadesCache.forEach(u => {
-      const opt = document.createElement("option");
+    unidadesParaMostrar.forEach(u => {
 
+      const opt = document.createElement("option");
       opt.value = u.codigo;
       opt.textContent = u.nome;
 
       unidadeDestino.appendChild(opt);
     });
+  }
 
-  } catch (erro) {
+  catch (erro) {
     console.error("Erro ao carregar unidades:", erro);
   }
 }
@@ -226,7 +236,7 @@ document.getElementById("unidadeDestino").addEventListener("change", () => {
 
 // FUNÇÃO PARA CARREGAR OS SETORES DE UMA UNIDADE
 async function carregarSetoresDaUnidade() {
-  const empresa = usuarioLogado.cod_empresa;
+  const empresa = codigoEmpresa;
   const unidade = getUnidadeSelecionada();
 
   if (!empresa || !unidade) {
@@ -260,7 +270,7 @@ async function carregarSetoresDaUnidade() {
 document.getElementById("setorDestino").addEventListener("change", carregarCargosDoSetor);
 
 async function carregarCargosDoSetor() {
-  const empresa = usuarioLogado.cod_empresa;
+  const empresa = codigoEmpresa;
   const unidade = getUnidadeSelecionada();
 
   const setorDestino = document.getElementById("setorDestino");
@@ -452,6 +462,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const novoSetorWrapper = document.getElementById("novoSetorWrapper");
   const novoSetor = document.getElementById("novoSetor");
 
+  const solicitarNovaUnidade = document.getElementById("solicitarNovaUnidade");
+  const divNovaUnidade = document.getElementById("divNovaUnidade");
+  const unidadeDestino = document.getElementById("unidadeDestino");
+
+  // CAMPOS DA NOVA UNIDADE
+  const camposNovaUnidade = [
+    "nome_fantasia",
+    "razao_social",
+    "cnpj",
+    "cnae",
+    "cep",
+    "rua",
+    "numero",
+    "bairro",
+    "estado",
+    "email"
+  ].map(id => document.getElementById(id));
+
+  const radiosTipoFaturamento = document.querySelectorAll('input[name="tipo_faturamento"]');
+
   // MOSTRA / OCULTAR SEÇÃO DE MUDANÇA DE FUNÇÃO
   tipoExame.addEventListener("change", () => {
     if (tipoExame.value === "MUDANCA_RISCOS_OCUPACIONAIS") {
@@ -467,12 +497,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       solicitarNovaFuncao.checked = false;
       solicitarNovoSetor.checked = false;
+      solicitarNovaUnidade.checked = false;
 
       novaFuncaoWrapper.style.display = "none";
       novoSetorWrapper.style.display = "none";
+      divNovaUnidade.style.display = "none";
 
       funcaoDestino.disabled = false;
       setorDestino.disabled = false;
+      unidadeDestino.disabled = false;
 
       novaFuncao.required = false;
       novoSetor.required = false;
@@ -482,7 +515,41 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // MOSTAR INPUT DE NOVA FUNÇÃO E DESCRIÇÃO DE ATIVIDADE E COLOCAR REQUIRED
+  // MOSTRAR / OCULTAR NOVA UNIDADE
+  solicitarNovaUnidade.addEventListener("change", function () {
+    if (this.checked) {
+      divNovaUnidade.style.display = "block";
+
+      unidadeDestino.value = "";
+      unidadeDestino.disabled = true;
+      unidadeDestino.required = false;
+
+      camposNovaUnidade.forEach(campo => {
+        if (campo) campo.required = true;
+      });
+
+      radiosTipoFaturamento.forEach(radio => radio.required = true);
+    } else {
+      divNovaUnidade.style.display = "none";
+
+      unidadeDestino.disabled = false;
+      unidadeDestino.required = true;
+
+      camposNovaUnidade.forEach(campo => {
+        if (campo) {
+          campo.required = false;
+          campo.value = "";
+        }
+      });
+
+      radiosTipoFaturamento.forEach(radio => {
+        radio.required = false;
+        radio.checked = false;
+      });
+    }
+  });
+
+  // MOSTRAR INPUT DE NOVA FUNÇÃO
   solicitarNovaFuncao.addEventListener("change", function () {
     if (this.checked) {
       novaFuncaoWrapper.style.display = "block";
@@ -506,7 +573,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // MOSTRAR INPUT DE NOVO SETOR E COLOCAR REQUIRED
+  // MOSTRAR INPUT DE NOVO SETOR
   solicitarNovoSetor.addEventListener("change", function () {
     if (this.checked) {
       novoSetorWrapper.style.display = "block";
@@ -619,13 +686,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // FUNÇÃO PARA CARREGAR OS PRESTADORES VINCULADOS À EMPRESA LOGADA
 async function carregarPrestadores() {
-  if (!empresaCodigo) return;
+  if (!codigoEmpresa) return;
 
   const select = document.getElementById("nomeClinica");
   if (!select) return;
 
   try {
-    await fetch(`/prestadores/${empresaCodigo}`);
+    await fetch(`/prestadores/${codigoEmpresa}`);
 
     await listarPrestadores();
 
@@ -634,9 +701,9 @@ async function carregarPrestadores() {
   }
 }
 
-// FUNÇÃO PARA LISTAR ESSES PRESTADORES
+// LISTAR OS PRESTADORES
 async function listarPrestadores() {
-  const res = await fetch(`/prestadores/${empresaCodigo}`);
+  const res = await fetch(`/prestadores/${codigoEmpresa}`);
   const prestadoresBase = await res.json();
 
   const detalhes = [];
@@ -651,22 +718,22 @@ async function listarPrestadores() {
 
   prestadoresCache = detalhes;
 
-  console.table(
-    prestadoresCache.map(p => ({
-      codigo: p.codigo,
-      estado: p.estado,
-      cidade: p.cidade,
-      nivel: p.nivelClassificacao
-    }))
-  );
+  // console.table(
+  //   prestadoresCache.map(p => ({
+  //     codigo: p.codigo,
+  //     estado: p.estado,
+  //     cidade: p.cidade,
+  //     nivel: p.nivelClassificacao
+  //   }))
+  // );
 
   popularSelectEstados(extrairEstados(prestadoresCache));
 }
 
-// FUNÇÃO PARA PEGAR OS DETALHES DESSES PRESTADORES
+// PEGAR OS DETALHES DO PRESTADOR
 async function buscarDetalhesPrestador(codigo) {
   try {
-    const res = await fetch(`/prestador/${empresaCodigo}/${codigo}`);
+    const res = await fetch(`/prestador/${codigoEmpresa}/${codigo}`);
     if (!res.ok) throw new Error();
 
     const dados = await res.json();
@@ -692,7 +759,7 @@ function extrairEstados(prestadores) {
   )].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 }
 
-// FUNÇÃO PARA POPULAR O SELECT DE ESTADOS
+// POPULAR O SELECT DE ESTADOS
 function popularSelectEstados(estados) {
   const select = document.getElementById("estadoClinica");
   if (!select) return;
@@ -754,6 +821,7 @@ document.getElementById("cidadeClinica").addEventListener("change", function () 
     const opt = document.createElement("option");
     opt.value = p.codigo;
     opt.textContent = p.nome;
+    opt.dataset.nome = p.nome;
     selectClinica.appendChild(opt);
   });
 });
@@ -787,8 +855,13 @@ document.getElementById("solicitarCredenciamento").addEventListener("change", fu
 
 // FUNÇÃO PARA DEFINIR O STATUS INICIAL
 function definirStatusInicial(s) {
+  const precisaUnidade = s.solicitar_nova_unidade === true;
   const precisaFuncaoSetor = s.solicitar_nova_funcao === true || s.solicitar_novo_setor === true;
   const precisaCredenciamento = s.solicitar_credenciamento === true;
+
+  if (precisaUnidade) {
+    return "PENDENTE_UNIDADE";
+  }
 
   if (precisaFuncaoSetor) {
     return "PENDENTE_SC";
@@ -800,6 +873,61 @@ function definirStatusInicial(s) {
 
   return "PENDENTE";
 }
+
+const inputCep = document.getElementById("cep");
+
+inputCep.addEventListener("input", function () {
+
+  let valor = this.value.replace(/\D/g, ""); // remove tudo que não é número
+
+  if (valor.length > 5) {
+    valor = valor.slice(0, 5) + "-" + valor.slice(5, 8);
+  }
+
+  this.value = valor;
+
+});
+
+// CHECKBOX DE NOVA UNIDADE TORNA OBRIGATORIO A CRIAÇÃO DE NOVO SETOR/CARGO
+document.addEventListener("DOMContentLoaded", () => {
+  const chkNovaUnidade = document.getElementById("solicitarNovaUnidade");
+
+  const selectSetor = document.getElementById("setorDestino");
+  const selectCargo = document.getElementById("funcaoDestino");
+
+  function bloquearSelect(e) {
+    if (chkNovaUnidade.checked) {
+      e.preventDefault();
+      e.stopPropagation();
+      alert("Para criação de nova unidade é necessário criar novo setor e função.");
+      return false;
+    }
+  }
+
+  // BLOQUEAR INTERAÇÕES
+  selectSetor.addEventListener("mousedown", bloquearSelect);
+  selectCargo.addEventListener("mousedown", bloquearSelect);
+  selectSetor.addEventListener("keydown", bloquearSelect);
+  selectCargo.addEventListener("keydown", bloquearSelect);
+
+  // LIMPAR OS CAMPOS DE SETOR E CARGO SE ESTIVER SELECIONADOS
+  chkNovaUnidade.addEventListener("change", () => {
+    if (chkNovaUnidade.checked) {
+      selectSetor.value = "";
+      selectCargo.value = "";
+    }
+  });
+
+  // VISUAL DE BLOQUEIO
+  function atualizarVisual() {
+    const bloqueado = chkNovaUnidade.checked;
+    selectSetor.style.cursor = bloqueado ? "not-allowed" : "pointer";
+    selectCargo.style.cursor = bloqueado ? "not-allowed" : "pointer";
+  }
+
+  chkNovaUnidade.addEventListener("change", atualizarVisual);
+  atualizarVisual();
+});
 
 // CHECKBOX DE NOVO SETOR TORNA OBRIGATORIO A CRIAÇÃO DE NOVO CARGO
 document.addEventListener("DOMContentLoaded", () => {
@@ -892,30 +1020,40 @@ function adicionarEmail() {
 
 // FUNÇÃO PARA ENVIAR EMAIL NA HORA DA SOLICITAÇÃO
 async function enviarEmailSolicitacao(dados) {
-  let destinatario = null;
+  let destinatario = "";
   let assunto = "";
   let mensagem = "";
 
-  const precisaFuncaoSetor = dados.solicitar_nova_funcao === true || dados.solicitar_novo_setor === true;
-  const precisaCredenciamento = dados.solicitar_credenciamento === true;
-
-  // PRIORIDADE: FUNÇÃO / SETOR
-  if (precisaFuncaoSetor) {
-    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
-    assunto = "Solicitação de criação de setor/função";
+  // EMAIL PARA CRIAÇÃO DE UNIDADE
+  if (dados.solicitar_nova_unidade === true) {
+    //destinatario = "clientes@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
+    assunto = "Solicitação de criação de nova unidade";
 
     mensagem = `
-      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
+      Uma solicitação para criação de unidade para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
       Gentileza dar prosseguimento à solicitação.
     `;
   }
 
-  // SOMENTE SE NÃO TIVER FUNÇÃO/SETOR
-  else if (precisaCredenciamento) {
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+  // EMAIL PARA CRIAÇÃO DE NOVO SETOR/CARGO
+  else if (dados.solicitar_novo_setor === true || dados.solicitar_nova_funcao === true) {
+    //destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
+    assunto = "Solicitação de criação de setor/função";
+
+    mensagem = `
+      Uma solicitação para criação de setor/função para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
+      
+      Gentileza dar prosseguimento à solicitação.
+    `;
+  }
+
+  // EMAIL PARA CREDENCIAMENTO
+  else if (dados.solicitar_credenciamento === true) {
+    //destinatario = "contratos@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de credenciamento";
 
     mensagem = `
@@ -923,10 +1061,6 @@ async function enviarEmailSolicitacao(dados) {
       
       Gentileza dar prosseguimento à solicitação.
     `;
-  }
-
-  if (!destinatario) {
-    return;
   }
 
   await fetch("/enviar-email-solicitacao", {
@@ -944,6 +1078,18 @@ async function enviarEmailSolicitacao(dados) {
 document.getElementById("formCadastro").addEventListener("submit", async function (e) {
   e.preventDefault();
 
+  const nomeFantasia = document.getElementById("nome_fantasia")?.value || null;
+  const razaoSocial = document.getElementById("razao_social")?.value || null;
+  const cnpj = document.getElementById("cnpj")?.value || null;
+  const cnae = document.getElementById("cnae")?.value || null;
+  const cep = document.getElementById("cep")?.value || null;
+  const rua = document.getElementById("rua")?.value || null;
+  const numero = document.getElementById("numero")?.value || null;
+  const bairro = document.getElementById("bairro")?.value || null;
+  const estado = document.getElementById("estado")?.value || null;
+  const email = document.getElementById("email")?.value || null;
+  const tipoFaturamento = document.querySelector('input[name="tipo_faturamento"]:checked')?.value || null;
+  const solicitarNovaUnidade = document.getElementById("solicitarNovaUnidade")?.checked === true;
   const unidadeDestino = document.getElementById("unidadeDestino");
   const solicitarNovaFuncao = document.getElementById("solicitarNovaFuncao")?.checked === true;
   const solicitarNovoSetor = document.getElementById("solicitarNovoSetor")?.checked === true;
@@ -973,7 +1119,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     cpf: document.getElementById("cpf").value,
     matricula: document.getElementById("matricula").value || null,
     data_admissao: document.getElementById("dataAdmissao").value,
-    cod_empresa: usuarioLogado.cod_empresa,
+    cod_empresa: codigoEmpresa,
     nome_empresa: document.getElementById("empresaNome").value,
     cod_unidade: document.getElementById("unidadeCodigo").value,
     nome_unidade: document.getElementById("unidadeNome").value,
@@ -987,6 +1133,18 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     data_exame: document.getElementById("dataExame").value || null,
     unidades_extras: unidades,
     unidade_destino: unidadeDestino.value ? unidadeDestino.options[unidadeDestino.selectedIndex].text : null,
+    solicitar_nova_unidade: solicitarNovaUnidade,
+    nome_fantasia: solicitarNovaUnidade ? nomeFantasia : null,
+    razao_social: solicitarNovaUnidade ? razaoSocial : null,
+    cnpj: solicitarNovaUnidade ? cnpj : null,
+    cnae: solicitarNovaUnidade ? cnae : null,
+    cep: solicitarNovaUnidade ? cep : null,
+    rua: solicitarNovaUnidade ? rua : null,
+    numero: solicitarNovaUnidade ? numero : null,
+    bairro: solicitarNovaUnidade ? bairro : null,
+    estado: solicitarNovaUnidade ? estado : null,
+    tipo_faturamento: solicitarNovaUnidade ? tipoFaturamento : null,
+    email: solicitarNovaUnidade ? email : null,
     setor_destino: setorDestino.value ? setorDestino.options[setorDestino.selectedIndex].text : null,
     solicitar_novo_setor: solicitarNovoSetor,
     nome_novo_setor: solicitarNovoSetor ? nomeNovoSetor : null,
@@ -1043,10 +1201,3 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     alert("Erro ao enviar solicitação");
   }
 });
-
-// FUNÇÃO DE LOGOUT
-function logout() {
-  sessionStorage.removeItem("usuario");
-  sessionStorage.removeItem("empresaCodigo");
-  window.location.href = "login.html";
-}

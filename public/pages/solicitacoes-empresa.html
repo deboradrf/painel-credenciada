@@ -45,8 +45,7 @@
             </div>
 
             <div class="dropdown profile-wrapper">
-                <button class="profile-trigger dropdown-toggle" data-bs-toggle="dropdown"
-                    aria-label="Abrir menu do perfil">
+                <button class="profile-trigger dropdown-toggle" data-bs-toggle="dropdown">
                     <div class="avatar-circle">
                         <i id="avatarIcon" class="fa-solid"></i>
                     </div>
@@ -70,9 +69,9 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
-                                <i class="fa-solid fa-bell"></i>
-                                Notificações
+                            <a href="permissoes.html">
+                                <i class="fa-solid fa-unlock"></i>
+                                Permissões
                             </a>
                         </li>
                         <li onclick="logout()">
@@ -192,11 +191,6 @@
         <div class="div-space"></div>
 
         <section class="extra-section">
-            <!-- <div class="socials">
-                <a href="https://www.instagram.com/salubritasso/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://salubrita.com.br/" target="_blank"><i class="fa-solid fa-globe"></i></a>
-                <a href="https://wa.me/553131669006" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-            </div> -->
             <p>© 2026 • Salubritá Saúde e Segurança no Trabalho</p>
         </section>
     </div>
@@ -363,7 +357,7 @@
                                 <div class="detail-label">
                                     <span>Unidade do Funcionário</span>
                                 </div>
-                                <input id="editCadNomeUnidade" class="detail-input" disabled/>
+                                <input id="editCadNomeUnidade" class="detail-input" disabled />
                             </div>
                         </div>
 
@@ -482,7 +476,7 @@
                                 <div class="detail-label">
                                     <span>Setor do Funcionário</span>
                                 </div>
-                                <input id="editCadNomeSetor" class="detail-input" disabled/>
+                                <input id="editCadNomeSetor" class="detail-input" disabled />
                             </div>
                         </div>
 
@@ -500,7 +494,7 @@
                                 <div class="detail-label">
                                     <span>Cargo do Funcionário</span>
                                 </div>
-                                <input id="editCadNomeCargo" class="detail-input" disabled/>
+                                <input id="editCadNomeCargo" class="detail-input" disabled />
                             </div>
                         </div>
 
@@ -518,7 +512,7 @@
                                 <div class="detail-label">
                                     <span>Descrição de Atividade</span>
                                 </div>
-                                <input id="editCadDescricaoAtividade" class="detail-input" maxlength="999"/>
+                                <input id="editCadDescricaoAtividade" class="detail-input" maxlength="999" />
                             </div>
                         </div>
 
@@ -601,7 +595,7 @@
                                         <div class="detail-label">
                                             <span>Estado da Clínica</span>
                                         </div>
-                                        <input id="editCadEstadoClinica" class="detail-input" disabled/>
+                                        <input id="editCadEstadoClinica" class="detail-input" disabled />
                                     </div>
                                 </div>
 
@@ -610,7 +604,7 @@
                                         <div class="detail-label">
                                             <span>Cidade da Clínica</span>
                                         </div>
-                                        <input id="editCadCidadeClinica" class="detail-input" disabled/>
+                                        <input id="editCadCidadeClinica" class="detail-input" disabled />
                                     </div>
                                 </div>
 
@@ -619,7 +613,7 @@
                                         <div class="detail-label">
                                             <span>Nome da Clínica</span>
                                         </div>
-                                        <input id="editCadNomeClinica" class="detail-input" disabled/>
+                                        <input id="editCadNomeClinica" class="detail-input" disabled />
                                     </div>
                                 </div>
                             </div>
@@ -816,7 +810,7 @@
                             </div>
                         </div>
 
-                        <div class="col-6" id="divUnidadeDestino">
+                        <div class="col-12" id="divUnidadeDestino">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Unidade onde irá atuar</span>
@@ -825,12 +819,122 @@
                             </div>
                         </div>
 
+                        <div class="col-6" id="divExameNomeFantasia">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Nome Fantasia</span>
+                                </div>
+                                <input id="editExameNomeFantasia" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameRazaoSocial">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Razão Social</span>
+                                </div>
+                                <input id="editExameRazaoSocial" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameCnpj">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>CNPJ</span>
+                                </div>
+                                <input id="editExameCnpj" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameCnae">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>CNAE</span>
+                                </div>
+                                <input id="editExameCnae" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameCep">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>CEP</span>
+                                </div>
+                                <input id="editExameCep" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameRua">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Rua</span>
+                                </div>
+                                <input id="editExameRua" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameNumero">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Número</span>
+                                </div>
+                                <input id="editExameNumero" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameBairro">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Bairro</span>
+                                </div>
+                                <input id="editExameBairro" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="divExameEstado">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Estado</span>
+                                </div>
+                                <input id="editExameEstado" class="detail-input" />
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameFaturamentoJunto">
+                            <div class="form-check my-2">
+                                <input class="form-check-input" type="radio" name="exame_tipo_faturamento"
+                                    id="exame_faturamento_junto" value="JUNTO">
+                                <label class="form-check-label" for="exame_faturamento_junto">
+                                    Essa unidade será faturada junto com a empresa principal, em uma única nota
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-6" id="divExameFaturamentoSeparado">
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="radio" name="exame_tipo_faturamento"
+                                    id="exame_faturamento_separado" value="SEPARADO">
+                                <label class="form-check-label" for="exame_faturamento_separado">
+                                    Essa unidade será faturada separadamente da empresa principal, com uma nota separada
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="divExameEmail">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>E-mail</span>
+                                </div>
+                                <input id="editExameEmail" class="detail-input" />
+                            </div>
+                        </div>
+
                         <div class="col-6" id="divExameSetorDestino">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Setor que irá atuar</span>
                                 </div>
-                                <input id="editExameSetorDestino" class="detail-input" />
+                                <input id="editExameSetorDestino" class="detail-input" disabled />
                             </div>
                         </div>
 
@@ -848,7 +952,7 @@
                                 <div class="detail-label">
                                     <span>Função que irá exercer</span>
                                 </div>
-                                <input id="editExameFuncaoDestino" class="detail-input" />
+                                <input id="editExameFuncaoDestino" class="detail-input" disabled />
                             </div>
                         </div>
 
@@ -861,7 +965,7 @@
                             </div>
                         </div>
 
-                        <div class="col-6" id="divExameDescricaoAtividade">
+                        <div class="col-12" id="divExameDescricaoAtividade">
                             <div class="detail-item">
                                 <div class="detail-label">
                                     <span>Descrição de Atividade</span>
@@ -913,7 +1017,7 @@
                                         <div class="detail-label">
                                             <span>Estado da Clínica</span>
                                         </div>
-                                        <input id="editExameEstadoClinica" class="detail-input" disabled/>
+                                        <input id="editExameEstadoClinica" class="detail-input" disabled />
                                     </div>
                                 </div>
 
@@ -922,7 +1026,7 @@
                                         <div class="detail-label">
                                             <span>Cidade da Clínica</span>
                                         </div>
-                                        <input id="editExameCidadeClinica" class="detail-input" disabled/>
+                                        <input id="editExameCidadeClinica" class="detail-input" disabled />
                                     </div>
                                 </div>
 
@@ -931,7 +1035,7 @@
                                         <div class="detail-label">
                                             <span>Nome da Clínica</span>
                                         </div>
-                                        <input id="editExameNomeClinica" class="detail-input" disabled/>
+                                        <input id="editExameNomeClinica" class="detail-input" disabled />
                                     </div>
                                 </div>
                             </div>
@@ -987,7 +1091,26 @@
         </div>
     </div>
 
+    <!-- MODAL VER CONSULTA -->
+    <div class="modal fade" id="modalConsulta" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Detalhes da Consulta</h3>
+                    <a data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
+                    </a>
+                </div>
+
+                <div class="modal-body">
+                    <p id="obsConsulta"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../script/session.js"></script>
     <script src="../script/solicitacoes-empresa.js"></script>
 </body>
 

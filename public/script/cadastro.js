@@ -56,14 +56,49 @@ function copiarSenha() {
 }
 
 // LISTENER PARA QUANDO SELECIONAR O PERFIL
-document.getElementById("perfil").addEventListener("change", function () {
+document.getElementById("perfil").addEventListener("change", async function () {
     const perfil = this.value;
     const selectEmpresa = document.getElementById("empresa");
+    const empresaGroup = document.getElementById("empresaGroup");
+    const selectsUnidade = document.querySelectorAll(".unidade-select");
+    const btnAddUnidade = document.getElementById("btnAddUnidade");
 
-    if (perfil === "EMPRESA" || perfil === "CREDENCIADA") {
-        carregarEmpresas(perfil);
-    } else {
+    if (perfil === "ADMINISTRADOR") {
+        // Mostrar campos de empresa e unidade
+        empresaGroup.style.display = "block";
+
+        // Empresa fixo TODAS
+        selectEmpresa.innerHTML = '<option value="TODAS">TODAS</option>';
+        selectEmpresa.value = "TODAS";
         selectEmpresa.disabled = true;
+
+        // Unidades fixo TODAS
+        selectsUnidade.forEach(select => {
+            select.innerHTML = '<option value="TODAS">TODAS</option>';
+            select.value = "TODAS";
+            select.disabled = true;
+        });
+
+        // Esconder botão de adicionar unidade
+        btnAddUnidade.style.display = "none";
+    } else if (perfil === "EMPRESA" || perfil === "CREDENCIADA") {
+        // Mostrar campo empresa normalmente
+        empresaGroup.style.display = "block";
+        selectEmpresa.required = true;
+        selectEmpresa.disabled = false;
+        carregarEmpresas(perfil);
+
+        // Unidades habilitadas, botão visível após carregar unidades
+        selectsUnidade.forEach(select => {
+            select.disabled = false;
+            select.innerHTML = '<option value="">Selecione...</option>';
+        });
+        btnAddUnidade.style.display = "inline-block";
+    } else {
+        empresaGroup.style.display = "none";
+        selectEmpresa.disabled = true;
+        selectsUnidade.forEach(select => select.disabled = true);
+        btnAddUnidade.style.display = "none";
     }
 });
 
@@ -90,8 +125,14 @@ async function carregarEmpresas(perfil) {
 
         select.innerHTML = '<option value="">Selecione...</option>';
 
+        // Adiciona a opção "TODAS" no topo
+        const todasOption = document.createElement("option");
+        todasOption.value = "TODAS";
+        todasOption.textContent = "TODAS";
+        select.appendChild(todasOption);
+
         if (empresas.length === 0) {
-            select.innerHTML = '<option value="">Nenhuma empresa disponível</option>';
+            select.innerHTML += '<option value="">Nenhuma empresa disponível</option>';
             select.disabled = true;
             return;
         }
@@ -111,49 +152,135 @@ async function carregarEmpresas(perfil) {
     }
 }
 
-// document.getElementById("empresa").addEventListener("change", function () {
-//     const empresaCodigo = this.value;
-//     carregarUnidades(empresaCodigo);
-// });
+// Chamar sempre que empresa mudar
+document.getElementById("empresa").addEventListener("change", async function () {
+    const empresaCodigo = this.value;
 
-// // FUNÇÃO PARA CARREGAR UNIDADES DA EMPRESA SELECIONADA
-// async function carregarUnidades(empresaCodigo) {
-//     const select = document.getElementById("unidade");
-//     if (!select) return;
+    const selects = document.querySelectorAll(".unidade-select");
 
-//     if (!empresaCodigo) {
-//         select.disabled = true;
-//         return;
-//     }
+    if (empresaCodigo === "TODAS") {
+        // define TODAS nas unidades
+        selects.forEach(select => {
+            select.innerHTML = "";
+            const opt = document.createElement("option");
+            opt.value = "TODAS";
+            opt.textContent = "TODAS";
+            select.appendChild(opt);
+            select.value = "TODAS";
+            select.disabled = true; // desabilita para evitar mudanças
+        });
+    } else {
+        // empresa específica
+        selects.forEach(select => {
+            select.disabled = false;
+            select.innerHTML = '<option value="">Selecione...</option>';
+        });
+        await carregarUnidades(empresaCodigo);
+    }
 
-//     select.disabled = true;
+    atualizarBotaoAddUnidade(); // atualiza visibilidade do botão
+});
 
-//     try {
-//         const res = await fetch(`/unidades/${empresaCodigo}`);
-//         const unidades = await res.json();
+// Chamar sempre que uma unidade mudar (se você tiver listener para cada select)
+document.querySelectorAll(".unidade-select").forEach(select => {
+    select.addEventListener("change", atualizarBotaoAddUnidade);
+});
 
-//         if (!unidades || unidades.length === 0) {
-//             select.innerHTML = '<option value="">Nenhuma unidade nesta empresa</option>';
-//             select.disabled = true;
-//             return;
-//         }
+function atualizarBotaoAddUnidade() {
+    const selects = document.querySelectorAll(".unidade-select");
+    const btnAddUnidade = document.getElementById("btnAddUnidade");
 
-//         select.innerHTML = '<option value="">Selecione...</option>';
+    // Verifica se existe pelo menos uma unidade válida
+    const possuiUnidadeValida = [...selects].some(s => s.options.length > 1 && s.value !== "TODAS" && !s.disabled);
 
-//         unidades.forEach(u => {
-//             const opt = document.createElement("option");
-//             opt.value = u.codigo;
-//             opt.textContent = u.nome;
-//             opt.dataset.nome = u.nome;
-//             select.appendChild(opt);
-//         });
+    btnAddUnidade.style.display = possuiUnidadeValida ? "inline-block" : "none";
+}
 
-//         select.disabled = false;
-//     } catch (err) {
-//         console.error("Erro ao carregar unidades:", err);
-//         select.innerHTML = '<option value="">Erro ao carregar</option>';
-//     }
-// }
+// FUNÇÃO PARA CARREGAR UNIDADES DA EMPRESA SELECIONADA
+async function carregarUnidades(empresaCodigo) {
+    const selects = document.querySelectorAll(".unidade-select");
+    const btnAddUnidade = document.getElementById("btnAddUnidade");
+
+    if (!empresaCodigo) return;
+
+    try {
+        // Se empresa "TODAS" estiver selecionada, buscar todas as unidades
+        let url = empresaCodigo === "TODAS" ? `/unidades` : `/unidades/${empresaCodigo}`;
+        const res = await fetch(url);
+        const unidades = await res.json();
+
+        selects.forEach(select => {
+            select.innerHTML = ""; // limpa opções
+
+            if (!unidades || unidades.length === 0) {
+                // Nenhuma unidade disponível
+                const opt = document.createElement("option");
+                opt.value = "";
+                opt.textContent = "Nenhuma unidade disponível";
+                select.appendChild(opt);
+                select.disabled = true; // desabilita select
+            } else {
+                select.disabled = false;
+
+                // Adiciona opção "Selecione..."
+                const placeholder = document.createElement("option");
+                placeholder.value = "";
+                placeholder.textContent = "Selecione...";
+                select.appendChild(placeholder);
+
+                // Adiciona a opção "Todas"
+                const todasOption = document.createElement("option");
+                todasOption.value = "TODAS";
+                todasOption.textContent = "TODAS";
+                select.appendChild(todasOption);
+
+                // Adiciona as unidades normais
+                unidades.forEach(u => {
+                    const opt = document.createElement("option");
+                    opt.value = u.codigo;
+                    opt.textContent = u.nome;
+                    opt.dataset.nome = u.nome;
+                    select.appendChild(opt);
+                });
+            }
+        });
+
+        // Mostrar ou esconder botão de adicionar unidade
+        if (!unidades || unidades.length === 0 || empresaCodigo === "TODAS") {
+            btnAddUnidade.style.display = "none";
+        } else {
+            btnAddUnidade.style.display = "inline-block";
+        }
+
+    } catch (err) {
+        console.error("Erro ao carregar unidades:", err);
+        selects.forEach(select => {
+            select.innerHTML = '<option value="">Erro ao carregar unidades</option>';
+            select.disabled = true;
+        });
+        btnAddUnidade.style.display = "none"; // esconde botão em caso de erro
+    }
+}
+
+const MAX_UNIDADES = 3;
+
+// Botão adicionar unidade
+document.getElementById("btnAddUnidade").addEventListener("click", () => {
+    const container = document.getElementById("unidadesContainer");
+    const selects = container.querySelectorAll(".unidade-select");
+
+    if (selects.length >= MAX_UNIDADES) {
+        alert("Máximo de 3 unidades permitido");
+        return;
+    }
+
+    const novo = selects[0].parentElement.cloneNode(true);
+
+    const select = novo.querySelector("select");
+    select.value = "";
+
+    container.appendChild(novo);
+});
 
 // CAMPO DE NOME SEMPRE MAIÚSCULO E SEM CARACTERES ESPECIAIS
 const nomeInput = document.getElementById("nome");
@@ -177,8 +304,31 @@ nomeInput.addEventListener("input", function () {
 document.getElementById("cadastroForm").addEventListener("submit", async e => {
     e.preventDefault();
 
-    const empresaNome = empresa.options[empresa.selectedIndex]?.text || null;
-    // const unidadeNome = unidade.options[unidade.selectedIndex]?.text || null;
+    const empresaSelect = document.getElementById("empresa");
+    const selectsUnidade = document.querySelectorAll(".unidade-select");
+
+    let empresaNome = empresaSelect.options[empresaSelect.selectedIndex]?.text || null;
+    let unidades = [];
+
+    if (perfil.value === "ADMINISTRADOR") {
+        // Para administrador: sempre usar TODAS
+        empresaNome = "TODAS";
+        unidades = [{ cod_unidade: "TODAS", nome_unidade: "TODAS" }];
+    } else {
+        // ⚠ Verifica se existe pelo menos uma unidade válida
+        const possuiUnidadeValida = [...selectsUnidade].some(s => !s.disabled && s.options.length > 1);
+        if (!possuiUnidadeValida) {
+            alert("Não é possível cadastrar: a empresa selecionada não possui unidades.");
+            return; // bloqueia envio
+        }
+
+        unidades = [...selectsUnidade]
+            .filter(s => s.value)
+            .map(s => ({
+                cod_unidade: s.value,
+                nome_unidade: s.options[s.selectedIndex].text
+            }));
+    }
 
     const body = {
         nome: nome.value,
@@ -186,10 +336,9 @@ document.getElementById("cadastroForm").addEventListener("submit", async e => {
         email: email.value,
         senha: senha.value,
         perfil: perfil.value,
-        cod_empresa: empresa.value,
+        cod_empresa: empresaSelect.value,
         nome_empresa: empresaNome,
-        // cod_unidade: unidade.value,
-        // nome_unidade: unidadeNome
+        unidades
     };
 
     const res = await fetch(`/cadastro`, {

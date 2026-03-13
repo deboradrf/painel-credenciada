@@ -1,16 +1,8 @@
-// USUÁRIO LOGADO
-const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
-
-if (!usuarioLogado) {
-    alert("Sessão expirada. Faça login novamente.");
-    window.location.href = "login.html";
-}
+const usuarioLogado = getUsuario();
+const nomeEmpresa = getEmpresaNome();
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
-    const cardsEmpresa = document.querySelectorAll(".card-empresa");
-    const cardsCredenciada = document.querySelectorAll(".card-credenciada");
-
     const userNameDropdown = document.getElementById("userNameDropdown");
     const dropdownUserExtra = document.getElementById("dropdownUserExtra");
 
@@ -25,14 +17,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // EMPRESA
     dropdownUserExtra.innerHTML = `
-        <div class="company-name">${usuarioLogado.nome_empresa}</div>
+        <div class="company-name">
+            <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+        </div>
     `;
 
     // LÓGICA DOS PERFIS DE ACESSO
     if (usuarioLogado.perfil === "CREDENCIADA") {
-        cardsEmpresa.forEach(card => card.style.display = "none");
-        cardsCredenciada.forEach(card => card.style.display = "flex");
-
         avatarIcon.classList.add("fa-hospital");
         avatarIconDropdown.classList.add("fa-hospital");
 
@@ -41,14 +32,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (usuarioLogado.perfil === "EMPRESA") {
-        cardsEmpresa.forEach(card => card.style.display = "flex");
-        cardsCredenciada.forEach(card => card.style.display = "none");
-
         avatarIcon.classList.add("fa-city");
         avatarIconDropdown.classList.add("fa-city");
 
         avatarBtn.classList.add("empresa");
         avatarDrop.classList.add("empresa");
+    }
+
+    if (usuarioLogado.perfil === "ADMINISTRADOR") {
+        avatarIcon.classList.add("fa-users-gear");
+        avatarIconDropdown.classList.add("fa-users-gear");
+
+        avatarBtn.classList.add("administrador");
+        avatarDrop.classList.add("administrador");
     }
 
     // BLUR
@@ -73,10 +69,3 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 });
-
-// FUNÇÃO DE LOGOUT
-function logout() {
-    sessionStorage.removeItem("usuario");
-    sessionStorage.removeItem("empresaCodigo");
-    window.location.href = "login.html";
-}
