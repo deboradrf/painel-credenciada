@@ -460,81 +460,40 @@ app.post("/cadastro", async (req, res) => {
   } catch (err) {
 
     if (err.code === "23505") {
-
-      if (err.constraint === "usuarios_email_key") {
-        return res.status(400).json({ erro: "Email já cadastrado" });
-      }
-
-      if (err.constraint === "usuarios_cpf_key") {
-        return res.status(400).json({ erro: "CPF já cadastrado" });
-      }
-
-      return res.status(400).json({ erro: "Dados já cadastrados" });
+      return res.status(400).json({ erro: "CPF já cadastrado" });
     }
 
     console.error(err);
     res.status(500).json({ erro: "Erro ao cadastrar usuário" });
-
   }
 });
 
 // ROTA DE LOGIN DE USUÁRIO
-// app.post("/login", async (req, res) => {
-//   try {
-//     const { email, senha } = req.body;
-
-//     const { rows } = await pool.query(
-//       `
-//       SELECT
-//         id,
-//         nome,
-//         email,
-//         perfil,
-//         cod_empresa,
-//         nome_empresa,
-//         unidades
-//       FROM usuarios
-//       WHERE email = $1
-//         AND senha = $2
-//       `,
-//       [email, senha]
-//     );
-
-//     if (!rows.length) {
-//       return res.status(401).json({ erro: "Email ou senha inválidos" });
-//     }
-
-//     res.json(rows[0]);
-
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ erro: "Erro no login" });
-//   }
-// });
-
 app.post("/login", async (req, res) => {
   try {
-    const { email, senha } = req.body;
 
-    const usuario = await pool.query(
+    const { usuario, senha } = req.body;
+
+    const result = await pool.query(
       `
       SELECT
         id,
         nome,
         email,
+        cpf,
         perfil,
         cod_empresa,
         nome_empresa,
         unidades
       FROM usuarios
-      WHERE email = $1
+      WHERE (email = $1 OR cpf = $1)
       AND senha = $2
       `,
-      [email, senha]
+      [usuario, senha]
     );
 
-    if (!usuario.rows.length) {
-      return res.status(401).json({ erro: "Email ou senha inválidos" });
+    if (!result.rows.length) {
+      return res.status(401).json({ erro: "Usuário ou senha inválidos" });
     }
 
     const empresasExtras = await pool.query(
@@ -543,11 +502,11 @@ app.post("/login", async (req, res) => {
       FROM usuarios_empresas
       WHERE usuario_id = $1
       `,
-      [usuario.rows[0].id]
+      [result.rows[0].id]
     );
 
     res.json({
-      ...usuario.rows[0],
+      ...result.rows[0],
       empresas_extras: empresasExtras.rows
     });
 
