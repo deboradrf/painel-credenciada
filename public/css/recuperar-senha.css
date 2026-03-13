@@ -1,0 +1,194 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+.wave-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.wave-top svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.mascote-saude {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 200px;
+    height: auto;
+    z-index: 1000;
+}
+
+.mascote-engenharia {
+    position: fixed;
+    bottom: 0;
+    left: 5px;
+    width: 200px;
+    height: auto;
+    z-index: 1000;
+}
+
+.gradient-form {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #F1F1F1;
+}
+
+.login-container {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.recuperar-side {
+    padding: 2rem 2rem;
+}
+
+h3 {
+    position: relative;
+    font-weight: 600;
+    font-size: 19px;
+    color: #88A6BB;
+    margin-bottom: 50px;
+}
+
+h3::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #88A6BB;
+}
+
+.recuperar-side form p {
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.btn-recuperar {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: #88A6BB;
+    border: none;
+    color: #FFFFFF;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-recuperar:hover {
+    transform: translateY(-2px);
+}
+
+.required {
+    color: red;
+}
+
+.form-group {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    color: #000000;
+    font-weight: 400;
+    font-size: 15px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    border: 2px solid #8A94A6;
+    border-radius: 8px;
+    overflow: hidden;
+    align-items: stretch;
+}
+
+.input-icon {
+    background: #FFFFFF;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #8A94A6;
+    min-width: 55px;
+    position: relative;
+    border-right: none;
+}
+
+.input-icon::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    height: 80%;
+    width: 3%;
+    background-color: #8A94A6;
+}
+
+.input-wrapper input {
+    flex: 1;
+    padding: 12px 14px;
+    border: none;
+    background: transparent;
+    color: #000000;
+    font-size: 15px;
+}
+
+.input-wrapper input:focus {
+    outline: none;
+}
+
+.esqueceu-senha {
+    text-align: center;
+}
+
+.esqueceu-senha a {
+    color: #000000;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+    box-shadow: 0 0 0 1000px #fff inset !important;
+    -webkit-text-fill-color: #000 !important;
+    transition: background-color 9999s ease-in-out 0s;
+}
+
+@media (max-width: 1120px) {
+    .mascote-saude,
+    .mascote-engenharia {
+        width: 30%;
+        max-width: 150px;
+    }
+}
+
+@media (max-width: 785px) {
+    .mascote-saude,
+    .mascote-engenharia {
+        display: none;
+    }
+}

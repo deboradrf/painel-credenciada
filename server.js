@@ -516,6 +516,78 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// ROTA DE RECUPERAR SENHA
+app.post("/recuperar-senha", async (req, res) => {
+  const { email } = req.body;
+
+  try {
+
+    const { rows } = await pool.query(
+      "SELECT id FROM usuarios WHERE email = $1",
+      [email]
+    );
+
+    if (rows.length === 0) {
+      return res.json({
+        ok: true,
+        message: "Se o email existir, enviaremos uma nova senha."
+      });
+    }
+
+    const novaSenha = gerarSenha(10);
+
+    await pool.query(
+      "UPDATE usuarios SET senha = $1 WHERE id = $2",
+      [novaSenha, rows[0].id]
+    );
+
+    await enviarEmailRecuperacao(email, novaSenha);
+
+    res.json({
+      ok: true,
+      message: "Uma nova senha foi enviada para seu email."
+    });
+
+  } catch (err) {
+
+    console.error("Erro recuperação:", err);
+
+    res.status(500).json({
+      erro: "Erro ao recuperar senha"
+    });
+
+  }
+});
+
+// FUNÇÃO PARA GERAR SENHA ALEATÓRIA
+function gerarSenha(tamanho = 8) {
+  const caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let senha = "";
+
+  for (let i = 0; i < tamanho; i++) {
+    senha += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+  }
+
+  return senha;
+}
+
+async function enviarEmailRecuperacao(email, novaSenha) {
+  await transporter.sendMail({
+    from: "Portal Salubritá <naoresponda@salubrita.com.br>",
+    to: email,
+    subject: "Recuperação de senha - Portal Salubritá",
+    text: `
+      Sua senha foi redefinida.
+
+      Nova senha: ${novaSenha}
+
+      Recomendamos que você altere sua senha após acessar o sistema.
+
+      Caso você não tenha solicitado, ignore este email.
+    `
+  });
+}
+
 // FORMULÁRIO PARA SOLICITAR NOVO CADASTRO
 app.post("/novo-cadastro", async (req, res) => {
   const f = req.body;
