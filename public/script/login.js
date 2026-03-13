@@ -19,7 +19,7 @@ document.getElementById("loginForm").onsubmit = async e => {
 
     sessionStorage.setItem("usuario", JSON.stringify(data));
 
-    window.location.href = "/index.html";
+    window.location.href = "/pages/index.html";
 };
 
 // MOSTRAR / OCULTAR SENHA
