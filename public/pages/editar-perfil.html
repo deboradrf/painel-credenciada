@@ -90,79 +90,75 @@
         </div>
     </header>
 
-    <main>
-        <div class="container-fluid">
-            <div class="card">
-                <div class="row g-0">
-                    <div class="col-sm-4 user-profile">
-                        <div class="card-left">
-                            <div class="avatar-wrapper">
-                                <div class="profile-header">
-                                    <div class="avatar">
-                                        <i id="avatarIconCard" class="fa-solid"></i>
-                                    </div>
+    <main class="container-fluid">
+        <div class="card">
+            <div class="row g-0">
+                <div class="col-sm-4 user-profile">
+                    <div class="card-left">
+                        <div class="avatar-wrapper">
+                            <div class="profile-header">
+                                <div class="avatar">
+                                    <i id="avatarIconCard" class="fa-solid"></i>
                                 </div>
-                                <span class="dot d1"></span>
-                                <span class="dot-small-yellow d2"></span>
-                                <span class="dot d3"></span>
-                                <span class="dot-small d4"></span>
-                                <span class="dot-small-silver d5"></span>
-                                <span class="dot-silver d6"></span>
-                                <span class="dot-small d7"></span>
                             </div>
-                            <h6 id="perfilNome"></h6>
-                            <small id="perfilTipo"></small>
-                            <br>
-                            <a onclick="editarPerfil()"><i class="fa-solid fa-pen-to-square"
-                                    style="color: #F1AE33"></i></a>
+                            <span class="dot d1"></span>
+                            <span class="dot-small-yellow d2"></span>
+                            <span class="dot d3"></span>
+                            <span class="dot-small d4"></span>
+                            <span class="dot-small-silver d5"></span>
+                            <span class="dot-silver d6"></span>
+                            <span class="dot-small d7"></span>
                         </div>
+                        <h6 id="perfilNome"></h6>
+                        <small id="perfilTipo"></small>
+                        <br>
+                        <a onclick="editarPerfil()"><i class="fa-solid fa-pen-to-square" style="color: #F1AE33"></i></a>
                     </div>
-                    <div class="col-sm-8">
-                        <div class="card-right">
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <h3>Meus dados</h3>
-                                </div>
-                                <div class="card-btn d-none" id="acoesEdicao">
-                                    <button type="button" onclick="cancelarEdicao()">
-                                        Cancelar
-                                    </button>
-                                    <button type="button" onclick="salvarEdicao()">
-                                        Salvar
-                                    </button>
-                                </div>
+                </div>
+                <div class="col-sm-8">
+                    <div class="card-right">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <h3>Meus dados</h3>
                             </div>
-
-                            <div class="form-group">
-                                <label>CPF</label>
-                                <div class="input-wrapper">
-                                    <div class="input-icon">
-                                        <i class="fa-solid fa-address-card"></i>
-                                    </div>
-                                    <input type="text" id="cpf" readonly>
-                                </div>
+                            <div class="card-btn d-none" id="acoesEdicao">
+                                <button type="button" onclick="cancelarEdicao()">
+                                    Cancelar
+                                </button>
+                                <button type="button" onclick="salvarEdicao()">
+                                    Salvar
+                                </button>
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label>E-mail</label>
-                                <div class="input-wrapper">
-                                    <div class="input-icon">
-                                        <i class="fa-solid fa-envelope"></i>
-                                    </div>
-                                    <input type="email" id="email" readonly>
+                        <div class="form-group">
+                            <label>CPF</label>
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-address-card"></i>
                                 </div>
+                                <input type="text" id="cpf" readonly>
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label>Senha</label>
-                                <div class="input-wrapper input-senha">
-                                    <div class="input-icon">
-                                        <i class="fa-solid fa-lock"></i>
-                                    </div>
-                                    <input type="password" id="senha" readonly>
-                                    <i class="fa-solid fa-eye toggle-senha" id="toggleSenha"
-                                        onclick="toggleSenha()"></i>
+                        <div class="form-group">
+                            <label>E-mail</label>
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-envelope"></i>
                                 </div>
+                                <input type="email" id="email" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Senha</label>
+                            <div class="input-wrapper input-senha">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-lock"></i>
+                                </div>
+                                <input type="password" id="senha" readonly>
+                                <i class="fa-solid fa-eye toggle-senha" id="toggleSenha" onclick="toggleSenha()"></i>
                             </div>
                         </div>
                     </div>
@@ -170,30 +166,6 @@
             </div>
         </div>
     </main>
-
-    <div class="footer-container">
-        <footer class="footer">
-            <div class="footer-wrapper">
-                <div class="footer-svg">
-                    <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"
-                        preserveAspectRatio="none">
-                        <path
-                            d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z"
-                            opacity=".3" class="shape-fill"></path>
-                        <path
-                            d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"
-                            class="shape-fill"></path>
-                    </svg>
-                </div>
-            </div>
-        </footer>
-
-        <div class="div-space"></div>
-
-        <section class="extra-section">
-            <p>© 2026 • Salubritá Saúde e Segurança no Trabalho</p>
-        </section>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../script/session.js"></script>

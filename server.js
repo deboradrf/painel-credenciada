@@ -2743,8 +2743,20 @@ async function enviarEmailObservacaoConsulta({ email, nomeFuncionario, observaca
   });
 }
 
-const PORT = process.env.NODE_ENV === 'development' ? 3000 : (process.env.PORT || 3003);
+// const PORT = process.env.NODE_ENV === 'development' ? 3000 : (process.env.PORT || 3003);
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+// app.listen(PORT, () => {
+//   console.log(`Servidor rodando na porta ${PORT}`);
+// });
+
+const PORT = process.env.NODE_ENV === 'development'
+  ? 3000
+  : (process.env.PORT || 3003);
+
+const HOST = process.env.NODE_ENV === 'development'
+  ? "0.0.0.0"
+  : "127.0.0.1";
+
+app.listen(PORT, HOST, () => {
+  console.log(`Servidor rodando em ${HOST}:${PORT}`);
 });
