@@ -63,12 +63,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     </a>
                 </li>
             `;
-            });
+        });
     } else {
         empresasHTML += `
             <li class="text-truncate" style="max-width: 100%;">
                 <small class="dropdown-item text-muted d-block text-truncate" style="white-space: normal;">
-                    Não existe empresa para ser trocada
+                    Nenhuma empresa para ser trocada
                 </small>
             </li>
         `;

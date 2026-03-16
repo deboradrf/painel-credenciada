@@ -238,55 +238,55 @@ h3::after {
 
 #listaPermissoes {
     padding: 0px 30px;
+    justify-content: center;
+    gap: 4px;
 }
 
 .card-permissao {
-    width: 100%;
     background: #FFFFFF;
     border-radius: 10px;
-    border: 1px solid #E5E7EB;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-    overflow: hidden;
+    padding: 20px;
+    height: 100%;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+    border: 1px solid #F1F1F1;
 }
 
 .empresa-header {
     display: flex;
     align-items: center;
-    gap: 16px;
-    height: 100px;
-    padding: 10px 20px;
-    background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
-    color: #fff;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #F1F1F1;
+    height: 60px;
 }
 
 .empresa-header h6 {
-    font-size: 15px;
     font-weight: 600;
+    font-size: 16px;
+    margin: 0;
+    color: #0f172a;
 }
 
 .lista-unidades {
     list-style: none;
-    padding: 16px;
+    padding: 0;
+    margin: 0;
 }
 
 .unit-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
+    padding: 10px 12px;
     border-radius: 10px;
-    font-size: 15px;
-    color: #374151;
-    transition: all 0.2s ease;
-}
-
-.unit-item i {
-    color: #F1AE33;
-    font-size: 16px;
+    margin-bottom: 8px;
+    background: #f8fafc;
+    font-size: 14px;
+    color: #334155;
+    transition: 0.2s ease;
 }
 
 .unit-item:hover {
-    background: #F9FAFB;
+    background: #F1AE33;
+    padding-left: 16px;
 }
 
 .footer-container {

@@ -19,85 +19,80 @@
 <body>
     <div class="wave-top">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
-            <path fill="#FFFFFF" fill-opacity="0.5"
+            <path fill="#FFFFFF" fill-opacity="0.4"
                 d="M0,128L48,144C96,160,192,192,288,176C384,160,480,96,576,74.7C672,53,768,75,864,85.3C960,96,1056,96,1152,80C1248,64,1344,32,1392,16L1440,0L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z">
             </path>
         </svg>
     </div>
+
     <main class="gradient-form">
         <div class="container">
+            <div class="logo">
+                <img src="../images/logo.png" alt="logo">
+            </div>
             <img src="../images/mascote-saude.png" class="mascote-saude">
             <img src="../images/mascote-engenharia.png" class="mascote-engenharia">
-            <div class="row justify-content-center">
-                <div class="col-xl-5 col-lg-6 col-md-8">
-                    <div class="card login-container">
-                        <div class="card-body login-side">
-                            <div class="logo">
-                                <img src="../images/logo.png" alt="logo">
+            <div class="row">
+                <div class="col-lg-6 col-md-8">
+                    <div class="card-body login-side">
+                        <h3>Acesse sua conta</h3>
+
+                        <form id="loginForm">
+                            <div class="form-group">
+                                <label>Usuário <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-id-card"></i>
+                                    </div>
+                                    <input type="text" id="usuario" name="usuario" maxlength="14" required>
+                                </div>
                             </div>
 
-                            <h3>Acesse sua conta</h3>
-
-                            <form id="loginForm">
-                                <div class="form-group">
-                                    <label>Usuário <span class="required">*</span></label>
-                                    <div class="input-wrapper">
-                                        <div class="input-icon">
-                                            <i class="fa-solid fa-id-card"></i>
-                                        </div>
-                                        <input type="text" id="usuario" name="usuario" required>
+                            <div class="form-group">
+                                <label>Senha <span class="required">*</span></label>
+                                <div class="input-wrapper input-senha">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-lock"></i>
                                     </div>
+                                    <input type="password" id="senha" name="senha" required>
+                                    <i class="fa-solid fa-eye toggle-senha" id="toggleSenha"
+                                        onclick="toggleSenha()"></i>
                                 </div>
+                            </div>
 
-                                <div class="form-group">
-                                    <label>Senha <span class="required">*</span></label>
-                                    <div class="input-wrapper input-senha">
-                                        <div class="input-icon">
-                                            <i class="fa-solid fa-lock"></i>
-                                        </div>
-                                        <input type="password" id="senha" name="senha" required>
-                                        <i class="fa-solid fa-eye toggle-senha" id="toggleSenha" onclick="toggleSenha()"></i>
-                                    </div>
-                                </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn-login">Entrar</button>
+                            </div>
 
-                                <div class="text-center">
-                                    <button type="submit" class="btn-login">Entrar</button>
-                                </div>
-
-                                <div class="esqueceu-senha mt-4">
-                                    <a href="recuperar-senha.html">
-                                        <small>Esqueceu sua senha?</small>
-                                    </a>
-                                </div>
-                            </form>
-                        </div>
-
-                        <!-- REDES SOCIAIS -->
-                        <div class="social-footer">
-                            <div id="social-media">
-                                <a href="https://www.instagram.com/salubritasso/" target="_blank">
-                                    <i class="fa-brands fa-square-instagram fa-2xl"></i>
-                                </a>
-                                <a href="https://wa.me/553131669006" target="_blank">
-                                    <i class="fa-brands fa-square-whatsapp fa-2xl"></i>
-                                </a>
-                                <a href="https://www.linkedin.com/company/salubrit%C3%A1-sa%C3%BAde-ocupacional/"
-                                    target="_blank">
-                                    <i class="fa-brands fa-linkedin fa-2xl"></i>
-                                </a>
-                                <a href="https://salubrita.com.br/" target="_blank">
-                                    <i class="fa-solid fa-globe fa-xl"></i>
+                            <div class="esqueceu-senha mt-4">
+                                <a href="recuperar-senha.html">
+                                    <small>Esqueceu sua senha?</small>
                                 </a>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+    <div class="social-footer">
+        <div id="social-media">
+            <a href="https://www.instagram.com/salubritasso/" target="_blank">
+                <i class="fa-brands fa-square-instagram fa-2xl"></i>
+            </a>
+            <a href="https://wa.me/553131669006" target="_blank">
+                <i class="fa-brands fa-square-whatsapp fa-2xl"></i>
+            </a>
+            <a href="https://www.linkedin.com/company/salubrit%C3%A1-sa%C3%BAde-ocupacional/" target="_blank">
+                <i class="fa-brands fa-linkedin fa-2xl"></i>
+            </a>
+            <a href="https://salubrita.com.br/" target="_blank">
+                <i class="fa-solid fa-globe fa-xl"></i>
+            </a>
+        </div>
+    </div>
 
     <script src="../script/login.js"></script>
-
 </body>
 
 </html>

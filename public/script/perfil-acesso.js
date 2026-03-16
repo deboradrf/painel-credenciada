@@ -130,9 +130,9 @@ async function carregarUsuarios() {
                 </div>
 
                 <div class="usuario-acoes">
-                    <button class="btn-empresas"
-                        onclick="abrirModalEmpresas(${u.id})">
+                    <button class="btn-gerenciar" onclick="abrirModalEmpresas(${u.id})">
                         <i class="fa-solid fa-gear"></i>
+                        Gerenciar empresas
                     </button>
                 </div>
             </div>

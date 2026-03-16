@@ -382,7 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // FUNÇÃO PARA GERAR MAIS UNIDADES PRA SOLICITAR ASO
 let contadorUnidades = 0;
-const limiteUnidades = 5;
+const limiteUnidades = 10;
 
 function ativarUnidades(ativar) {
   const container = document.getElementById("unidadesContainer");

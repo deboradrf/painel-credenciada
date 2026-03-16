@@ -309,14 +309,20 @@ li {
     align-items: center;
 }
 
-.btn-empresas {
+.btn-gerenciar {
     background: #53A5A6;
     border: none;
     color: white;
-    width: 34px;
-    height: 34px;
+    width: 180px;
+    height: 30px;
     border-radius: 8px;
     cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s ease;
+}
+
+.btn-gerenciar:hover {
+    transform: translateY(-1px);
 }
 
 .footer-container {
