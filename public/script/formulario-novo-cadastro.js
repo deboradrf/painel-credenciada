@@ -1086,8 +1086,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CRIAÇÃO DE UNIDADE
   if (dados.solicitar_nova_unidade === true) {
-    destinatario = "clientes@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "clientes@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de criação de nova unidade";
 
     mensagem = `
@@ -1099,8 +1099,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CRIAÇÃO DE NOVO SETOR/CARGO
   else if (dados.solicitar_novo_setor === true || dados.solicitar_novo_cargo === true) {
-    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de criação de setor/cargo";
 
     mensagem = `
@@ -1112,8 +1112,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CREDENCIAMENTO
   else if (dados.solicitar_credenciamento === true) {
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "contratos@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de credenciamento";
 
     mensagem = `

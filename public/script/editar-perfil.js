@@ -94,7 +94,7 @@ function preencherTela(user) {
 
     document.getElementById("cpf").value = user.cpf;
     document.getElementById("email").value = user.email;
-    document.getElementById("senha").value = user.senha;
+    document.getElementById("senha").value = "";
 
     ajustarIcone(user.perfil);
 }
@@ -130,11 +130,10 @@ function editarPerfil() {
     card.classList.add("editando");
 
     const email = document.getElementById("email");
-    const senha = document.getElementById("senha");
 
     // guarda valores atuais
     dadosOriginais.email = email.value;
-    dadosOriginais.senha = senha.value;
+    dadosOriginais.senha = "";
 
     habilitarInput("email");
     habilitarInput("senha");
@@ -161,7 +160,7 @@ function cancelarEdicao() {
     const senha = document.getElementById("senha");
 
     email.value = dadosOriginais.email;
-    senha.value = dadosOriginais.senha;
+    senha.value = "";
 
     email.setAttribute("readonly", true);
     senha.setAttribute("readonly", true);
@@ -193,6 +192,8 @@ async function salvarEdicao() {
     document.getElementById("acoesEdicao").classList.add("d-none");
 
     alert("Dados atualizados com sucesso!");
+
+    location.reload();
 }
 
 // MOSTRAR / OCULTAR SENHA

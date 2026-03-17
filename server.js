@@ -7,6 +7,7 @@ const { XMLParser } = require("fast-xml-parser");
 const iconv = require("iconv-lite");
 const soap = require("soap");
 const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
@@ -439,6 +440,9 @@ app.post("/cadastro", async (req, res) => {
   try {
     const { nome, cpf, email, senha, perfil, cod_empresa, nome_empresa, unidades } = req.body;
 
+    // CRIPTOGRAFAR SENHA
+    const senhaHash = await bcrypt.hash(senha, 10);
+
     await pool.query(
       `INSERT INTO usuarios
        (nome, cpf, email, senha, perfil, cod_empresa, nome_empresa, unidades)
@@ -447,7 +451,7 @@ app.post("/cadastro", async (req, res) => {
         nome,
         cpf,
         email,
-        senha,
+        senhaHash,
         perfil,
         cod_empresa || null,
         nome_empresa || null,
@@ -469,10 +473,71 @@ app.post("/cadastro", async (req, res) => {
 });
 
 // ROTA DE LOGIN DE USUÁRIO
+// app.post("/login", async (req, res) => {
+//   try {
+//     const { usuario, senha } = req.body;
+
+//     const result = await pool.query(
+//       `
+//       SELECT
+//         id,
+//         nome,
+//         email,
+//         cpf,
+//         senha,
+//         perfil,
+//         cod_empresa,
+//         nome_empresa,
+//         unidades
+//       FROM usuarios
+//       WHERE (cpf = $1)
+//       `,
+//       [usuario]
+//     );
+
+//     if (!result.rows.length) {
+//       return res.status(401).json({ erro: "Usuário ou senha inválidos" });
+//     }
+
+//     const user = result.rows[0];
+
+//     // COMPARAÇÃO COM BCRYPT
+//     const senhaValida = await bcrypt.compare(senha, user.senha);
+
+//     if (!senhaValida) {
+//       return res.status(401).json({ erro: "Usuário ou senha inválidos" });
+//     }
+
+//     // REMOVE A SENHA ANTES DE ENVIAR
+//     delete user.senha;
+
+//     const empresasExtras = await pool.query(
+//       `
+//         SELECT cod_empresa, nome_empresa, unidades
+//         FROM usuarios_empresas
+//         WHERE usuario_id = $1
+//       `,
+//       [user.id]
+//     );
+
+//     res.json({
+//       ...user,
+//       empresas_extras: empresasExtras.rows
+//     });
+
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ erro: "Erro no login" });
+//   }
+// });
+
+// LOGIN COMPATÍVEL COM CADASTRO ANTIGO E NOVO (dps que todo mundo alterar a senha, mudar pro
+// cod de login acima)
 app.post("/login", async (req, res) => {
   try {
-
     const { usuario, senha } = req.body;
+
+    console.log("Usuario digitado:", usuario);
 
     const result = await pool.query(
       `
@@ -481,20 +546,49 @@ app.post("/login", async (req, res) => {
         nome,
         email,
         cpf,
+        senha,
         perfil,
         cod_empresa,
         nome_empresa,
         unidades
       FROM usuarios
-      WHERE (email = $1 OR cpf = $1)
-      AND senha = $2
+      WHERE cpf = $1
       `,
-      [usuario, senha]
+      [usuario]
     );
 
     if (!result.rows.length) {
       return res.status(401).json({ erro: "Usuário ou senha inválidos" });
     }
+
+    const user = result.rows[0];
+
+    let senhaValida = false;
+
+    // 🔥 DETECTA SE É BCRYPT OU TEXTO
+    if (user.senha.startsWith("$2b$")) {
+      // senha criptografada
+      senhaValida = await bcrypt.compare(senha, user.senha);
+    } else {
+      // senha antiga (texto puro)
+      senhaValida = senha === user.senha;
+
+      // 🔥 BONUS: já atualiza pra bcrypt automaticamente
+      if (senhaValida) {
+        const novaHash = await bcrypt.hash(senha, 10);
+
+        await pool.query(
+          "UPDATE usuarios SET senha = $1 WHERE id = $2",
+          [novaHash, user.id]
+        );
+      }
+    }
+
+    if (!senhaValida) {
+      return res.status(401).json({ erro: "Usuário ou senha inválidos" });
+    }
+
+    delete user.senha;
 
     const empresasExtras = await pool.query(
       `
@@ -502,11 +596,11 @@ app.post("/login", async (req, res) => {
       FROM usuarios_empresas
       WHERE usuario_id = $1
       `,
-      [result.rows[0].id]
+      [user.id]
     );
 
     res.json({
-      ...result.rows[0],
+      ...user,
       empresas_extras: empresasExtras.rows
     });
 
@@ -518,27 +612,28 @@ app.post("/login", async (req, res) => {
 
 // ROTA DE RECUPERAR SENHA
 app.post("/recuperar-senha", async (req, res) => {
-  const { email } = req.body;
+  const { email, usuario } = req.body;
 
   try {
-
     const { rows } = await pool.query(
-      "SELECT id FROM usuarios WHERE email = $1",
-      [email]
+      "SELECT id FROM usuarios WHERE email = $1 AND cpf = $2",
+      [email, usuario]
     );
 
     if (rows.length === 0) {
-      return res.json({
-        ok: true,
-        message: "Se o email existir, enviaremos uma nova senha."
+      return res.status(400).json({
+        erro: "Usuário ou e-mail não encontrados"
       });
     }
 
     const novaSenha = gerarSenha(10);
 
+    // HASH DA SENHA
+    const senhaHash = await bcrypt.hash(novaSenha, 10);
+
     await pool.query(
       "UPDATE usuarios SET senha = $1 WHERE id = $2",
-      [novaSenha, rows[0].id]
+      [senhaHash, rows[0].id]
     );
 
     await enviarEmailRecuperacao(email, novaSenha);
@@ -549,13 +644,11 @@ app.post("/recuperar-senha", async (req, res) => {
     });
 
   } catch (err) {
-
     console.error("Erro recuperação:", err);
 
     res.status(500).json({
       erro: "Erro ao recuperar senha"
     });
-
   }
 });
 
@@ -2600,22 +2693,40 @@ app.put("/usuarios/:id", async (req, res) => {
   const { id } = req.params;
   const { email, senha } = req.body;
 
-  if (!email || !senha) {
-    return res.status(400).json({ erro: "Email e senha são obrigatórios" });
+  if (!email) {
+    return res.status(400).json({ erro: "Email é obrigatório" });
   }
 
   try {
-    await pool.query(
-      `
-      UPDATE usuarios
-      SET email = $1,
-        senha = $2
-      WHERE id = $3
-      `,
-      [email, senha, id]
-    );
+    // SE VEIO SENHA → ATUALIZA COM HASH
+    if (senha && senha.trim() !== "") {
+
+      const senhaHash = await bcrypt.hash(senha, 10);
+
+      await pool.query(
+        `
+          UPDATE usuarios
+          SET email = $1,
+              senha = $2
+          WHERE id = $3
+        `,
+        [email, senhaHash, id]
+      );
+
+    } else {
+      // SE NÃO VEIO SENHA → NÃO MEXE NA SENHA
+      await pool.query(
+        `
+          UPDATE usuarios
+          SET email = $1
+          WHERE id = $2
+        `,
+        [email, id]
+      );
+    }
 
     res.json({ sucesso: true });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: "Erro ao atualizar perfil" });
@@ -2668,8 +2779,8 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
 async function enviarEmailSetorFuncao(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
-    //to: "debora.fonseca@salubrita.com.br",
+    //to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de criação de setor/função",
     text: `
       Uma solicitação para criação de setor/função para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
@@ -2682,8 +2793,8 @@ async function enviarEmailSetorFuncao(dados) {
 async function enviarEmailSetorCargo(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
-    //to: "debora.fonseca@salubrita.com.br",
+    //to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de criação de setor/cargo",
     text: `
       Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
@@ -2696,8 +2807,8 @@ async function enviarEmailSetorCargo(dados) {
 async function enviarEmailCredenciamento(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    to: "contratos@salubrita.com.br",
-    //to: "debora.fonseca@salubrita.com.br",
+    //to: "contratos@salubrita.com.br",
+    to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de credenciamento",
     text: `
       Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.

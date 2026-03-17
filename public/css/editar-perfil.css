@@ -441,8 +441,16 @@ hr {
     position: absolute;
     right: 0;
     height: 80%;
-    width: 4%;
+    width: 3%;
     background-color: #8A94A6;
+}
+
+.editando #toggleSenha {
+  display: block;
+}
+
+#toggleSenha {
+  display: none;
 }
 
 .input-wrapper input {
@@ -499,9 +507,9 @@ hr {
 }
 
 .input-senha .toggle-senha {
-    margin-right: 12px;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
     cursor: pointer;
-    color: #8A94A6;
-    display: flex;
-    align-items: center;
 }

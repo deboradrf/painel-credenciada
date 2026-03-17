@@ -33,9 +33,19 @@
                     <div class="card login-container">
                         <div class="card-body recuperar-side">
                             <h3>Esqueceu sua senha?</h3>
-                            <small>Digite seu e-mail cadastrado para receber uma nova senha.</small>
+                            <small>Digite seu usuário e o e-mail cadastrado para receber uma nova senha.</small>
 
                             <form id="recuperarForm">
+                                <div class="form-group">
+                                    <label>Usuário <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                        <input type="text" id="usuario" placeholder="Digite seu usuário" required>
+                                    </div>
+                                </div>
+
                                 <div class="form-group">
                                     <label>E-mail <span class="required">*</span></label>
                                     <div class="input-wrapper">
