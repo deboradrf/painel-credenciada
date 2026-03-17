@@ -63,7 +63,7 @@ h3 {
     font-weight: 600;
     font-size: 19px;
     color: #88A6BB;
-    margin-bottom: 50px;
+    margin-bottom: 20px;
 }
 
 h3::after {
@@ -76,9 +76,8 @@ h3::after {
     background: #88A6BB;
 }
 
-.recuperar-side form p {
-    margin-bottom: 1.5rem;
-    font-weight: 500;
+.recuperar-side form {
+    margin-top: 30px;
 }
 
 .btn-recuperar {

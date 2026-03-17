@@ -84,7 +84,7 @@ nomeInput.addEventListener("input", function () {
 });
 
 // MÁSCARA DE RG
-const rgInput = document.getElementById("doc_identidade");
+const rgInput = document.getElementById("docIdentidade");
 
 rgInput.addEventListener("input", function () {
   let value = rgInput.value.toUpperCase();
@@ -122,6 +122,30 @@ cpfInput.addEventListener("input", function () {
   value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 
   this.value = value;
+});
+
+// CAMPOS EM MAIÚSCULO
+const camposMaiusculo = [
+  "nomeFantasia",
+  "razaoSocial",
+  "rua",
+  "bairro",
+  "estado",
+  "novoSetor",
+  "novoCargo",
+  "labToxicologico",
+  "estadoCredenciamento",
+  "cidadeCredenciamento"
+];
+
+camposMaiusculo.forEach(id => {
+  const campo = document.getElementById(id);
+
+  if (campo) {
+    campo.addEventListener("input", function () {
+      this.value = this.value.toUpperCase();
+    });
+  }
 });
 
 // FUNÇÃO PARA CARREGAR UNIDADES DA EMPRESA FILTRANDO PELO USUÁRIO LOGADO
@@ -234,8 +258,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const divNovaUnidade = document.getElementById("divNovaUnidade");
 
   const camposNovaUnidade = [
-    "nome_fantasia",
-    "razao_social",
+    "nomeFantasia",
+    "razaoSocial",
     "cnpj",
     "cnae",
     "cep",
@@ -246,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "email"
   ].map(id => document.getElementById(id));
 
-  const radiosTipoFaturamento = document.querySelectorAll('input[name="tipo_faturamento"]');
+  const radiosTipoFaturamento = document.querySelectorAll('input[name="tipoFaturamento"]');
 
   if (!chkNovaUnidade || !unidadeSelect || !divNovaUnidade) return;
 
@@ -297,6 +321,20 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarNovaUnidade();
 });
 
+// MÁSCARA DE CNPJ
+document.getElementById('cnpj').addEventListener('input', function (e) {
+  let value = e.target.value;
+
+  value = value.replace(/\D/g, '');
+
+  value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+  value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+  value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+  value = value.replace(/(\d{4})(\d)/, '$1-$2');
+
+  e.target.value = value;
+});
+
 // CHECKBOX DE NOVA UNIDADE TORNA OBRIGATORIO A CRIAÇÃO DE NOVO SETOR/CARGO
 document.addEventListener("DOMContentLoaded", () => {
   const chkNovaUnidade = document.getElementById("solicitarNovaUnidade");
@@ -342,14 +380,13 @@ const inputCep = document.getElementById("cep");
 
 inputCep.addEventListener("input", function () {
 
-  let valor = this.value.replace(/\D/g, ""); // remove tudo que não é número
+  let valor = this.value.replace(/\D/g, "");
 
   if (valor.length > 5) {
     valor = valor.slice(0, 5) + "-" + valor.slice(5, 8);
   }
 
   this.value = valor;
-
 });
 
 // MOSTRAR / OCULTAR SEÇÃO DE NOVO SETOR E DEFINIR REQUIRED NO CAMPO
@@ -439,7 +476,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const wrapperDescricaoAtividade = document.getElementById("descricaoAtividadeWrapper");
   const selectCargo = document.getElementById("cargoSelect");
   const novoCargo = document.getElementById("novoCargo");
-  const descricaoAtividade = document.getElementById("descricao_atividade");
+  const descricaoAtividade = document.getElementById("descricaoAtividade");
 
   if (!chkSolicitarNovoCargo || !selectCargo || !wrapperNovoCargo || !wrapperDescricaoAtividade) return;
 
@@ -487,7 +524,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // MOSTRAR / OCULTAR TIPO RAC
-const racCheckboxes = document.querySelectorAll('input[name="form_rac"]');
+const racCheckboxes = document.querySelectorAll('input[name="formRac"]');
 const divRacValeOpcoes = document.getElementById("divRacValeOpcoes");
 
 racCheckboxes.forEach(cb => {
@@ -506,7 +543,7 @@ racCheckboxes.forEach(cb => {
 });
 
 // LISTENER DOS CAMPOS DE DATA/HORA DO EXAME (SÓ PERMITIR MAIS DE 24H DA SOLICITAÇÃO)
-const dataInput = document.getElementById("data_exame");
+const dataInput = document.getElementById("dataExame");
 
 dataInput.addEventListener("blur", validarDataHoraExame);
 
@@ -593,7 +630,7 @@ function adicionarUnidade() {
 async function carregarPrestadores() {
   if (!codigoEmpresa) return;
 
-  const select = document.getElementById("nome_clinica");
+  const select = document.getElementById("nomeClinica");
   if (!select) return;
 
   try {
@@ -666,7 +703,7 @@ function extrairEstados(prestadores) {
 
 // POPULAR O SELECT DE ESTADOS
 function popularSelectEstados(estados) {
-  const select = document.getElementById("estado_clinica");
+  const select = document.getElementById("estadoClinica");
   if (!select) return;
 
   select.innerHTML = '<option value="">Selecione...</option>';
@@ -680,9 +717,9 @@ function popularSelectEstados(estados) {
 }
 
 // QUANDO SELECIONAR O ESTADO, FILTRAR POR CIDADES
-document.getElementById("estado_clinica").addEventListener("change", function () {
+document.getElementById("estadoClinica").addEventListener("change", function () {
   const estadoSelecionado = this.value;
-  const selectCidade = document.getElementById("cidade_clinica");
+  const selectCidade = document.getElementById("cidadeClinica");
 
   selectCidade.innerHTML = '<option value="">Selecione...</option>';
 
@@ -706,11 +743,11 @@ document.getElementById("estado_clinica").addEventListener("change", function ()
 });
 
 // QUANDO SELECIONAR A CIDADE, FILTRAR AS CLÍNICAS
-document.getElementById("cidade_clinica").addEventListener("change", function () {
-  const estadoSelecionado = document.getElementById("estado_clinica").value;
+document.getElementById("cidadeClinica").addEventListener("change", function () {
+  const estadoSelecionado = document.getElementById("estadoClinica").value;
   const cidadeSelecionada = this.value;
 
-  const selectClinica = document.getElementById("nome_clinica");
+  const selectClinica = document.getElementById("nomeClinica");
   selectClinica.innerHTML = '<option value="">Selecione...</option>';
 
   if (!estadoSelecionado || !cidadeSelecionada) return;
@@ -735,13 +772,13 @@ document.getElementById("cidade_clinica").addEventListener("change", function ()
 document.addEventListener("DOMContentLoaded", () => {
   const chkCredenciamento = document.getElementById("solicitarCredenciamento");
 
-  const selectEstado = document.getElementById("estado_clinica");
-  const selectCidade = document.getElementById("cidade_clinica");
-  const selectClinica = document.getElementById("nome_clinica");
+  const selectEstado = document.getElementById("estadoClinica");
+  const selectCidade = document.getElementById("cidadeClinica");
+  const selectClinica = document.getElementById("nomeClinica");
 
   const cardCredenciamento = document.getElementById("cardCredenciamento");
-  const estadoCredenciamento = document.getElementById("estado_credenciamento");
-  const cidadeCredenciamento = document.getElementById("cidade_credenciamento");
+  const estadoCredenciamento = document.getElementById("estadoCredenciamento");
+  const cidadeCredenciamento = document.getElementById("cidadeCredenciamento");
 
   if (!chkCredenciamento) return;
 
@@ -806,11 +843,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // COLOCAR REQUIRED NO CAMPO DE ESTADO CLÍNICA E CIDADE CLÍNICA PARA CREDENCIAMENTO
 document.getElementById("solicitarCredenciamento").addEventListener("change", function () {
-  const estadoSelect = document.getElementById("estado_clinica");
-  const estadoCredenciamentoInput = document.getElementById("estado_credenciamento");
+  const estadoSelect = document.getElementById("estadoClinica");
+  const estadoCredenciamentoInput = document.getElementById("estadoCredenciamento");
 
-  const cidadeSelect = document.getElementById("cidade_clinica");
-  const cidadeCredenciamentoInput = document.getElementById("cidade_credenciamento");
+  const cidadeSelect = document.getElementById("cidadeClinica");
+  const cidadeCredenciamentoInput = document.getElementById("cidadeCredenciamento");
 
   if (this.checked) {
     estadoSelect.removeAttribute("required");
@@ -909,8 +946,8 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
 
   const unidadeSelect = document.getElementById("unidadeSelect");
   const solicitarNovaUnidade = document.getElementById("solicitarNovaUnidade")?.checked === true;
-  const nomeFantasia = document.getElementById("nome_fantasia")?.value || null;
-  const razaoSocial = document.getElementById("razao_social")?.value || null;
+  const nomeFantasia = document.getElementById("nomeFantasia")?.value || null;
+  const razaoSocial = document.getElementById("razaoSocial")?.value || null;
   const cnpj = document.getElementById("cnpj")?.value || null;
   const cnae = document.getElementById("cnae")?.value || null;
   const cep = document.getElementById("cep")?.value || null;
@@ -919,16 +956,16 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   const bairro = document.getElementById("bairro")?.value || null;
   const estado = document.getElementById("estado")?.value || null;
   const email = document.getElementById("email")?.value || null;
-  const tipoFaturamento = document.querySelector('input[name="tipo_faturamento"]:checked')?.value || null;
+  const tipoFaturamento = document.querySelector('input[name="tipoFaturamento"]:checked')?.value || null;
   const setorSelect = document.getElementById("setorSelect");
   const cargoSelect = document.getElementById("cargoSelect");
-  const tipoContratacaoValue = document.getElementById("tipo_contratacao").value;
+  const tipoContratacaoValue = document.getElementById("tipoContratacao").value;
   const naoPossuiMatricula = document.getElementById("naoPossuiMatricula")?.checked === true;
   const solicitarNovoSetor = document.getElementById("solicitarNovoSetor")?.checked === true;
   const solicitarNovoCargo = document.getElementById("solicitarNovoCargo")?.checked === true;
   const nomeNovoSetor = document.getElementById("novoSetor")?.value || null;
   const nomeNovoCargo = document.getElementById("novoCargo")?.value || null;
-  const racSelecionados = Array.from(document.querySelectorAll('input[name="form_rac"]:checked')).map(el => el.value);
+  const racSelecionados = Array.from(document.querySelectorAll('input[name="formRac"]:checked')).map(el => el.value);
   const tiposRacSelecionados = Array.from(document.querySelectorAll('input[name="racValeOpcao"]:checked')).map(el => el.value);
   const solicitarCredenciamento = document.getElementById("solicitarCredenciamento")?.checked === true;
 
@@ -945,17 +982,17 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
 
   const dados = {
     nome_funcionario: document.getElementById("nome").value,
-    data_nascimento: document.getElementById("data_nascimento").value,
+    data_nascimento: document.getElementById("dataNascimento").value,
     sexo: document.getElementById("sexo").value,
-    estado_civil: document.getElementById("estado_civil").value,
-    doc_identidade: document.getElementById("doc_identidade").value || null,
+    estado_civil: document.getElementById("estadoCivil").value,
+    doc_identidade: document.getElementById("docIdentidade").value || null,
     cpf: document.getElementById("cpf").value,
     matricula: naoPossuiMatricula ? null : document.getElementById("matricula").value,
     nao_possui_matricula: naoPossuiMatricula,
-    data_admissao: document.getElementById("data_admissao").value,
+    data_admissao: document.getElementById("dataAdmissao").value,
     tipo_contratacao: tipoContratacaoValue,
     cod_categoria: codCategoriaMap[tipoContratacaoValue],
-    regime_trabalho: document.getElementById("regime_trabalho").value,
+    regime_trabalho: document.getElementById("regimeTrabalho").value,
     cod_empresa: codigoEmpresa,
     nome_empresa: nomeEmpresa,
     cod_unidade: solicitarNovaUnidade ? null : unidadeSelect.value,
@@ -980,15 +1017,15 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     nome_cargo: solicitarNovoCargo ? null : cargoSelect.selectedOptions[0].dataset.nome,
     solicitar_novo_cargo: solicitarNovoCargo,
     nome_novo_cargo: solicitarNovoCargo ? nomeNovoCargo : null,
-    descricao_atividade: document.getElementById("descricao_atividade").value,
+    descricao_atividade: document.getElementById("descricaoAtividade").value,
     rac: racSelecionados.length ? racSelecionados : null,
     tipos_rac: tiposRacSelecionados.length ? tiposRacSelecionados : null,
-    tipo_exame: document.getElementById("tipo_exame").value,
-    data_exame: document.getElementById("data_exame").value || null,
+    tipo_exame: document.getElementById("tipoExame").value,
+    data_exame: document.getElementById("dataExame").value || null,
     unidades_extras: unidades,
     cnh: document.getElementById("cnh").value || null,
-    vencimento_cnh: document.getElementById("vencimento_cnh").value || null,
-    lab_toxicologico: document.getElementById("lab_toxicologico").value || null,
+    vencimento_cnh: document.getElementById("vencimentoCnh").value || null,
+    lab_toxicologico: document.getElementById("labToxicologico").value || null,
     solicitar_credenciamento: solicitarCredenciamento,
     observacao: document.getElementById("observacao").value || null,
     emails_extras: emailsExtras,
@@ -997,14 +1034,14 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   };
 
   if (solicitarCredenciamento) {
-    dados.estado_credenciamento = document.getElementById("estado_credenciamento").value;
-    dados.cidade_credenciamento = document.getElementById("cidade_credenciamento").value;
+    dados.estado_credenciamento = document.getElementById("estadoCredenciamento").value;
+    dados.cidade_credenciamento = document.getElementById("cidadeCredenciamento").value;
   }
   else {
-    dados.estado_clinica = document.getElementById("estado_clinica").value;
-    dados.cidade_clinica = document.getElementById("cidade_clinica").value;
+    dados.estado_clinica = document.getElementById("estadoClinica").value;
+    dados.cidade_clinica = document.getElementById("cidadeClinica").value;
 
-    const clinicaSelect = document.getElementById("nome_clinica");
+    const clinicaSelect = document.getElementById("nomeClinica");
 
     dados.cod_clinica = clinicaSelect.value;
     dados.nome_clinica = clinicaSelect.selectedOptions[0]?.dataset.nome || null;

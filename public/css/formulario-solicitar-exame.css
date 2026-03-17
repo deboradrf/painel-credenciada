@@ -422,14 +422,6 @@ h5::after {
     color: #9CA3AF;
 }
 
-#novaFuncao,
-#novoSetor,
-#labToxicologico,
-#estadoCredenciamento,
-#cidadeCredenciamento {
-    text-transform: uppercase;
-}
-
 #nome,
 #cpf,
 #matricula,

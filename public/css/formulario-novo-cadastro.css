@@ -638,19 +638,6 @@ h5::after {
   opacity: 1;
 } */
 
-#nome_fantasia,
-#razao_social,
-#rua,
-#bairro,
-#estado,
-#novoSetor,
-#novoCargo,
-#lab_toxicologico,
-#estado_credenciamento,
-#cidade_credenciamento {
-    text-transform: uppercase;
-}
-
 .footer-container {
     filter: drop-shadow(0 -3px 12px rgba(0, 0, 0, 0.12));
 }

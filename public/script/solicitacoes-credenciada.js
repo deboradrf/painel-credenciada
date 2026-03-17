@@ -17,18 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const avatarBtn = document.querySelector(".profile-trigger .avatar-circle");
   const avatarDrop = document.querySelector(".profile-header .avatar-circle");
 
-  function getPrimeiroNomeESobrenome(nomeCompleto) {
-    if (!nomeCompleto) return "";
-
-    const partes = nomeCompleto.trim().split(" ");
-
-    return partes.length >= 2
-      ? `${partes[0]} ${partes[1]}`
-      : partes[0];
-  }
-
   // NOME
-  userNameDropdown.innerText = getPrimeiroNomeESobrenome(usuarioLogado.nome);
+  userNameDropdown.innerText = usuarioLogado.nome?.trim() || "";
 
   // EMPRESA
   dropdownUserExtra.innerHTML = `
@@ -673,6 +663,13 @@ async function preencherModal(s, tipo) {
 
     // MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE RISCOS OCUPACIONAIS
     const divUnidadeDestino = document.getElementById("divExameUnidadeDestino");
+
+    // ESCONDER UNIDADE DESTINO SE NÃO EXISTIR
+    if ((!s.unidade_destino || s.unidade_destino.trim() === "") && !s.solicitar_nova_unidade) {
+      divUnidadeDestino?.classList.add("d-none");
+    } else {
+      divUnidadeDestino?.classList.remove("d-none");
+    }
 
     const blocosMudancaRisco = [
       "blocoExameSetorDestino",

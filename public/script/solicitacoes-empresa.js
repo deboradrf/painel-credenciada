@@ -445,7 +445,7 @@ async function abrirModalEditar(id, tipo) {
   }
 }
 
-// MÁSCARA DE CEP
+// MÁSCARA DE CEP CADASTRO
 const inputCep = document.getElementById("editCadCep");
 
 inputCep.addEventListener("input", function () {
@@ -460,11 +460,19 @@ inputCep.addEventListener("input", function () {
   }
 });
 
-// CAMPO DE ESTADO CREDENCIAMENTO SEMPRE MAIÚSCULO
-const inputEstadoCredenciamento = document.getElementById("editCadEstadoCredenciamento");
+// MÁSCARA DE CEP EXAME
+const inputCepExame = document.getElementById("editExameCep");
 
-inputEstadoCredenciamento.addEventListener("input", function () {
-  this.value = this.value.toUpperCase();
+inputCepExame.addEventListener("input", function () {
+  let valor = this.value.replace(/\D/g, "");
+
+  if (valor.length > 8) valor = valor.slice(0, 8);
+
+  if (valor.length > 5) {
+    this.value = valor.replace(/^(\d{5})(\d)/, "$1-$2");
+  } else {
+    this.value = valor;
+  }
 });
 
 // FUNÇÃO PARA FORMATAR DATA
@@ -1034,6 +1042,68 @@ async function salvarEdicaoCadastro() {
 
   carregarSolicitacoes();
 }
+
+// MÁSCARA DE CNPJ EXAME
+document.getElementById('editExameCnpj').addEventListener('input', function (e) {
+  let value = e.target.value;
+
+  value = value.replace(/\D/g, '');
+
+  value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+  value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+  value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+  value = value.replace(/(\d{4})(\d)/, '$1-$2');
+
+  e.target.value = value;
+});
+
+// CAMPOS EM MAIÚSCULO
+const camposMaiusculo = [
+  "editCadNomeFantasia",
+  "editCadRazaoSocial",
+  "editCadRua",
+  "editCadBairro",
+  "editCadEstado",
+  "editCadNovoSetor",
+  "editCadNovoCargo",
+  "editCadLabToxicologico",
+  "editCadEstadoCredenciamento",
+  "editCadCidadeCredenciamento",
+  "editExameNomeFantasia",
+  "editExameRazaoSocial",
+  "editExameRua",
+  "editExameBairro",
+  "editExameEstado",
+  "editExameNovaFuncao",
+  "editExameNovoSetor",
+  "editExameLabToxicologico",
+  "editExameEstadoCredenciamento",
+  "editExameCidadeCredenciamento"
+];
+
+camposMaiusculo.forEach(id => {
+  const campo = document.getElementById(id);
+
+  if (campo) {
+    campo.addEventListener("input", function () {
+      this.value = this.value.toUpperCase();
+    });
+  }
+});
+
+// MÁSCARA DE CNPJ CADASTRO
+document.getElementById('editCadCnpj').addEventListener('input', function (e) {
+  let value = e.target.value;
+
+  value = value.replace(/\D/g, '');
+
+  value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+  value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+  value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+  value = value.replace(/(\d{4})(\d)/, '$1-$2');
+
+  e.target.value = value;
+});
 
 // FUNÇÃO PARA SALVAR EDIÇÃO - NOVO EXAME
 async function salvarEdicaoExame() {

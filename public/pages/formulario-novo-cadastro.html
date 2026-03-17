@@ -118,7 +118,7 @@
                                     <div class="input-icon">
                                         <i class="fa-solid fa-calendar"></i>
                                     </div>
-                                    <input type="date" id="data_nascimento" max="9999-12-31">
+                                    <input type="date" id="dataNascimento" max="9999-12-31">
                                 </div>
                             </div>
                         </div>
@@ -144,7 +144,7 @@
                                     <div class="input-icon">
                                         <i class="fa-solid fa-user-group"></i>
                                     </div>
-                                    <select id="estado_civil" required>
+                                    <select id="estadoCivil" required>
                                         <option value="">Selecione...</option>
                                         <option value="SOLTEIRO">Solteiro(a)</option>
                                         <option value="CASADO">Casado(a)</option>
@@ -172,7 +172,7 @@
                                     <div class="input-icon">
                                         <i class="fa-solid fa-id-card-clip"></i>
                                     </div>
-                                    <input type="text" id="doc_identidade" placeholder="Ex: MG 12.345-678">
+                                    <input type="text" id="docIdentidade" placeholder="Ex: MG 12.345-678">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -216,7 +216,7 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-calendar-plus"></i>
                                 </div>
-                                <input type="date" id="data_admissao" max="9999-12-31">
+                                <input type="date" id="dataAdmissao" max="9999-12-31">
                             </div>
                         </div>
 
@@ -226,7 +226,7 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-briefcase"></i>
                                 </div>
-                                <select id="tipo_contratacao" required>
+                                <select id="tipoContratacao" required>
                                     <option value="">Selecione...</option>
                                     <option value="CLT">CLT</option>
                                     <option value="COOPERADO">Cooperado</option>
@@ -246,7 +246,7 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-clock"></i>
                                 </div>
-                                <select id="regime_trabalho" required>
+                                <select id="regimeTrabalho" required>
                                     <option value="">Selecione...</option>
                                     <option value="NORMAL">Normal</option>
                                     <option value="TURNO">Turno</option>
@@ -303,7 +303,7 @@
                                         <div class="input-icon">
                                             <i class="fa-solid fa-store"></i>
                                         </div>
-                                        <input type="text" id="nome_fantasia">
+                                        <input type="text" id="nomeFantasia">
                                     </div>
                                 </div>
 
@@ -313,7 +313,7 @@
                                         <div class="input-icon">
                                             <i class="fa-solid fa-file-signature"></i>
                                         </div>
-                                        <input type="text" id="razao_social">
+                                        <input type="text" id="razaoSocial">
                                     </div>
                                 </div>
                             </div>
@@ -326,7 +326,7 @@
                                         <div class="input-icon">
                                             <i class="fa-solid fa-id-card"></i>
                                         </div>
-                                        <input type="text" id="cnpj">
+                                        <input type="text" id="cnpj" maxlength="18">
                                     </div>
                                 </div>
 
@@ -370,7 +370,7 @@
                                         <div class="input-icon">
                                             <i class="fa-solid fa-hashtag"></i>
                                         </div>
-                                        <input type="text" id="numero">
+                                        <input type="number" id="numero">
                                     </div>
                                 </div>
                             </div>
@@ -399,7 +399,7 @@
 
                             <div class="form-row">
                                 <div class="form-check my-2">
-                                    <input class="form-check-input" type="radio" name="tipo_faturamento" value="JUNTO">
+                                    <input class="form-check-input" type="radio" name="tipoFaturamento" value="JUNTO">
                                     <label class="form-check-label">
                                         Essa unidade será faturada junto com a empresa principal, em uma única
                                         nota
@@ -407,7 +407,7 @@
                                 </div>
 
                                 <div class="form-check mt-2 mb-4">
-                                    <input class="form-check-input" type="radio" name="tipo_faturamento"
+                                    <input class="form-check-input" type="radio" name="tipoFaturamento"
                                         value="SEPARADO">
                                     <label class="form-check-label">
                                         Essa unidade será faturada separadamente da empresa principal, com uma
@@ -417,8 +417,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label>E-mail para envio das faturas correspondentes a essa unidade <span
-                                        class="required">*</span></label>
+                                <label>E-mail para envio das faturas correspondentes a essa unidade <span class="required">*</span></label>
                                 <div class="input-wrapper">
                                     <div class="input-icon">
                                         <i class="fa-solid fa-envelope"></i>
@@ -506,7 +505,7 @@
                                         <i class="fa-solid fa-user-pen"></i>
                                     </div>
 
-                                    <textarea id="descricao_atividade" rows="2" maxlength="999"></textarea>
+                                    <textarea id="descricaoAtividade" rows="2" maxlength="999"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -529,26 +528,26 @@
                             <div class="rac-checkbox-group">
                                 <div class="form-row">
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="form_rac" class="form-check-input me-1"
+                                        <input type="checkbox" name="formRac" class="form-check-input me-1"
                                             value="FORMULARIO_UNIDADE_CSN">
                                         Formulário Unidade CSN
                                     </label>
 
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="form_rac" class="form-check-input me-1"
+                                        <input type="checkbox" name="formRac" class="form-check-input me-1"
                                             value="FORMULARIO_UNIDADE_VALLOUREC">
                                         Formulário Unidade Vallourec
                                     </label>
 
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="form_rac" class="form-check-input me-1"
+                                        <input type="checkbox" name="formRac" class="form-check-input me-1"
                                             value="FORMULARIO_UNIDADE_KINROSS">
                                         Formulário Unidade Kinross
                                     </label>
                                 </div>
 
                                 <label class="rac-checkbox">
-                                    <input type="checkbox" name="form_rac" class="form-check-input me-1"
+                                    <input type="checkbox" name="formRac" class="form-check-input me-1"
                                         value="FORMULARIO_RAC_VALE">
                                     Formulário RAC Vale
                                 </label>
@@ -619,7 +618,7 @@
                                     <div class="input-icon">
                                         <i class="fa-solid fa-file"></i>
                                     </div>
-                                    <select id="tipo_exame">
+                                    <select id="tipoExame">
                                         <option value="ADMISSIONAL">Admissional</option>
                                     </select>
                                 </div>
@@ -631,13 +630,13 @@
                                     <div class="input-icon">
                                         <i class="fa-solid fa-calendar"></i>
                                     </div>
-                                    <input type="date" id="data_exame" max="9999-12-31">
+                                    <input type="date" id="dataExame" max="9999-12-31">
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-group mt-2">
-                            <input type="hidden" id="solicitarMaisUnidades" name="solicitar_mais_unidades"
+                            <input type="hidden" id="solicitarMaisUnidades" name="solicitarMaisUnidades"
                                 value="false">
 
                             <div class="d-flex align-items-center mt-2">
@@ -699,7 +698,7 @@
                                     <div class="input-icon">
                                         <i class="fa-solid fa-credit-card"></i>
                                     </div>
-                                    <input type="date" id="vencimento_cnh" max="9999-12-31">
+                                    <input type="date" id="vencimentoCnh" max="9999-12-31">
                                 </div>
                             </div>
                         </div>
@@ -709,7 +708,7 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-vial"></i>
                                 </div>
-                                <input type="text" id="lab_toxicologico">
+                                <input type="text" id="labToxicologico">
                             </div>
                         </div>
                     </div>
@@ -726,33 +725,36 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </div>
-                                <select id="estado_clinica" required>
+                                <select id="estadoClinica" required>
                                     <option value="">Carregando...</option>
                                 </select>
                             </div>
                         </div>
+
                         <div class="form-group">
                             <label>Cidade da Clínica <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </div>
-                                <select id="cidade_clinica" required>
+                                <select id="cidadeClinica" required>
                                     <option value="">Carregando...</option>
                                 </select>
                             </div>
                         </div>
+
                         <div class="form-group">
                             <label>Nome da Clínica <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <div class="input-icon">
                                     <i class="fa-solid fa-house-medical"></i>
                                 </div>
-                                <select id="nome_clinica" required>
+                                <select id="nomeClinica" required>
                                     <option value="">Carregando...</option>
                                 </select>
                             </div>
                         </div>
+
                         <div class="form-group">
                             <div class="alerts-container mb-2">
                                 <div class="alert alert-warning">
@@ -783,7 +785,7 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </div>
-                                <input type="text" id="estado_credenciamento">
+                                <input type="text" id="estadoCredenciamento">
                             </div>
                         </div>
                         <div class="form-group">
@@ -792,7 +794,7 @@
                                 <div class="input-icon">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </div>
-                                <input type="text" id="cidade_credenciamento">
+                                <input type="text" id="cidadeCredenciamento">
                             </div>
                         </div>
                     </div>
@@ -819,7 +821,7 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <div class="form-group">
-                            <input type="hidden" id="enviarMaisEmails" name="enviar_mais_emails" value="false">
+                            <input type="hidden" id="enviarMaisEmails" name="enviarMaisEmails" value="false">
 
                             <div class="d-flex align-items-center mt-3">
                                 <label class="fw-semibold mb-0 me-4">

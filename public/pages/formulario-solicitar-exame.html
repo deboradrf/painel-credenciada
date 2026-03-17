@@ -233,26 +233,26 @@
                             <div class="rac-checkbox-group">
                                 <div class="form-row">
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="form_rac" class="form-check-input me-1"
+                                        <input type="checkbox" name="formRac" class="form-check-input me-1"
                                             value="FORMULARIO_UNIDADE_CSN">
                                         Formulário Unidade CSN
                                     </label>
 
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="form_rac" class="form-check-input me-1"
+                                        <input type="checkbox" name="formRac" class="form-check-input me-1"
                                             value="FORMULARIO_UNIDADE_VALLOUREC">
                                         Formulário Unidade Vallourec
                                     </label>
 
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="form_rac" class="form-check-input me-1"
+                                        <input type="checkbox" name="formRac" class="form-check-input me-1"
                                             value="FORMULARIO_UNIDADE_KINROSS">
                                         Formulário Unidade Kinross
                                     </label>
                                 </div>
 
                                 <label class="rac-checkbox">
-                                    <input type="checkbox" name="form_rac" class="form-check-input me-1"
+                                    <input type="checkbox" name="formRac" class="form-check-input me-1"
                                         value="FORMULARIO_RAC_VALE">
                                     Formulário RAC Vale
                                 </label>
@@ -265,44 +265,44 @@
                             <div class="rac-checkbox-group">
                                 <div class="form-row">
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="tipo_rac" class="form-check-input me-1"
+                                        <input type="checkbox" name="tipoRac" class="form-check-input me-1"
                                             value="RAC_1">
                                         RAC 1 - Trabalhos em Altura
                                     </label>
 
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="tipo_rac" class="form-check-input me-1"
+                                        <input type="checkbox" name="tipoRac" class="form-check-input me-1"
                                             value="RAC_2">
                                         RAC 2 - Veículos Automotores
                                     </label>
 
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="tipo_rac" class="form-check-input me-1"
+                                        <input type="checkbox" name="tipoRac" class="form-check-input me-1"
                                             value="RAC_3">
                                         RAC 3 - Equipamentos Móveis
                                     </label>
 
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="tipo_rac" class="form-check-input me-1"
+                                        <input type="checkbox" name="tipoRac" class="form-check-input me-1"
                                             value="RAC_5">
                                         RAC 5 - Içamento de Cargas
                                     </label>
 
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="tipo_rac" class="form-check-input me-1"
+                                        <input type="checkbox" name="tipoRac" class="form-check-input me-1"
                                             value="RAC_6">
                                         RAC 6 - Espaço Confinado
                                     </label>
 
                                     <label class="rac-checkbox">
-                                        <input type="checkbox" name="tipo_rac" class="form-check-input me-1"
+                                        <input type="checkbox" name="tipoRac" class="form-check-input me-1"
                                             value="RAC_10">
                                         RAC 10 - Trabalhos em Eletricidade
                                     </label>
                                 </div>
 
                                 <label class="rac-checkbox">
-                                    <input type="checkbox" name="tipo_rac" class="form-check-input me-1" value="RAC_11">
+                                    <input type="checkbox" name="tipoRac" class="form-check-input me-1" value="RAC_11">
                                     RAC 11 - Metal Líquido
                                 </label>
                             </div>
@@ -351,7 +351,7 @@
 
                         <div id="blocoSolicitarMaisUnidades" style="display:none">
                             <div class="form-group mt-2">
-                                <input type="hidden" id="solicitarMaisUnidades" name="solicitar_mais_unidades"
+                                <input type="hidden" id="solicitarMaisUnidades" name="solicitarMaisUnidades"
                                     value="false">
 
                                 <div class="d-flex align-items-center mt-2">
@@ -443,7 +443,7 @@
                                         <div class="input-icon">
                                             <i class="fa-solid fa-store"></i>
                                         </div>
-                                        <input type="text" id="nome_fantasia">
+                                        <input type="text" id="nomeFantasia">
                                     </div>
                                 </div>
 
@@ -453,7 +453,7 @@
                                         <div class="input-icon">
                                             <i class="fa-solid fa-file-signature"></i>
                                         </div>
-                                        <input type="text" id="razao_social">
+                                        <input type="text" id="razaoSocial">
                                     </div>
                                 </div>
                             </div>
@@ -466,7 +466,7 @@
                                         <div class="input-icon">
                                             <i class="fa-solid fa-id-card"></i>
                                         </div>
-                                        <input type="text" id="cnpj">
+                                        <input type="text" id="cnpj" maxlength="18">
                                     </div>
                                 </div>
 
@@ -510,7 +510,7 @@
                                         <div class="input-icon">
                                             <i class="fa-solid fa-hashtag"></i>
                                         </div>
-                                        <input type="text" id="numero">
+                                        <input type="number" id="numero">
                                     </div>
                                 </div>
                             </div>
@@ -539,7 +539,7 @@
 
                             <div class="form-row">
                                 <div class="form-check my-2">
-                                    <input class="form-check-input" type="radio" name="tipo_faturamento" value="JUNTO">
+                                    <input class="form-check-input" type="radio" name="tipoFaturamento" value="JUNTO">
                                     <label class="form-check-label">
                                         Essa unidade será faturada junto com a empresa principal, em uma única
                                         nota
@@ -547,7 +547,7 @@
                                 </div>
 
                                 <div class="form-check mt-2 mb-4">
-                                    <input class="form-check-input" type="radio" name="tipo_faturamento"
+                                    <input class="form-check-input" type="radio" name="tipoFaturamento"
                                         value="SEPARADO">
                                     <label class="form-check-label">
                                         Essa unidade será faturada separadamente da empresa principal, com uma
@@ -657,6 +657,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label>CNH</label>
@@ -799,7 +800,7 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <div class="form-group">
-                            <input type="hidden" id="enviarMaisEmails" name="enviar_mais_emails" value="false">
+                            <input type="hidden" id="enviarMaisEmails" name="enviarMaisEmails" value="false">
 
                             <div class="d-flex align-items-center mt-3">
                                 <label class="fw-semibold mb-0 me-4">

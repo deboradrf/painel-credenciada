@@ -312,7 +312,7 @@ function formatarCPF(cpf) {
 }
 
 // MOSTRAR / OCULTAR TIPO RAC
-const racCheckboxes = document.querySelectorAll('input[name="form_rac"]');
+const racCheckboxes = document.querySelectorAll('input[name="formRac"]');
 const divTipoRac = document.getElementById("divTipoRac");
 
 racCheckboxes.forEach(cb => {
@@ -325,7 +325,7 @@ racCheckboxes.forEach(cb => {
 
     if (!racValeSelecionado) {
       // limpa seleção dos tipos RAC Vale
-      document.querySelectorAll('input[name="tipo_rac"]').forEach(cb => cb.checked = false);
+      document.querySelectorAll('input[name="tipoRac"]').forEach(cb => cb.checked = false);
     }
   });
 });
@@ -468,8 +468,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // CAMPOS DA NOVA UNIDADE
   const camposNovaUnidade = [
-    "nome_fantasia",
-    "razao_social",
+    "nomeFantasia",
+    "razaoSocial",
     "cnpj",
     "cnae",
     "cep",
@@ -480,7 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "email"
   ].map(id => document.getElementById(id));
 
-  const radiosTipoFaturamento = document.querySelectorAll('input[name="tipo_faturamento"]');
+  const radiosTipoFaturamento = document.querySelectorAll('input[name="tipoFaturamento"]');
 
   // MOSTRA / OCULTAR SEÇÃO DE MUDANÇA DE FUNÇÃO
   tipoExame.addEventListener("change", () => {
@@ -874,18 +874,18 @@ function definirStatusInicial(s) {
   return "PENDENTE";
 }
 
+// MÁSCARA DE CEP
 const inputCep = document.getElementById("cep");
 
 inputCep.addEventListener("input", function () {
 
-  let valor = this.value.replace(/\D/g, ""); // remove tudo que não é número
+  let valor = this.value.replace(/\D/g, "");
 
   if (valor.length > 5) {
     valor = valor.slice(0, 5) + "-" + valor.slice(5, 8);
   }
 
   this.value = valor;
-
 });
 
 // CHECKBOX DE NOVA UNIDADE TORNA OBRIGATORIO A CRIAÇÃO DE NOVO SETOR/CARGO
@@ -1074,12 +1074,50 @@ async function enviarEmailSolicitacao(dados) {
   });
 }
 
+// CAMPOS EM MAIÚSCULO
+const camposMaiusculo = [
+  "nomeFantasia",
+  "razaoSocial",
+  "rua",
+  "bairro",
+  "estado",
+  "novaFuncao",
+  "novoSetor",
+  "labToxicologico",
+  "estadoCredenciamento",
+  "cidadeCredenciamento"
+];
+
+camposMaiusculo.forEach(id => {
+  const campo = document.getElementById(id);
+
+  if (campo) {
+    campo.addEventListener("input", function () {
+      this.value = this.value.toUpperCase();
+    });
+  }
+});
+
+// MÁSCARA DE CNPJ
+document.getElementById('cnpj').addEventListener('input', function (e) {
+  let value = e.target.value;
+
+  value = value.replace(/\D/g, '');
+
+  value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+  value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+  value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+  value = value.replace(/(\d{4})(\d)/, '$1-$2');
+
+  e.target.value = value;
+});
+
 // ENVIO DO FORMULÁRIO
 document.getElementById("formCadastro").addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  const nomeFantasia = document.getElementById("nome_fantasia")?.value || null;
-  const razaoSocial = document.getElementById("razao_social")?.value || null;
+  const nomeFantasia = document.getElementById("nomeFantasia")?.value || null;
+  const razaoSocial = document.getElementById("razaoSocial")?.value || null;
   const cnpj = document.getElementById("cnpj")?.value || null;
   const cnae = document.getElementById("cnae")?.value || null;
   const cep = document.getElementById("cep")?.value || null;
@@ -1088,7 +1126,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   const bairro = document.getElementById("bairro")?.value || null;
   const estado = document.getElementById("estado")?.value || null;
   const email = document.getElementById("email")?.value || null;
-  const tipoFaturamento = document.querySelector('input[name="tipo_faturamento"]:checked')?.value || null;
+  const tipoFaturamento = document.querySelector('input[name="tipoFaturamento"]:checked')?.value || null;
   const solicitarNovaUnidade = document.getElementById("solicitarNovaUnidade")?.checked === true;
   const unidadeDestino = document.getElementById("unidadeDestino");
   const solicitarNovaFuncao = document.getElementById("solicitarNovaFuncao")?.checked === true;
@@ -1099,8 +1137,8 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   const nomeNovoSetor = document.getElementById("novoSetor")?.value || null;
   const solicitarCredenciamento = document.getElementById("solicitarCredenciamento")?.checked === true;
   const clinicaSelect = document.getElementById("nomeClinica");
-  const racSelecionados = Array.from(document.querySelectorAll('input[name="form_rac"]:checked')).map(el => el.value);
-  const tiposRacSelecionados = Array.from(document.querySelectorAll('input[name="tipo_rac"]:checked')).map(el => el.value);
+  const racSelecionados = Array.from(document.querySelectorAll('input[name="formRac"]:checked')).map(el => el.value);
+  const tiposRacSelecionados = Array.from(document.querySelectorAll('input[name="tipoRac"]:checked')).map(el => el.value);
 
   const unidades = Array.from(document.querySelectorAll(".unidade-extra-select"))
     .filter(select => select.value)
