@@ -23,9 +23,10 @@ document.getElementById("recuperarForm").addEventListener("submit", async (e) =>
         const data = await res.json()
 
         if (!res.ok) {
-            alert(data.erro) // 🔥 agora pega o erro certo
             botao.disabled = false
             botao.innerText = "Recuperar senha"
+
+            alert(data.erro)
             return
         }
 
@@ -34,10 +35,10 @@ document.getElementById("recuperarForm").addEventListener("submit", async (e) =>
 
     } catch (err) {
         console.error(err)
-        alert("Erro ao recuperar senha")
-
         botao.disabled = false
         botao.innerText = "Recuperar senha"
+
+        alert("Erro ao recuperar senha")
     }
 })
 

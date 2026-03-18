@@ -2,7 +2,7 @@ document.getElementById("loginForm").onsubmit = async e => {
     e.preventDefault();
 
     const usuario = document.getElementById("usuario").value;
-    const senha = document.getElementById("senha").value;
+    const senha = document.getElementById("senha").value.trim();
 
     const res = await fetch(`/login`, {
         method: "POST",

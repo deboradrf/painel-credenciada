@@ -1028,7 +1028,7 @@ async function enviarEmailSolicitacao(dados) {
   if (dados.solicitar_nova_unidade === true) {
     destinatario = "clientes@salubrita.com.br";
     //destinatario = "debora.fonseca@salubrita.com.br";
-    assunto = "Solicitação de criação de nova unidade";
+    assunto = "Solicitação de Criação de Unidade";
 
     mensagem = `
       Uma solicitação para criação de unidade para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.

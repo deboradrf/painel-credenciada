@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("filterCPF").value = "";
     document.getElementById("filterStatus").value = "";
 
-    renderizarTabela(solicitacoes);
+    aplicarFiltros();
   });
 
   carregarSolicitacoes();
@@ -80,25 +80,22 @@ document.getElementById("checkMostrarTudo").addEventListener("change", function 
 // FUNÇÃO PARA ESCONDER SOLICITAÇÕES POR PADRÃO
 let mostrarConcluidos = false;
 
+const statusConcluidos = ["APROVADO", "ENVIADO_SOC"];
+
 function deveExibir(s) {
+  // MARCADO → mostrar concluídos + cancelados
   if (mostrarConcluidos) {
-    return true;
+    return (
+      statusConcluidos.includes(s.status) ||
+      s.status === "CANCELADO"
+    );
   }
 
-  // ESCONDER CANCELADOS
-  if (s.status === "CANCELADO") {
-    return false;
-  }
-
-  if (s.tipo === "NOVO_EXAME" && s.status === "APROVADO") {
-    return false;
-  }
-
-  if (s.tipo === "NOVO_CADASTRO" && s.status === "ENVIADO_SOC") {
-    return false;
-  }
-
-  return true;
+  // DESMARCADO → mostrar somente pendentes
+  return (
+    !statusConcluidos.includes(s.status) &&
+    s.status !== "CANCELADO"
+  );
 }
 
 // FUNÇÃO PARA CARREGAR SOLICITAÇÕES E RENDERIZAR A TABELA
@@ -1777,7 +1774,15 @@ async function salvarEdicaoExame() {
 }
 
 // FUNÇÃO PARA APROVAR / REPROVAR SOLICITAÇÃO
-async function analisarSolicitacao(status) {
+async function analisarSolicitacao(status, btn) {
+  const textoOriginal = btn.innerHTML;
+
+  // BLOQUEIA O BOTÃO E ADICIONA O SPINNER
+  btn.disabled = true;
+  btn.innerHTML = `
+    ${status === "APROVADO" ? "Aprovando..." : "Reprovando..."}
+  `;
+
   const isExame = document.getElementById("modalDetalhesNovoExame").classList.contains("show");
   const tipo = isExame ? "NOVO_EXAME" : "NOVO_CADASTRO";
 
@@ -1786,16 +1791,25 @@ async function analisarSolicitacao(status) {
     const observacaoConsulta = getObservacaoConsultaAtual();
 
     if (!tipoConsulta) {
+      btn.disabled = false;
+      btn.innerHTML = textoOriginal;
+
       alert("Selecione o tipo da consulta.");
       return;
     }
 
     if (tipoConsulta === "PENDENTE_AGENDAMENTO") {
+      btn.disabled = false;
+      btn.innerHTML = textoOriginal;
+
       alert("Não é possível aprovar com consulta pendente de agendamento.");
       return;
     }
 
     if (!observacaoConsulta || !observacaoConsulta.value.trim()) {
+      btn.disabled = false;
+      btn.innerHTML = textoOriginal;
+
       alert("A observação da consulta é obrigatória.");
       observacaoConsulta?.focus();
       return;
@@ -1810,6 +1824,7 @@ async function analisarSolicitacao(status) {
 
   if (status === "REPROVADO" && !motivo.trim()) {
     alert("Informe o motivo da reprovação");
+    btn && (btn.innerText = "Reprovar");
     return;
   }
 
@@ -1832,8 +1847,12 @@ async function analisarSolicitacao(status) {
     bootstrap.Modal.getInstance(document.querySelector(".modal.show")).hide();
     motivoInput.value = "";
     carregarSolicitacoes();
-  } else {
+  }
+  else {
     alert("Erro ao analisar solicitação");
+
+    btn.disabled = false;
+    btn.innerHTML = textoOriginal;
   }
 }
 

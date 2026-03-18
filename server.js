@@ -537,8 +537,6 @@ app.post("/login", async (req, res) => {
   try {
     const { usuario, senha } = req.body;
 
-    console.log("Usuario digitado:", usuario);
-
     const result = await pool.query(
       `
       SELECT
@@ -2781,7 +2779,7 @@ async function enviarEmailSetorFuncao(dados) {
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
     to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
     //to: "debora.fonseca@salubrita.com.br",
-    subject: "Solicitação de criação de setor/função",
+    subject: "Solicitação de Criação de Setor/Função",
     text: `
       Uma solicitação para criação de setor/função para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
@@ -2795,7 +2793,7 @@ async function enviarEmailSetorCargo(dados) {
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
     to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
     //to: "debora.fonseca@salubrita.com.br",
-    subject: "Solicitação de criação de setor/cargo",
+    subject: "Solicitação de Criação de Setor/Cargo",
     text: `
       Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
@@ -2809,7 +2807,7 @@ async function enviarEmailCredenciamento(dados) {
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
     to: "contratos@salubrita.com.br",
     //to: "debora.fonseca@salubrita.com.br",
-    subject: "Solicitação de credenciamento",
+    subject: "Solicitação de Credenciamento",
     text: `
       Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
       
@@ -2823,10 +2821,10 @@ async function enviarEmailReprovacao(email, motivo) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
     to: email,
-    subject: "Sua solicitação foi reprovada",
+    subject: "Solicitação Reprovada",
     text:
       `
-      Sua solicitação foi REPROVADA pelo seguinte motivo:
+      Sua solicitação foi reprovada pelo seguinte motivo:
 
       "${motivo}"
 
@@ -2843,11 +2841,11 @@ async function enviarEmailObservacaoConsulta({ email, nomeFuncionario, observaca
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
     to: email,
-    subject: "Consulta médica",
+    subject: "Consulta agendada",
     html: `
       <p>A solicitação referente a novo cadastro/novo exame do(a) colaborador(a): ${nomeFuncionario} foi aprovada.</p>
 
-      <p><strong>Observação da consulta:</strong></p>
+      <p>Observação da consulta:</p>
 
       "${observacao.replace(/\n/g, "<br>")}"
     `

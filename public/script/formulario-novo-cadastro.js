@@ -1088,7 +1088,7 @@ async function enviarEmailSolicitacao(dados) {
   if (dados.solicitar_nova_unidade === true) {
     destinatario = "clientes@salubrita.com.br";
     //destinatario = "debora.fonseca@salubrita.com.br";
-    assunto = "Solicitação de criação de nova unidade";
+    assunto = "Solicitação de Criação de Unidade";
 
     mensagem = `
       Uma solicitação para criação de unidade para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
@@ -1101,7 +1101,7 @@ async function enviarEmailSolicitacao(dados) {
   else if (dados.solicitar_novo_setor === true || dados.solicitar_novo_cargo === true) {
     destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
     //destinatario = "debora.fonseca@salubrita.com.br";
-    assunto = "Solicitação de criação de setor/cargo";
+    assunto = "Solicitação de Criação de Setor/Cargo";
 
     mensagem = `
       Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
@@ -1114,7 +1114,7 @@ async function enviarEmailSolicitacao(dados) {
   else if (dados.solicitar_credenciamento === true) {
     destinatario = "contratos@salubrita.com.br";
     //destinatario = "debora.fonseca@salubrita.com.br";
-    assunto = "Solicitação de credenciamento";
+    assunto = "Solicitação de Credenciamento";
 
     mensagem = `
       Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.

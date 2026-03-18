@@ -92,25 +92,22 @@ document.getElementById("checkMostrarTudo").addEventListener("change", function 
 // FUNÇÃO PARA ESCONDER SOLICITAÇÕES POR PADRÃO
 let mostrarConcluidos = false;
 
+const statusConcluidos = ["APROVADO", "ENVIADO_SOC"];
+
 function deveExibir(s) {
+  // MARCADO → mostrar concluídos + cancelados
   if (mostrarConcluidos) {
-    return true;
+    return (
+      statusConcluidos.includes(s.status) ||
+      s.status === "CANCELADO"
+    );
   }
 
-  // ESCONDER CANCELADOS
-  if (s.status === "CANCELADO") {
-    return false;
-  }
-
-  if (s.tipo === "NOVO_EXAME" && s.status === "APROVADO") {
-    return false;
-  }
-
-  if (s.tipo === "NOVO_CADASTRO" && s.status === "ENVIADO_SOC") {
-    return false;
-  }
-
-  return true;
+  // DESMARCADO → mostrar somente pendentes
+  return (
+    !statusConcluidos.includes(s.status) &&
+    s.status !== "CANCELADO"
+  );
 }
 
 // FUNÇÃO PARA CARREGAR HISTÓRICO DAS SOLICITAÇÕES
@@ -198,7 +195,7 @@ function renderizarTabela(lista) {
     // }
 
     // AÇÕES
-    let acoes = "";
+    let acoes = "Nenhuma ação a ser feita";
 
     // STATUS QUE MOSTRAM CONSULTA
     if (s.status === "APROVADO" || s.status === "ENVIADO_SOC") {
