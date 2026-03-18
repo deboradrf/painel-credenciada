@@ -1553,7 +1553,7 @@ function pegarDadosEdicaoCadastro(statusAtual) {
 function edicaoUnidade(statusAtual) {
   const payload = {};
 
-  if (statusAtual === "PENDENTE_UNIDADE" || statusAtual === "PENDENTE_REAVALIACAO") {
+  if (statusAtual === "PENDENTE_UNIDADE") {
     const select = document.getElementById("unidadeSelect");
 
     if (select && select.style.display !== "none" && select.value) {
@@ -1669,7 +1669,7 @@ function pegarDadosEdicaoExame(statusAtual) {
 function edicaoExameUnidade(statusAtual) {
   const payload = {};
 
-  if (statusAtual === "PENDENTE_UNIDADE" || statusAtual === "PENDENTE_REAVALIACAO") {
+  if (statusAtual === "PENDENTE_UNIDADE") {
     const select = document.getElementById("unidadeDestinoSelect");
 
     if (select && select.style.display !== "none" && select.value) {
