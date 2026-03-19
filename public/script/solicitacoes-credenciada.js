@@ -200,35 +200,35 @@ async function renderizarTabela(lista) {
       <td class="actions">
         <div class="actions-wrapper">
           ${estaEmAnalise
-          ? `
+        ? `
               <small style="opacity:0.6;">
                 Em análise por ${s.em_analise_por_nome?.split(' ')[0]}
               </small>
               `
-          : `
+        : `
             <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
               Analisar
             </button>
 
             ${podeEnviarSOC
-            ? `
+          ? `
                   <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
                     Enviar SOC
                   </button>
                   `
-            : ""
-            }
+          : ""
+        }
 
             ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
-            ? `
+          ? `
                   <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
                     Cancelar
                   </button>
                   `
-            : ""
-            }
+          : ""
+        }
           `
-          }
+      }
         </div>
       </td>
     `;
@@ -344,6 +344,31 @@ async function preencherModal(s, tipo) {
   }
 
   if (tipo === "NOVO_CADASTRO") {
+    window.flagsSolicitacao = {
+      solicitar_novo_setor: s.solicitar_novo_setor,
+      solicitar_novo_cargo: s.solicitar_novo_cargo,
+      solicitar_credenciamento: s.solicitar_credenciamento,
+    };
+
+    // INFERIR ETAPA ANTERIOR
+    if (s.status === "PENDENTE_REAVALIACAO") {
+      const precisaUnidade = s.solicitar_nova_unidade && !s.cod_unidade;
+      const precisaSC = (s.solicitar_novo_setor && !s.cod_setor) || (s.solicitar_novo_cargo && !s.cod_cargo);
+      const precisaCredenciamento = s.solicitar_credenciamento && !s.nome_clinica;
+
+      if (precisaUnidade) {
+        window.etapaAnteriorReavaliacao = "PENDENTE_UNIDADE";
+      } else if (precisaSC) {
+        window.etapaAnteriorReavaliacao = "PENDENTE_SC";
+      } else if (precisaCredenciamento) {
+        window.etapaAnteriorReavaliacao = "PENDENTE_CREDENCIAMENTO";
+      } else {
+        window.etapaAnteriorReavaliacao = null;
+      }
+    } else {
+      window.etapaAnteriorReavaliacao = null;
+    }
+
     document.getElementById("cadastro_solicitacao_id").innerHTML = `${s.solicitacao_id}`;
 
     document.getElementById("cadastro_solicitado_por_email").innerText = emails;
@@ -564,6 +589,31 @@ async function preencherModal(s, tipo) {
   }
 
   if (tipo === "NOVO_EXAME") {
+    window.flagsSolicitacao = {
+      solicitar_novo_setor: s.solicitar_novo_setor,
+      solicitar_nova_funcao: s.solicitar_nova_funcao,
+      solicitar_credenciamento: s.solicitar_credenciamento,
+    };
+
+    // INFERIR ETAPA ANTERIOR PELOS CAMPOS AINDA NULOS + FLAGS
+    if (s.status === "PENDENTE_REAVALIACAO") {
+      const precisaUnidade = s.solicitar_nova_unidade && !s.unidade_destino;
+      const precisaSC = (s.solicitar_nova_funcao && !s.funcao_destino) || (s.solicitar_novo_setor && !s.setor_destino);
+      const precisaCredenciamento = s.solicitar_credenciamento && !s.nome_clinica;
+
+      if (precisaUnidade) {
+        window.etapaAnteriorReavaliacao = "PENDENTE_UNIDADE";
+      } else if (precisaSC) {
+        window.etapaAnteriorReavaliacao = "PENDENTE_SC";
+      } else if (precisaCredenciamento) {
+        window.etapaAnteriorReavaliacao = "PENDENTE_CREDENCIAMENTO";
+      } else {
+        window.etapaAnteriorReavaliacao = null;
+      }
+    } else {
+      window.etapaAnteriorReavaliacao = null;
+    }
+
     document.getElementById("exame_solicitacao_id").innerHTML = `${s.solicitacao_id}`;
 
     document.getElementById("exame_solicitado_por_email").innerText = emails;
@@ -921,11 +971,19 @@ async function preencherModal(s, tipo) {
 
   const temEdicao = s.solicitar_nova_unidade || s.solicitar_novo_setor || s.solicitar_novo_cargo || s.solicitar_nova_funcao || s.solicitar_credenciamento;
 
-  if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || (s.status === "PENDENTE_REAVALIACAO" && temEdicao)) {
+  // NO PENDENTE_REAVALIACAO, só mostra salvar se tiver etapa anterior identificada
+  const reavaliacaoPrecisaSalvar = s.status === "PENDENTE_REAVALIACAO" &&
+    temEdicao &&
+    window.etapaAnteriorReavaliacao !== null &&
+    window.etapaAnteriorReavaliacao !== undefined;
+
+  if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" ||
+    s.status === "PENDENTE_CREDENCIAMENTO" || reavaliacaoPrecisaSalvar) {
     botoesSalvar.forEach(btn => btn.style.display = "inline-flex");
   }
 
-  if (s.status === "PENDENTE" || s.status === "PENDENTE_AGENDAMENTO" || (s.status === "PENDENTE_REAVALIACAO" && !temEdicao)) {
+  if (s.status === "PENDENTE" || s.status === "PENDENTE_AGENDAMENTO" ||
+    (s.status === "PENDENTE_REAVALIACAO" && !reavaliacaoPrecisaSalvar)) {
     botoesAprovar.forEach(btn => btn.style.display = "inline-flex");
   }
 
@@ -1540,6 +1598,20 @@ function marcarTipoConsultaSalvo(valor, tipo) {
 function pegarDadosEdicaoCadastro(statusAtual) {
   let payload = {};
 
+  if (statusAtual === "PENDENTE_REAVALIACAO") {
+    const etapaAnterior = window.etapaAnteriorReavaliacao;
+
+    if (etapaAnterior === "PENDENTE_UNIDADE") {
+      payload = { ...payload, ...edicaoUnidade("PENDENTE_UNIDADE") };
+    } else if (etapaAnterior === "PENDENTE_SC") {
+      payload = { ...payload, ...edicaoSetorCargo("PENDENTE_SC") };
+    } else if (etapaAnterior === "PENDENTE_CREDENCIAMENTO") {
+      payload = { ...payload, ...edicaoCredenciamento("PENDENTE_CREDENCIAMENTO") };
+    }
+
+    return payload;
+  }
+
   payload = {
     ...payload,
     ...edicaoUnidade(statusAtual),
@@ -1553,7 +1625,7 @@ function pegarDadosEdicaoCadastro(statusAtual) {
 function edicaoUnidade(statusAtual) {
   const payload = {};
 
-  if (statusAtual === "PENDENTE_UNIDADE") {
+  if (statusAtual === "PENDENTE_UNIDADE" || statusAtual === "PENDENTE_REAVALIACAO") {
     const select = document.getElementById("unidadeSelect");
 
     if (select && select.style.display !== "none" && select.value) {
@@ -1611,6 +1683,80 @@ async function salvarEdicaoCadastro() {
   }
 
   const statusAtual = window.statusAtualSolicitacao;
+  const flags = window.flagsSolicitacao || {};
+  const etapaAnterior = window.etapaAnteriorReavaliacao;
+
+  // VALIDAÇÕES
+  if (statusAtual === "PENDENTE_UNIDADE") {
+    const select = document.getElementById("unidadeSelect");
+    if (!select || !select.value) {
+      alert("Selecione a unidade antes de salvar.");
+      return;
+    }
+  }
+
+  if (statusAtual === "PENDENTE_SC") {
+    if (flags.solicitar_novo_setor) {
+      const select = document.getElementById("setorSelect");
+      if (!select || !select.value) {
+        alert("Selecione o setor antes de salvar.");
+        return;
+      }
+    }
+
+    if (flags.solicitar_novo_cargo) {
+      const select = document.getElementById("cargoSelect");
+      if (!select || !select.value) {
+        alert("Selecione o cargo antes de salvar.");
+        return;
+      }
+    }
+  }
+
+  if (statusAtual === "PENDENTE_CREDENCIAMENTO") {
+    const select = document.getElementById("clinicaSelect");
+    if (!select || !select.value) {
+      alert("Selecione a clínica antes de salvar.");
+      return;
+    }
+  }
+
+  if (statusAtual === "PENDENTE_REAVALIACAO") {
+    if (etapaAnterior === "PENDENTE_UNIDADE") {
+      const select = document.getElementById("unidadeSelect");
+      if (!select || !select.value) {
+        alert("Selecione a unidade antes de salvar.");
+        return;
+      }
+    }
+
+    if (etapaAnterior === "PENDENTE_SC") {
+      if (flags.solicitar_novo_setor) {
+        const select = document.getElementById("setorSelect");
+        if (!select || !select.value) {
+          alert("Selecione o setor antes de salvar.");
+          return;
+        }
+      }
+
+      if (flags.solicitar_novo_cargo) {
+        const select = document.getElementById("cargoSelect");
+        if (!select || !select.value) {
+          alert("Selecione o cargo antes de salvar.");
+          return;
+        }
+      }
+    }
+
+    if (etapaAnterior === "PENDENTE_CREDENCIAMENTO") {
+      const select = document.getElementById("clinicaSelect");
+      if (!select || !select.value) {
+        alert("Selecione a clínica antes de salvar.");
+        return;
+      }
+    }
+  }
+
   const dadosEdicao = pegarDadosEdicaoCadastro(statusAtual);
 
   let endpoint = "";
@@ -1624,7 +1770,7 @@ async function salvarEdicaoCadastro() {
   }
 
   if (!endpoint) {
-    alert("Nenhum alteração para salvar.");
+    alert("Nenhuma alteração para salvar.");
     return;
   }
 
@@ -1656,6 +1802,22 @@ async function salvarEdicaoCadastro() {
 function pegarDadosEdicaoExame(statusAtual) {
   let payload = {};
 
+  // NO PENDENTE_REAVALIACAO, coleta APENAS os dados da etapa correta
+  if (statusAtual === "PENDENTE_REAVALIACAO") {
+    const etapaAnterior = window.etapaAnteriorReavaliacao;
+
+    if (etapaAnterior === "PENDENTE_UNIDADE") {
+      payload = { ...payload, ...edicaoExameUnidade("PENDENTE_UNIDADE") };
+    } else if (etapaAnterior === "PENDENTE_SC") {
+      payload = { ...payload, ...edicaoFuncaoSetor("PENDENTE_SC") };
+    } else if (etapaAnterior === "PENDENTE_CREDENCIAMENTO") {
+      payload = { ...payload, ...edicaoExameCredenciamento("PENDENTE_CREDENCIAMENTO") };
+    }
+
+    return payload;
+  }
+
+  // NOS OUTROS STATUS, comportamento normal
   payload = {
     ...payload,
     ...edicaoExameUnidade(statusAtual),
@@ -1669,7 +1831,7 @@ function pegarDadosEdicaoExame(statusAtual) {
 function edicaoExameUnidade(statusAtual) {
   const payload = {};
 
-  if (statusAtual === "PENDENTE_UNIDADE") {
+  if (statusAtual === "PENDENTE_UNIDADE" || statusAtual === "PENDENTE_REAVALIACAO") {
     const select = document.getElementById("unidadeDestinoSelect");
 
     if (select && select.style.display !== "none" && select.value) {
@@ -1730,22 +1892,92 @@ async function salvarEdicaoExame() {
   }
 
   const statusAtual = window.statusAtualSolicitacao;
+  const flags = window.flagsSolicitacao || {};
+  const etapaAnterior = window.etapaAnteriorReavaliacao;
+
+  // VALIDAÇÃO
+  if (statusAtual === "PENDENTE_UNIDADE") {
+    const select = document.getElementById("unidadeDestinoSelect");
+    if (!select || !select.value) {
+      alert("Selecione a unidade de destino antes de salvar.");
+      return;
+    }
+  }
+
+  if (statusAtual === "PENDENTE_SC") {
+    if (flags.solicitar_novo_setor) {
+      const select = document.getElementById("exameSetorDestinoSelect");
+      if (!select || !select.value) {
+        alert("Selecione o setor antes de salvar.");
+        return;
+      }
+    }
+
+    if (flags.solicitar_nova_funcao) {
+      const select = document.getElementById("exameFuncaoDestinoSelect");
+      if (!select || !select.value) {
+        alert("Selecione a função antes de salvar.");
+        return;
+      }
+    }
+  }
+
+  if (statusAtual === "PENDENTE_CREDENCIAMENTO") {
+    const select = document.getElementById("clinicaExameSelect");
+    if (!select || !select.value) {
+      alert("Selecione a clínica antes de salvar.");
+      return;
+    }
+  }
+
+  if (statusAtual === "PENDENTE_REAVALIACAO") {
+    if (etapaAnterior === "PENDENTE_UNIDADE") {
+      const select = document.getElementById("unidadeDestinoSelect");
+      if (!select || !select.value) {
+        alert("Selecione a unidade de destino antes de salvar.");
+        return;
+      }
+    }
+    if (etapaAnterior === "PENDENTE_SC") {
+      if (flags.solicitar_novo_setor) {
+        const select = document.getElementById("exameSetorDestinoSelect");
+        if (!select || !select.value) {
+          alert("Selecione o setor antes de salvar.");
+          return;
+        }
+      }
+
+      if (flags.solicitar_nova_funcao) {
+        const select = document.getElementById("exameFuncaoDestinoSelect");
+        if (!select || !select.value) {
+          alert("Selecione a função antes de salvar.");
+          return;
+        }
+      }
+    }
+    if (etapaAnterior === "PENDENTE_CREDENCIAMENTO") {
+      const select = document.getElementById("clinicaExameSelect");
+      if (!select || !select.value) {
+        alert("Selecione a clínica antes de salvar.");
+        return;
+      }
+    }
+  }
+
   const dadosEdicao = pegarDadosEdicaoExame(statusAtual);
 
   let endpoint = "";
 
   if (dadosEdicao.unidade_destino) {
     endpoint = `/solicitacoes/novo-exame/${solicitacaoAtualId}/salvar-unidade`;
-  }
-  else if (dadosEdicao.funcao_destino || dadosEdicao.setor_destino) {
+  } else if (dadosEdicao.funcao_destino || dadosEdicao.setor_destino) {
     endpoint = `/solicitacoes/novo-exame/${solicitacaoAtualId}/salvar-sc`;
-  }
-  else if (dadosEdicao.cod_clinica) {
+  } else if (dadosEdicao.cod_clinica) {
     endpoint = `/solicitacoes/novo-exame/${solicitacaoAtualId}/salvar-credenciamento`;
   }
 
   if (!endpoint) {
-    alert("Nenhum alteração para salvar.");
+    alert("Nenhuma alteração para salvar.");
     return;
   }
 

@@ -1628,6 +1628,10 @@ app.get("/solicitacoes", async (req, res) => {
           f.solicitar_novo_setor,
           f.solicitar_novo_cargo,
           f.solicitar_credenciamento,
+          f.nome_unidade       AS unidade_destino,
+          f.nome_setor         AS setor_destino,
+          f.nome_cargo         AS funcao_destino,
+          f.nome_clinica,
           s.em_analise_por,
           ulock.nome AS em_analise_por_nome,
           'NOVO_CADASTRO' AS tipo
@@ -1653,9 +1657,13 @@ app.get("/solicitacoes", async (req, res) => {
           f.solicitar_nova_funcao,
           f.solicitar_novo_setor,
           f.solicitar_credenciamento,
+          f.unidade_destino,
+          f.setor_destino,
+          f.funcao_destino,
+          f.nome_clinica,
           s.em_analise_por,
           ulock.nome AS em_analise_por_nome,
-          'NOVO_EXAME' AS tipo      
+          'NOVO_EXAME' AS tipo
         FROM solicitacoes_novo_exame s
         JOIN novo_exame f ON f.id = s.novo_exame_id
         LEFT JOIN usuarios ulock ON ulock.id = s.em_analise_por
