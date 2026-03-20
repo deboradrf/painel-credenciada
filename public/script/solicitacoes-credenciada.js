@@ -80,20 +80,22 @@ document.getElementById("checkMostrarTudo").addEventListener("change", function 
 // FUNÇÃO PARA ESCONDER SOLICITAÇÕES POR PADRÃO
 let mostrarConcluidos = false;
 
-const statusConcluidos = ["APROVADO", "ENVIADO_SOC"];
+const statusConcluidosPorTipo = { NOVO_EXAME: ["APROVADO"], NOVO_CADASTRO: ["ENVIADO_SOC"] };
 
 function deveExibir(s) {
+  const concluidosDoTipo = statusConcluidosPorTipo[s.tipo] || [];
+
   // MARCADO → mostrar concluídos + cancelados
   if (mostrarConcluidos) {
     return (
-      statusConcluidos.includes(s.status) ||
+      concluidosDoTipo.includes(s.status) ||
       s.status === "CANCELADO"
     );
   }
 
   // DESMARCADO → mostrar somente pendentes
   return (
-    !statusConcluidos.includes(s.status) &&
+    !concluidosDoTipo.includes(s.status) &&
     s.status !== "CANCELADO"
   );
 }
@@ -268,7 +270,7 @@ async function verDetalhes(id, tipo) {
     const lockData = await lockRes.json();
 
     if (!lockRes.ok || !lockData.sucesso) {
-      alert(lockData.erro || "Esta solicitação já está em análise.");
+      notify.error(lockData.erro || "Esta solicitação já está em análise");
       return;
     }
 
@@ -322,10 +324,9 @@ async function verDetalhes(id, tipo) {
       },
       { once: true }
     );
-
-  } catch (err) {
-    console.error(err);
-    alert("Erro ao carregar detalhes");
+  } catch (erro) {
+    console.error(erro);
+    notify.error("Erro ao carregar detalhes");
   }
 }
 
@@ -1492,7 +1493,7 @@ document.querySelectorAll('input[name="statusConsulta"]').forEach(radio => {
 // FUNÇÃO PARA ATUALIZAR O STATUS PARA PENDENTE_AGENDAMENTO
 async function atualizarStatusParaPendenteAgendamento() {
   if (!solicitacaoAtualId || !tipoSolicitacaoAtual) {
-    alert("Solicitação não identificada.");
+    notify.error("Solicitação não identificada");
     return;
   }
 
@@ -1512,7 +1513,7 @@ async function atualizarStatusParaPendenteAgendamento() {
     const data = await res.json();
 
     if (!res.ok || !data.sucesso) {
-      alert(data.erro || "Erro ao atualizar status");
+      notify.error(data.erro || "Erro ao atualizar status");
       return;
     }
 
@@ -1532,10 +1533,9 @@ async function atualizarStatusParaPendenteAgendamento() {
       });
 
     carregarSolicitacoes();
-
-  } catch (err) {
-    console.error(err);
-    alert("Erro ao atualizar status");
+  } catch (erro) {
+    console.error(erro);
+    notify.error("Erro ao atualizar status");
   }
 }
 
@@ -1678,7 +1678,7 @@ function edicaoCredenciamento(statusAtual) {
 
 async function salvarEdicaoCadastro() {
   if (!solicitacaoAtualId) {
-    alert("ID da solicitação não encontrado");
+    notify.error("ID da solicitação não encontrado");
     return;
   }
 
@@ -1690,7 +1690,7 @@ async function salvarEdicaoCadastro() {
   if (statusAtual === "PENDENTE_UNIDADE") {
     const select = document.getElementById("unidadeSelect");
     if (!select || !select.value) {
-      alert("Selecione a unidade antes de salvar.");
+      notify.warning("Selecione a unidade antes de salvar");
       return;
     }
   }
@@ -1699,7 +1699,7 @@ async function salvarEdicaoCadastro() {
     if (flags.solicitar_novo_setor) {
       const select = document.getElementById("setorSelect");
       if (!select || !select.value) {
-        alert("Selecione o setor antes de salvar.");
+        notify.warning("Selecione o setor antes de salvar");
         return;
       }
     }
@@ -1707,7 +1707,7 @@ async function salvarEdicaoCadastro() {
     if (flags.solicitar_novo_cargo) {
       const select = document.getElementById("cargoSelect");
       if (!select || !select.value) {
-        alert("Selecione o cargo antes de salvar.");
+        notify.warning("Selecione o cargo antes de salvar");
         return;
       }
     }
@@ -1716,7 +1716,7 @@ async function salvarEdicaoCadastro() {
   if (statusAtual === "PENDENTE_CREDENCIAMENTO") {
     const select = document.getElementById("clinicaSelect");
     if (!select || !select.value) {
-      alert("Selecione a clínica antes de salvar.");
+      notify.warning("Selecione a clínica antes de salvar");
       return;
     }
   }
@@ -1725,7 +1725,7 @@ async function salvarEdicaoCadastro() {
     if (etapaAnterior === "PENDENTE_UNIDADE") {
       const select = document.getElementById("unidadeSelect");
       if (!select || !select.value) {
-        alert("Selecione a unidade antes de salvar.");
+        notify.warning("Selecione a unidade antes de salvar");
         return;
       }
     }
@@ -1734,7 +1734,7 @@ async function salvarEdicaoCadastro() {
       if (flags.solicitar_novo_setor) {
         const select = document.getElementById("setorSelect");
         if (!select || !select.value) {
-          alert("Selecione o setor antes de salvar.");
+          notify.warning("Selecione o setor antes de salvar");
           return;
         }
       }
@@ -1742,7 +1742,7 @@ async function salvarEdicaoCadastro() {
       if (flags.solicitar_novo_cargo) {
         const select = document.getElementById("cargoSelect");
         if (!select || !select.value) {
-          alert("Selecione o cargo antes de salvar.");
+          notify.warning("Selecione o cargo antes de salvar");
           return;
         }
       }
@@ -1751,7 +1751,7 @@ async function salvarEdicaoCadastro() {
     if (etapaAnterior === "PENDENTE_CREDENCIAMENTO") {
       const select = document.getElementById("clinicaSelect");
       if (!select || !select.value) {
-        alert("Selecione a clínica antes de salvar.");
+        notify.warning("Selecione a clínica antes de salvar");
         return;
       }
     }
@@ -1770,7 +1770,7 @@ async function salvarEdicaoCadastro() {
   }
 
   if (!endpoint) {
-    alert("Nenhuma alteração para salvar.");
+    notify.warning("Nenhuma alteração para salvar");
     return;
   }
 
@@ -1784,17 +1784,18 @@ async function salvarEdicaoCadastro() {
     if (!res.ok) {
       const txt = await res.text();
       console.error(txt);
-      alert("Erro ao salvar (ver console)");
+
+      notify.error("Erro ao salvar (ver console)");
       return;
     }
 
-    alert("Salvo com sucesso");
+    notify.success("Salvo com sucesso!");
     bootstrap.Modal.getInstance(document.querySelector(".modal.show")).hide();
     carregarSolicitacoes();
 
-  } catch (err) {
-    console.error(err);
-    alert("Erro de comunicação com o servidor");
+  } catch (erro) {
+    console.error(erro);
+    notify.error("Erro de comunicação com o servidor");
   }
 }
 
@@ -1887,7 +1888,7 @@ function edicaoExameCredenciamento(statusAtual) {
 
 async function salvarEdicaoExame() {
   if (!solicitacaoAtualId) {
-    alert("ID da solicitação não encontrado");
+    notify.error("ID da solicitação não encontrado");
     return;
   }
 
@@ -1899,7 +1900,7 @@ async function salvarEdicaoExame() {
   if (statusAtual === "PENDENTE_UNIDADE") {
     const select = document.getElementById("unidadeDestinoSelect");
     if (!select || !select.value) {
-      alert("Selecione a unidade de destino antes de salvar.");
+      notify.warning("Selecione a unidade antes de salvar");
       return;
     }
   }
@@ -1908,7 +1909,7 @@ async function salvarEdicaoExame() {
     if (flags.solicitar_novo_setor) {
       const select = document.getElementById("exameSetorDestinoSelect");
       if (!select || !select.value) {
-        alert("Selecione o setor antes de salvar.");
+        notify.warning("Selecione o setor antes de salvar");
         return;
       }
     }
@@ -1916,7 +1917,7 @@ async function salvarEdicaoExame() {
     if (flags.solicitar_nova_funcao) {
       const select = document.getElementById("exameFuncaoDestinoSelect");
       if (!select || !select.value) {
-        alert("Selecione a função antes de salvar.");
+        notify.warning("Selecione a função antes de salvar");
         return;
       }
     }
@@ -1925,7 +1926,7 @@ async function salvarEdicaoExame() {
   if (statusAtual === "PENDENTE_CREDENCIAMENTO") {
     const select = document.getElementById("clinicaExameSelect");
     if (!select || !select.value) {
-      alert("Selecione a clínica antes de salvar.");
+      notify.warning("Selecione a clínica antes de salvar");
       return;
     }
   }
@@ -1934,7 +1935,7 @@ async function salvarEdicaoExame() {
     if (etapaAnterior === "PENDENTE_UNIDADE") {
       const select = document.getElementById("unidadeDestinoSelect");
       if (!select || !select.value) {
-        alert("Selecione a unidade de destino antes de salvar.");
+        notify.warning("Selecione a unidade antes de salvar");
         return;
       }
     }
@@ -1942,7 +1943,7 @@ async function salvarEdicaoExame() {
       if (flags.solicitar_novo_setor) {
         const select = document.getElementById("exameSetorDestinoSelect");
         if (!select || !select.value) {
-          alert("Selecione o setor antes de salvar.");
+          notify.warning("Selecione o setor antes de salvar");
           return;
         }
       }
@@ -1950,7 +1951,7 @@ async function salvarEdicaoExame() {
       if (flags.solicitar_nova_funcao) {
         const select = document.getElementById("exameFuncaoDestinoSelect");
         if (!select || !select.value) {
-          alert("Selecione a função antes de salvar.");
+          notify.warning("Selecione a função antes de salvar");
           return;
         }
       }
@@ -1958,7 +1959,7 @@ async function salvarEdicaoExame() {
     if (etapaAnterior === "PENDENTE_CREDENCIAMENTO") {
       const select = document.getElementById("clinicaExameSelect");
       if (!select || !select.value) {
-        alert("Selecione a clínica antes de salvar.");
+        notify.warning("Selecione a clínica antes de salvar");
         return;
       }
     }
@@ -1977,7 +1978,7 @@ async function salvarEdicaoExame() {
   }
 
   if (!endpoint) {
-    alert("Nenhuma alteração para salvar.");
+    notify.warning("Nenhuma alteração para salvar");
     return;
   }
 
@@ -1991,29 +1992,24 @@ async function salvarEdicaoExame() {
     if (!res.ok) {
       const txt = await res.text();
       console.error(txt);
-      alert("Erro ao salvar (ver console)");
+
+      notify.error("Erro ao salvar (ver console)");
       return;
     }
 
-    alert("Salvo com sucesso");
+    notify.success("Salvo com sucesso!");
     bootstrap.Modal.getInstance(document.querySelector(".modal.show")).hide();
     carregarSolicitacoes();
-
-  } catch (err) {
-    console.error(err);
-    alert("Erro de comunicação com o servidor");
+  } catch (erro) {
+    console.error(erro);
+    notify.error("Erro na comunicação com o servidor");
   }
 }
 
 // FUNÇÃO PARA APROVAR / REPROVAR SOLICITAÇÃO
 async function analisarSolicitacao(status, btn) {
-  const textoOriginal = btn.innerHTML;
-
-  // BLOQUEIA O BOTÃO E ADICIONA O SPINNER
   btn.disabled = true;
-  btn.innerHTML = `
-    ${status === "APROVADO" ? "Aprovando..." : "Reprovando..."}
-  `;
+  btn.style.opacity = "0.6";
 
   const isExame = document.getElementById("modalDetalhesNovoExame").classList.contains("show");
   const tipo = isExame ? "NOVO_EXAME" : "NOVO_CADASTRO";
@@ -2024,25 +2020,22 @@ async function analisarSolicitacao(status, btn) {
 
     if (!tipoConsulta) {
       btn.disabled = false;
-      btn.innerHTML = textoOriginal;
-
-      alert("Selecione o tipo da consulta.");
+      btn.style.opacity = "1";
+      notify.warning("Selecione o tipo da consulta");
       return;
     }
 
     if (tipoConsulta === "PENDENTE_AGENDAMENTO") {
       btn.disabled = false;
-      btn.innerHTML = textoOriginal;
-
-      alert("Não é possível aprovar com consulta pendente de agendamento.");
+      btn.style.opacity = "1";
+      notify.error("Não é possível aprovar com consulta pendente de agendamento");
       return;
     }
 
     if (!observacaoConsulta || !observacaoConsulta.value.trim()) {
       btn.disabled = false;
-      btn.innerHTML = textoOriginal;
-
-      alert("A observação da consulta é obrigatória.");
+      btn.style.opacity = "1";
+      notify.warning("Informe a observação da consulta");
       observacaoConsulta?.focus();
       return;
     }
@@ -2055,36 +2048,33 @@ async function analisarSolicitacao(status, btn) {
   const motivo = motivoInput.value;
 
   if (status === "REPROVADO" && !motivo.trim()) {
-    alert("Informe o motivo da reprovação");
-    btn && (btn.innerText = "Reprovar");
+    notify.warning("Informe o motivo da reprovação");
+    btn.disabled = false;
+    btn.style.opacity = "1";
     return;
   }
 
-  const res = await fetch(`/solicitacoes/${tipo}/${solicitacaoAtualId}/analisar`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        status,
-        motivo,
-        usuario_id: usuarioLogado.id,
-        tipo_consulta: getTipoConsultaSelecionado(),
-        observacao_consulta: getObservacaoConsultaAtual()?.value || null
-      })
-    }
-  );
+  const res = await fetch(`/solicitacoes/${tipo}/${solicitacaoAtualId}/analisar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      status,
+      motivo,
+      usuario_id: usuarioLogado.id,
+      tipo_consulta: getTipoConsultaSelecionado(),
+      observacao_consulta: getObservacaoConsultaAtual()?.value || null
+    })
+  });
 
   if (res.ok) {
-    alert("Solicitação analisada com sucesso");
+    notify.success("Solicitação analisada com sucesso!");
     bootstrap.Modal.getInstance(document.querySelector(".modal.show")).hide();
     motivoInput.value = "";
     carregarSolicitacoes();
-  }
-  else {
-    alert("Erro ao analisar solicitação");
-
+  } else {
+    notify.error("Erro ao analisar solicitação");
     btn.disabled = false;
-    btn.innerHTML = textoOriginal;
+    btn.style.opacity = "1";
   }
 }
 
@@ -2105,14 +2095,15 @@ async function cancelarSolicitacao(id, tipo, usuarioLogadoId) {
     const data = await response.json();
 
     if (data.sucesso) {
-      alert("Solicitação cancelada com sucesso!");
+      notify.success("Solicitação cancelada com sucesso!");
       carregarSolicitacoes();
-    } else {
-      alert(data.erro || "Não foi possível cancelar a solicitação.");
     }
-  } catch (err) {
-    console.error(err);
-    alert("Erro na comunicação com o servidor.");
+    else {
+      notify.error(data.erro || "Não foi possível cancelar a solicitação");
+    }
+  } catch (erro) {
+    console.error(erro);
+    notify.error("Erro na comunicação com o servidor");
   }
 }
 
@@ -2132,14 +2123,15 @@ async function enviarSOC(id) {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.detalhe || "Erro ao enviar para o SOC");
+      notify.error(data.detalhe || "Erro ao enviar para o SOC");
       return;
     }
 
-    alert("Enviado ao SOC com sucesso");
+    notify.success("Enviado ao SOC com sucesso");
     await carregarSolicitacoes();
 
-  } catch (err) {
-    alert("Falha de comunicação com o servidor");
+  } catch (erro) {
+    console.error(erro);
+    notify.error("Erro na comunicação com o servidor");
   }
 }

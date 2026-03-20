@@ -240,7 +240,7 @@ async function salvarEmpresas() {
         })
     });
 
-    alert("Empresas atualizadas");
+    notify.success("Empresas salvas com sucesso!");
 
     await carregarUsuarios();
 }
@@ -391,5 +391,5 @@ async function salvarUnidades() {
         })
     });
 
-    alert("Unidades salvas");
+    notify.success("Unidades salvas com sucesso!");
 }

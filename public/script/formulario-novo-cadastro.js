@@ -185,9 +185,9 @@ async function carregarUnidades() {
       select.appendChild(opt);
     });
 
-  } catch (err) {
-    console.error("Erro ao carregar unidades:", err);
-    select.innerHTML = '<option value="">Erro ao carregar</option>';
+  } catch (erro) {
+    console.error(erro);
+    notify.error("Erro ao carregar unidades");
   }
 }
 
@@ -214,9 +214,9 @@ document.getElementById("unidadeSelect").addEventListener("change", async functi
         selectSetor.appendChild(opt);
       });
 
-  } catch (err) {
-    console.error("Erro ao carregar setores da unidade:", err);
-    alert("Erro ao carregar setores da unidade selecionada");
+  } catch (erro) {
+    console.error(erro);
+    notify.error("Erro ao carregar setores");
   }
 });
 
@@ -245,9 +245,9 @@ document.getElementById("setorSelect").addEventListener("change", async function
       selectCargo.appendChild(opt);
     });
 
-  } catch (err) {
-    console.error("Erro ao carregar cargos:", err);
-    alert("Erro ao carregar cargos do setor");
+  } catch (erro) {
+    console.error(erro);
+    notify.error("Erro ao carregar cargos");
   }
 });
 
@@ -346,7 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (chkNovaUnidade.checked) {
       e.preventDefault();
       e.stopPropagation();
-      alert("Para criação de nova unidade é necessário criar novo setor e cargo.");
+      notify.warning("Para criação de nova unidade é necessário criar novo setor e cargo");
       return false;
     }
   }
@@ -443,7 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (chkNovoSetor.checked) {
       e.preventDefault();
       e.stopPropagation();
-      alert("Para criação de novo setor é necessário criar novo cargo.");
+      notify.warning("Para criação de novo setor é necessário criar novo cargo");
       return false;
     }
   }
@@ -557,9 +557,7 @@ function validarDataHoraExame() {
   const dataSelecionada = new Date(data + "T00:00:00");
 
   if (dataSelecionada <= hoje) {
-    alert(
-      "Atenção: o período para realização do exame deve ser, preferencialmente, no mínimo 24 horas da solicitação."
-    );
+    notify.warning("O período para realização do exame deve ser de no mínimo 24 horas da solicitação");
   }
 }
 
@@ -591,7 +589,7 @@ function ativarUnidades(ativar) {
 
 function adicionarUnidade() {
   if (contadorUnidades >= limiteUnidades) {
-    alert("Você pode adicionar no máximo 5 unidades adicionais.");
+    notify.warning("Máximo de 10 unidades permitido");
     return;
   }
 
@@ -638,8 +636,9 @@ async function carregarPrestadores() {
 
     await listarPrestadores();
 
-  } catch (err) {
-    console.error("Erro ao carregar prestadores:", err);
+  } catch (erro) {
+    console.error(erro);
+    notify.error("Erro ao carregar prestadores");
   }
 }
 
@@ -899,7 +898,7 @@ function ativarEmails(valor) {
 
 function adicionarEmail() {
   if (contadorEmails >= limiteEmails) {
-    alert("Você pode adicionar no máximo 2 e-mails extras.");
+    notify.warning("Máximo de 2 e-mails permitido");
     return;
   }
 
@@ -940,7 +939,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   const cpf = document.getElementById("cpf").value.replace(/\D/g, "");
 
   if (cpf.length !== 11) {
-    alert("CPF inválido! O CPF deve ter 11 dígitos.");
+    notify.error("CPF inválido! O CPF deve ter 11 dígitos");
     return;
   }
 
@@ -1061,7 +1060,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
       throw new Error("Erro no envio");
     }
     else {
-      alert("Solicitação enviada com sucesso!");
+      notify.success("Solicitação enviada com sucesso!");
 
       window.scrollTo({
         top: 0,
@@ -1074,7 +1073,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     document.getElementById("formCadastro").reset();
   } catch (erro) {
     console.error(erro);
-    alert("Erro ao enviar solicitação");
+    notify.error("Erro ao enviar solicitação");
   }
 });
 
@@ -1086,8 +1085,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CRIAÇÃO DE UNIDADE
   if (dados.solicitar_nova_unidade === true) {
-    destinatario = "clientes@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "clientes@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de Criação de Unidade";
 
     mensagem = `
@@ -1099,8 +1098,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CRIAÇÃO DE NOVO SETOR/CARGO
   else if (dados.solicitar_novo_setor === true || dados.solicitar_novo_cargo === true) {
-    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de Criação de Setor/Cargo";
 
     mensagem = `
@@ -1112,8 +1111,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CREDENCIAMENTO
   else if (dados.solicitar_credenciamento === true) {
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "contratos@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de Credenciamento";
 
     mensagem = `

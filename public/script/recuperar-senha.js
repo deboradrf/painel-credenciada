@@ -26,19 +26,23 @@ document.getElementById("recuperarForm").addEventListener("submit", async (e) =>
             botao.disabled = false
             botao.innerText = "Recuperar senha"
 
-            alert(data.erro)
+            notify.error(data.erro || "Erro ao recuperar senha")
             return
         }
 
-        alert(data.message)
-        window.location.href = "/pages/login.html"
+        notify.success("Nova senha enviada para o seu e-mail!")
 
-    } catch (err) {
-        console.error(err)
+        setTimeout(() => {
+            window.location.href = "/pages/login.html"
+        }, 1500)
+
+    } catch (erro) {
+        console.error(erro)
+        
         botao.disabled = false
         botao.innerText = "Recuperar senha"
 
-        alert("Erro ao recuperar senha")
+        notify.error("Erro ao recuperar senha")
     }
 })
 

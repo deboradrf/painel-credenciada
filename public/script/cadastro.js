@@ -30,7 +30,7 @@ function copiarSenha() {
     const input = document.getElementById("senha");
 
     if (!input || !input.value) {
-        alert("Nenhuma senha para copiar");
+        notify.warning("Nenhuma senha para copiar");
         return;
     }
 
@@ -46,9 +46,9 @@ function copiarSenha() {
 
     try {
         document.execCommand("copy");
-        alert("Senha copiada!");
+        notify.success("Senha copiada!");
     } catch (err) {
-        alert("Não foi possível copiar a senha");
+        notify.error("Não foi possível copiar a senha");
         console.error(err);
     }
 
@@ -258,7 +258,7 @@ async function carregarUnidades(empresaCodigo) {
             select.innerHTML = '<option value="">Erro ao carregar unidades</option>';
             select.disabled = true;
         });
-        btnAddUnidade.style.display = "none"; // esconde botão em caso de erro
+        btnAddUnidade.style.display = "none";
     }
 }
 
@@ -270,7 +270,7 @@ document.getElementById("btnAddUnidade").addEventListener("click", () => {
     const selects = container.querySelectorAll(".unidade-select");
 
     if (selects.length >= MAX_UNIDADES) {
-        alert("Máximo de 3 unidades permitido");
+        notify.warning("Máximo de 3 unidades permitido");
         return;
     }
 
@@ -318,8 +318,8 @@ document.getElementById("cadastroForm").addEventListener("submit", async e => {
         // ⚠ Verifica se existe pelo menos uma unidade válida
         const possuiUnidadeValida = [...selectsUnidade].some(s => !s.disabled && s.options.length > 1);
         if (!possuiUnidadeValida) {
-            alert("Não é possível cadastrar: a empresa selecionada não possui unidades.");
-            return; // bloqueia envio
+            notify.error("Não é possível cadastrar: a empresa selecionada não possui unidades.");
+            return;
         }
 
         unidades = [...selectsUnidade]
@@ -340,7 +340,7 @@ document.getElementById("cadastroForm").addEventListener("submit", async e => {
         nome_empresa: empresaNome,
         unidades
     };
-
+    
     const res = await fetch(`/cadastro`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -350,10 +350,10 @@ document.getElementById("cadastroForm").addEventListener("submit", async e => {
     const data = await res.json();
 
     if (!res.ok) {
-        alert(data.erro || "Erro ao cadastrar");
+        notify.error(data.erro || "Erro ao cadastrar");
         return;
     }
 
-    alert("Usuário cadastrado com sucesso!");
+    notify.success("Usuário cadastrado com sucesso!");
     e.target.reset();
 });

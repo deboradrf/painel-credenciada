@@ -392,18 +392,20 @@ async function cancelarSolicitacao(
 
     if (data.sucesso) {
       if (precisaAviso) {
-        alert("Para esta solicitação, o cancelamento deve ser formalizado por e-mail.");
-      } else {
-        alert("Solicitação cancelada com sucesso!");
+        notify.warning("Para esta solicitação, o cancelamento deve ser formalizado por e-mail");
+      }
+      else {
+        notify.success("Solicitação cancelada com sucesso!");
       }
 
       carregarSolicitacoes();
-    } else {
-      alert(data.erro || "Não foi possível cancelar a solicitação.");
     }
-  } catch (err) {
-    console.error(err);
-    alert("Erro na comunicação com o servidor.");
+    else {
+      notify.error(data.erro || "Não foi possível cancelar a solicitação");
+    }
+  } catch (erro) {
+    console.error(erro);
+    notify.error("Erro na comunicação com o servidor");
   }
 }
 
@@ -420,12 +422,12 @@ function verMotivo(motivo) {
 
 // ABRIR MODAL DE EDITAR
 async function abrirModalEditar(id, tipo) {
-  const url =
-    tipo === "NOVO_EXAME" ? `/solicitacoes/novo-exame/${id}` : `/solicitacoes/novo-cadastro/${id}`;
+  const url = tipo === "NOVO_EXAME" ? `/solicitacoes/novo-exame/${id}` : `/solicitacoes/novo-cadastro/${id}`;
 
   const res = await fetch(url);
+
   if (!res.ok) {
-    alert("Erro ao carregar dados para edição");
+    notify.error("Erro ao carregar dados para edição");
     return;
   }
 
@@ -435,7 +437,8 @@ async function abrirModalEditar(id, tipo) {
     preencherModalEditarExame(s);
 
     new bootstrap.Modal(document.getElementById("modalEditarExame")).show();
-  } else {
+  }
+  else {
     preencherModalEditarCadastro(s);
 
     new bootstrap.Modal(document.getElementById("modalEditarCadastro")).show();
@@ -1029,7 +1032,7 @@ async function salvarEdicaoCadastro() {
   const resposta = await res.json();
 
   if (!res.ok) {
-    alert(resposta.erro || "Erro ao salvar edição");
+    notify.error(resposta.erro || "Erro ao salvar edição");
     return;
   }
 
@@ -1140,7 +1143,7 @@ async function salvarEdicaoExame() {
   const resposta = await res.json();
 
   if (!res.ok) {
-    alert(resposta.erro || "Erro ao salvar edição");
+    notify.error(resposta.erro || "Erro ao salvar edição");
     return;
   }
 

@@ -70,7 +70,7 @@ async function carregarPerfil() {
     const user = await res.json();
 
     if (!res.ok) {
-        alert(user.erro);
+        notify.error(user.erro || "Erro ao carregar perfil");
         return;
     }
 
@@ -182,7 +182,7 @@ async function salvarEdicao() {
     });
 
     if (!res.ok) {
-        alert("Erro ao salvar dados");
+        notify.error("Erro ao salvar dados");
         return;
     }
 
@@ -191,7 +191,7 @@ async function salvarEdicao() {
     document.getElementById("senha").setAttribute("readonly", true);
     document.getElementById("acoesEdicao").classList.add("d-none");
 
-    alert("Dados atualizados com sucesso!");
+    notidy.success("Dados atualizados com sucesso!");
 
     location.reload();
 }

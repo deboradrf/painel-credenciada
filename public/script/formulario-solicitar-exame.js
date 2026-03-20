@@ -9,8 +9,8 @@ const unidadesEmpresa = getEmpresaUnidades();
 // FUNCIONÁRIO SELECIONADO NA TELA ANTERIOR
 const funcionarioAtual = JSON.parse(localStorage.getItem("funcionario"));
 if (!funcionarioAtual) {
-  alert("Nenhum funcionário selecionado.");
-  window.location.href = "buscar-cpf.html";
+  notify.error("Nenhum funcionário selecionado");
+  window.location.href = "index.html";
 }
 
 // DROPDOWN DO PERFIL
@@ -206,9 +206,9 @@ async function popularSelectUnidadeDestino() {
       unidadeDestino.appendChild(opt);
     });
   }
-
   catch (erro) {
-    console.error("Erro ao carregar unidades:", erro);
+    console.error(erro);
+    notify.error("Erro ao carregar unidades");
   }
 }
 
@@ -296,7 +296,8 @@ async function carregarCargosDoSetor() {
     });
   }
   catch (erro) {
-    console.error("Erro ao carregar cargos:", erro);
+    console.error(erro);
+    notify.error("Erro ao carregar cargos");
   }
 }
 
@@ -345,9 +346,7 @@ function validarDataExame() {
   const dataSelecionada = new Date(data + "T00:00:00");
 
   if (dataSelecionada <= hoje) {
-    alert(
-      "ATENÇÃO: o período para realização do exame deve ser, preferencialmente, no mínimo 24 horas da solicitação."
-    );
+    notify.warning("O período para realização do exame deve ser de no mínimo 24 horas da solicitação");
   }
 }
 
@@ -408,7 +407,7 @@ function ativarUnidades(ativar) {
 
 function adicionarUnidade() {
   if (contadorUnidades >= limiteUnidades) {
-    alert("Você pode adicionar no máximo 5 unidades adicionais.");
+    notify.warning("Máximo de 10 unidades permitido");
     return;
   }
 
@@ -417,7 +416,7 @@ function adicionarUnidade() {
   const container = document.getElementById("unidadesContainer");
 
   if (!unidadesCache || unidadesCache.length === 0) {
-    alert("Nenhuma unidade disponível.");
+    notify.error("Nenhuma unidade disponível");
     return;
   }
 
@@ -696,8 +695,9 @@ async function carregarPrestadores() {
 
     await listarPrestadores();
 
-  } catch (err) {
-    console.error("Erro ao carregar prestadores:", err);
+  } catch (erro) {
+    console.error(erro);
+    notify.error("Erro ao carregar prestadores");
   }
 }
 
@@ -899,7 +899,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (chkNovaUnidade.checked) {
       e.preventDefault();
       e.stopPropagation();
-      alert("Para criação de nova unidade é necessário criar novo setor e função.");
+      notify.warning("Para criação de nova unidade é necessário criar novo setor e função");
       return false;
     }
   }
@@ -939,7 +939,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (chkNovoSetor.checked) {
       e.preventDefault();
       e.stopPropagation();
-      alert("Para criação de novo setor é necessário criar nova função.");
+      notify.warning("Para criação de novo setor é necessário criar nova função");
       return false;
     }
   }
@@ -996,7 +996,7 @@ function ativarEmails(valor) {
 
 function adicionarEmail() {
   if (contadorEmails >= limiteEmails) {
-    alert("Você pode adicionar no máximo 2 e-mails extras.");
+    notify.warning("Máximo de 2 e-mails permitido");
     return;
   }
 
@@ -1026,8 +1026,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CRIAÇÃO DE UNIDADE
   if (dados.solicitar_nova_unidade === true) {
-    destinatario = "clientes@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "clientes@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de Criação de Unidade";
 
     mensagem = `
@@ -1039,8 +1039,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CRIAÇÃO DE NOVO SETOR/CARGO
   else if (dados.solicitar_novo_setor === true || dados.solicitar_nova_funcao === true) {
-    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de criação de setor/função";
 
     mensagem = `
@@ -1052,8 +1052,8 @@ async function enviarEmailSolicitacao(dados) {
 
   // EMAIL PARA CREDENCIAMENTO
   else if (dados.solicitar_credenciamento === true) {
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "contratos@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de credenciamento";
 
     mensagem = `
@@ -1222,8 +1222,9 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
 
     if (!res.ok) {
       throw new Error("Erro no envio");
-    } else {
-      alert("Solicitação enviada com sucesso!");
+    }
+    else {
+      notify.success("Solicitação enviada com sucesso!");
 
       window.scrollTo({
         top: 0,
@@ -1236,6 +1237,6 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     document.getElementById("formCadastro").reset();
   } catch (erro) {
     console.error(erro);
-    alert("Erro ao enviar solicitação");
+    notify.error("Erro ao enviar solicitação");
   }
 });

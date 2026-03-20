@@ -16,13 +16,15 @@ document.getElementById("loginForm").onsubmit = async e => {
     const data = await res.json();
 
     if (!res.ok) {
-        alert(data.erro);
+        notify.error(data.erro || "Usuário ou senha inválidos");
         return;
     }
 
     sessionStorage.setItem("usuario", JSON.stringify(data));
 
-    window.location.href = "/pages/index.html";
+    setTimeout(() => {
+        window.location.href = "/pages/index.html";
+    }, 1200);
 };
 
 // MOSTRAR / OCULTAR SENHA
