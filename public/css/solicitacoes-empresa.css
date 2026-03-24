@@ -14,7 +14,7 @@ body {
 
 body.blur-main main {
     filter: blur(4px);
-    transition: filter 0.25s ease;
+    transition: filter 0.3s ease;
 }
 
 body.blur-main header {
@@ -54,7 +54,7 @@ body.blur-main header {
 }
 
 .header-center span {
-    transition: transform 0.2s;
+    transition: transform 0.3s;
 }
 
 .header-center span:hover {
@@ -186,11 +186,6 @@ body.blur-main header {
 
 .profile-list .between {
     justify-content: space-between;
-}
-
-.actions button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 ul {
@@ -356,9 +351,9 @@ h3::after {
     cursor: pointer;
     font-size: 14px;
     padding: 0 10px 0 10px;
-    width: 100px;
+    width: 90px;
     height: 38px;
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
 }
 
 .btn-search:hover {
@@ -373,9 +368,9 @@ h3::after {
     cursor: pointer;
     font-size: 13px;
     padding: 0 10px 0 10px;
-    width: 120px;
+    width: 130px;
     height: 38px;
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
 }
 
 .table-wrapper {
@@ -432,10 +427,17 @@ td {
     word-break: break-word;
 }
 
+.col-situacao {
+  width: 250px;
+  max-width: 250px;
+  white-space: normal;
+  word-break: break-word;
+}
+
 .actions .btn-consulta {
     background-color: #FFFFFF;
     border: 1px solid #E5E7EB;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
     color: #000000;
     cursor: pointer;
@@ -443,7 +445,7 @@ td {
     line-height: 28px;
     padding: 0 10px 0 10px;
     width: 120px;
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
 }
 
 .actions .btn-consulta:hover {
@@ -453,7 +455,7 @@ td {
 .status-pill {
     padding: 4px 12px;
     color: #FFFFFF;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 11px;
     font-weight: 500;
     line-height: 1.2;
@@ -482,17 +484,21 @@ td {
 
 .status-pill.reprovado,
 .status-pill.erro_soc {
-    background: #EF4444;
+    background: #F05252;
 }
 
 .status-pill.cancelado {
     background: #616161;
 }
 
+.actions button:not(:last-child) {
+    margin-bottom: 5px;
+}
+
 .actions button {
     background-color: #FFFFFF;
     border: 1px solid #E5E7EB;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
     color: #000000;
     cursor: pointer;
@@ -500,7 +506,7 @@ td {
     line-height: 28px;
     padding: 0 10px 0 10px;
     width: 100px;
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
 }
 
 .actions button:hover {
@@ -510,7 +516,7 @@ td {
 .footer-actions button {
     background-color: #FFFFFF;
     border: 1px solid #E5E7EB;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
     color: #000000;
     cursor: pointer;
@@ -518,8 +524,8 @@ td {
     line-height: 28px;
     padding: 0 10px 0 10px;
     width: 120px;
-    height: 35px;
-    transition: all 0.25s ease;
+    height: 38px;
+    transition: all 0.3s ease;
 }
 
 .footer-actions button:hover {
@@ -588,7 +594,7 @@ td {
 
 .detail-item {
     background: #F9FAFB;
-    border-radius: 14px;
+    border-radius: 10px;
     padding: 14px 18px;
     display: flex;
     flex-direction: column;
@@ -604,7 +610,7 @@ td {
 }
 
 .detail-editable {
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
 }
 
 .detail-input {

@@ -21,37 +21,6 @@ body.blur-main header {
     filter: none;
 }
 
-.title {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 40px;
-}
-
-h3 {
-    position: relative;
-    font-weight: 600;
-    font-size: 23px;
-    color: #000000;
-    margin-bottom: 15px;
-}
-
-h3::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -5px;
-    width: 50px;
-    height: 3px;
-    background: #000000;
-}
-
-.subtitle {
-    font-size: 15px;
-    color: #6B7280;
-    margin-top: 4px;
-}
-
 .header-container {
     color: #FFFFFF;
     padding: 24px 24px;
@@ -232,85 +201,237 @@ main {
     flex: 1;
 }
 
-.container-fluid {
+.title {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    background-color: #F1F1F1;
-    padding: 48px 32px 20px;
+    margin-bottom: 20px;
 }
 
-.contact-card {
+h3 {
+    position: relative;
+    font-weight: 600;
+    font-size: 23px;
+    color: #000000;
+    margin-bottom: 15px;
+}
+
+h3::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #000000;
+}
+
+.subtitle {
+    font-size: 15px;
+    color: #6B7280;
+    margin-top: 4px;
+}
+
+.card {
     width: 100%;
-    max-width: 1000px;
     background-color: #FFFFFF;
+    border: none;
     border-radius: 10px;
     padding: 20px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    opacity: 0;
-    transform: translateX(-30px) scale(0.98);
-    animation: fadeInRight 0.6s ease forwards;
 }
 
-.contact-card:nth-child(n) {
-    animation-delay: calc(var(--i) * 0.1s);
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #EEEEEE;
+    padding: 16px 12px;
+    transition: all 0.3s ease;
 }
 
-@keyframes fadeInRight {
-    to {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
+.list-group-item:hover {
+    background-color: #F9F9F9;
+    transform: translateX(4px);
 }
 
-.contact-card i {
-    color: #53A5A6;
-    text-align: center;
-}
-
-.contact-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.contact-info span {
-    font-weight: 600;
-    font-size: 15px;
-}
-
-.contact-info small {
+.list-group-item small {
     color: #6B7280;
     font-size: 13px;
 }
 
-.socials {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 30px;
+.btn-editar {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #000000;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
+    width: 100px;
 }
 
-.socials a {
-    width: 50px;
-    height: 50px;
-    background: #53A5A6;
+.btn-excluir {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: #F05252;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 20px;
-    transition: transform 0.3s, background 0.3s;
-    text-decoration: none;
+    transition: 0.3s ease-in-out;
 }
 
-.socials a:hover {
-    background: #4A8F90;
-    transform: translateY(-3px) scale(1.1);
+.btn-excluir i {
+    font-size: 14px;
+}
+
+.btn-excluir:hover {
+    transform: scale(1.2);
+}
+
+.btn-add-email {
+    background-color: #88A6BB;
+    border: 1px solid #88A6BB;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
+    width: 200px;
+    transition: all 0.3s ease;
+}
+
+.btn-add-email:hover {
+    transform: translateY(-2px);
+}
+
+.btn-salvar {
+    height: 35px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #000000;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
+    width: 100px;
+    transition: all 0.3s ease;
+}
+
+.btn-salvar:hover {
+    transform: translateY(-2px);
+}
+
+.nav-tabs {
+    border: none;
+    gap: 10px;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #6B7280;
+    font-weight: 400;
+    border-radius: 10px;
+    padding: 6px 12px;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #F1AE33;
+    color: #FFFFFF;
+}
+
+.modal-content {
+    border-radius: 10px;
+    border: none;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
+    border-bottom: none;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+    padding: 20px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.modal-header h3 {
+    position: relative;
+    font-weight: 600;
+    font-size: 19px;
+    color: #FFFFFF;
+    margin-bottom: 15px;
+}
+
+.modal-header h3::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #FFFFFF;
+}
+
+.form-group label {
+    color: #4F545A;
+    font-weight: 600;
+    font-size: 15px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    border: 2px solid #8A94A6;
+    border-radius: 10px;
+    overflow: hidden;
+    align-items: stretch;
+}
+
+.input-icon {
+    background: #FFFFFF;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #8A94A6;
+    min-width: 55px;
+    position: relative;
+    border-right: none;
+}
+
+.input-icon::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    height: 80%;
+    width: 3%;
+    background-color: #8A94A6;
+}
+
+.input-wrapper input {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    color: #000000;
+    font-size: 15px;
+}
+
+.input-wrapper input:focus {
+    outline: none;
+}
+
+.modal-footer {
+    border-top: none;
 }
 
 .footer-container {
@@ -374,4 +495,13 @@ main {
     margin: 0;
     font-size: 14px;
     font-weight: 500;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+    box-shadow: 0 0 0 1000px #fff inset !important;
+    -webkit-text-fill-color: #000 !important;
+    transition: background-color 9999s ease-in-out 0s;
 }

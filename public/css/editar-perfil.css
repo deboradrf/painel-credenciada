@@ -14,7 +14,7 @@ body {
 
 body.blur-main main {
     filter: blur(4px);
-    transition: filter 0.25s ease;
+    transition: filter 0.3s ease;
 }
 
 body.blur-main header {
@@ -54,7 +54,7 @@ body.blur-main header {
 }
 
 .header-center span {
-    transition: transform 0.2s;
+    transition: transform 0.3s;
 }
 
 .header-center span:hover {

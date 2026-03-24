@@ -4,6 +4,13 @@ const nomeEmpresa = getEmpresaNome();
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
+    const empresaTrocada = sessionStorage.getItem("empresaTrocada");
+
+    if (empresaTrocada) {
+        notify.success(`Você trocou para: ${empresaTrocada}`);
+        sessionStorage.removeItem("empresaTrocada");
+    }
+
     const cardsAdministrador = document.querySelectorAll(".card-administrador");
     const cardsEmpresa = document.querySelectorAll(".card-empresa");
     const cardsCredenciada = document.querySelectorAll(".card-credenciada");
@@ -131,16 +138,16 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // MODAL DE AVISO
-document.addEventListener("DOMContentLoaded", function () {
-    const hoje = new Date().toISOString().split("T")[0];
-    const ultimaExibicao = localStorage.getItem("modalManutencaoData");
+// document.addEventListener("DOMContentLoaded", function () {
+//     const hoje = new Date().toISOString().split("T")[0];
+//     const ultimaExibicao = localStorage.getItem("modalManutencaoData");
 
-    if (ultimaExibicao !== hoje) {
-        const modal = new bootstrap.Modal(
-            document.getElementById("modalManutencao")
-        );
-        modal.show();
+//     if (ultimaExibicao !== hoje) {
+//         const modal = new bootstrap.Modal(
+//             document.getElementById("modalManutencao")
+//         );
+//         modal.show();
 
-        localStorage.setItem("modalManutencaoData", hoje);
-    }
-});
+//         localStorage.setItem("modalManutencaoData", hoje);
+//     }
+// });

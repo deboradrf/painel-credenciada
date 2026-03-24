@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contato</title>
+    <title>Gerenciar Responsável</title>
     <link rel="icon" type="image/png" href="/images/icone.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@
         href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
     <script src="https://kit.fontawesome.com/4392b60e4c.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="../css/contato.css">
+    <link rel="stylesheet" href="../css/gerenciar-responsavel.css">
 </head>
 
 <body>
@@ -91,33 +91,83 @@
     </header>
 
     <main>
-        <div class="container-fluid">
-            <div class="title">
-                <h3>Contatos</h3>
-                <p class="subtitle">Entre em contato com nossa equipe para tirar dúvidas ou solicitar suporte</p>
-            </div>
+        <div class="container">
+            <div class="row mt-5">
+                <div class="title">
+                    <h3>Gerenciar Responsável</h3>
+                    <p class="subtitle">
+                        Selecione uma empresa e informe o e-mail do responsável que receberá as notificações das
+                        solicitações dessa empresa
+                    </p>
+                </div>
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <ul class="nav nav-tabs mb-4 justify-content-center">
+                            <li class="nav-item">
+                                <button class="nav-link active" id="tabCom" onclick="trocarAba('com')">
+                                    Com responsável
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="tabSem" onclick="trocarAba('sem')">
+                                    Sem responsável
+                                </button>
+                            </li>
+                        </ul>
 
-            <div class="contact-card shadow-sm">
-                <i class="fa-solid fa-phone fa-xl" style="color: #F1AE33"></i>
-                <div class="contact-info">
-                    <span>(31) 3166-9006</span>
-                    <small>Telefone para atendimento</small>
+                        <div class="mb-3">
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </div>
+                                <input type="text" id="filtroEmail" placeholder="Buscar por e-mail do responsável..." oninput="filtrar()" />
+                            </div>
+                        </div>
+
+                        <ul id="listaEmpresas" class="list-group list-group-flush"></ul>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <div class="contact-card shadow-sm">
-                <i class="fa-solid fa-envelope fa-xl" style="color: #F1AE33"></i>
-                <div class="contact-info">
-                    <span>credenciada@salubrita.com.br</span>
-                    <small>Email para suporte</small>
-                </div>
-            </div>
+        <!-- MODAL EDITAR RESPONSÁVEL -->
+        <div class="modal fade" id="modalResponsavel" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Editar Responsável</h3>
+                        <a data-bs-dismiss="modal">
+                            <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
+                        </a>
+                    </div>
 
-            <div class="contact-card shadow-sm">
-                <i class="fa-brands fa-whatsapp fa-2xl" style="color: #F1AE33"></i>
-                <div class="contact-info">
-                    <span>(31) 3166-9006</span>
-                    <small>Atendimento via WhatsApp</small>
+                    <div class="modal-body">
+                        <input type="hidden" id="modalEmpresaNome">
+
+                        <div class="form-group mt-3">
+                            <label>E-mail</label>
+
+                            <div id="emailsContainer">
+                                <div class="input-wrapper email-row">
+                                    <div class="input-icon">
+                                        <i class="fa-solid fa-envelope"></i>
+                                    </div>
+                                    <input type="email" class="email-input">
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn-add-email mt-2" onclick="adicionarCampoEmail()">
+                                <i class="fa-solid fa-plus"></i> Adicionar outro e-mail
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button id="btnSalvarModal" class="btn-salvar">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Salvar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -148,8 +198,10 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../script/alert.js"></script>
     <script src="../script/session.js"></script>
-    <script src="../script/contato.js"></script>
+    <script src="../script/gerenciar-responsavel.js"></script>
 </body>
 
 </html>

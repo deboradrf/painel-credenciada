@@ -1022,45 +1022,27 @@ function adicionarEmail() {
 async function enviarEmailSolicitacao(dados) {
   let destinatario = "";
   let assunto = "";
-  let mensagem = "";
 
-  // EMAIL PARA CRIAÇÃO DE UNIDADE
+  const mensagem = `
+    Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
+    
+    Gentileza dar prosseguimento à solicitação.
+  `;
+
   if (dados.solicitar_nova_unidade === true) {
-    destinatario = "clientes@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "clientes@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de Criação de Unidade";
-
-    mensagem = `
-      Uma solicitação para criação de unidade para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
-      
-      Gentileza dar prosseguimento à solicitação.
-    `;
   }
 
-  // EMAIL PARA CRIAÇÃO DE NOVO SETOR/CARGO
   else if (dados.solicitar_novo_setor === true || dados.solicitar_nova_funcao === true) {
-    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
-    assunto = "Solicitação de criação de setor/função";
-
-    mensagem = `
-      Uma solicitação para criação de setor/função para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
-      
-      Gentileza dar prosseguimento à solicitação.
-    `;
+    assunto = "Solicitação de Criação de Setor/Função";
   }
 
-  // EMAIL PARA CREDENCIAMENTO
   else if (dados.solicitar_credenciamento === true) {
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
-    assunto = "Solicitação de credenciamento";
-
-    mensagem = `
-      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
-      
-      Gentileza dar prosseguimento à solicitação.
-    `;
+    //destinatario = "contratos@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
+    assunto = "Solicitação de Credenciamento";
   }
 
   await fetch("/enviar-email-solicitacao", {
@@ -1069,7 +1051,11 @@ async function enviarEmailSolicitacao(dados) {
     body: JSON.stringify({
       destinatario,
       assunto,
-      mensagem
+      mensagem,
+
+      codigo_empresa: dados.cod_empresa,
+      solicitar_novo_setor: dados.solicitar_novo_setor,
+      solicitar_nova_funcao: dados.solicitar_nova_funcao
     })
   });
 }

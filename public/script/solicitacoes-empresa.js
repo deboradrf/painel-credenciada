@@ -53,11 +53,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("btnBuscar").addEventListener("click", aplicarFiltros);
-
-  document.getElementById("btnLimpar").addEventListener("click", () => {
+    document.getElementById("btnLimpar").addEventListener("click", () => {
     document.getElementById("filterTipo").value = "";
     document.getElementById("filterCPF").value = "";
     document.getElementById("filterStatus").value = "";
+    document.getElementById("checkMostrarTudo").checked = false;
 
     aplicarFiltros();
   });
@@ -65,19 +65,30 @@ document.addEventListener("DOMContentLoaded", () => {
   carregarSolicitacoes();
 });
 
+function temFiltroAtivo(tipo, cpf, status) {
+  return tipo || cpf || status;
+}
+
 // FUNÇÃO PARA APLICAR FILTROS
 function aplicarFiltros() {
   const tipo = document.getElementById("filterTipo").value;
-  const cpf = document.getElementById("filterCPF").value;
+  const cpf = document.getElementById("filterCPF").value.trim();
   const status = document.getElementById("filterStatus").value;
+
+  const filtroAtivo = temFiltroAtivo(tipo, cpf, status);
 
   const filtradas = solicitacoes.filter(s => {
     const matchTipo = !tipo || s.tipo === tipo;
     const matchCPF = !cpf || s.cpf.includes(cpf);
     const matchStatus = !status || s.status === status;
-    const matchVisibilidade = deveExibir(s);
 
-    return matchTipo && matchCPF && matchStatus && matchVisibilidade;
+    // SE TEM QUALQUER FILTRO → IGNORA VISIBILIDADE
+    if (filtroAtivo) {
+      return matchTipo && matchCPF && matchStatus;
+    }
+
+    // SEM FILTRO → aplica regra padrão
+    return matchTipo && matchCPF && matchStatus && deveExibir(s);
   });
 
   renderizarTabela(filtradas);
@@ -207,13 +218,7 @@ function renderizarTabela(lista) {
       `;
     }
     // STATUS QUE PODEM CANCELAR
-    else if (
-      s.status === "PENDENTE_UNIDADE" ||
-      s.status === "PENDENTE_SC" ||
-      s.status === "PENDENTE_CREDENCIAMENTO" ||
-      s.status === "PENDENTE"
-    ) {
-
+    else if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || s.status === "PENDENTE") {
       if (s.tipo === "NOVO_EXAME") {
         acoes = `
           <button onclick="cancelarSolicitacao(
@@ -281,7 +286,7 @@ function renderizarTabela(lista) {
             ${s.status}
           </span>
         </td>
-        <td class="text-muted">
+        <td class="col-situacao text-muted">
           ${situacao}
         </td>
         <td class="actions text-muted">
@@ -296,7 +301,8 @@ function renderizarTabela(lista) {
 const RAC_LABELS = {
   FORMULARIO_RAC_VALE: "FORMULÁRIO RAC VALE",
   FORMULARIO_UNIDADE_CSN: "FORMULÁRIO UNIDADE CSN",
-  FORMULARIO_UNIDADE_VALLOUREC: "FORMULÁRIO UNIDADE VALLOUREC"
+  FORMULARIO_UNIDADE_VALLOUREC: "FORMULÁRIO UNIDADE VALLOUREC",
+  FORMULARIO_UNIDADE_KINROSS:  "FORMULÁRIO UNIDADE KINROSS"
 };
 
 function formatarRac(rac) {
@@ -349,18 +355,8 @@ function formatarTiposRac(tipos) {
 }
 
 // FUNÇÃO PARA CANCELAR SOLICITAÇÃO PENDENTE
-async function cancelarSolicitacao(
-  id,
-  tipo,
-  usuarioLogadoId,
-  status,
-  solicitarNovaUnidade,
-  solicitarNovoSetor,
-  solicitarNovoCargo,
-  solicitarNovaFuncao,
-  solicitarCredenciamento
-) {
-  const confirmar = confirm("Tem certeza que deseja cancelar esta solicitação?");
+async function cancelarSolicitacao(id, tipo, usuarioLogadoId, status, solicitarNovaUnidade, solicitarNovoSetor, solicitarNovoCargo, solicitarNovaFuncao, solicitarCredenciamento) {
+  const confirmar = await modalConfirm("Tem certeza que deseja cancelar esta solicitação?");
   if (!confirmar) return;
 
   // Status que sempre mostram aviso
@@ -695,7 +691,7 @@ function preencherModalEditarCadastro(s) {
   }
 }
 
-// FUNÇÃO PARA FORMATAR CPF
+// FUNÇÃO PARA FORMATAR CPF FORMULÁRIO
 function formatarCPF(cpf) {
   if (!cpf) return "";
 
@@ -985,6 +981,11 @@ function stringParaArrayRac(valor) {
 
 // FUNÇÃO PARA SALVAR EDIÇÃO - NOVO CADASTRO
 async function salvarEdicaoCadastro() {
+  const confirmar = await modalConfirm("Deseja salvar as alterações?");
+  if (!confirmar) return;
+
+  const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
+
   const id = document.getElementById("editCadId").value;
   const tipoContratacaoValue = document.getElementById("editCadTipoContratacao").value;
   const tipoFaturamentoSelecionado = document.querySelector('input[name="tipo_faturamento"]:checked')?.value;
@@ -1020,7 +1021,9 @@ async function salvarEdicaoCadastro() {
     lab_toxicologico: document.getElementById("editCadLabToxicologico").value,
     estado_credenciamento: document.getElementById("editCadEstadoCredenciamento").value,
     cidade_credenciamento: document.getElementById("editCadCidadeCredenciamento").value,
-    observacao: document.getElementById("editCadObservacao").value
+    observacao: document.getElementById("editCadObservacao").value,
+
+    usuario_id: usuarioLogado.id
   };
 
   const res = await fetch(`/solicitacoes/novo-cadastro/${id}/editar`, {
@@ -1107,6 +1110,11 @@ document.getElementById('editCadCnpj').addEventListener('input', function (e) {
 
 // FUNÇÃO PARA SALVAR EDIÇÃO - NOVO EXAME
 async function salvarEdicaoExame() {
+  const confirmar = await modalConfirm("Deseja salvar as alterações?");
+  if (!confirmar) return;
+
+  const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
+
   const id = document.getElementById("editExameId").value;
   const tipoFaturamentoSelecionado = document.querySelector('input[name="exame_tipo_faturamento"]:checked')?.value;
 
@@ -1131,7 +1139,9 @@ async function salvarEdicaoExame() {
     lab_toxicologico: document.getElementById("editExameLabToxicologico").value || null,
     estado_credenciamento: document.getElementById("editExameEstadoCredenciamento").value || null,
     cidade_credenciamento: document.getElementById("editExameCidadeCredenciamento").value || null,
-    observacao: document.getElementById("editExameObservacao").value || null
+    observacao: document.getElementById("editExameObservacao").value || null,
+    
+    usuario_id: usuarioLogado.id
   };
 
   const res = await fetch(`/solicitacoes/novo-exame/${id}/editar`, {
@@ -1154,7 +1164,7 @@ async function salvarEdicaoExame() {
   carregarSolicitacoes();
 }
 
-// MÁSCARA DE CPF 
+// MÁSCARA DE CPF PRO FILTRO
 const cpfInput = document.getElementById("filterCPF");
 
 cpfInput.addEventListener("input", function () {

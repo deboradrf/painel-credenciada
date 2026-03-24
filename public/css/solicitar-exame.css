@@ -14,7 +14,7 @@ body {
 
 body.blur-main main {
     filter: blur(4px);
-    transition: filter 0.25s ease;
+    transition: filter 0.3s ease;
 }
 
 body.blur-main header {
@@ -54,7 +54,7 @@ body.blur-main header {
 }
 
 .header-center span {
-    transition: transform 0.2s;
+    transition: transform 0.3s;
 }
 
 .header-center span:hover {
@@ -240,6 +240,16 @@ h3::after {
 
 .form-group {
     width: 100%;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: formEntrada 0.7s ease forwards;
+}
+
+@keyframes formEntrada {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .form-group label {
@@ -315,14 +325,15 @@ h3::after {
     justify-content: center;
     white-space: nowrap;
     transition:
-        background-color 0.25s ease,
-        color 0.25s ease,
-        border-color 0.25s ease;
+        background-color 0.3s ease,
+        color 0.3s ease,
+        border-color 0.3s ease;
 }
 
 .btn-verificar:hover {
     background-color: #F1AE33;
     color: #FFFFFF;
+    border-color: #F1AE33;
 }
 
 .alert {
@@ -386,18 +397,12 @@ h3::after {
     color: #FFFFFF;
 }
 
-.card {
-    opacity: 0;
-    animation: fadeInUp 0.8s forwards;
-}
-
-.detail-item {
-    background: #F9F9F9;
-    border-radius: 0.6rem;
-    padding: 8px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.funcionario-card {
+    background: #FFFFFF;
+    border-radius: 10px;
+    padding: 18px;
+    border: none;
+    animation: fadeInUp 0.6s ease;
 }
 
 @keyframes fadeInUp {
@@ -410,6 +415,21 @@ h3::after {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-item {
+    background: #F9F9F9;
+    border-radius: 0.6rem;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .detail-item.horizontal {
@@ -442,7 +462,21 @@ h3::after {
     cursor: pointer;
     font-size: 14px;
     padding: 0 10px 0 10px;
-    width: 300px;
+    width: 320px;
+    height: 40px;
+}
+
+.btn-cadastrar-funcionario {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #000000;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
+    width: 200px;
     height: 40px;
 }
 

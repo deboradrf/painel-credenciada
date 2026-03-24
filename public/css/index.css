@@ -14,7 +14,7 @@ body {
 
 body.blur-main main {
     filter: blur(4px);
-    transition: filter 0.25s ease;
+    transition: filter 0.3s ease;
 }
 
 body.blur-main header {
@@ -54,7 +54,7 @@ body.blur-main header {
 }
 
 .header-center span {
-    transition: transform 0.2s;
+    transition: transform 0.3s;
 }
 
 .header-center span:hover {
@@ -277,11 +277,29 @@ h3::after {
     flex-direction: column;
     height: 300px;
     width: 400px;
-    transition: transform 0.2s;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+    animation: fadeInUp 0.6s ease forwards;
 }
 
-.card:hover {
-    transform: translateY(-5px);
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+.card:nth-child(5) { animation-delay: 0.5s; }
+.card:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.card:hover .icon {
+    transform: scale(1.1);
+    transition: all 0.3s ease-in-out;
 }
 
 .card-header {
@@ -384,6 +402,8 @@ h3::after {
     font-size: 13px;
     color: #FFFFFF;
     margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
 }
 
 .footer-container {

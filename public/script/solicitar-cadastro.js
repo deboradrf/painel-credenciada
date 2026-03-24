@@ -72,10 +72,8 @@ async function buscarCPF() {
     return;
   }
 
-  resultado.innerHTML = "🔎 Consultando funcionário no SOC...";
-
   try {
-    const res = await fetch(`/soc/funcionario-por-cpf/${cpf}/${empresaUsuario}`);
+    const res = await fetch(`/pesquisar-funcionario-soc/${cpf}/${empresaUsuario}`);
     const data = await res.json();
 
     let funcionarios = [];
@@ -104,6 +102,7 @@ async function buscarCPF() {
         <div class="d-flex justify-content-center my-3">
           <button class="btn-cadastrar-funcionario"
             onclick="window.location.href='formulario-novo-cadastro.html'">
+            <i class="fa-solid fa-user-plus" style="color: #88A6BB"></i>
             Solicitar cadastro
           </button>
         </div>
@@ -121,9 +120,10 @@ async function buscarCPF() {
         </div>
       </div>
 
-      <div class="card text-center my-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
+      <div class="funcionario-card shadow-sm text-center my-4">
+        <div class="card-header mb-3">
           <div class="detail-value">
+            <i class="fa-solid fa-user" style="color: #88A6BB"></i>
             ${f.nome}
           </div>
           <div class="ms-auto">
@@ -170,10 +170,11 @@ async function buscarCPF() {
           </div>
         </div>
 
-        <div class="card-footer text-body-secondary">
+        <div class="card-footer text-body-secondary mt-4">
           <div class="d-flex justify-content-center">
             <button class="btn-solicitar-exame"
               onclick="salvarFuncionario(${JSON.stringify(f).replace(/"/g, '&quot;')}); window.location.href='formulario-solicitar-exame.html'">
+              <i class="fa-solid fa-file-circle-plus" style="color: #88A6BB"></i>
               Solicitar exame para este funcionário
             </button>
           </div>

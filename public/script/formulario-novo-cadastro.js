@@ -122,7 +122,49 @@ cpfInput.addEventListener("input", function () {
   value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 
   this.value = value;
+
+  // VALIDAÇÃO
+  const cpfLimpo = value.replace(/\D/g, "");
+
+  if (cpfLimpo.length === 11) {
+    if (!validarCPF(cpfLimpo)) {
+      notify.error("CPF inválido");
+    }
+  }
 });
+
+// FUNÃO PARA VALIDAR O CPF
+function validarCPF(cpf) {
+  cpf = cpf.replace(/\D/g, "");
+
+  if (cpf.length !== 11) return false;
+
+  if (/^(\d)\1+$/.test(cpf)) return false;
+
+  let soma = 0;
+  let resto;
+
+  for (let i = 0; i < 9; i++)
+    soma += parseInt(cpf.charAt(i)) * (10 - i);
+
+  resto = (soma * 10) % 11;
+  if (resto === 10) resto = 0;
+
+  if (resto !== parseInt(cpf.charAt(9)))
+    return false;
+
+  soma = 0;
+  for (let i = 0; i < 10; i++)
+    soma += parseInt(cpf.charAt(i)) * (11 - i);
+
+  resto = (soma * 10) % 11;
+  if (resto === 10) resto = 0;
+
+  if (resto !== parseInt(cpf.charAt(10)))
+    return false;
+
+  return true;
+}
 
 // CAMPOS EM MAIÚSCULO
 const camposMaiusculo = [
@@ -938,8 +980,8 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
 
   const cpf = document.getElementById("cpf").value.replace(/\D/g, "");
 
-  if (cpf.length !== 11) {
-    notify.error("CPF inválido! O CPF deve ter 11 dígitos");
+  if (!validarCPF(cpf)) {
+    notify.error("CPF inválido!");
     return;
   }
 
@@ -1081,45 +1123,27 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
 async function enviarEmailSolicitacao(dados) {
   let destinatario = "";
   let assunto = "";
-  let mensagem = "";
+  
+  const mensagem = `
+    Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
+    
+    Gentileza dar prosseguimento à solicitação.
+  `;
 
-  // EMAIL PARA CRIAÇÃO DE UNIDADE
   if (dados.solicitar_nova_unidade === true) {
-    destinatario = "clientes@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "clientes@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de Criação de Unidade";
-
-    mensagem = `
-      Uma solicitação para criação de unidade para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
-      
-      Gentileza dar prosseguimento à solicitação.
-    `;
   }
 
-  // EMAIL PARA CRIAÇÃO DE NOVO SETOR/CARGO
   else if (dados.solicitar_novo_setor === true || dados.solicitar_novo_cargo === true) {
-    destinatario = "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de Criação de Setor/Cargo";
-
-    mensagem = `
-      Uma solicitação para criação de setor/cargo para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
-      
-      Gentileza dar prosseguimento à solicitação.
-    `;
   }
 
-  // EMAIL PARA CREDENCIAMENTO
   else if (dados.solicitar_credenciamento === true) {
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "contratos@salubrita.com.br";
+    destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de Credenciamento";
-
-    mensagem = `
-      Uma solicitação de credenciamento para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
-      
-      Gentileza dar prosseguimento à solicitação.
-    `;
   }
 
   await fetch("/enviar-email-solicitacao", {
@@ -1128,7 +1152,11 @@ async function enviarEmailSolicitacao(dados) {
     body: JSON.stringify({
       destinatario,
       assunto,
-      mensagem
+      mensagem,
+
+      codigo_empresa: dados.cod_empresa,
+      solicitar_novo_setor: dados.solicitar_novo_setor,
+      solicitar_novo_cargo: dados.solicitar_novo_cargo
     })
   });
 }

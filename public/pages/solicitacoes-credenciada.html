@@ -229,9 +229,9 @@
 
                 <div class="modal-body">
                     <div class="row g-3">
-                        <div class="col-12">
+                        <!-- <div class="col-12">
                             <p id="linha_aprovacao_cadastro" class="text-muted small"></p>
-                        </div>
+                        </div> -->
 
                         <div class="col-12">
                             <div class="detail-item email">
@@ -683,7 +683,8 @@
                     </div>
 
                     <div class="footer-actions mt-4">
-                        <button type="button" class="btn-aprovar" id="btn-aprovar" onclick="analisarSolicitacao('APROVADO', this)">
+                        <button type="button" class="btn-aprovar" id="btn-aprovar"
+                            onclick="analisarSolicitacao('APROVADO', this)">
                             <i class="fa-solid fa-check mx-1"></i>
                             Aprovar
                         </button>
@@ -693,7 +694,8 @@
                             Salvar
                         </button>
 
-                        <button type="button" class="btn-reprovar" id="btn-reprovar" onclick="analisarSolicitacao('REPROVADO', this)">
+                        <button type="button" class="btn-reprovar" id="btn-reprovar"
+                            onclick="analisarSolicitacao('REPROVADO', this)">
                             <i class="fa-solid fa-xmark"></i>
                             Reprovar
                         </button>
@@ -717,9 +719,9 @@
 
                 <div class="modal-body">
                     <div class="row g-3">
-                        <div class="col-12">
+                        <!-- <div class="col-12">
                             <p id="linha_aprovacao_exame" class="text-muted small"></p>
-                        </div>
+                        </div> -->
 
                         <div class="col-12">
                             <div class="detail-item email">
@@ -1178,6 +1180,22 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL HISTÓRICO -->
+    <div class="modal fade" id="modalHistorico">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Histórico da Solicitação</h3>
+                    <a data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
+                    </a>
+                </div>
+
+                <div class="modal-body" id="conteudoHistorico"></div>
             </div>
         </div>
     </div>

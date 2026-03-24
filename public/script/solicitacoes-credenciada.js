@@ -56,11 +56,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("btnBuscar").addEventListener("click", aplicarFiltros);
-
   document.getElementById("btnLimpar").addEventListener("click", () => {
     document.getElementById("filterTipo").value = "";
+    document.getElementById("filterEmpresa").value = "";
     document.getElementById("filterCPF").value = "";
     document.getElementById("filterStatus").value = "";
+    document.getElementById("checkMostrarTudo").checked = false;
 
     aplicarFiltros();
   });
@@ -71,34 +72,11 @@ document.addEventListener("DOMContentLoaded", () => {
 // BOTAO PARA ATUALIZAR PAGINA
 document.getElementById("btnAtualizar").addEventListener("click", () => { location.reload(); });
 
-// BOTÃO PARA MOSTRAR AS SOLICITAÇÕES CONCLUÍDAS
-document.getElementById("checkMostrarTudo").addEventListener("change", function () {
-  mostrarConcluidos = this.checked;
-  aplicarFiltros();
-});
-
-// FUNÇÃO PARA ESCONDER SOLICITAÇÕES POR PADRÃO
-let mostrarConcluidos = false;
-
-const statusConcluidosPorTipo = { NOVO_EXAME: ["APROVADO"], NOVO_CADASTRO: ["ENVIADO_SOC"] };
-
-function deveExibir(s) {
-  const concluidosDoTipo = statusConcluidosPorTipo[s.tipo] || [];
-
-  // MARCADO → mostrar concluídos + cancelados
-  if (mostrarConcluidos) {
-    return (
-      concluidosDoTipo.includes(s.status) ||
-      s.status === "CANCELADO"
-    );
-  }
-
-  // DESMARCADO → mostrar somente pendentes
-  return (
-    !concluidosDoTipo.includes(s.status) &&
-    s.status !== "CANCELADO"
-  );
+function temFiltroAtivo(tipo, empresa, cpf, status) {
+  return tipo || empresa || cpf || status;
 }
+
+
 
 // FUNÇÃO PARA CARREGAR SOLICITAÇÕES E RENDERIZAR A TABELA
 async function carregarSolicitacoes() {
@@ -129,24 +107,66 @@ function formatarDataHoraSolicitacoes(data) {
   return `${dia}/${mes}/${ano} ${horas}:${minutos}`;
 }
 
+function temFiltroAtivo(tipo, cpf, status) {
+  return tipo || cpf || status;
+}
+
 // FUNÇÃO PARA APLICAR FILTROS
 function aplicarFiltros() {
   const tipo = document.getElementById("filterTipo").value;
   const empresa = document.getElementById("filterEmpresa").value.toLowerCase();
-  const cpf = document.getElementById("filterCPF").value;
+  const cpf = document.getElementById("filterCPF").value.trim();
   const status = document.getElementById("filterStatus").value;
+
+  const filtroAtivo = tipo || empresa || cpf || status;
 
   const filtradas = solicitacoes.filter(s => {
     const matchTipo = !tipo || s.tipo === tipo;
     const matchEmpresa = !empresa || (s.nome_empresa && s.nome_empresa.toLowerCase().includes(empresa));
     const matchCPF = !cpf || s.cpf.includes(cpf);
     const matchStatus = !status || s.status === status;
+
+    // SE TEM QUALQUER FILTRO → IGNORA VISIBILIDADE
+    if (filtroAtivo) {
+      return matchTipo && matchEmpresa && matchCPF && matchStatus;
+    }
+
+    // SEM FILTRO → aplica regra padrão
     const matchVisibilidade = deveExibir(s);
 
     return matchTipo && matchEmpresa && matchCPF && matchStatus && matchVisibilidade;
   });
 
   renderizarTabela(filtradas);
+}
+
+// BOTÃO PARA MOSTRAR AS SOLICITAÇÕES CONCLUÍDAS
+document.getElementById("checkMostrarTudo").addEventListener("change", function () {
+  mostrarConcluidos = this.checked;
+  aplicarFiltros();
+});
+
+// FUNÇÃO PARA ESCONDER SOLICITAÇÕES POR PADRÃO
+let mostrarConcluidos = false;
+
+const statusConcluidosPorTipo = { NOVO_EXAME: ["APROVADO"], NOVO_CADASTRO: ["ENVIADO_SOC"] };
+
+function deveExibir(s) {
+  const concluidosDoTipo = statusConcluidosPorTipo[s.tipo] || [];
+
+  // MARCADO → mostrar concluídos + cancelados
+  if (mostrarConcluidos) {
+    return (
+      concluidosDoTipo.includes(s.status) ||
+      s.status === "CANCELADO"
+    );
+  }
+
+  // DESMARCADO → mostrar somente pendentes
+  return (
+    !concluidosDoTipo.includes(s.status) &&
+    s.status !== "CANCELADO"
+  );
 }
 
 // FUNÇÃO PARA RENDERIZAR TABELA COM AS SOLICITAÇÕES
@@ -202,33 +222,37 @@ async function renderizarTabela(lista) {
       <td class="actions">
         <div class="actions-wrapper">
           ${estaEmAnalise
-        ? `
-              <small style="opacity:0.6;">
-                Em análise por ${s.em_analise_por_nome?.split(' ')[0]}
-              </small>
-              `
-        : `
-            <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
-              Analisar
-            </button>
-
-            ${podeEnviarSOC
           ? `
-                  <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
-                    Enviar SOC
-                  </button>
-                  `
-          : ""
-        }
+                <small style="opacity:0.6;">
+                  Em análise por ${s.em_analise_por_nome?.split(' ')[0]}
+                </small>
+                `
+          : `
+              <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
+                Analisar
+              </button>
 
-            ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
-          ? `
-                  <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
-                    Cancelar
-                  </button>
-                  `
-          : ""
-        }
+              <button onclick="abrirHistorico(${s.solicitacao_id}, '${s.tipo}')">
+                Histórico
+              </button>
+
+              ${podeEnviarSOC
+            ? `
+                    <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
+                      Enviar SOC
+                    </button>
+                    `
+            : ""
+          }
+
+              ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
+            ? `
+                    <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
+                      Cancelar
+                    </button>
+                    `
+            : ""
+          }
           `
       }
         </div>
@@ -799,8 +823,6 @@ async function preencherModal(s, tipo) {
 
     }
 
-
-    // 👇 COLOQUE AQUI A LÓGICA DA SITUAÇÃO 3
     if (s.unidade_destino && s.setor_destino) {
       const codigoUnidade = await obterCodigoUnidadePorNome(
         s.cod_empresa,
@@ -1014,91 +1036,196 @@ async function preencherModal(s, tipo) {
   }
 
   // STATUS
-  const alertStatus =
-    tipo === "NOVO_EXAME"
-      ? document.getElementById("linha_aprovacao_exame")
-      : document.getElementById("linha_aprovacao_cadastro");
+  // const alertStatus =
+  //   tipo === "NOVO_EXAME"
+  //     ? document.getElementById("linha_aprovacao_exame")
+  //     : document.getElementById("linha_aprovacao_cadastro");
 
-  alertStatus.style.display = "none";
-  alertStatus.innerHTML = "";
+  // alertStatus.style.display = "none";
+  // alertStatus.innerHTML = "";
 
-  if (s.status === "ERRO_SOC" && s.retorno_soc_erro) {
-    alertStatus.style.display = "block";
-    alertStatus.innerHTML = `
-      <div class="alerts-container mb-2">
-        <div class="alert alert-erro">
-          <i class="fa-solid fa-circle-check fa-lg" style="color: #F05252"></i>
-          <p class="alert-text">
-            Erro retornado pelo SOC: ${s.retorno_soc_erro}
-          </p>
-        </div>
-      </div>
-    `;
-    return;
-  }
+  // if (s.status === "ERRO_SOC") {
+  //   alertStatus.style.display = "block";
+  //   alertStatus.innerHTML = `
+  //     <div class="alerts-container mb-2">
+  //       <div class="alert alert-erro">
+  //         <i class="fa-solid fa-circle-check fa-lg" style="color: #F05252"></i>
+  //         <p class="alert-text">
+  //           Erro retornado pelo SOC: ${s.erro_soc}
+  //         </p>
+  //       </div>
+  //     </div>
+  //   `;
+  //   return;
+  // }
 
   // APROVADO
-  if (s.status === "APROVADO") {
-    alertStatus.style.display = "block";
-    alertStatus.innerHTML = `
-      <div class="alerts-container mb-2">
-        <div class="alert alert-aprovado">
-          <i class="fa-solid fa-circle-check fa-lg" style="color: #53A5A6"></i>
-          <p class="alert-text">
-            Aprovado por ${s.analisado_por_nome} em ${formatarDataHoraSolicitacoes(s.analisado_em)}
-          </p>
-        </div>
-      </div>
-    `;
-    return;
-  }
+  // if (s.status === "APROVADO") {
+  //   alertStatus.style.display = "block";
+  //   alertStatus.innerHTML = `
+  //     <div class="alerts-container mb-2">
+  //       <div class="alert alert-aprovado">
+  //         <i class="fa-solid fa-circle-check fa-lg" style="color: #53A5A6"></i>
+  //         <p class="alert-text">
+  //           Aprovado por ${s.aprovado_por_nome} em ${formatarDataHoraSolicitacoes(s.aprovado_em)}
+  //         </p>
+  //       </div>
+  //     </div>
+  //   `;
+  //   return;
+  // }
 
   // REPROVADO
-  if (s.status === "REPROVADO") {
-    alertStatus.style.display = "block";
-    alertStatus.innerHTML = `
-      <div class="alerts-container mb-2">
-        <div class="alert alert-reprovado">
-          <i class="fa-solid fa-circle-xmark fa-lg" style="color: #DC3545"></i>
-          <p class="alert-text">
-            Reprovado por ${s.analisado_por_nome} em ${formatarDataHoraSolicitacoes(s.analisado_em)}
-          </p>
-        </div>
-      </div>
-    `;
-    return;
-  }
+  // if (s.status === "REPROVADO") {
+  //   alertStatus.style.display = "block";
+  //   alertStatus.innerHTML = `
+  //     <div class="alerts-container mb-2">
+  //       <div class="alert alert-reprovado">
+  //         <i class="fa-solid fa-circle-xmark fa-lg" style="color: #DC3545"></i>
+  //         <p class="alert-text">
+  //           Reprovado por ${s.reprovado_por_nome} em ${formatarDataHoraSolicitacoes(s.reprovado_em)}
+  //         </p>
+  //       </div>
+  //     </div>
+  //   `;
+  //   return;
+  // }
 
   // CANCELADO
-  if (s.status === "CANCELADO") {
-    alertStatus.style.display = "block";
-    alertStatus.innerHTML = `
-      <div class="alerts-container mb-2">
-        <div class="alert alert-cancelado">
-          <i class="fa-solid fa-ban fa-lg" style="color: #6C757D"></i>
-          <p class="alert-text">
-            Cancelado por ${s.cancelado_por_nome} em ${formatarDataHoraSolicitacoes(s.cancelado_em)}
-          </p>
-        </div>
-      </div>
-    `;
-    return;
-  }
+  // if (s.status === "CANCELADO") {
+  //   alertStatus.style.display = "block";
+  //   alertStatus.innerHTML = `
+  //     <div class="alerts-container mb-2">
+  //       <div class="alert alert-cancelado">
+  //         <i class="fa-solid fa-ban fa-lg" style="color: #6C757D"></i>
+  //         <p class="alert-text">
+  //           Cancelado por ${s.cancelado_por_nome} em ${formatarDataHoraSolicitacoes(s.cancelado_em)}
+  //         </p>
+  //       </div>
+  //     </div>
+  //   `;
+  //   return;
+  // }
 
   // ENVIADO SOC
-  if (s.status === "ENVIADO_SOC") {
-    alertStatus.style.display = "block";
-    alertStatus.innerHTML = `
-      <div class="alerts-container mb-2">
-        <div class="alert alert-enviado">
-          <i class="fa-solid fa-paper-plane fa-lg" style="color: #88A6BB"></i>
-          <p class="alert-text">
-            Enviado ao SOC por ${s.enviado_soc_por_nome} em ${formatarDataHoraSolicitacoes(s.enviado_soc_em)}
-          </p>
+  // if (s.status === "ENVIADO_SOC") {
+  //   alertStatus.style.display = "block";
+  //   alertStatus.innerHTML = `
+  //     <div class="alerts-container mb-2">
+  //       <div class="alert alert-enviado">
+  //         <i class="fa-solid fa-paper-plane fa-lg" style="color: #88A6BB"></i>
+  //         <p class="alert-text">
+  //           Enviado ao SOC por ${s.enviado_soc_por_nome} em ${formatarDataHoraSolicitacoes(s.enviado_soc_em)}
+  //         </p>
+  //       </div>
+  //     </div>
+  //   `;
+  //   return;
+  // }
+}
+
+// FUNÇÃO PARA MOSTRAR O HISTÓRICO DAS SOLICITAÇÕES
+async function abrirHistorico(id, tipo) {
+  try {
+    const res = await fetch(`/solicitacoes/${tipo}/${id}/historico`);
+    if (!res.ok) throw new Error("Erro ao carregar histórico");
+
+    const historico = await res.json();
+    historico.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+    const container = document.getElementById("conteudoHistorico");
+
+    if (!historico.length) {
+      container.innerHTML = `
+        <div class="text-center text-muted py-4">
+          <i class="fa-regular fa-folder-open fa-2x mb-2"></i>
+          <div>Sem histórico</div>
         </div>
+      `;
+      new bootstrap.Modal(document.getElementById("modalHistorico")).show();
+      return;
+    }
+
+    const getIcon = (etapa) => {
+      switch (etapa) {
+        case "Solicitado":
+          return { icon: "fa-file-circle-plus fa-lg", color: "#88A6BB" };
+
+        case "Aprovado":
+          return { icon: "fa-circle-check fa-lg", color: "#53A5A6" };
+
+        case "Reprovado":
+          return { icon: "fa-circle-xmark fa-lg", color: "#F05252" };
+
+        case "Cancelado":
+          return { icon: "fa-ban fa-lg", color: "#616161" };
+
+        case "Reavaliado":
+          return { icon: "fa-rotate fa-lg", color: "#F1AE33" };
+
+        case "Enviado ao SOC":
+          return { icon: "fa-paper-plane fa-lg", color: "#88A6BB" };
+
+        default:
+          return { icon: "fa-circle fa-lg", color: "#000000" };
+      }
+    };
+
+    const html = `
+      <div class="timeline">
+        ${historico.map(h => {
+          const dataFormatada = h.data ? new Date(h.data).toLocaleString() : "-";
+          const { icon, color } = getIcon(h.etapa);
+
+          return `
+            <div class="timeline-item">
+              <div class="timeline-icon">
+                <i class="fa-solid ${icon}" style="color: ${color}"></i>
+              </div>
+
+              <div class="timeline-content">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <h6>${h.etapa}</h6>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center text-muted small">
+                  <div>
+                    <i class="fa-solid fa-user me-1"></i>
+                    ${h.usuario || "-"}
+                  </div>
+
+                  <div>
+                    <i class="fa-regular fa-clock me-1"></i>
+                    ${dataFormatada}
+                  </div>
+                </div>
+
+                ${h.motivo ? `
+                  <div class="text-danger small mt-1">
+                    <i class="fa-solid fa-ban me-1"></i>
+                    ${h.motivo}
+                  </div>
+                ` : ""}
+
+                ${h.erro ? `
+                  <div class="text-warning small mt-1">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                    ${h.erro}
+                  </div>
+                ` : ""}
+              </div>
+            </div>
+          `;
+        }).join("")}
       </div>
     `;
-    return;
+
+    container.innerHTML = html;
+    new bootstrap.Modal(document.getElementById("modalHistorico")).show();
+
+  } catch (err) {
+    console.error(err);
+    notify.error("Não foi possível carregar o histórico");
   }
 }
 
@@ -1360,7 +1487,8 @@ async function carregarFuncao(empresaCodigo, selecionadoNome = "") {
 const RAC_LABELS = {
   FORMULARIO_RAC_VALE: "FORMULÁRIO RAC VALE",
   FORMULARIO_UNIDADE_CSN: "FORMULÁRIO UNIDADE CSN",
-  FORMULARIO_UNIDADE_VALLOUREC: "FORMULÁRIO UNIDADE VALLOUREC"
+  FORMULARIO_UNIDADE_VALLOUREC: "FORMULÁRIO UNIDADE VALLOUREC",
+  FORMULARIO_UNIDADE_KINROSS: "FORMULÁRIO UNIDADE KINROSS"
 };
 
 function formatarRac(rac) {
@@ -1477,11 +1605,9 @@ document.querySelectorAll('input[name="statusConsulta"]').forEach(radio => {
     if (this.value !== "PENDENTE_AGENDAMENTO")
       return;
 
-    const confirmado = confirm(
-      "Deseja alterar o status desta solicitação para PENDENTE_AGENDAMENTO?"
-    );
+    const confirmar = await modalConfirm("Deseja alterar o status desta solicitação para PENDENTE_AGENDAMENTO?");
 
-    if (!confirmado) {
+    if (!confirmar) {
       this.checked = false;
       return;
     }
@@ -2008,9 +2134,6 @@ async function salvarEdicaoExame() {
 
 // FUNÇÃO PARA APROVAR / REPROVAR SOLICITAÇÃO
 async function analisarSolicitacao(status, btn) {
-  btn.disabled = true;
-  btn.style.opacity = "0.6";
-
   const isExame = document.getElementById("modalDetalhesNovoExame").classList.contains("show");
   const tipo = isExame ? "NOVO_EXAME" : "NOVO_CADASTRO";
 
@@ -2019,22 +2142,16 @@ async function analisarSolicitacao(status, btn) {
     const observacaoConsulta = getObservacaoConsultaAtual();
 
     if (!tipoConsulta) {
-      btn.disabled = false;
-      btn.style.opacity = "1";
       notify.warning("Selecione o tipo da consulta");
       return;
     }
 
     if (tipoConsulta === "PENDENTE_AGENDAMENTO") {
-      btn.disabled = false;
-      btn.style.opacity = "1";
       notify.error("Não é possível aprovar com consulta pendente de agendamento");
       return;
     }
 
     if (!observacaoConsulta || !observacaoConsulta.value.trim()) {
-      btn.disabled = false;
-      btn.style.opacity = "1";
       notify.warning("Informe a observação da consulta");
       observacaoConsulta?.focus();
       return;
@@ -2049,8 +2166,6 @@ async function analisarSolicitacao(status, btn) {
 
   if (status === "REPROVADO" && !motivo.trim()) {
     notify.warning("Informe o motivo da reprovação");
-    btn.disabled = false;
-    btn.style.opacity = "1";
     return;
   }
 
@@ -2073,14 +2188,12 @@ async function analisarSolicitacao(status, btn) {
     carregarSolicitacoes();
   } else {
     notify.error("Erro ao analisar solicitação");
-    btn.disabled = false;
-    btn.style.opacity = "1";
   }
 }
 
 // FUNÇÃO PARA CANCELAR SOLICITAÇÃO PENDENTE
 async function cancelarSolicitacao(id, tipo, usuarioLogadoId) {
-  const confirmar = confirm("Tem certeza que deseja cancelar esta solicitação?");
+  const confirmar = await modalConfirm("Tem certeza que deseja cancelar esta solicitação?");
   if (!confirmar) return;
 
   try {
@@ -2109,7 +2222,8 @@ async function cancelarSolicitacao(id, tipo, usuarioLogadoId) {
 
 // FUNÇÃO PARA ENVIAR AO SOC
 async function enviarSOC(id) {
-  if (!confirm("Deseja enviar este funcionário ao SOC?")) return;
+  const confirmar = await modalConfirm("Deseja enviar este funcionário ao SOC?");
+  if (!confirmar) return;
 
   try {
     const res = await fetch(`/soc/funcionarios/${id}/enviar`,

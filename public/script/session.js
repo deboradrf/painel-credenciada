@@ -46,10 +46,11 @@ function getEmpresaUnidades() {
 
 // TROCAR EMPRESA
 function trocarEmpresa(cod, nome, unidades) {
-
   sessionStorage.setItem("empresaCodigo", cod);
   sessionStorage.setItem("empresaNome", nome);
   sessionStorage.setItem("empresaUnidades", JSON.stringify(unidades));
+
+  sessionStorage.setItem("empresaTrocada", nome);
 
   location.reload();
 }

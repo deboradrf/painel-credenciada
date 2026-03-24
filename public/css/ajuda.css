@@ -14,7 +14,7 @@ body {
 
 body.blur-main main {
     filter: blur(4px);
-    transition: filter 0.25s ease;
+    transition: filter 0.3s ease;
 }
 
 body.blur-main header {
@@ -54,7 +54,7 @@ body.blur-main header {
 }
 
 .header-center span {
-    transition: transform 0.2s;
+    transition: transform 0.3s;
 }
 
 .header-center span:hover {
@@ -246,7 +246,7 @@ hr {
     width: 200px;
     text-decoration: none;
     user-select: none;
-    transition: color 0.25s ease;
+    transition: color 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -353,7 +353,7 @@ hr {
     background: #FFFFFF;
     border: 1px solid #E9ECEF;
     text-align: center;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     cursor: default;
 }
 

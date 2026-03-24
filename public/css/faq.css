@@ -14,7 +14,7 @@ body {
 
 body.blur-main main {
     filter: blur(4px);
-    transition: filter 0.25s ease;
+    transition: filter 0.3s ease;
 }
 
 body.blur-main header {
@@ -86,7 +86,7 @@ h3::after {
 }
 
 .header-center span {
-    transition: transform 0.2s;
+    transition: transform 0.3s;
 }
 
 .header-center span:hover {
@@ -247,10 +247,23 @@ main {
     max-width: 1000px;
     background: #FFFFFF;
     border-radius: 10px;
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     margin-bottom: 15px;
     overflow: hidden;
     transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateX(-30px) scale(0.98);
+    animation: fadeInRight 0.6s ease forwards;
+}
+
+.faq-item:nth-child(n) {
+    animation-delay: calc(var(--i) * 0.1s);
+}
+
+@keyframes fadeInRight {
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
 }
 
 .faq-question {

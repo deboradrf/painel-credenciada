@@ -14,7 +14,7 @@ body {
 
 body.blur-main main {
     filter: blur(4px);
-    transition: filter 0.25s ease;
+    transition: filter 0.3s ease;
 }
 
 body.blur-main header {
@@ -54,7 +54,7 @@ body.blur-main header {
 }
 
 .header-center span {
-    transition: transform 0.2s;
+    transition: transform 0.3s;
 }
 
 .header-center span:hover {
@@ -363,7 +363,7 @@ h3::after {
     padding: 0 10px 0 10px;
     width: 100px;
     height: 30px;
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
 }
 
 .btn-search:hover {
@@ -414,7 +414,6 @@ th {
     color: #FFFFFF;
     padding: 20px;
     text-align: center;
-    border-bottom: 5px solid #E5E7EB;
 }
 
 th:not(:last-child)::after {
@@ -455,10 +454,14 @@ td {
   word-break: break-word;
 }
 
+.actions button:not(:last-child) {
+    margin-bottom: 5px;
+}
+
 .actions button {
     background-color: #FFFFFF;
     border: 1px solid #E5E7EB;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
     color: #000000;
     cursor: pointer;
@@ -466,7 +469,7 @@ td {
     line-height: 28px;
     padding: 0 10px 0 10px;
     width: 100px;
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
 }
 
 .actions button:hover {
@@ -476,7 +479,7 @@ td {
 .status-pill {
     padding: 4px 12px;
     color: #FFFFFF;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 11px;
     font-weight: 500;
     line-height: 1.2;
@@ -509,7 +512,7 @@ td {
 
 .status-pill.reprovado,
 .status-pill.erro_soc {
-    background: #EF4444;
+    background: #F05252;
 }
 
 .modal-header {
@@ -543,7 +546,7 @@ td {
 
 .detail-item {
     background: #F9FAFB;
-    border-radius: 14px;
+    border-radius: 10px;
     padding: 14px 18px;
     display: flex;
     flex-direction: column;
@@ -552,7 +555,7 @@ td {
 
 .detail-item.email {
     background: #F9FAFB;
-    border-radius: 14px;
+    border-radius: 10px;
     padding: 14px 18px;
     display: flex;
     flex-direction: column;
@@ -745,7 +748,7 @@ td {
     justify-content: center;
     background-color: #FFFFFF;
     border: 1px solid #E5E7EB;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
     color: #000000;
     cursor: pointer;
@@ -753,8 +756,8 @@ td {
     line-height: 28px;
     padding: 0 10px 0 10px;
     width: 120px;
-    height: 35px;
-    transition: all 0.25s ease;
+    height: 38px;
+    transition: all 0.3s ease;
 }
 
 .footer-actions button:hover {
@@ -776,6 +779,46 @@ td {
     border-color: #f1ae33;
     box-shadow: 0 0 0 3px rgba(241, 174, 51, 0.15);
     outline: none;
+}
+
+.timeline {
+  position: relative;
+  margin: 10px 0;
+  padding-left: 30px;
+  border-left: 2px solid #F1F1F1;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.timeline-icon {
+  position: absolute;
+  left: -16px;
+  top: 0;
+  background: #FFFFFF;
+  border: 2px solid #F1F1F1;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.timeline-content {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 10px 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  transition: 0.2s;
+}
+
+.timeline-content:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .footer-container {

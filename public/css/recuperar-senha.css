@@ -91,7 +91,7 @@ h3::after {
     font-weight: 500;
     margin-top: 10px;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
 }
 
 .btn-recuperar:hover {
