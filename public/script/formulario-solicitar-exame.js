@@ -1022,6 +1022,7 @@ function adicionarEmail() {
 async function enviarEmailSolicitacao(dados) {
   let destinatario = "";
   let assunto = "";
+  let cc = "";
 
   const mensagem = `
     Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
@@ -1031,17 +1032,16 @@ async function enviarEmailSolicitacao(dados) {
 
   if (dados.solicitar_nova_unidade === true) {
     destinatario = "clientes@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de Criação de Unidade";
   }
 
   else if (dados.solicitar_novo_setor === true || dados.solicitar_nova_funcao === true) {
     assunto = "Solicitação de Criação de Setor/Função";
+    cc = "nicolly.rocha@salubrita.com.br, paulina.oliveira@salubrita.com.br, rubia.costa@salubrita.com.br";
   }
 
   else if (dados.solicitar_credenciamento === true) {
     destinatario = "contratos@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de Credenciamento";
   }
 
@@ -1052,6 +1052,7 @@ async function enviarEmailSolicitacao(dados) {
       destinatario,
       assunto,
       mensagem,
+      cc,
 
       codigo_empresa: dados.cod_empresa,
       solicitar_novo_setor: dados.solicitar_novo_setor,

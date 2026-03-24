@@ -2886,9 +2886,40 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+const isDev = process.env.NODE_ENV === "development";
+
+// 👇 função central de envio
+async function enviarEmailSeguro({ to, cc, subject, text, html }) {
+  let destinoFinal = to;
+  let ccFinal = cc;
+
+  if (isDev) {
+    // 🔁 redireciona tudo pra você em ambiente de teste
+    destinoFinal = "debora.fonseca@salubrita.com.br";
+    ccFinal = undefined;
+
+    console.log("📧 [DEV] Email redirecionado:");
+    console.log({
+      originalTo: to,
+      originalCc: cc,
+      destinoFinal,
+      subject
+    });
+  }
+
+  return transporter.sendMail({
+    from: "Portal Salubritá <naoresponda@salubrita.com.br>",
+    to: destinoFinal,
+    cc: ccFinal || undefined,
+    subject,
+    text,
+    html
+  });
+}
+
 // ROTA PARA ENVIAR E-MAIL NA HORA DA SOLICITAÇÃO
 app.post("/enviar-email-solicitacao", async (req, res) => {
-  const { destinatario, assunto, mensagem, codigo_empresa, solicitar_novo_setor, solicitar_nova_funcao, solicitar_novo_cargo } = req.body;
+  const { destinatario, cc, assunto, mensagem, codigo_empresa, solicitar_novo_setor, solicitar_nova_funcao, solicitar_novo_cargo } = req.body;
 
   try {
     let destinoFinal = destinatario?.trim() || "";
@@ -2903,9 +2934,9 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
       destinoFinal = emailsArray.join(", ");
     }
 
-    await transporter.sendMail({
-      from: "Portal Salubritá <naoresponda@salubrita.com.br>",
+    await enviarEmailSeguro({
       to: destinoFinal,
+      cc: cc,
       subject: assunto,
       text: mensagem
     });
@@ -2936,17 +2967,16 @@ async function enviarEmailSetorFuncao(dados) {
 
     const destino = emailsArray.join(", ");
 
-    await transporter.sendMail({
-      from: "Portal Salubritá <naoresponda@salubrita.com.br>",
+    await enviarEmailSeguro({
       to: destino,
+      cc: ["nicolly.rocha@salubrita.com.br", "paulina.oliveira@salubrita.com.br", "rubia.costa@salubrita.com.br"].join(", "),
       subject: "Solicitação de Criação de Setor/Função",
       text: `
         Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
-    
+
         Gentileza dar prosseguimento à solicitação.
       `
     });
-
   } catch (erro) {
     console.error("Erro ao enviar email");
   }
@@ -2964,9 +2994,9 @@ async function enviarEmailSetorCargo(dados) {
 
     const destino = emailsArray.join(", ");
 
-    await transporter.sendMail({
-      from: "Portal Salubritá <naoresponda@salubrita.com.br>",
+    await enviarEmailSeguro({
       to: destino,
+      cc: ["nicolly.rocha@salubrita.com.br", "paulina.oliveira@salubrita.com.br", "rubia.costa@salubrita.com.br"].join(", "),
       subject: "Solicitação de Criação de Setor/Cargo",
       text: `
         Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
@@ -2981,52 +3011,47 @@ async function enviarEmailSetorCargo(dados) {
 
 // FUNÇÃO PARA ENVIAR E-MAIL DEPOIS DA CRIAÇÃO DE SETOR/CARGO/FUNÇÃO
 async function enviarEmailCredenciamento(dados) {
-  await transporter.sendMail({
-    from: "Portal Salubritá <naoresponda@salubrita.com.br>",
+  await enviarEmailSeguro({
     to: "contratos@salubrita.com.br",
-    //to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de Credenciamento",
     text: `
-      Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
-    
-      Gentileza dar prosseguimento à solicitação.
-    `
+        Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
+      
+        Gentileza dar prosseguimento à solicitação.
+      `
   });
 }
 
 // FUNÇÃO PRA ENVIAR E-MAIL PRA PESSOA DA SOLICITAÇÃO QUANDO FOR REPROVADA
 async function enviarEmailReprovacao(email, motivo) {
-  await transporter.sendMail({
-    from: "Portal Salubritá <naoresponda@salubrita.com.br>",
+  await enviarEmailSeguro({
     to: email,
     subject: "Solicitação Reprovada",
-    text:
+    text: `
+        Sua solicitação foi reprovada pelo seguinte motivo:
+
+        "${motivo}"
+
+        Ela permanecerá pendente até que as correções necessárias sejam realizadas.
+
+        Gentileza acessar o Portal Salubritá para revisar e editar as informações.
       `
-      Sua solicitação foi reprovada pelo seguinte motivo:
-
-      "${motivo}"
-
-      Ela permanecerá pendente até que as correções necessárias sejam realizadas.
-
-      Gentileza acessar o Portal Salubritá para revisar e editar as informações.
-    `
   });
 }
 
 // FUNÇÃO PRA ENVIAR E-MAIL PRA PESSOA DA SOLICITAÇÃO QUANDO FOR APROVADO E TIVER OBSERVAÇÃO
 // SOBRE A CONSULTA
 async function enviarEmailObservacaoConsulta({ email, nomeFuncionario, observacao }) {
-  await transporter.sendMail({
-    from: "Portal Salubritá <naoresponda@salubrita.com.br>",
+  await enviarEmailSeguro({
     to: email,
     subject: "Consulta Agendada",
     html: `
-      <p>A solicitação referente a novo cadastro/novo exame do(a) colaborador(a): ${nomeFuncionario} foi aprovada.</p>
+        <p>A solicitação referente a novo cadastro/novo exame do(a) colaborador(a): ${nomeFuncionario} foi aprovada.</p>
 
-      <p>Observação da consulta:</p>
+        <p>Observação da consulta:</p>
 
-      "${observacao.replace(/\n/g, "<br>")}"
-    `
+        "${observacao.replace(/\n/g, "<br>")}"
+      `
   });
 }
 
