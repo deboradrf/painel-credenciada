@@ -1131,8 +1131,8 @@ async function enviarEmailSolicitacao(dados) {
   `;
 
   if (dados.solicitar_nova_unidade === true) {
-    //destinatario = "clientes@salubrita.com.br";
-    destinatario = "debora.fonseca@salubrita.com.br";
+    destinatario = "clientes@salubrita.com.br";
+    //destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de Criação de Unidade";
   }
 
@@ -1141,8 +1141,8 @@ async function enviarEmailSolicitacao(dados) {
   }
 
   else if (dados.solicitar_credenciamento === true) {
-    //destinatario = "contratos@salubrita.com.br";
-    destinatario = "debora.fonseca@salubrita.com.br";
+    destinatario = "contratos@salubrita.com.br";
+    //destinatario = "debora.fonseca@salubrita.com.br";
     assunto = "Solicitação de Credenciamento";
   }
 

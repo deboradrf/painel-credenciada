@@ -2952,20 +2952,6 @@ async function enviarEmailSetorFuncao(dados) {
   }
 }
 
-// async function enviarEmailSetorFuncao(dados) {
-//   await transporter.sendMail({
-//     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-//     //to: "nicolly.rocha@salubrita.com.br; paulina.oliveira@salubrita.com.br; rubia.costa@salubrita.com.br",
-//     to: "debora.fonseca@salubrita.com.br",
-//     subject: "Solicitação de Criação de Setor/Função",
-//     text: `
-//       Uma solicitação para criação de setor/função para Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
-
-//       Gentileza dar prosseguimento à solicitação.
-//     `
-//   });
-// }
-
 // FUNÇÃO PARA ENVIAR E-MAIL DEPOIS DA CRIAÇÃO DE UNIDADE - NOVO CADASTRO
 async function enviarEmailSetorCargo(dados) {
   try {
@@ -2997,8 +2983,8 @@ async function enviarEmailSetorCargo(dados) {
 async function enviarEmailCredenciamento(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    //to: "contratos@salubrita.com.br",
-    to: "debora.fonseca@salubrita.com.br",
+    to: "contratos@salubrita.com.br",
+    //to: "debora.fonseca@salubrita.com.br",
     subject: "Solicitação de Credenciamento",
     text: `
       Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
