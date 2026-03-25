@@ -454,15 +454,11 @@ td {
   word-break: break-word;
 }
 
-.actions {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 8px;
+.actions-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
   align-items: center;
-}
-
-.actions button:not(:last-child) {
-    margin-bottom: 5px;
 }
 
 .actions button {
