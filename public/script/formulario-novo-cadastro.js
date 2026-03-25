@@ -1132,7 +1132,7 @@ async function enviarEmailSolicitacao(dados) {
 
   if (dados.solicitar_nova_unidade === true) {
     destinatario = "clientes@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "fonsecadrf@outlook.com";
     assunto = "Solicitação de Criação de Unidade";
   }
 
@@ -1142,7 +1142,7 @@ async function enviarEmailSolicitacao(dados) {
 
   else if (dados.solicitar_credenciamento === true) {
     destinatario = "contratos@salubrita.com.br";
-    //destinatario = "debora.fonseca@salubrita.com.br";
+    //destinatario = "wasidrf@outlook.com";
     assunto = "Solicitação de Credenciamento";
   }
 
