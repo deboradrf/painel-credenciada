@@ -2894,6 +2894,7 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
 
   try {
     let destinoFinal = "";
+    let copia = "";
 
     // SETOR / CARGO → buscar na tabela
     if (tipoSolicitacao === "SETOR_CARGO") {
@@ -2914,6 +2915,8 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
       }
 
       destinoFinal = emailsArray.join(", ");
+      copia = "debora.fonseca@salubrita.com.br, wasidrf@outlook.com";
+      //copia = "nicolly.rocha@salubrita.com.br, paulina.oliveira@salubrita.com.br, rubia.costa@salubrita.com.br";
     }
 
     // UNIDADE ou CREDENCIAMENTO → email fixo
@@ -2929,6 +2932,7 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
       from: "Portal Salubritá <naoresponda@salubrita.com.br>",
       to: destinoFinal,
       subject: assunto,
+      cc: copia || undefined,
       text: mensagem
     });
 
@@ -2956,11 +2960,27 @@ async function enviarEmailSetorFuncao(dados) {
 
     const emailsArray = result.rows[0]?.emails || [];
 
+    if (!Array.isArray(emailsArray) || emailsArray.length === 0) {
+      throw new Error("Nenhum email encontrado para essa empresa");
+    }
+
     const destino = emailsArray.join(", ");
+
+    // const copia = [
+    //   "nicolly.rocha@salubrita.com.br",
+    //   "paulina.oliveira@salubrita.com.br",
+    //   "rubia.costa@salubrita.com.br"
+    // ];
+
+    const copia = [
+      "debora.fonseca@salubrita.com.br",
+      "wasidrf@outlook.com"
+    ];
 
     await transporter.sendMail({
       from: "Portal Salubritá <naoresponda@salubrita.com.br>",
       to: destino,
+      cc: copia,
       subject: "Solicitação de Criação de Setor/Função",
       text: `
         Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
@@ -2984,11 +3004,27 @@ async function enviarEmailSetorCargo(dados) {
 
     const emailsArray = result.rows[0]?.emails || [];
 
+    if (!Array.isArray(emailsArray) || emailsArray.length === 0) {
+      throw new Error("Nenhum email encontrado para essa empresa");
+    }
+
     const destino = emailsArray.join(", ");
+
+    // const copia = [
+    //   "nicolly.rocha@salubrita.com.br",
+    //   "paulina.oliveira@salubrita.com.br",
+    //   "rubia.costa@salubrita.com.br"
+    // ];
+
+    const copia = [
+      "debora.fonseca@salubrita.com.br",
+      "wasidrf@outlook.com"
+    ];
 
     await transporter.sendMail({
       from: "Portal Salubritá <naoresponda@salubrita.com.br>",
       to: destino,
+      cc: copia,
       subject: "Solicitação de Criação de Setor/Cargo",
       text: `
         Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
