@@ -2915,8 +2915,8 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
       }
 
       destinoFinal = emailsArray.join(", ");
-      copia = "debora.fonseca@salubrita.com.br, wasidrf@outlook.com";
-      //copia = "nicolly.rocha@salubrita.com.br, paulina.oliveira@salubrita.com.br, rubia.costa@salubrita.com.br";
+      //copia = "debora.fonseca@salubrita.com.br, wasidrf@outlook.com";
+      copia = "nicolly.rocha@salubrita.com.br, paulina.oliveira@salubrita.com.br, rubia.costa@salubrita.com.br";
     }
 
     // UNIDADE ou CREDENCIAMENTO → email fixo
@@ -2966,16 +2966,16 @@ async function enviarEmailSetorFuncao(dados) {
 
     const destino = emailsArray.join(", ");
 
-    // const copia = [
-    //   "nicolly.rocha@salubrita.com.br",
-    //   "paulina.oliveira@salubrita.com.br",
-    //   "rubia.costa@salubrita.com.br"
-    // ];
-
     const copia = [
-      "debora.fonseca@salubrita.com.br",
-      "wasidrf@outlook.com"
+      "nicolly.rocha@salubrita.com.br",
+      "paulina.oliveira@salubrita.com.br",
+      "rubia.costa@salubrita.com.br"
     ];
+
+    // const copia = [
+    //   "debora.fonseca@salubrita.com.br",
+    //   "wasidrf@outlook.com"
+    // ];
 
     await transporter.sendMail({
       from: "Portal Salubritá <naoresponda@salubrita.com.br>",
@@ -3010,16 +3010,16 @@ async function enviarEmailSetorCargo(dados) {
 
     const destino = emailsArray.join(", ");
 
-    // const copia = [
-    //   "nicolly.rocha@salubrita.com.br",
-    //   "paulina.oliveira@salubrita.com.br",
-    //   "rubia.costa@salubrita.com.br"
-    // ];
-
     const copia = [
-      "debora.fonseca@salubrita.com.br",
-      "wasidrf@outlook.com"
+      "nicolly.rocha@salubrita.com.br",
+      "paulina.oliveira@salubrita.com.br",
+      "rubia.costa@salubrita.com.br"
     ];
+
+    // const copia = [
+    //   "debora.fonseca@salubrita.com.br",
+    //   "wasidrf@outlook.com"
+    // ];
 
     await transporter.sendMail({
       from: "Portal Salubritá <naoresponda@salubrita.com.br>",
@@ -3087,12 +3087,6 @@ async function enviarEmailObservacaoConsulta({ email, nomeFuncionario, observaca
     `
   });
 }
-
-// const PORT = process.env.NODE_ENV === 'development' ? 3000 : (process.env.PORT || 3003);
-
-// app.listen(PORT, () => {
-//   console.log(`Servidor rodando na porta ${PORT}`);
-// });
 
 const PORT = process.env.NODE_ENV === 'development'
   ? 3000
