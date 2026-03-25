@@ -890,24 +890,24 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-unidade", async (req, res) => {
 
     await client.query(
       `
-      UPDATE novo_cadastro
-      SET cod_unidade = $1,
-          nome_unidade = $2
-      WHERE id = (
-        SELECT novo_cadastro_id
-        FROM solicitacoes_novo_cadastro
-        WHERE id = $3
-      )
+        UPDATE novo_cadastro
+        SET cod_unidade = $1,
+            nome_unidade = $2
+        WHERE id = (
+          SELECT novo_cadastro_id
+          FROM solicitacoes_novo_cadastro
+          WHERE id = $3
+        )
       `,
       [cod_unidade, nome_unidade, id]
     );
 
     const result = await client.query(
       `
-      UPDATE solicitacoes_novo_cadastro
-      SET status = 'PENDENTE_SC'
-      WHERE id = $1
-      RETURNING status
+        UPDATE solicitacoes_novo_cadastro
+        SET status = 'PENDENTE_SC'
+        WHERE id = $1
+        RETURNING status
       `,
       [id]
     );
@@ -915,12 +915,13 @@ app.put("/solicitacoes/novo-cadastro/:id/salvar-unidade", async (req, res) => {
     // PEGAR OS DADOS DA SOLICITAÇÃO
     const dados = await client.query(
       `
-      SELECT
-        nc.nome_empresa,
-        nc.nome_unidade
-      FROM solicitacoes_novo_cadastro s
-      JOIN novo_cadastro nc ON nc.id = s.novo_cadastro_id
-      WHERE s.id = $1
+        SELECT
+          nc.nome_empresa,
+          nc.nome_unidade,
+          nc.cod_empresa
+        FROM solicitacoes_novo_cadastro s
+        JOIN novo_cadastro nc ON nc.id = s.novo_cadastro_id
+        WHERE s.id = $1
       `,
       [id]
     );
@@ -1379,7 +1380,8 @@ app.put("/solicitacoes/novo-exame/:id/salvar-unidade", async (req, res) => {
       `
       SELECT
         nc.nome_empresa,
-        nc.unidade_destino
+        nc.unidade_destino,
+        nc.cod_empresa
       FROM solicitacoes_novo_exame s
       JOIN novo_exame nc ON nc.id = s.novo_exame_id
       WHERE s.id = $1
@@ -2888,19 +2890,39 @@ const transporter = nodemailer.createTransport({
 
 // ROTA PARA ENVIAR E-MAIL NA HORA DA SOLICITAÇÃO
 app.post("/enviar-email-solicitacao", async (req, res) => {
-  const { destinatario, assunto, mensagem, codigo_empresa, solicitar_novo_setor, solicitar_nova_funcao, solicitar_novo_cargo } = req.body;
+  const { tipoSolicitacao, destinatario, assunto, mensagem, codigo_empresa } = req.body;
 
   try {
-    let destinoFinal = destinatario?.trim() || "";
+    let destinoFinal = "";
 
-    if (solicitar_novo_setor || solicitar_nova_funcao || solicitar_novo_cargo) {
+    // SETOR / CARGO → buscar na tabela
+    if (tipoSolicitacao === "SETOR_CARGO") {
+
       const result = await pool.query(
         "SELECT emails FROM responsavel_empresa WHERE cod_empresa = $1",
         [codigo_empresa]
       );
 
-      const emailsArray = result.rows[0]?.emails || [];
+      let emailsArray = result.rows[0]?.emails || [];
+
+      if (typeof emailsArray === "string") {
+        emailsArray = JSON.parse(emailsArray);
+      }
+
+      if (!Array.isArray(emailsArray) || emailsArray.length === 0) {
+        throw new Error("Nenhum email encontrado para essa empresa");
+      }
+
       destinoFinal = emailsArray.join(", ");
+    }
+
+    // UNIDADE ou CREDENCIAMENTO → email fixo
+    else {
+      destinoFinal = destinatario;
+    }
+
+    if (!destinoFinal) {
+      throw new Error("Destinatário não definido");
     }
 
     await transporter.sendMail({

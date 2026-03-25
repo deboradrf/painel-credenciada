@@ -1123,40 +1123,42 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
 async function enviarEmailSolicitacao(dados) {
   let destinatario = "";
   let assunto = "";
-  
-  const mensagem = `
-    Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
-    
-    Gentileza dar prosseguimento à solicitação.
-  `;
+  let tipoSolicitacao = "";
 
   if (dados.solicitar_nova_unidade === true) {
+    tipoSolicitacao = "UNIDADE";
     destinatario = "clientes@salubrita.com.br";
     //destinatario = "fonsecadrf@outlook.com";
     assunto = "Solicitação de Criação de Unidade";
   }
 
   else if (dados.solicitar_novo_setor === true || dados.solicitar_novo_cargo === true) {
+    tipoSolicitacao = "SETOR_CARGO";
     assunto = "Solicitação de Criação de Setor/Cargo";
   }
 
   else if (dados.solicitar_credenciamento === true) {
+    tipoSolicitacao = "CREDENCIAMENTO";
     destinatario = "contratos@salubrita.com.br";
     //destinatario = "wasidrf@outlook.com";
     assunto = "Solicitação de Credenciamento";
   }
 
+  const mensagem = `
+    Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
+    
+    Gentileza dar prosseguimento à solicitação.
+  `;
+
   await fetch("/enviar-email-solicitacao", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      tipoSolicitacao,
       destinatario,
       assunto,
       mensagem,
-
-      codigo_empresa: dados.cod_empresa,
-      solicitar_novo_setor: dados.solicitar_novo_setor,
-      solicitar_novo_cargo: dados.solicitar_novo_cargo
+      codigo_empresa: dados.cod_empresa
     })
   });
 }

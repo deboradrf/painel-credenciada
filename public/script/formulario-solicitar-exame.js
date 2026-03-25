@@ -1022,6 +1022,26 @@ function adicionarEmail() {
 async function enviarEmailSolicitacao(dados) {
   let destinatario = "";
   let assunto = "";
+  let tipoSolicitacao = "";
+
+  if (dados.solicitar_nova_unidade === true) {
+    tipoSolicitacao = "UNIDADE";
+    destinatario = "clientes@salubrita.com.br";
+    //destinatario = "fonsecadrf@outlook.com";
+    assunto = "Solicitação de Criação de Unidade";
+  }
+
+  else if (dados.solicitar_novo_setor === true || dados.solicitar_nova_funcao === true) {
+    tipoSolicitacao = "SETOR_CARGO";
+    assunto = "Solicitação de Criação de Setor/Função";
+  }
+
+  else if (dados.solicitar_credenciamento === true) {
+    tipoSolicitacao = "CREDENCIAMENTO";
+    destinatario = "contratos@salubrita.com.br";
+    //destinatario = "wasidrf@outlook.com";
+    assunto = "Solicitação de Credenciamento";
+  }
 
   const mensagem = `
     Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.
@@ -1029,33 +1049,15 @@ async function enviarEmailSolicitacao(dados) {
     Gentileza dar prosseguimento à solicitação.
   `;
 
-  if (dados.solicitar_nova_unidade === true) {
-    destinatario = "clientes@salubrita.com.br";
-    //destinatario = "fonsecadrf@outlook.com";
-    assunto = "Solicitação de Criação de Unidade";
-  }
-
-  else if (dados.solicitar_novo_setor === true || dados.solicitar_nova_funcao === true) {
-    assunto = "Solicitação de Criação de Setor/Função";
-  }
-
-  else if (dados.solicitar_credenciamento === true) {
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "wasidrf@outlook.com";
-    assunto = "Solicitação de Credenciamento";
-  }
-
   await fetch("/enviar-email-solicitacao", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      tipoSolicitacao,
       destinatario,
       assunto,
       mensagem,
-
-      codigo_empresa: dados.cod_empresa,
-      solicitar_novo_setor: dados.solicitar_novo_setor,
-      solicitar_nova_funcao: dados.solicitar_nova_funcao
+      codigo_empresa: dados.cod_empresa
     })
   });
 }
