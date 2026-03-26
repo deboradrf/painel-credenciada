@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("btnBuscar").addEventListener("click", aplicarFiltros);
-    document.getElementById("btnLimpar").addEventListener("click", () => {
+  document.getElementById("btnLimpar").addEventListener("click", () => {
     document.getElementById("filterTipo").value = "";
     document.getElementById("filterCPF").value = "";
     document.getElementById("filterStatus").value = "";
@@ -327,7 +327,7 @@ function renderizarTabela(lista) {
       `;
     });
 
-  tbody.classList.remove("fade");
+    tbody.classList.remove("fade");
   }, 100);
 
   renderizarPaginacao();
@@ -411,10 +411,10 @@ async function abrirHistorico(id, tipo) {
     const html = `
       <div class="timeline">
         ${historico.map(h => {
-          const dataFormatada = h.data ? new Date(h.data).toLocaleString() : "-";
-          const { icon, color } = getIcon(h.etapa);
+      const dataFormatada = h.data ? new Date(h.data).toLocaleString() : "-";
+      const { icon, color } = getIcon(h.etapa);
 
-          return `
+      return `
             <div class="timeline-item">
               <div class="timeline-icon">
                 <i class="fa-solid ${icon}" style="color: ${color}"></i>
@@ -453,7 +453,7 @@ async function abrirHistorico(id, tipo) {
               </div>
             </div>
           `;
-        }).join("")}
+    }).join("")}
       </div>
     `;
 
@@ -510,7 +510,7 @@ const RAC_LABELS = {
   FORMULARIO_RAC_VALE: "FORMULÁRIO RAC VALE",
   FORMULARIO_UNIDADE_CSN: "FORMULÁRIO UNIDADE CSN",
   FORMULARIO_UNIDADE_VALLOUREC: "FORMULÁRIO UNIDADE VALLOUREC",
-  FORMULARIO_UNIDADE_KINROSS:  "FORMULÁRIO UNIDADE KINROSS"
+  FORMULARIO_UNIDADE_KINROSS: "FORMULÁRIO UNIDADE KINROSS"
 };
 
 function formatarRac(rac) {
@@ -551,7 +551,6 @@ async function cancelarSolicitacao(id, tipo, usuarioLogadoId, status, solicitarN
     flagEspecial = solicitarNovaUnidade || solicitarNovoSetor || solicitarNovoCargo || solicitarCredenciamento;
   }
 
-  // Determina se deve mostrar aviso
   const precisaAviso =
     statusComAviso.includes(status) || (status === "PENDENTE" && flagEspecial);
 
@@ -718,7 +717,7 @@ function preencherModalEditarCadastro(s) {
   document.getElementById("editCadNovoCargo").value = s.nome_novo_cargo;
   document.getElementById("editCadDescricaoAtividade").value = s.descricao_atividade;
   document.getElementById("editCadRac").value = formatarRac(s.rac),
-  document.getElementById("editCadTiposRac").value = formatarTiposRac(s.tipos_rac);
+    document.getElementById("editCadTiposRac").value = formatarTiposRac(s.tipos_rac);
   document.getElementById("editCadTipoExame").value = s.tipo_exame;
   document.getElementById("editCadDataExame").value = formatarDataParaInput(s.data_exame);
   document.getElementById("editCadMaisUnidades").innerText = s.mais_unidades;
@@ -1163,7 +1162,7 @@ async function salvarEdicaoCadastro() {
   const confirmar = await modalConfirm("Deseja salvar as alterações?");
   if (!confirmar) return;
 
-  const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
+  const usuarioLogado = getUsuario();
 
   const id = document.getElementById("editCadId").value;
   const tipoContratacaoValue = document.getElementById("editCadTipoContratacao").value;
@@ -1195,6 +1194,7 @@ async function salvarEdicaoCadastro() {
     nome_novo_setor: document.getElementById("editCadNovoSetor").value,
     nome_novo_cargo: document.getElementById("editCadNovoCargo").value,
     descricao_atividade: document.getElementById("editCadDescricaoAtividade").value,
+    data_exame: dataParaFormatoBanco(document.getElementById("editCadDataExame").value),
     cnh: document.getElementById("editCadCNH").value,
     vencimento_cnh: dataParaFormatoBanco(document.getElementById("editCadVencimentoCNH").value),
     lab_toxicologico: document.getElementById("editCadLabToxicologico").value,
@@ -1292,7 +1292,7 @@ async function salvarEdicaoExame() {
   const confirmar = await modalConfirm("Deseja salvar as alterações?");
   if (!confirmar) return;
 
-  const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
+  const usuarioLogado = getUsuario();
 
   const id = document.getElementById("editExameId").value;
   const tipoFaturamentoSelecionado = document.querySelector('input[name="exame_tipo_faturamento"]:checked')?.value;
@@ -1313,13 +1313,14 @@ async function salvarEdicaoExame() {
     descricao_atividade: document.getElementById("editExameDescricaoAtividade").value,
     nome_novo_setor: document.getElementById("editExameNovoSetor").value || null,
     motivo_consulta: document.getElementById("editExameMotivoConsulta").value || null,
+    data_exame: dataParaFormatoBanco(document.getElementById("editExameDataExame").value),
     cnh: document.getElementById("editExameCNH").value || null,
     vencimento_cnh: dataParaFormatoBanco(document.getElementById("editExameVencimentoCNH").value),
     lab_toxicologico: document.getElementById("editExameLabToxicologico").value || null,
     estado_credenciamento: document.getElementById("editExameEstadoCredenciamento").value || null,
     cidade_credenciamento: document.getElementById("editExameCidadeCredenciamento").value || null,
     observacao: document.getElementById("editExameObservacao").value || null,
-    
+
     usuario_id: usuarioLogado.id
   };
 

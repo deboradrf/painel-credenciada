@@ -1975,16 +1975,17 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
         nome_novo_setor = $23,
         nome_novo_cargo = $24,
         descricao_atividade = $25,
-        cnh = $26,
-        vencimento_cnh = $27,
-        lab_toxicologico = $28,
-        estado_credenciamento = $29,
-        cidade_credenciamento = $30,
-        observacao = $31
+        data_exame = $26,
+        cnh = $27,
+        vencimento_cnh = $28,
+        lab_toxicologico = $29,
+        estado_credenciamento = $30,
+        cidade_credenciamento = $31,
+        observacao = $32
       WHERE id = (
         SELECT novo_cadastro_id
         FROM solicitacoes_novo_cadastro
-        WHERE id = $32
+        WHERE id = $33
       )
     `, [
       f.nome_funcionario,
@@ -2012,6 +2013,7 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
       f.nome_novo_setor,
       f.nome_novo_cargo,
       f.descricao_atividade,
+      f.data_exame,
       f.cnh,
       f.vencimento_cnh || null,
       f.lab_toxicologico,
@@ -2068,16 +2070,17 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
         descricao_atividade = $13,
         nome_novo_setor = $14,
         motivo_consulta = $15,
-        cnh = $16,
-        vencimento_cnh = $17,
-        lab_toxicologico = $18,
-        estado_credenciamento = $19,
-        cidade_credenciamento = $20,
-        observacao = $21
+        data_exame = $16,
+        cnh = $17,
+        vencimento_cnh = $18,
+        lab_toxicologico = $19,
+        estado_credenciamento = $20,
+        cidade_credenciamento = $21,
+        observacao = $22
       WHERE id = (
         SELECT novo_exame_id
         FROM solicitacoes_novo_exame
-        WHERE id = $22
+        WHERE id = $23
       )
     `, [
       f.nome_fantasia,
@@ -2095,6 +2098,7 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
       f.descricao_atividade,
       f.nome_novo_setor,
       f.motivo_consulta,
+      f.data_exame,
       f.cnh,
       f.vencimento_cnh || null,
       f.lab_toxicologico,
