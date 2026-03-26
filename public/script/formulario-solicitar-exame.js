@@ -8,10 +8,6 @@ const unidadesEmpresa = getEmpresaUnidades();
 
 // FUNCIONÁRIO SELECIONADO NA TELA ANTERIOR
 const funcionarioAtual = JSON.parse(localStorage.getItem("funcionario"));
-if (!funcionarioAtual) {
-  notify.error("Nenhum funcionário selecionado");
-  window.location.href = "index.html";
-}
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
@@ -30,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // EMPRESA
   dropdownUserExtra.innerHTML = `
     <div class="company-name">
-      <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+      <small>${nomeEmpresa}</small>
     </div>
   `;
 
@@ -208,7 +204,6 @@ async function popularSelectUnidadeDestino() {
   }
   catch (erro) {
     console.error(erro);
-    notify.error("Erro ao carregar unidades");
   }
 }
 
@@ -297,7 +292,6 @@ async function carregarCargosDoSetor() {
   }
   catch (erro) {
     console.error(erro);
-    notify.error("Erro ao carregar cargos");
   }
 }
 
@@ -350,7 +344,7 @@ function validarDataExame() {
   }
 }
 
-// MOSTRAR CAMPO DE ADD MAIS UNIDADES SE TIPO EXAME FOR 'PERIODICO', OU 'MUDANÇA FUNÇÃO' OU 'DEMISSIONAL'
+// MOSTRAR CAMPO DE ADD MAIS UNIDADES SE TIPO EXAME FOR 'ADMISSIONAL', 'PERIODICO', 'MUDANÇA FUNÇÃO' OU 'DEMISSIONAL'
 document.addEventListener("DOMContentLoaded", () => {
   const tipoExame = document.getElementById("tipoExame");
   const blocoMaisUnidades = document.getElementById("blocoSolicitarMaisUnidades");
@@ -360,6 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function verificarTipoExame() {
 
     const tiposPermitidos = [
+      "ADMISSIONAL",
       "PERIODICO",
       "MUDANCA_RISCOS_OCUPACIONAIS",
       "DEMISSIONAL"
@@ -697,7 +692,6 @@ async function carregarPrestadores() {
 
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro ao carregar prestadores");
   }
 }
 
@@ -1026,8 +1020,8 @@ async function enviarEmailSolicitacao(dados) {
 
   if (dados.solicitar_nova_unidade === true) {
     tipoSolicitacao = "UNIDADE";
-    destinatario = "clientes@salubrita.com.br";
-    //destinatario = "fonsecadrf@outlook.com";
+    //destinatario = "clientes@salubrita.com.br";
+    destinatario = "fonsecadrf@outlook.com";
     assunto = "Solicitação de Criação de Unidade";
   }
 
@@ -1038,8 +1032,8 @@ async function enviarEmailSolicitacao(dados) {
 
   else if (dados.solicitar_credenciamento === true) {
     tipoSolicitacao = "CREDENCIAMENTO";
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "wasidrf@outlook.com";
+    //destinatario = "contratos@salubrita.com.br";
+    destinatario = "wasidrf@outlook.com";
     assunto = "Solicitação de Credenciamento";
   }
 
@@ -1218,6 +1212,13 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
         top: 0,
         behavior: "smooth"
       });
+
+      // LIMPA O FUNCIONÁRIO SALVO NO LOCALSTORAGE
+      localStorage.removeItem("funcionario");
+
+      setTimeout(() => {
+        window.location.href = "/pages/index.html";
+      }, 3000);
     }
 
     await enviarEmailSolicitacao(dados);
@@ -1225,6 +1226,5 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     document.getElementById("formCadastro").reset();
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro ao enviar solicitação");
   }
 });

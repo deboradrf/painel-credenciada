@@ -29,9 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // EMPRESA ATUAL
     let empresasHTML = `
-    <div class="company-name mb-2">
-        <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
-    </div>
+        <div class="company-name mb-2">
+            <small>${nomeEmpresa}</small>
+        </div>
     `;
 
     // JUNTA TODAS AS EMPRESAS (PRINCIPAL + EXTRAS)
@@ -135,6 +135,25 @@ document.addEventListener("DOMContentLoaded", () => {
     profileBtn.addEventListener("hide.bs.dropdown", () => {
         document.body.classList.remove("blur-main");
     });
+});
+
+// CONTROLE DA ANIMAÇÃO DOS CARDS DE ACORDO COM O PERFIL LOGADO
+document.addEventListener("DOMContentLoaded", () => {
+  const usuario = getUsuario();
+  if (!usuario) return;
+
+  const perfil = usuario.perfil?.trim().toLowerCase();
+
+  const cardsVisiveis = document.querySelectorAll(`.card-${perfil}`);
+  const cards = cardsVisiveis.length ? cardsVisiveis : document.querySelectorAll(".card");
+
+  cards.forEach((card, index) => {
+    const delay = Math.min(index * 0.1, 0.3);
+
+    card.style.animationDelay = `${delay}s`;
+    
+    card.classList.add("animate");
+  });
 });
 
 // MODAL DE AVISO

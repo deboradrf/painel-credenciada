@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // EMPRESA
   dropdownUserExtra.innerHTML = `
     <div class="company-name">
-      <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+      <small>${nomeEmpresa}</small>
     </div>
   `;
 
@@ -229,7 +229,6 @@ async function carregarUnidades() {
 
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro ao carregar unidades");
   }
 }
 
@@ -258,7 +257,6 @@ document.getElementById("unidadeSelect").addEventListener("change", async functi
 
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro ao carregar setores");
   }
 });
 
@@ -289,7 +287,6 @@ document.getElementById("setorSelect").addEventListener("change", async function
 
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro ao carregar cargos");
   }
 });
 
@@ -680,7 +677,6 @@ async function carregarPrestadores() {
 
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro ao carregar prestadores");
   }
 }
 
@@ -1108,6 +1104,10 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
         top: 0,
         behavior: "smooth"
       });
+
+      setTimeout(() => {
+        window.location.href = "/pages/index.html";
+      }, 3000);
     }
 
     await enviarEmailSolicitacao(dados);
@@ -1115,7 +1115,6 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     document.getElementById("formCadastro").reset();
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro ao enviar solicitação");
   }
 });
 
@@ -1127,8 +1126,8 @@ async function enviarEmailSolicitacao(dados) {
 
   if (dados.solicitar_nova_unidade === true) {
     tipoSolicitacao = "UNIDADE";
-    destinatario = "clientes@salubrita.com.br";
-    //destinatario = "fonsecadrf@outlook.com";
+    //destinatario = "clientes@salubrita.com.br";
+    destinatario = "fonsecadrf@outlook.com";
     assunto = "Solicitação de Criação de Unidade";
   }
 
@@ -1139,8 +1138,8 @@ async function enviarEmailSolicitacao(dados) {
 
   else if (dados.solicitar_credenciamento === true) {
     tipoSolicitacao = "CREDENCIAMENTO";
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "wasidrf@outlook.com";
+    //destinatario = "contratos@salubrita.com.br";
+    destinatario = "wasidrf@outlook.com";
     assunto = "Solicitação de Credenciamento";
   }
 

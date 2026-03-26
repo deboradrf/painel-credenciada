@@ -40,7 +40,7 @@ async function dropdownPerfil() {
     // EMPRESA
     dropdownUserExtra.innerHTML = `
         <div class="company-name">
-            <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+            <small>${nomeEmpresa}</small>
         </div>
     `;
 

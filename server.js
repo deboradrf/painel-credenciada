@@ -2915,17 +2915,13 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
       }
 
       destinoFinal = emailsArray.join(", ");
-      //copia = "debora.fonseca@salubrita.com.br, wasidrf@outlook.com";
-      copia = "nicolly.rocha@salubrita.com.br, paulina.oliveira@salubrita.com.br, rubia.costa@salubrita.com.br";
+      copia = "debora.fonseca@salubrita.com.br, wasidrf@outlook.com";
+      //copia = "nicolly.rocha@salubrita.com.br, paulina.oliveira@salubrita.com.br, rubia.costa@salubrita.com.br";
     }
 
     // UNIDADE ou CREDENCIAMENTO → email fixo
     else {
       destinoFinal = destinatario;
-    }
-
-    if (!destinoFinal) {
-      throw new Error("Destinatário não definido");
     }
 
     await transporter.sendMail({
@@ -2966,16 +2962,16 @@ async function enviarEmailSetorFuncao(dados) {
 
     const destino = emailsArray.join(", ");
 
-    const copia = [
-      "nicolly.rocha@salubrita.com.br",
-      "paulina.oliveira@salubrita.com.br",
-      "rubia.costa@salubrita.com.br"
-    ];
-
     // const copia = [
-    //   "debora.fonseca@salubrita.com.br",
-    //   "wasidrf@outlook.com"
+    //   "nicolly.rocha@salubrita.com.br",
+    //   "paulina.oliveira@salubrita.com.br",
+    //   "rubia.costa@salubrita.com.br"
     // ];
+
+    const copia = [
+      "debora.fonseca@salubrita.com.br",
+      "wasidrf@outlook.com"
+    ];
 
     await transporter.sendMail({
       from: "Portal Salubritá <naoresponda@salubrita.com.br>",
@@ -3010,16 +3006,16 @@ async function enviarEmailSetorCargo(dados) {
 
     const destino = emailsArray.join(", ");
 
-    const copia = [
-      "nicolly.rocha@salubrita.com.br",
-      "paulina.oliveira@salubrita.com.br",
-      "rubia.costa@salubrita.com.br"
-    ];
-
     // const copia = [
-    //   "debora.fonseca@salubrita.com.br",
-    //   "wasidrf@outlook.com"
+    //   "nicolly.rocha@salubrita.com.br",
+    //   "paulina.oliveira@salubrita.com.br",
+    //   "rubia.costa@salubrita.com.br"
     // ];
+
+    const copia = [
+      "debora.fonseca@salubrita.com.br",
+      "wasidrf@outlook.com"
+    ];
 
     await transporter.sendMail({
       from: "Portal Salubritá <naoresponda@salubrita.com.br>",
@@ -3041,8 +3037,8 @@ async function enviarEmailSetorCargo(dados) {
 async function enviarEmailCredenciamento(dados) {
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    to: "contratos@salubrita.com.br",
-    //to: "wasidrf@outlook.com",
+    //to: "contratos@salubrita.com.br",
+    to: "wasidrf@outlook.com",
     subject: "Solicitação de Credenciamento",
     text: `
       Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.

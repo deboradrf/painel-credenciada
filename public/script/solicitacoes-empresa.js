@@ -1,5 +1,9 @@
 let solicitacoes = [];
 
+let paginaAtual = 1;
+const itensPorPagina = 10;
+let listaFiltradaAtual = [];
+
 const usuarioLogado = getUsuario();
 const nomeEmpresa = getEmpresaNome();
 
@@ -20,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // EMPRESA
   dropdownUserExtra.innerHTML = `
     <div class="company-name">
-      <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+      <small>${nomeEmpresa}</small>
     </div>
   `;
 
@@ -91,6 +95,9 @@ function aplicarFiltros() {
     return matchTipo && matchCPF && matchStatus && deveExibir(s);
   });
 
+  paginaAtual = 1;
+  listaFiltradaAtual = filtradas;
+
   renderizarTabela(filtradas);
 }
 
@@ -121,6 +128,12 @@ function deveExibir(s) {
   );
 }
 
+// FUNÇÃO DE PAGINAÇÃO
+function paginar(lista, pagina, limite) {
+  const inicio = (pagina - 1) * limite;
+  return lista.slice(inicio, inicio + limite);
+}
+
 // FUNÇÃO PARA CARREGAR HISTÓRICO DAS SOLICITAÇÕES
 async function carregarSolicitacoes() {
   const res = await fetch(`/solicitacoes-empresa/${usuarioLogado.id}`);
@@ -136,185 +149,320 @@ async function carregarSolicitacoes() {
 
 // FUNÇÃO PARA RENDERIZAR A TABELA E MOSTRAR OS DADOS
 function renderizarTabela(lista) {
-  const tbody = document.getElementById("tabelaHistorico");
-  tbody.innerHTML = "";
+  const tbody = document.querySelector("tbody");
+  tbody.classList.add("fade");
 
-  if (!lista.length) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="12" class="text-muted text-center">
-          Nenhuma solicitação encontrada
-        </td>
-      </tr>
-    `;
-    return;
-  }
+  setTimeout(() => {
+    tbody.innerHTML = "";
 
-  lista.forEach(s => {
-    const iconeTipo =
-      s.tipo === "NOVO_EXAME"
-        ? `<i class="fa-solid fa-file-circle-plus fa-lg" style="color: #F1AE33"></i>`
-        : `<i class="fa-solid fa-user-plus fa-lg" style="color: #F1AE33"></i>`;
+    const listaPaginada = paginar(lista, paginaAtual, itensPorPagina);
 
-    // TEXTO DA SITUAÇÃO
-    let situacao = "—";
+    if (!listaPaginada.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="12" class="text-muted text-center">
+            Nenhuma solicitação encontrada
+          </td>
+        </tr>
+      `;
+      return;
+    }
 
-    if (s.status === "PENDENTE_UNIDADE") situacao = "Aguardando criação de unidade";
-    if (s.status === "PENDENTE_SC") situacao = "Aguardando criação de setor/cargo";
-    if (s.status === "PENDENTE_CREDENCIAMENTO") situacao = "Aguardando credenciamento";
-    if (s.status === "PENDENTE") situacao = "Solicitação em análise";
-    if (s.status === "PENDENTE_REAVALIACAO") situacao = "Solicitação em análise";
-    if (s.status === "PENDENTE_AGENDAMENTO") situacao = "Aguardando horário de agendamento da clínica credenciada";
-    if (s.status === "APROVADO") situacao = "Solicitação aprovada";
-    if (s.status === "REPROVADO") situacao = "Ajustes necessários";
-    if (s.status === "ENVIADO_SOC") situacao = "Solicitação finalizada";
-    if (s.status === "CANCELADO") situacao = "Solicitação cancelada";
+    listaPaginada.forEach(s => {
+      const iconeTipo =
+        s.tipo === "NOVO_EXAME"
+          ? `<i class="fa-solid fa-file-circle-plus fa-lg" style="color: #F1AE33"></i>`
+          : `<i class="fa-solid fa-user-plus fa-lg" style="color: #F1AE33"></i>`;
 
-    // // AÇÕES
-    // let acoes = "Nenhuma ação a ser feita";
+      // TEXTO DA SITUAÇÃO
+      let situacao = "—";
 
-    // if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || s.status === "PENDENTE") {
-    //   if (s.tipo === "NOVO_EXAME") {
-    //     acoes = `
-    //       <button onclick="cancelarSolicitacao(
-    //         ${s.solicitacao_id},
-    //         '${s.tipo}',
-    //         ${usuarioLogado.id},
-    //         '${s.status}',
-    //         false,       // solicitarNovaUnidade
-    //         ${s.solicitar_novo_setor},
-    //         false,       // solicitarNovoCargo
-    //         ${s.solicitar_nova_funcao}, // solicitarNovaFuncao
-    //         ${s.solicitar_credenciamento} // solicitarCredenciamento
-    //       )">Cancelar</button>
-    //     `;
-    //   } else {
-    //     acoes = `
-    //       <button onclick="cancelarSolicitacao(
-    //         ${s.solicitacao_id},
-    //         '${s.tipo}',
-    //         ${usuarioLogado.id},
-    //         '${s.status}',
-    //         ${s.solicitar_nova_unidade}, // solicitarNovaUnidade
-    //         ${s.solicitar_novo_setor},   // solicitarNovoSetor
-    //         ${s.solicitar_novo_cargo},   // solicitarNovoCargo
-    //         false,                        // solicitarNovaFuncao
-    //         ${s.solicitar_credenciamento} // solicitarCredenciamento
-    //       )">Cancelar</button>
-    //     `;
-    //   }
-    // }
+      if (s.status === "PENDENTE_UNIDADE") situacao = "Aguardando criação de unidade";
+      if (s.status === "PENDENTE_SC") situacao = "Aguardando criação de setor/cargo";
+      if (s.status === "PENDENTE_CREDENCIAMENTO") situacao = "Aguardando credenciamento";
+      if (s.status === "PENDENTE") situacao = "Solicitação em análise";
+      if (s.status === "PENDENTE_REAVALIACAO") situacao = "Solicitação em análise";
+      if (s.status === "PENDENTE_AGENDAMENTO") situacao = "Aguardando horário de agendamento da clínica credenciada";
+      if (s.status === "APROVADO") situacao = "Solicitação aprovada";
+      if (s.status === "REPROVADO") situacao = "Ajustes necessários";
+      if (s.status === "ENVIADO_SOC") situacao = "Solicitação finalizada";
+      if (s.status === "CANCELADO") situacao = "Solicitação cancelada";
 
-    // AÇÕES
-    let acoes = "Nenhuma ação a ser feita";
+      // // AÇÕES
+      // let acoes = "Nenhuma ação a ser feita";
 
-    // STATUS QUE MOSTRAM CONSULTA
-    if (s.status === "APROVADO" || s.status === "ENVIADO_SOC") {
-      acoes = `
-        <button class="btn-consulta"
-          onclick="verConsulta(${s.solicitacao_id}, '${s.tipo}')">
-          Ver Consulta
+      // if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || s.status === "PENDENTE") {
+      //   if (s.tipo === "NOVO_EXAME") {
+      //     acoes = `
+      //       <button onclick="cancelarSolicitacao(
+      //         ${s.solicitacao_id},
+      //         '${s.tipo}',
+      //         ${usuarioLogado.id},
+      //         '${s.status}',
+      //         false,       // solicitarNovaUnidade
+      //         ${s.solicitar_novo_setor},
+      //         false,       // solicitarNovoCargo
+      //         ${s.solicitar_nova_funcao}, // solicitarNovaFuncao
+      //         ${s.solicitar_credenciamento} // solicitarCredenciamento
+      //       )">Cancelar</button>
+      //     `;
+      //   } else {
+      //     acoes = `
+      //       <button onclick="cancelarSolicitacao(
+      //         ${s.solicitacao_id},
+      //         '${s.tipo}',
+      //         ${usuarioLogado.id},
+      //         '${s.status}',
+      //         ${s.solicitar_nova_unidade}, // solicitarNovaUnidade
+      //         ${s.solicitar_novo_setor},   // solicitarNovoSetor
+      //         ${s.solicitar_novo_cargo},   // solicitarNovoCargo
+      //         false,                        // solicitarNovaFuncao
+      //         ${s.solicitar_credenciamento} // solicitarCredenciamento
+      //       )">Cancelar</button>
+      //     `;
+      //   }
+      // }
+
+      // AÇÕES
+      let acoes = `
+        <button onclick="abrirHistorico(${s.solicitacao_id}, '${s.tipo}')">
+          Histórico
         </button>
       `;
-    }
-    // STATUS QUE PODEM CANCELAR
-    else if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || s.status === "PENDENTE") {
-      if (s.tipo === "NOVO_EXAME") {
-        acoes = `
-          <button onclick="cancelarSolicitacao(
-            ${s.solicitacao_id},
-            '${s.tipo}',
-            ${usuarioLogado.id},
-            '${s.status}',
-            false,
-            ${s.solicitar_novo_setor},
-            false,
-            ${s.solicitar_nova_funcao},
-            ${s.solicitar_credenciamento}
-          )">Cancelar</button>
-        `;
-      } else {
-        acoes = `
-          <button onclick="cancelarSolicitacao(
-            ${s.solicitacao_id},
-            '${s.tipo}',
-            ${usuarioLogado.id},
-            '${s.status}',
-            ${s.solicitar_nova_unidade},
-            ${s.solicitar_novo_setor},
-            ${s.solicitar_novo_cargo},
-            false,
-            ${s.solicitar_credenciamento}
-          )">Cancelar</button>
+
+      // STATUS QUE MOSTRAM CONSULTA
+      if (s.status === "APROVADO" || s.status === "ENVIADO_SOC") {
+        acoes += `
+          <button onclick="verConsulta(${s.solicitacao_id}, '${s.tipo}')">
+            Ver Consulta
+          </button>
         `;
       }
-    }
 
-    if (s.status === "REPROVADO") {
-      acoes = `
-        <button onclick='verMotivo(${JSON.stringify(s.motivo_reprovacao)})'>
-          Ver motivo
-        </button>
+      // STATUS QUE PODEM CANCELAR
+      else if (
+        s.status === "PENDENTE_UNIDADE" ||
+        s.status === "PENDENTE_SC" ||
+        s.status === "PENDENTE_CREDENCIAMENTO" ||
+        s.status === "PENDENTE"
+      ) {
+        if (s.tipo === "NOVO_EXAME") {
+          acoes += `
+            <button onclick="cancelarSolicitacao(
+              ${s.solicitacao_id},
+              '${s.tipo}',
+              ${usuarioLogado.id},
+              '${s.status}',
+              false,
+              ${!!s.solicitar_novo_setor},
+              false,
+              ${!!s.solicitar_nova_funcao},
+              ${!!s.solicitar_credenciamento}
+            )">Cancelar</button>
+          `;
+        } else {
+          acoes += `
+            <button onclick="cancelarSolicitacao(
+              ${s.solicitacao_id},
+              '${s.tipo}',
+              ${usuarioLogado.id},
+              '${s.status}',
+              ${!!s.solicitar_nova_unidade},
+              ${!!s.solicitar_novo_setor},
+              ${!!s.solicitar_novo_cargo},
+              false,
+              ${!!s.solicitar_credenciamento}
+            )">Cancelar</button>
+          `;
+        }
+      }
 
-        <button onclick="abrirModalEditar(${s.solicitacao_id}, '${s.tipo}')">
-          Editar
-        </button>
+      // REPROVADO (também precisa ser +=)
+      if (s.status === "REPROVADO") {
+        acoes += `
+          <button onclick='verMotivo(${JSON.stringify(s.motivo_reprovacao)})'>
+            Ver motivo
+          </button>
 
-        <button onclick="cancelarSolicitacao(
-          ${s.solicitacao_id},
-          '${s.tipo}',
-          ${usuarioLogado.id},
-          '${s.status}',
-          ${s.solicitar_nova_unidade || false},
-          ${s.solicitar_novo_setor || false},
-          ${s.solicitar_novo_cargo || false},
-          ${s.solicitar_nova_funcao || false},
-          ${s.solicitar_credenciamento || false}
-        )">
-        Cancelar </button>
+          <button onclick="abrirModalEditar(${s.solicitacao_id}, '${s.tipo}')">
+            Editar
+          </button>
+
+          <button onclick="cancelarSolicitacao(
+            ${s.solicitacao_id},
+            '${s.tipo}',
+            ${usuarioLogado.id},
+            '${s.status}',
+            ${!!s.solicitar_nova_unidade},
+            ${!!s.solicitar_novo_setor},
+            ${!!s.solicitar_novo_cargo},
+            ${!!s.solicitar_nova_funcao},
+            ${!!s.solicitar_credenciamento}
+          )">
+            Cancelar
+          </button>
+        `;
+      }
+
+      tbody.innerHTML += `
+        <tr>
+          <td>${iconeTipo}</td>
+          <td class="col-data">${formatarDataHora(s.solicitado_em)}</td>
+          <td class="col-funcionario">${(s.nome_funcionario).toUpperCase()}</td>
+          <td>${s.cpf}</td>
+          <td>
+            <span class="status-pill ${s.status.toLowerCase()}">
+              ${s.status}
+            </span>
+          </td>
+          <td class="col-situacao text-muted">
+            ${situacao}
+          </td>
+          <td class="actions text-muted">
+            <div class="actions-wrapper">
+              ${acoes}
+            </div>
+          </td>
+        </tr>
       `;
-    }
+    });
 
-    tbody.innerHTML += `
-      <tr>
-        <td>${iconeTipo}</td>
-        <td class="col-data">${formatarDataHora(s.solicitado_em)}</td>
-        <td class="col-funcionario">${(s.nome_funcionario).toUpperCase()}</td>
-        <td>${s.cpf}</td>
-        <td>
-          <span class="status-pill ${s.status.toLowerCase()}">
-            ${s.status}
-          </span>
-        </td>
-        <td class="col-situacao text-muted">
-          ${situacao}
-        </td>
-        <td class="actions text-muted">
-          ${acoes || "-"}
-        </td>
-      </tr>
-    `;
-  });
+  tbody.classList.remove("fade");
+  }, 100);
+
+  renderizarPaginacao();
 }
 
-// FUNÇÃO PARA FORMATAR RAC
-const RAC_LABELS = {
-  FORMULARIO_RAC_VALE: "FORMULÁRIO RAC VALE",
-  FORMULARIO_UNIDADE_CSN: "FORMULÁRIO UNIDADE CSN",
-  FORMULARIO_UNIDADE_VALLOUREC: "FORMULÁRIO UNIDADE VALLOUREC",
-  FORMULARIO_UNIDADE_KINROSS:  "FORMULÁRIO UNIDADE KINROSS"
-};
+function renderizarPaginacao() {
+  const totalPaginas = Math.ceil(listaFiltradaAtual.length / itensPorPagina);
+  const container = document.getElementById("paginacao");
 
-function formatarRac(rac) {
-  if (!rac) return "-";
+  container.innerHTML = "";
 
-  const lista = Array.isArray(rac)
-    ? rac
-    : rac.split(",");
+  if (totalPaginas <= 1) return;
 
-  return lista
-    .map(item => RAC_LABELS[item] || item)
-    .join(", ");
+  for (let i = 1; i <= totalPaginas; i++) {
+    const btn = document.createElement("button");
+    btn.innerText = i;
+    btn.classList.add("btn", "btn-sm", "mx-1");
+
+    if (i === paginaAtual) {
+      btn.classList.add("btn-primary");
+    } else {
+      btn.classList.add("btn-outline-primary");
+    }
+
+    btn.onclick = () => {
+      paginaAtual = i;
+      renderizarTabela(listaFiltradaAtual);
+    };
+
+    container.appendChild(btn);
+  }
+}
+
+// FUNÇÃO PARA MOSTRAR O HISTÓRICO DAS SOLICITAÇÕES
+async function abrirHistorico(id, tipo) {
+  try {
+    const res = await fetch(`/solicitacoes/${tipo}/${id}/historico`);
+    if (!res.ok) throw new Error("Erro ao carregar histórico");
+
+    const historico = await res.json();
+    historico.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+    const container = document.getElementById("conteudoHistorico");
+
+    if (!historico.length) {
+      container.innerHTML = `
+        <div class="text-center text-muted py-4">
+          <i class="fa-regular fa-folder-open fa-2x mb-2"></i>
+          <div>Sem histórico</div>
+        </div>
+      `;
+      new bootstrap.Modal(document.getElementById("modalHistorico")).show();
+      return;
+    }
+
+    const getIcon = (etapa) => {
+      switch (etapa) {
+        case "Solicitado":
+          return { icon: "fa-file-circle-plus fa-lg", color: "#88A6BB" };
+
+        case "Aprovado":
+          return { icon: "fa-circle-check fa-lg", color: "#53A5A6" };
+
+        case "Reprovado":
+          return { icon: "fa-circle-xmark fa-lg", color: "#F05252" };
+
+        case "Cancelado":
+          return { icon: "fa-ban fa-lg", color: "#616161" };
+
+        case "Reavaliado":
+          return { icon: "fa-rotate fa-lg", color: "#F1AE33" };
+
+        case "Enviado ao SOC":
+          return { icon: "fa-paper-plane fa-lg", color: "#88A6BB" };
+
+        default:
+          return { icon: "fa-circle fa-lg", color: "#000000" };
+      }
+    };
+
+    const html = `
+      <div class="timeline">
+        ${historico.map(h => {
+          const dataFormatada = h.data ? new Date(h.data).toLocaleString() : "-";
+          const { icon, color } = getIcon(h.etapa);
+
+          return `
+            <div class="timeline-item">
+              <div class="timeline-icon">
+                <i class="fa-solid ${icon}" style="color: ${color}"></i>
+              </div>
+
+              <div class="timeline-content">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <h6>${h.etapa}</h6>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center text-muted small">
+                  <div>
+                    <i class="fa-solid fa-user me-1"></i>
+                    ${h.usuario || "-"}
+                  </div>
+
+                  <div>
+                    <i class="fa-regular fa-clock me-1"></i>
+                    ${dataFormatada}
+                  </div>
+                </div>
+
+                ${h.motivo ? `
+                  <div class="text-danger small mt-1">
+                    <i class="fa-solid fa-ban me-1"></i>
+                    ${h.motivo}
+                  </div>
+                ` : ""}
+
+                ${h.erro ? `
+                  <div class="text-warning small mt-1">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                    ${h.erro}
+                  </div>
+                ` : ""}
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+
+    container.innerHTML = html;
+    new bootstrap.Modal(document.getElementById("modalHistorico")).show();
+
+  } catch (erro) {
+    console.error(erro);
+  }
 }
 
 // MODAL DE VER CONSULTA
@@ -340,9 +488,41 @@ async function verConsulta(id, tipo) {
     const modal = new bootstrap.Modal(document.getElementById("modalConsulta"));
     modal.show();
 
-  } catch (error) {
-    console.error("Erro ao buscar consulta:", error);
+  } catch (erro) {
+    console.error(erro);
   }
+}
+
+// FUNÇÃO PARA FORMATAR TIPO DE EXAME
+const TIPO_EXAME_LABELS = {
+  MUDANCA_RISCOS_OCUPACIONAIS: "MUDANÇA DE FUNÇÃO / RISCOS OCUPACIONAIS",
+  CONSULTA_ASSISTENCIAL: "CONSULTA ASSINSTENCIAL",
+  RETORNO_TRABALHO: "RETORNO AO TRABALHO"
+};
+
+function formatarTipoExame(tipo) {
+  if (!tipo) return "-";
+  return TIPO_EXAME_LABELS[tipo] || tipo;
+}
+
+// FUNÇÃO PARA FORMATAR RAC
+const RAC_LABELS = {
+  FORMULARIO_RAC_VALE: "FORMULÁRIO RAC VALE",
+  FORMULARIO_UNIDADE_CSN: "FORMULÁRIO UNIDADE CSN",
+  FORMULARIO_UNIDADE_VALLOUREC: "FORMULÁRIO UNIDADE VALLOUREC",
+  FORMULARIO_UNIDADE_KINROSS:  "FORMULÁRIO UNIDADE KINROSS"
+};
+
+function formatarRac(rac) {
+  if (!rac) return "-";
+
+  const lista = Array.isArray(rac)
+    ? rac
+    : rac.split(",");
+
+  return lista
+    .map(item => RAC_LABELS[item] || item)
+    .join(", ");
 }
 
 // FUNÇÃO PARA FORMATAR OS TIPOS DE RAC
@@ -401,7 +581,6 @@ async function cancelarSolicitacao(id, tipo, usuarioLogadoId, status, solicitarN
     }
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro na comunicação com o servidor");
   }
 }
 
@@ -539,7 +718,7 @@ function preencherModalEditarCadastro(s) {
   document.getElementById("editCadNovoCargo").value = s.nome_novo_cargo;
   document.getElementById("editCadDescricaoAtividade").value = s.descricao_atividade;
   document.getElementById("editCadRac").value = formatarRac(s.rac),
-    document.getElementById("editCadTiposRac").value = formatarTiposRac(s.tipos_rac);
+  document.getElementById("editCadTiposRac").value = formatarTiposRac(s.tipos_rac);
   document.getElementById("editCadTipoExame").value = s.tipo_exame;
   document.getElementById("editCadDataExame").value = formatarDataParaInput(s.data_exame);
   document.getElementById("editCadMaisUnidades").innerText = s.mais_unidades;
@@ -752,7 +931,7 @@ function preencherModalEditarExame(s) {
   document.getElementById("editExameEmail").value = s.email;
   document.getElementById("editExameNomeSetor").value = s.nome_setor;
   document.getElementById("editExameNomeCargo").value = s.nome_cargo;
-  document.getElementById("editExameTipoExame").value = s.tipo_exame;
+  document.getElementById("editExameTipoExame").value = formatarTipoExame(s.tipo_exame);
   document.getElementById("editExameDataExame").value = formatarDataParaInput(s.data_exame);
   document.getElementById("editExameMaisUnidades").innerText = s.mais_unidades;
   document.getElementById("editExameRac").value = formatarRac(s.rac);

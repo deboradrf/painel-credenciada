@@ -132,7 +132,6 @@ function aplicarEstiloPadrao(botao) {
   botao.style.width = "120px";
   botao.style.transition = "all 0.3s ease";
 
-  // hover manual
   botao.onmouseenter = () => {
     botao.style.transform = "translateY(-2px)";
   };

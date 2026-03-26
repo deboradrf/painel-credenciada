@@ -53,10 +53,15 @@
 
                 <div class="dropdown-menu dropdown-menu-end profile-menu shadow">
                     <div class="profile-header">
-                        <div class="avatar-circle large">
-                            <i id="avatarIconDropdown" class="fa-solid"></i>
+                        <div class="user-top">
+                            <div class="avatar-circle large">
+                                <i id="avatarIconDropdown" class="fa-solid"></i>
+                            </div>
+                            <div class="user-info">
+                                <span id="userNameDropdown" class="user-name"></span>
+                                <span id="sessionCountdown" class="session-countdown"></span>
+                            </div>
                         </div>
-                        <span id="userNameDropdown" class="user-name"></span>
                     </div>
 
                     <hr>
@@ -64,20 +69,17 @@
                     <ul class="profile-list">
                         <li>
                             <a href="editar-perfil.html">
-                                <i class="fa-solid fa-user"></i>
-                                Editar Perfil
+                                <i class="fa-solid fa-user"></i> Editar Perfil
                             </a>
                         </li>
                         <li>
                             <a href="permissoes.html">
-                                <i class="fa-solid fa-unlock"></i>
-                                Permissões
+                                <i class="fa-solid fa-unlock"></i> Permissões
                             </a>
                         </li>
                         <li onclick="logout()">
                             <a href="#">
-                                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                                Logout
+                                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
                             </a>
                         </li>
                     </ul>
@@ -91,12 +93,16 @@
     </header>
 
     <main class="container-fluid">
-        <div class="card">
+        <div class="title">
+            <h3>Editar Perfil</h3>
+            <p class="subtitle">Atualize seu e-mail e sua senha de acesso e mantenha seus dados seguros</p>
+        </div>
+        <div class="card shadow-sm">
             <div class="row g-0">
                 <div class="col-sm-4 user-profile">
                     <div class="card-left">
                         <div class="avatar-wrapper">
-                            <div class="profile-header">
+                            <div class="profile-header-card">
                                 <div class="avatar">
                                     <i id="avatarIconCard" class="fa-solid"></i>
                                 </div>
@@ -112,7 +118,7 @@
                         <h6 id="perfilNome"></h6>
                         <small id="perfilTipo"></small>
                         <br>
-                        <a onclick="editarPerfil()"><i class="fa-solid fa-pen-to-square" style="color: #F1AE33"></i></a>
+                        <a onclick="editarPerfil()"><i class="fa-solid fa-pen-to-square icon-editar"></i></a>
                     </div>
                 </div>
                 <div class="col-sm-8">

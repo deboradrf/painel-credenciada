@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // EMPRESA
     dropdownUserExtra.innerHTML = `
         <div class="company-name">
-            <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+            <small>${nomeEmpresa}</small>
         </div>
     `;
 
@@ -64,7 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function carregarPerfil() {
-    const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
+    const usuarioLogado = getUsuario();
+
+    if (!usuarioLogado || !usuarioLogado.id) {
+        console.error("Usuário inválido:", usuarioLogado);
+        return;
+    }
 
     const res = await fetch(`/usuarios/${usuarioLogado.id}`);
     const user = await res.json();
@@ -170,15 +175,23 @@ function cancelarEdicao() {
 
 // FUNÇÃO PARA SALVAR EDIÇÃO
 async function salvarEdicao() {
-    const usuarioLogado = JSON.parse(sessionStorage.getItem("usuario"));
+    const usuarioLogado = getUsuario();
 
     const email = document.getElementById("email").value;
     const senha = document.getElementById("senha").value;
 
+    // objeto base
+    const body = { email };
+
+    // só adiciona senha se tiver valor
+    if (senha.trim() !== "") {
+        body.senha = senha;
+    }
+
     const res = await fetch(`/usuarios/${usuarioLogado.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, senha })
+        body: JSON.stringify(body)
     });
 
     if (!res.ok) {
@@ -186,14 +199,11 @@ async function salvarEdicao() {
         return;
     }
 
-    document.querySelector(".card").classList.remove("editando");
-    document.getElementById("email").setAttribute("readonly", true);
-    document.getElementById("senha").setAttribute("readonly", true);
-    document.getElementById("acoesEdicao").classList.add("d-none");
+    notify.success("Dados atualizados com sucesso!");
 
-    notidy.success("Dados atualizados com sucesso!");
-
-    location.reload();
+    setTimeout(() => {
+        location.reload();
+    }, 3000);
 }
 
 // MOSTRAR / OCULTAR SENHA

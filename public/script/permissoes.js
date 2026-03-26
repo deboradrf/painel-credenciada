@@ -24,7 +24,7 @@ async function dropdownPerfil() {
     // EMPRESA
     dropdownUserExtra.innerHTML = `
         <div class="company-name">
-            <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+            <small>${nomeEmpresa}</small>
         </div>
     `;
 
@@ -67,9 +67,9 @@ async function dropdownPerfil() {
 
 // FUNÇÃO PARA MOSTRAR AS PERMISSÕES DO USUÁRIO
 async function carregarPermissoes() {
-    const usuario = JSON.parse(sessionStorage.getItem("usuario"));
+    const usuarioLogado = getUsuario();
 
-    const res = await fetch(`/permissoes/${usuario.id}`);
+    const res = await fetch(`/permissoes/${usuarioLogado.id}`);
     const dados = await res.json();
 
     const container = document.getElementById("listaPermissoes");
@@ -77,23 +77,30 @@ async function carregarPermissoes() {
 
     dados.empresas.forEach(empresa => {
         const card = document.createElement("div");
-        card.className = "col-md-4 mb-4";
+        card.className = "col-lg-4 col-sm-8 mb-4";
+
+        const totalUnidades = empresa.unidades.length;
+        const labelUnidades = totalUnidades === 1 ? "1 unidade" : `${totalUnidades} unidades`;
 
         let unidadesHtml = "";
         empresa.unidades.forEach(un => {
             unidadesHtml += `
                 <li class="unit-item">
+                    <span class="unit-dot"></span>
                     <span>${un.nome_unidade}</span>
                 </li>
             `;
         });
 
         card.innerHTML = `
-            <div class="card-permissao">
+            <div class="card-permissao shadow-sm">
                 <div class="empresa-header">
+                    <div class="empresa-icon">
+                        <i class="fa-solid fa-city"></i>
+                    </div>
                     <h6>${empresa.nome_empresa}</h6>
+                    <span class="empresa-badge">${labelUnidades}</span>
                 </div>
-
                 <ul class="lista-unidades">
                     ${unidadesHtml}
                 </ul>

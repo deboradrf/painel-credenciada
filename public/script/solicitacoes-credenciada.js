@@ -3,6 +3,10 @@ let tipoSolicitacaoAtual = null;
 let solicitacaoAtualId = null;
 let hierarquiaAtual = null;
 
+let paginaAtual = 1;
+const itensPorPagina = 10;
+let listaFiltradaAtual = [];
+
 const usuarioLogado = getUsuario();
 const nomeEmpresa = getEmpresaNome();
 
@@ -23,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // EMPRESA
   dropdownUserExtra.innerHTML = `
     <div class="company-name">
-      <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+      <small>${nomeEmpresa}</small>
     </div>
   `;
 
@@ -72,12 +76,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // BOTAO PARA ATUALIZAR PAGINA
 document.getElementById("btnAtualizar").addEventListener("click", () => { location.reload(); });
 
-function temFiltroAtivo(tipo, empresa, cpf, status) {
-  return tipo || empresa || cpf || status;
-}
-
-
-
 // FUNÇÃO PARA CARREGAR SOLICITAÇÕES E RENDERIZAR A TABELA
 async function carregarSolicitacoes() {
   const res = await fetch("/solicitacoes");
@@ -107,8 +105,8 @@ function formatarDataHoraSolicitacoes(data) {
   return `${dia}/${mes}/${ano} ${horas}:${minutos}`;
 }
 
-function temFiltroAtivo(tipo, cpf, status) {
-  return tipo || cpf || status;
+function temFiltroAtivo(tipo, empresa, cpf, status) {
+  return tipo || empresa || cpf || status;
 }
 
 // FUNÇÃO PARA APLICAR FILTROS
@@ -136,6 +134,9 @@ function aplicarFiltros() {
 
     return matchTipo && matchEmpresa && matchCPF && matchStatus && matchVisibilidade;
   });
+
+  paginaAtual = 1;
+  listaFiltradaAtual = filtradas;
 
   renderizarTabela(filtradas);
 }
@@ -169,98 +170,142 @@ function deveExibir(s) {
   );
 }
 
+// FUNÇÃO DE PAGINAÇÃO
+function paginar(lista, pagina, limite) {
+  const inicio = (pagina - 1) * limite;
+  return lista.slice(inicio, inicio + limite);
+}
+
 // FUNÇÃO PARA RENDERIZAR TABELA COM AS SOLICITAÇÕES
 async function renderizarTabela(lista) {
   const tbody = document.querySelector("tbody");
-  tbody.innerHTML = "";
+  tbody.classList.add("fade");
 
-  if (!lista.length) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="12" class="text-muted text-center">
-          Nenhuma solicitação encontrada
+  setTimeout(() => {
+    tbody.innerHTML = "";
+
+    const listaPaginada = paginar(lista, paginaAtual, itensPorPagina);
+
+    if (!listaPaginada.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="12" class="text-muted text-center">
+            Nenhuma solicitação encontrada
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    listaPaginada.forEach(s => {
+      const tr = document.createElement("tr");
+
+      const status = (s.status || "PENDENTE").toUpperCase();
+      const statusClass = status.toLowerCase();
+
+      const podeEnviarSOC = (s.tipo === "NOVO_CADASTRO" && s.status === "APROVADO") || s.status === "ERRO_SOC";
+
+      const estaEmAnalise = s.em_analise_por && s.em_analise_por !== usuarioLogado.id;
+
+      let iconeTipo = "";
+
+      if (s.tipo === "NOVO_CADASTRO") {
+        iconeTipo = `
+        <i class="fa-solid fa-user-plus fa-lg" style="color: #F1AE33"></i>
+      `;
+      }
+
+      if (s.tipo === "NOVO_EXAME") {
+        iconeTipo = `
+        <i class="fa-solid fa-file-circle-plus fa-lg" style="color: #F1AE33"></i>
+      `;
+      }
+
+      tr.innerHTML = `
+        <td>${iconeTipo}</td>
+        <td class="col-data">${formatarDataHoraSolicitacoes(s.solicitado_em)}</td>
+        <td class="col-empresa">${s.nome_empresa}</td>
+        <td class="col-funcionario">${(s.nome_funcionario).toUpperCase()}</td>
+        <td>${s.cpf}</td>
+        <td>${(s.cidade).toUpperCase()}</td>
+        <td>
+          <span class="status-pill ${statusClass}">${s.status}</span>
         </td>
-      </tr>
-    `;
-    return;
-  }
-
-  lista.forEach(s => {
-    const tr = document.createElement("tr");
-
-    const status = (s.status || "PENDENTE").toUpperCase();
-    const statusClass = status.toLowerCase();
-
-    const podeEnviarSOC = (s.tipo === "NOVO_CADASTRO" && s.status === "APROVADO") || s.status === "ERRO_SOC";
-
-    const estaEmAnalise = s.em_analise_por && s.em_analise_por !== usuarioLogado.id;
-
-    let iconeTipo = "";
-
-    if (s.tipo === "NOVO_CADASTRO") {
-      iconeTipo = `
-      <i class="fa-solid fa-user-plus fa-lg" style="color: #F1AE33"></i>
-    `;
-    }
-
-    if (s.tipo === "NOVO_EXAME") {
-      iconeTipo = `
-      <i class="fa-solid fa-file-circle-plus fa-lg" style="color: #F1AE33"></i>
-    `;
-    }
-
-    tr.innerHTML = `
-      <td>${iconeTipo}</td>
-      <td class="col-data">${formatarDataHoraSolicitacoes(s.solicitado_em)}</td>
-      <td class="col-empresa">${s.nome_empresa}</td>
-      <td class="col-funcionario">${(s.nome_funcionario).toUpperCase()}</td>
-      <td>${s.cpf}</td>
-      <td>${(s.cidade).toUpperCase()}</td>
-      <td>
-        <span class="status-pill ${statusClass}">${s.status}</span>
-      </td>
-      <td class="actions">
-        <div class="actions-wrapper">
-          ${estaEmAnalise
-          ? `
+        <td class="actions">
+          <div class="actions-wrapper">
+            ${estaEmAnalise
+            ? `
                 <small style="opacity:0.6;">
                   Em análise por ${s.em_analise_por_nome?.split(' ')[0]}
                 </small>
                 `
-          : `
-              <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
-                Analisar
-              </button>
+            : `
+                <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
+                  Analisar
+                </button>
 
-              <button onclick="abrirHistorico(${s.solicitacao_id}, '${s.tipo}')">
-                Histórico
-              </button>
+                <button onclick="abrirHistorico(${s.solicitacao_id}, '${s.tipo}')">
+                  Histórico
+                </button>
 
-              ${podeEnviarSOC
-            ? `
+                ${podeEnviarSOC
+                ? `
                     <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
                       Enviar SOC
                     </button>
-                    `
-            : ""
-          }
+                  `
+                : ""
+                }
 
-              ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
-            ? `
+                ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
+                ? `
                     <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
                       Cancelar
                     </button>
                     `
-            : ""
-          }
-          `
-      }
-        </div>
-      </td>
-    `;
+                : ""
+                }
+              `
+            }
+            </div>
+          </td>
+        `;
 
-    tbody.appendChild(tr);
-  });
+      tbody.appendChild(tr);
+    });
+  
+  tbody.classList.remove("fade");
+  }, 100);
+
+  renderizarPaginacao();
+}
+
+function renderizarPaginacao() {
+  const totalPaginas = Math.ceil(listaFiltradaAtual.length / itensPorPagina);
+  const container = document.getElementById("paginacao");
+
+  container.innerHTML = "";
+
+  if (totalPaginas <= 1) return;
+
+  for (let i = 1; i <= totalPaginas; i++) {
+    const btn = document.createElement("button");
+    btn.innerText = i;
+    btn.classList.add("btn", "btn-sm", "mx-1");
+
+    if (i === paginaAtual) {
+      btn.classList.add("btn-primary");
+    } else {
+      btn.classList.add("btn-outline-primary");
+    }
+
+    btn.onclick = () => {
+      paginaAtual = i;
+      renderizarTabela(listaFiltradaAtual);
+    };
+
+    container.appendChild(btn);
+  }
 }
 
 // LIBERAR O LOCK AO ATUALIZAR A PAGINA
@@ -350,7 +395,6 @@ async function verDetalhes(id, tipo) {
     );
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro ao carregar detalhes");
   }
 }
 
@@ -654,7 +698,7 @@ async function preencherModal(s, tipo) {
     document.getElementById("exame_nome_cargo").innerText = s.nome_cargo;
     document.getElementById("exame_rac").innerText = formatarRac(s.rac) || "-";
     document.getElementById("exame_tipos_rac").innerText = formatarTiposRac(s.tipos_rac);
-    document.getElementById("exame_tipo_exame").innerText = s.tipo_exame;
+    document.getElementById("exame_tipo_exame").innerText = formatarTipoExame(s.tipo_exame);
     document.getElementById("exame_data_exame").innerText = formatarData(s.data_exame);
     preencherMaisUnidadesExame(s);
     document.getElementById("exame_unidade_destino").innerText = s.unidade_destino || "-";
@@ -1014,7 +1058,7 @@ async function preencherModal(s, tipo) {
   const botoesReprovar = document.querySelectorAll(".btn-reprovar");
   const blocosMotivoReprovacao = document.querySelectorAll(".div-motivo-reprovacao");
 
-  if (s.status === 'APROVADO' || s.status === "ENVIADO_SOC") {
+  if (s.status === 'APROVADO' || s.status === "ENVIADO_SOC" || s.status === "CANCELADO") {
     botoesReprovar.forEach(btn => { btn.style.display = 'none'; });
     blocosMotivoReprovacao.forEach(bloco => { bloco.style.display = 'none'; });
 
@@ -1222,10 +1266,8 @@ async function abrirHistorico(id, tipo) {
 
     container.innerHTML = html;
     new bootstrap.Modal(document.getElementById("modalHistorico")).show();
-
-  } catch (err) {
-    console.error(err);
-    notify.error("Não foi possível carregar o histórico");
+  } catch (erro) {
+    console.error(erro);
   }
 }
 
@@ -1307,8 +1349,8 @@ async function carregarUnidades(empresaCodigo, selecionadoNome = "") {
       if (u.nome === selecionadoNome) opt.selected = true;
       select.appendChild(opt);
     });
-  } catch (err) {
-    console.error("Erro ao carregar unidades:", err);
+  } catch (erro) {
+    console.error(erro);
   }
 }
 
@@ -1335,8 +1377,8 @@ async function carregarUnidadesNovoExame(empresaCodigo, unidadeSelecionada = "")
       select.appendChild(opt);
     });
 
-  } catch (err) {
-    console.error("Erro ao carregar unidades:", err);
+  } catch (erro) {
+    console.error(erro);
   }
 }
 
@@ -1378,8 +1420,8 @@ async function carregarSetores(empresaCodigo, unidadeCodigo, setorSelecionado = 
       select.appendChild(option);
     });
   }
-  catch (err) {
-    console.error("Erro ao carregar setores:", err);
+  catch (erro) {
+    console.error(erro);
   }
 }
 
@@ -1433,11 +1475,9 @@ async function carregarCargosDoSetorSelecionado(
         option.selected = true;
 
       selectCargo.appendChild(option);
-
     });
-
-  } catch (error) {
-    console.error("Erro ao carregar cargos:", error);
+  } catch (erro) {
+    console.error(erro);
   }
 }
 
@@ -1478,9 +1518,21 @@ async function carregarFuncao(empresaCodigo, selecionadoNome = "") {
       if (c.nome === selecionadoNome) opt.selected = true;
       selectFuncaoDestino.appendChild(opt);
     });
-  } catch (err) {
-    console.error("Erro ao carregar cargos:", err);
+  } catch (erro) {
+    console.error(erro);
   }
+}
+
+// FUNÇÃO PARA FORMATAR TIPO DE EXAME
+const TIPO_EXAME_LABELS = {
+  MUDANCA_RISCOS_OCUPACIONAIS: "MUDANÇA DE FUNÇÃO / RISCOS OCUPACIONAIS",
+  CONSULTA_ASSISTENCIAL: "CONSULTA ASSINSTENCIAL",
+  RETORNO_TRABALHO: "RETORNO AO TRABALHO"
+};
+
+function formatarTipoExame(tipo) {
+  if (!tipo) return "-";
+  return TIPO_EXAME_LABELS[tipo] || tipo;
 }
 
 // FUNÇÃO PARA FORMATAR RAC
@@ -1591,9 +1643,8 @@ async function carregarPrestadoresPreferenciais(codEmpresa, selectId, clinicaSel
         option.selected = true;
 
       select.appendChild(option);
-
-    } catch (e) {
-      console.error("Erro no prestador:", p.codigo, e);
+    } catch (erro) {
+      console.error(erro);
     }
   }
 }
@@ -1661,7 +1712,6 @@ async function atualizarStatusParaPendenteAgendamento() {
     carregarSolicitacoes();
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro ao atualizar status");
   }
 }
 
@@ -1911,7 +1961,6 @@ async function salvarEdicaoCadastro() {
       const txt = await res.text();
       console.error(txt);
 
-      notify.error("Erro ao salvar (ver console)");
       return;
     }
 
@@ -1921,7 +1970,6 @@ async function salvarEdicaoCadastro() {
 
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro de comunicação com o servidor");
   }
 }
 
@@ -2128,7 +2176,6 @@ async function salvarEdicaoExame() {
     carregarSolicitacoes();
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro na comunicação com o servidor");
   }
 }
 
@@ -2216,7 +2263,6 @@ async function cancelarSolicitacao(id, tipo, usuarioLogadoId) {
     }
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro na comunicação com o servidor");
   }
 }
 
@@ -2246,6 +2292,5 @@ async function enviarSOC(id) {
 
   } catch (erro) {
     console.error(erro);
-    notify.error("Erro na comunicação com o servidor");
   }
 }

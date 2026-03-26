@@ -7,10 +7,7 @@ document.getElementById("loginForm").onsubmit = async e => {
     const res = await fetch(`/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            usuario: usuario,
-            senha: senha
-        })
+        body: JSON.stringify({ usuario, senha })
     });
 
     const data = await res.json();
@@ -20,11 +17,16 @@ document.getElementById("loginForm").onsubmit = async e => {
         return;
     }
 
-    sessionStorage.setItem("usuario", JSON.stringify(data));
+    const TEMPO_EXPIRACAO = 60 * 60 * 1000;
+    
+    const dadosSessao = {
+        usuario: data,
+        expiraEm: Date.now() + TEMPO_EXPIRACAO
+    };
 
-    setTimeout(() => {
-        window.location.href = "/pages/index.html";
-    }, 1200);
+    sessionStorage.setItem("usuario", JSON.stringify(dadosSessao));
+
+    window.location.href = "/pages/index.html";
 };
 
 // MOSTRAR / OCULTAR SENHA

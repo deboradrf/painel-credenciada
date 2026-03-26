@@ -147,13 +147,6 @@ h3::after {
     color: #F1AE33;
 }
 
-.user-name {
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 1;
-    color: #000000;
-}
-
 .profile-menu {
     width: 300px;
     background: #FFFFFF;
@@ -162,33 +155,51 @@ h3::after {
     border: none;
 }
 
+.profile-menu hr {
+    border: none;
+    border-top: 1px solid #c0c0c0;
+    height: 1px;
+    margin: 0;
+}
+
 .profile-header {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.user-top {
+    display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 15px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
-.profile-subtitle {
-    margin-top: 8px;
+.user-info {
+    display: flex;
+    flex-direction: column;
 }
 
-.profile-subtitle .company-name {
-    font-size: 13px;
+.user-name {
     font-weight: 600;
+    font-size: 14px;
     color: #6B7280;
-    line-height: 1.3;
+    max-width: 210px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.profile-subtitle .unit-name {
+.session-countdown {
     font-size: 12px;
-    color: #6B7280;
-    line-height: 1.2;
+    color: #F1AE33;
+    margin-top: 2px;
 }
 
 .profile-list {
     list-style: none;
-    padding: 10px 0;
+    padding: 5px 0;
+    margin: 0;
 }
 
 .profile-list li {
@@ -197,7 +208,7 @@ h3::after {
     display: flex;
     align-items: center;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 14px;
 }
 
 .profile-list li:hover {
@@ -213,20 +224,22 @@ h3::after {
 
 .profile-list a i {
     color: #F1AE33;
-    margin-right: 5px;
+    margin-right: 8px;
 }
 
 .profile-list .between {
     justify-content: space-between;
 }
 
-ul {
-    margin: 0;
+.profile-subtitle {
+    margin-top: 10px;
 }
 
-hr {
-    margin: 0;
-    color: #5F5D6B;
+.profile-subtitle .company-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6B7280;
+    line-height: 0.9rem;
 }
 
 main {
@@ -252,17 +265,16 @@ main {
     transition: all 0.3s ease;
     opacity: 0;
     transform: translateX(-30px) scale(0.98);
-    animation: fadeInRight 0.6s ease forwards;
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards;
 }
 
-.faq-item:nth-child(n) {
-    animation-delay: calc(var(--i) * 0.1s);
-}
-
-@keyframes fadeInRight {
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
     to {
         opacity: 1;
-        transform: translateX(0) scale(1);
     }
 }
 

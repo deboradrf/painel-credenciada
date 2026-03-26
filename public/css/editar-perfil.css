@@ -115,13 +115,6 @@ body.blur-main header {
     color: #F1AE33;
 }
 
-.user-name {
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 1;
-    color: #000000;
-}
-
 .profile-menu {
     width: 300px;
     background: #FFFFFF;
@@ -130,33 +123,51 @@ body.blur-main header {
     border: none;
 }
 
+.profile-menu hr {
+    border: none;
+    border-top: 1px solid #c0c0c0;
+    height: 1px;
+    margin: 0;
+}
+
 .profile-header {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.user-top {
+    display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 15px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
-.profile-subtitle {
-    margin-top: 8px;
+.user-info {
+    display: flex;
+    flex-direction: column;
 }
 
-.profile-subtitle .company-name {
-    font-size: 13px;
+.user-name {
     font-weight: 600;
+    font-size: 14px;
     color: #6B7280;
-    line-height: 1.3;
+    max-width: 210px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.profile-subtitle .unit-name {
+.session-countdown {
     font-size: 12px;
-    color: #6B7280;
-    line-height: 1.2;
+    color: #F1AE33;
+    margin-top: 2px;
 }
 
 .profile-list {
     list-style: none;
-    padding: 10px 0;
+    padding: 5px 0;
+    margin: 0;
 }
 
 .profile-list li {
@@ -165,7 +176,7 @@ body.blur-main header {
     display: flex;
     align-items: center;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 14px;
 }
 
 .profile-list li:hover {
@@ -181,20 +192,54 @@ body.blur-main header {
 
 .profile-list a i {
     color: #F1AE33;
-    margin-right: 5px;
+    margin-right: 8px;
 }
 
 .profile-list .between {
     justify-content: space-between;
 }
 
-ul {
-    margin: 0;
+.profile-subtitle {
+    margin-top: 10px;
 }
 
-hr {
-    margin: 0;
-    color: #5F5D6B;
+.profile-subtitle .company-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6B7280;
+    line-height: 0.9rem;
+}
+
+.title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+h3 {
+    position: relative;
+    font-weight: 600;
+    font-size: 23px;
+    color: #000000;
+    margin-bottom: 15px;
+}
+
+h3::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #000000;
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 15px;
+    color: #6B7280;
+    margin-top: 4px;
 }
 
 .container-fluid {
@@ -208,9 +253,19 @@ hr {
 
 .card {
     border-radius: 10px;
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     border: none;
     width: 800px;
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .user-profile {
@@ -241,7 +296,7 @@ hr {
     justify-content: center;
 }
 
-.profile-header {
+.profile-header-card {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -279,7 +334,7 @@ hr {
     position: absolute;
     width: 10px;
     height: 10px;
-    background: #f4c430;
+    background: #F1AE33;
     border-radius: 50%;
 }
 
@@ -295,7 +350,7 @@ hr {
     position: absolute;
     width: 8px;
     height: 8px;
-    background: #f4c430;
+    background: #F1AE33;
     border-radius: 50%;
 }
 
@@ -350,7 +405,9 @@ hr {
     left: 90px;
 }
 
-.card-left i {
+.icon-editar {
+    color: #F1AE33;
+    transition: color 0.3s ease;
     cursor: pointer;
 }
 
@@ -448,11 +505,11 @@ hr {
 }
 
 .editando #toggleSenha {
-  display: block;
+    display: block;
 }
 
 #toggleSenha {
-  display: none;
+    display: none;
 }
 
 .input-wrapper input {
@@ -470,6 +527,23 @@ hr {
 }
 
 /* ESTILO DE EDIÇÃO */
+.card.editando .user-profile {
+    background: linear-gradient(135deg, #F1AE33, #F8BC3A, #F3B84A);
+}
+
+.card.editando .dot,
+.card.editando .dot-small-yellow {
+    background: #53A5A6;
+}
+
+.card.editando .icon-editar {
+    color: #6B7280;
+}
+
+.card.editando #avatarIconCard {
+    color: #6B7280;
+}
+
 .card.editando h3 {
     color: #F1AE33;
 }

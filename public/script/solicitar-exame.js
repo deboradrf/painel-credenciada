@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // EMPRESA
   dropdownUserExtra.innerHTML = `
     <div class="company-name">
-      <span style="color: #F1AE33">Empresa Atual:</span> ${nomeEmpresa}
+      <small>${nomeEmpresa}</small>
     </div>
   `;
 
@@ -219,8 +219,9 @@ async function buscarCPF() {
       `).join("")}
     `;
 
-  } catch (err) {
-    console.error("❌ ERRO:", err);
+  } catch (erro) {
+    console.error(erro);
+
     resultado.innerHTML = `
       <div class="alerts-container mb-4">
         <div class="alert alert-erro">

@@ -53,10 +53,15 @@
 
                 <div class="dropdown-menu dropdown-menu-end profile-menu shadow">
                     <div class="profile-header">
-                        <div class="avatar-circle large">
-                            <i id="avatarIconDropdown" class="fa-solid"></i>
+                        <div class="user-top">
+                            <div class="avatar-circle large">
+                                <i id="avatarIconDropdown" class="fa-solid"></i>
+                            </div>
+                            <div class="user-info">
+                                <span id="userNameDropdown" class="user-name"></span>
+                                <span id="sessionCountdown" class="session-countdown"></span>
+                            </div>
                         </div>
-                        <span id="userNameDropdown" class="user-name"></span>
                     </div>
 
                     <hr>
@@ -64,20 +69,17 @@
                     <ul class="profile-list">
                         <li>
                             <a href="editar-perfil.html">
-                                <i class="fa-solid fa-user"></i>
-                                Editar Perfil
+                                <i class="fa-solid fa-user"></i> Editar Perfil
                             </a>
                         </li>
                         <li>
                             <a href="permissoes.html">
-                                <i class="fa-solid fa-unlock"></i>
-                                Permissões
+                                <i class="fa-solid fa-unlock"></i> Permissões
                             </a>
                         </li>
                         <li onclick="logout()">
                             <a href="#">
-                                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                                Logout
+                                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
                             </a>
                         </li>
                     </ul>
@@ -164,10 +166,9 @@
                         </tr>
                     </thead>
 
-                    <tbody id="tabelaHistorico">
-                        <!-- PREENCHIDO NO JS -->
-                    </tbody>
+                    <tbody><!-- GERADO NO JS --></tbody>
                 </table>
+                <div id="paginacao" class="paginacao-container"></div>
             </div>
         </div>
     </main>
@@ -1106,6 +1107,22 @@
                 <div class="modal-body">
                     <p id="obsConsulta"></p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL HISTÓRICO -->
+    <div class="modal fade" id="modalHistorico">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Histórico da Solicitação</h3>
+                    <a data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
+                    </a>
+                </div>
+
+                <div class="modal-body" id="conteudoHistorico"></div>
             </div>
         </div>
     </div>

@@ -47,9 +47,9 @@ function copiarSenha() {
     try {
         document.execCommand("copy");
         notify.success("Senha copiada!");
-    } catch (err) {
+    } catch (erro) {
+        console.error(erro);
         notify.error("Não foi possível copiar a senha");
-        console.error(err);
     }
 
     document.body.removeChild(textarea);
@@ -145,8 +145,9 @@ async function carregarEmpresas(perfil) {
         });
 
         select.disabled = false;
-    } catch (err) {
-        console.error("Erro ao carregar empresas:", err);
+    } catch (erro) {
+        console.error(erro);
+
         select.innerHTML = '<option value="">Erro ao carregar</option>';
         select.disabled = true;
     }
@@ -251,13 +252,14 @@ async function carregarUnidades(empresaCodigo) {
         } else {
             btnAddUnidade.style.display = "inline-block";
         }
+    } catch (erro) {
+        console.error(erro);
 
-    } catch (err) {
-        console.error("Erro ao carregar unidades:", err);
         selects.forEach(select => {
             select.innerHTML = '<option value="">Erro ao carregar unidades</option>';
             select.disabled = true;
         });
+
         btnAddUnidade.style.display = "none";
     }
 }
@@ -340,7 +342,7 @@ document.getElementById("cadastroForm").addEventListener("submit", async e => {
         nome_empresa: empresaNome,
         unidades
     };
-    
+
     const res = await fetch(`/cadastro`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
