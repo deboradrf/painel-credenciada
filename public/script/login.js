@@ -26,7 +26,12 @@ document.getElementById("loginForm").onsubmit = async e => {
 
     sessionStorage.setItem("usuario", JSON.stringify(dadosSessao));
 
-    window.location.href = "/pages/index.html";
+    // VERIFICA O TIPO DE USUÁRIO
+    if (data.perfil === "ADMINISTRADOR") {
+        window.location.href = "/pages/selecionar-perfil.html";
+    } else {
+        window.location.href = "/pages/index.html";
+    }
 };
 
 // MOSTRAR / OCULTAR SENHA

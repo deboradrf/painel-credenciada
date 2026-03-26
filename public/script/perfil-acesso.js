@@ -164,7 +164,6 @@ async function carregarTodasEmpresas() {
 
         const opt = document.createElement("option");
 
-        // NOME CORRETO DAS PROPRIEDADES
         opt.value = e.codigo;
         opt.textContent = `${e.codigo} - ${e.nome}`;
 
