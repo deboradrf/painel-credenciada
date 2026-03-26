@@ -726,35 +726,48 @@ tr:last-child td {
 
 #paginacao {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
-  gap: 6px;
-  margin-top: 15px;
+  gap: 12px;
+  margin-top: 20px;
 }
 
 #paginacao button {
-  border: none;
-  background: transparent;
-  color: #6B7280;
-  font-size: 14px;
-  padding: 6px 10px;
-  border-radius: 6px;
+  border: 1px solid #E5E7EB;
+  background: #fff;
+  color: #374151;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 #paginacao button:hover {
-  background: rgba(83, 165, 166, 0.1);
-  color: #F1AE33;
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+  transform: translateY(-1px);
 }
 
-#paginacao button.btn-primary {
-  background: #F1AE33;
+#paginacao button.btn-proximo,
+#paginacao button.btn-anterior {
+  background: #88A6BB;
   color: #fff;
-  font-weight: 500;
+  border-color: #88A6BB;
 }
 
-#paginacao button.btn-outline-primary {
-  background: transparent;
+#paginacao button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#paginacao span {
+  font-size: 13px;
+  color: #6B7280;
+  background: #F9FAFB;
+  padding: 6px 12px;
+  border-radius: 999px;
 }
 
 .footer-container {

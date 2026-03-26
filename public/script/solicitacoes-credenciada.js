@@ -234,12 +234,12 @@ async function renderizarTabela(lista) {
         <td class="actions">
           <div class="actions-wrapper">
             ${estaEmAnalise
-            ? `
+          ? `
                 <small style="opacity:0.6;">
                   Em análise por ${s.em_analise_por_nome?.split(' ')[0]}
                 </small>
                 `
-            : `
+          : `
                 <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
                   Analisar
                 </button>
@@ -249,32 +249,32 @@ async function renderizarTabela(lista) {
                 </button>
 
                 ${podeEnviarSOC
-                ? `
+            ? `
                     <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
                       Enviar SOC
                     </button>
                   `
-                : ""
-                }
+            : ""
+          }
 
                 ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
-                ? `
+            ? `
                     <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
                       Cancelar
                     </button>
                     `
-                : ""
-                }
+            : ""
+          }
               `
-            }
+        }
             </div>
           </td>
         `;
 
       tbody.appendChild(tr);
     });
-  
-  tbody.classList.remove("fade");
+
+    tbody.classList.remove("fade");
   }, 100);
 
   renderizarPaginacao();
@@ -288,24 +288,47 @@ function renderizarPaginacao() {
 
   if (totalPaginas <= 1) return;
 
-  for (let i = 1; i <= totalPaginas; i++) {
-    const btn = document.createElement("button");
-    btn.innerText = i;
-    btn.classList.add("btn", "btn-sm", "mx-1");
+  // BOTÃO ANTERIOR
+  const btnAnterior = document.createElement("button");
+  btnAnterior.innerHTML = "← Anterior";
+  btnAnterior.classList.add("btn", "btn-sm", "mx-1", "btn-anterior");
 
-    if (i === paginaAtual) {
-      btn.classList.add("btn-primary");
-    } else {
-      btn.classList.add("btn-outline-primary");
-    }
-
-    btn.onclick = () => {
-      paginaAtual = i;
-      renderizarTabela(listaFiltradaAtual);
-    };
-
-    container.appendChild(btn);
+  if (paginaAtual === 1) {
+    btnAnterior.disabled = true;
   }
+
+  btnAnterior.onclick = () => {
+    if (paginaAtual > 1) {
+      paginaAtual--;
+      renderizarTabela(listaFiltradaAtual);
+    }
+  };
+
+  container.appendChild(btnAnterior);
+
+  // TEXTO DA PÁGINA ATUAL
+  const info = document.createElement("small");
+  info.innerText = `Página ${paginaAtual} de ${totalPaginas}`;
+
+  container.appendChild(info);
+
+  // BOTÃO PRÓXIMO
+  const btnProximo = document.createElement("button");
+  btnProximo.innerHTML = "Próximo →";
+  btnProximo.classList.add("btn", "btn-sm", "mx-1", "btn-proximo");
+
+  if (paginaAtual === totalPaginas) {
+    btnProximo.disabled = true;
+  }
+
+  btnProximo.onclick = () => {
+    if (paginaAtual < totalPaginas) {
+      paginaAtual++;
+      renderizarTabela(listaFiltradaAtual);
+    }
+  };
+
+  container.appendChild(btnProximo);
 }
 
 // LIBERAR O LOCK AO ATUALIZAR A PAGINA
@@ -1218,10 +1241,10 @@ async function abrirHistorico(id, tipo) {
     const html = `
       <div class="timeline">
         ${historico.map(h => {
-          const dataFormatada = h.data ? new Date(h.data).toLocaleString() : "-";
-          const { icon, color } = getIcon(h.etapa);
+      const dataFormatada = h.data ? new Date(h.data).toLocaleString() : "-";
+      const { icon, color } = getIcon(h.etapa);
 
-          return `
+      return `
             <div class="timeline-item">
               <div class="timeline-icon">
                 <i class="fa-solid ${icon}" style="color: ${color}"></i>
@@ -1260,7 +1283,7 @@ async function abrirHistorico(id, tipo) {
               </div>
             </div>
           `;
-        }).join("")}
+    }).join("")}
       </div>
     `;
 

@@ -341,24 +341,47 @@ function renderizarPaginacao() {
 
   if (totalPaginas <= 1) return;
 
-  for (let i = 1; i <= totalPaginas; i++) {
-    const btn = document.createElement("button");
-    btn.innerText = i;
-    btn.classList.add("btn", "btn-sm", "mx-1");
+  // BOTÃO ANTERIOR
+  const btnAnterior = document.createElement("button");
+  btnAnterior.innerHTML = "← Anterior";
+  btnAnterior.classList.add("btn", "btn-sm", "mx-1", "btn-anterior");
 
-    if (i === paginaAtual) {
-      btn.classList.add("btn-primary");
-    } else {
-      btn.classList.add("btn-outline-primary");
-    }
-
-    btn.onclick = () => {
-      paginaAtual = i;
-      renderizarTabela(listaFiltradaAtual);
-    };
-
-    container.appendChild(btn);
+  if (paginaAtual === 1) {
+    btnAnterior.disabled = true;
   }
+
+  btnAnterior.onclick = () => {
+    if (paginaAtual > 1) {
+      paginaAtual--;
+      renderizarTabela(listaFiltradaAtual);
+    }
+  };
+
+  container.appendChild(btnAnterior);
+
+  // TEXTO DA PÁGINA ATUAL
+  const info = document.createElement("small");
+  info.innerText = `Página ${paginaAtual} de ${totalPaginas}`;
+
+  container.appendChild(info);
+
+  // BOTÃO PRÓXIMO
+  const btnProximo = document.createElement("button");
+  btnProximo.innerHTML = "Próximo →";
+  btnProximo.classList.add("btn", "btn-sm", "mx-1", "btn-proximo");
+
+  if (paginaAtual === totalPaginas) {
+    btnProximo.disabled = true;
+  }
+
+  btnProximo.onclick = () => {
+    if (paginaAtual < totalPaginas) {
+      paginaAtual++;
+      renderizarTabela(listaFiltradaAtual);
+    }
+  };
+
+  container.appendChild(btnProximo);
 }
 
 // FUNÇÃO PARA MOSTRAR O HISTÓRICO DAS SOLICITAÇÕES
