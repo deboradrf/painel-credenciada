@@ -4,7 +4,7 @@ let solicitacaoAtualId = null;
 let hierarquiaAtual = null;
 
 let paginaAtual = 1;
-const itensPorPagina = 10;
+const itensPorPagina = 20;
 let listaFiltradaAtual = [];
 
 const usuarioLogado = getUsuario();
@@ -194,6 +194,8 @@ async function renderizarTabela(lista) {
           </td>
         </tr>
       `;
+
+      tbody.classList.remove("fade");
       return;
     }
 
@@ -503,6 +505,7 @@ async function preencherModal(s, tipo) {
     document.getElementById("cadastro_tipos_rac").innerText = formatarTiposRac(s.tipos_rac);
     document.getElementById("cadastro_tipo_exame").innerText = s.tipo_exame;
     document.getElementById("cadastro_data_exame").innerText = formatarData(s.data_exame);
+    document.getElementById("cadastro_nova_data_exame").innerText = formatarData(s.nova_data_exame);
     preencherMaisUnidades(s);
     document.getElementById("cadastro_cnh").innerText = s.cnh || "-";
     document.getElementById("cadastro_vencimento_cnh").innerText = formatarData(s.vencimento_cnh) || "-";
@@ -515,46 +518,25 @@ async function preencherModal(s, tipo) {
     document.getElementById("cadastro_observacao").innerText = s.observacao || "-";
 
     // MOSTRAR / ESCONDER BLOCO DE NOVA UNIDADE
-    const blocoNomeFantasia = document.getElementById("divNomeFantasia");
-    const blocoRazaoSocial = document.getElementById("divRazaoSocial");
-    const blocoCnpj = document.getElementById("divCnpj");
-    const blocoCnae = document.getElementById("divCnae");
-    const blocoCep = document.getElementById("divCep");
-    const blocoRua = document.getElementById("divRua");
-    const blocoNumero = document.getElementById("divNumero");
-    const blocoBairro = document.getElementById("divBairro");
-    const blocoEstado = document.getElementById("divEstado");
-    const blocoFaturamentoJunto = document.getElementById("divFaturamentoJunto");
-    const blocoFaturamentoSeparado = document.getElementById("divFaturamentoSeparado");
-    const blocoEmail = document.getElementById("divEmail");
+    const blocoNovaUnidade = [
+      "divNomeFantasia",
+      "divRazaoSocial",
+      "divCnpj",
+      "divCnae",
+      "divCep",
+      "divRua",
+      "divNumero",
+      "divBairro",
+      "divEstado",
+      "divFaturamentoJunto",
+      "divFaturamentoSeparado",
+      "divEmail"
+    ];
 
-    if (s.solicitar_nova_unidade === true) {
-      blocoNomeFantasia.classList.remove("d-none");
-      blocoRazaoSocial.classList.remove("d-none");
-      blocoCnpj.classList.remove("d-none");
-      blocoCnae.classList.remove("d-none");
-      blocoCep.classList.remove("d-none");
-      blocoRua.classList.remove("d-none");
-      blocoNumero.classList.remove("d-none");
-      blocoBairro.classList.remove("d-none");
-      blocoEstado.classList.remove("d-none");
-      blocoFaturamentoJunto.classList.remove("d-none");
-      blocoFaturamentoSeparado.classList.remove("d-none");
-      blocoEmail.classList.remove("d-none");
-    } else {
-      blocoNomeFantasia.classList.add("d-none");
-      blocoRazaoSocial.classList.add("d-none");
-      blocoCnpj.classList.add("d-none");
-      blocoCnae.classList.add("d-none");
-      blocoCep.classList.add("d-none");
-      blocoRua.classList.add("d-none");
-      blocoNumero.classList.add("d-none");
-      blocoBairro.classList.add("d-none");
-      blocoEstado.classList.add("d-none");
-      blocoFaturamentoJunto.classList.add("d-none");
-      blocoFaturamentoSeparado.classList.add("d-none");
-      blocoEmail.classList.add("d-none");
-    }
+    blocoNovaUnidade.forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.toggle("d-none", !s.solicitar_nova_unidade);
+    });
 
     // TRANSFORMAR O CAMPO DE UNIDADE EM SELECT CASO PRECISE CRIAR UMA NOVA
     const spanUnidade = document.getElementById("cadastro_nome_unidade");
@@ -591,6 +573,15 @@ async function preencherModal(s, tipo) {
       blocoDescricaoAtividade.classList.remove("d-none");
     } else {
       blocoDescricaoAtividade.classList.add("d-none");
+    }
+
+    // OCULTAR CAMPO DE NOVA DATA EXAME SE ESTIVER VAZIA
+    const blocoNovaData = document.getElementById("divNovaData");
+
+    if (!s.nova_data_exame) {
+      blocoNovaData.classList.add("d-none");
+    } else {
+      blocoNovaData.classList.remove("d-none");
     }
 
     // TRANSFORMAR O CAMPO DE SETOR DO FUNCIONÁRIO EM SELECT CASO PRECISE CRIAR UM NOVO PARA SER SELECIONADO APÓS CRIADO 
@@ -723,6 +714,7 @@ async function preencherModal(s, tipo) {
     document.getElementById("exame_tipos_rac").innerText = formatarTiposRac(s.tipos_rac);
     document.getElementById("exame_tipo_exame").innerText = formatarTipoExame(s.tipo_exame);
     document.getElementById("exame_data_exame").innerText = formatarData(s.data_exame);
+    document.getElementById("exame_nova_data_exame").innerText = formatarData(s.nova_data_exame);
     preencherMaisUnidadesExame(s);
     document.getElementById("exame_unidade_destino").innerText = s.unidade_destino || "-";
     document.getElementById("exame_nome_fantasia").innerText = s.nome_fantasia;
@@ -759,45 +751,33 @@ async function preencherModal(s, tipo) {
     document.getElementById("exame_observacao").innerText = s.observacao || "-";
 
     // MOSTRAR / ESCONDER BLOCO DE NOVA UNIDADE
-    const blocoNomeFantasia = document.getElementById("blocoExameNomeFantasia");
-    const blocoRazaoSocial = document.getElementById("blocoExameRazaoSocial");
-    const blocoCnpj = document.getElementById("blocoExameCnpj");
-    const blocoCnae = document.getElementById("blocoExameCnae");
-    const blocoCep = document.getElementById("blocoExameCep");
-    const blocoRua = document.getElementById("blocoExameRua");
-    const blocoNumero = document.getElementById("blocoExameNumero");
-    const blocoBairro = document.getElementById("blocoExameBairro");
-    const blocoEstado = document.getElementById("blocoExameEstado");
-    const blocoFaturamentoJunto = document.getElementById("blocoExameFaturamentoJunto");
-    const blocoFaturamentoSeparado = document.getElementById("blocoExameFaturamentoSeparado");
-    const blocoEmail = document.getElementById("blocoExameEmail");
+    const blocoNovaUnidade = [
+      "divExameNomeFantasia",
+      "divExameRazaoSocial",
+      "divExameCnpj",
+      "divExameCnae",
+      "divExameCep",
+      "divExameRua",
+      "divExameNumero",
+      "divExameBairro",
+      "divExameEstado",
+      "divExameFaturamentoJunto",
+      "divExameFaturamentoSeparado",
+      "divExameEmail"
+    ];
 
-    if (s.solicitar_nova_unidade === true) {
-      blocoNomeFantasia.classList.remove("d-none");
-      blocoRazaoSocial.classList.remove("d-none");
-      blocoCnpj.classList.remove("d-none");
-      blocoCnae.classList.remove("d-none");
-      blocoCep.classList.remove("d-none");
-      blocoRua.classList.remove("d-none");
-      blocoNumero.classList.remove("d-none");
-      blocoBairro.classList.remove("d-none");
-      blocoEstado.classList.remove("d-none");
-      blocoFaturamentoJunto.classList.remove("d-none");
-      blocoFaturamentoSeparado.classList.remove("d-none");
-      blocoEmail.classList.remove("d-none");
+    blocoNovaUnidade.forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.toggle("d-none", !s.solicitar_nova_unidade);
+    });
+
+    // OCULTAR CAMPO DE NOVA DATA EXAME SE ESTIVER VAZIA
+    const blocoNovaData = document.getElementById("divExameNovaData");
+
+    if (!s.nova_data_exame) {
+      blocoNovaData.classList.add("d-none");
     } else {
-      blocoNomeFantasia.classList.add("d-none");
-      blocoRazaoSocial.classList.add("d-none");
-      blocoCnpj.classList.add("d-none");
-      blocoCnae.classList.add("d-none");
-      blocoCep.classList.add("d-none");
-      blocoRua.classList.add("d-none");
-      blocoNumero.classList.add("d-none");
-      blocoBairro.classList.add("d-none");
-      blocoEstado.classList.add("d-none");
-      blocoFaturamentoJunto.classList.add("d-none");
-      blocoFaturamentoSeparado.classList.add("d-none");
-      blocoEmail.classList.add("d-none");
+      blocoNovaData.classList.remove("d-none");
     }
 
     // MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE RISCOS OCUPACIONAIS

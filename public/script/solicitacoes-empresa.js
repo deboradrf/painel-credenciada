@@ -1,11 +1,14 @@
 let solicitacoes = [];
 
 let paginaAtual = 1;
-const itensPorPagina = 10;
+const itensPorPagina = 20;
 let listaFiltradaAtual = [];
 
 const usuarioLogado = getUsuario();
 const nomeEmpresa = getEmpresaNome();
+
+let codEmpresaAtual = null;
+let codUnidadeAtual = null;
 
 // DROPDOWN DO PERFIL
 document.addEventListener("DOMContentLoaded", () => {
@@ -165,6 +168,8 @@ function renderizarTabela(lista) {
           </td>
         </tr>
       `;
+
+      tbody.classList.remove("fade");
       return;
     }
 
@@ -188,41 +193,6 @@ function renderizarTabela(lista) {
       if (s.status === "ENVIADO_SOC") situacao = "Solicitação finalizada";
       if (s.status === "CANCELADO") situacao = "Solicitação cancelada";
 
-      // // AÇÕES
-      // let acoes = "Nenhuma ação a ser feita";
-
-      // if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || s.status === "PENDENTE") {
-      //   if (s.tipo === "NOVO_EXAME") {
-      //     acoes = `
-      //       <button onclick="cancelarSolicitacao(
-      //         ${s.solicitacao_id},
-      //         '${s.tipo}',
-      //         ${usuarioLogado.id},
-      //         '${s.status}',
-      //         false,       // solicitarNovaUnidade
-      //         ${s.solicitar_novo_setor},
-      //         false,       // solicitarNovoCargo
-      //         ${s.solicitar_nova_funcao}, // solicitarNovaFuncao
-      //         ${s.solicitar_credenciamento} // solicitarCredenciamento
-      //       )">Cancelar</button>
-      //     `;
-      //   } else {
-      //     acoes = `
-      //       <button onclick="cancelarSolicitacao(
-      //         ${s.solicitacao_id},
-      //         '${s.tipo}',
-      //         ${usuarioLogado.id},
-      //         '${s.status}',
-      //         ${s.solicitar_nova_unidade}, // solicitarNovaUnidade
-      //         ${s.solicitar_novo_setor},   // solicitarNovoSetor
-      //         ${s.solicitar_novo_cargo},   // solicitarNovoCargo
-      //         false,                        // solicitarNovaFuncao
-      //         ${s.solicitar_credenciamento} // solicitarCredenciamento
-      //       )">Cancelar</button>
-      //     `;
-      //   }
-      // }
-
       // AÇÕES
       let acoes = `
         <button onclick="abrirHistorico(${s.solicitacao_id}, '${s.tipo}')">
@@ -240,12 +210,7 @@ function renderizarTabela(lista) {
       }
 
       // STATUS QUE PODEM CANCELAR
-      else if (
-        s.status === "PENDENTE_UNIDADE" ||
-        s.status === "PENDENTE_SC" ||
-        s.status === "PENDENTE_CREDENCIAMENTO" ||
-        s.status === "PENDENTE"
-      ) {
+      else if (s.status === "PENDENTE_UNIDADE" || s.status === "PENDENTE_SC" || s.status === "PENDENTE_CREDENCIAMENTO" || s.status === "PENDENTE" || s.status === "PENDENTE_REAVALIACAO") {
         if (s.tipo === "NOVO_EXAME") {
           acoes += `
             <button onclick="cancelarSolicitacao(
@@ -277,7 +242,7 @@ function renderizarTabela(lista) {
         }
       }
 
-      // REPROVADO (também precisa ser +=)
+      // REPROVADO
       if (s.status === "REPROVADO") {
         acoes += `
           <button onclick='verMotivo(${JSON.stringify(s.motivo_reprovacao)})'>
@@ -501,12 +466,10 @@ async function verConsulta(id, tipo) {
   }
 
   try {
-
     const response = await fetch(url);
     const data = await response.json();
 
-    document.getElementById("obsConsulta").innerText =
-      data.dados.observacao_consulta || "Nenhuma observação registrada.";
+    document.getElementById("obsConsulta").innerText = data.dados.observacao_consulta;
 
     const modal = new bootstrap.Modal(document.getElementById("modalConsulta"));
     modal.show();
@@ -527,6 +490,106 @@ function formatarTipoExame(tipo) {
   if (!tipo) return "-";
   return TIPO_EXAME_LABELS[tipo] || tipo;
 }
+
+// FUNÇÃO PARA RESOLVER CÓDIGO DA UNIDADE PELO NOME (USADO NO MODAL DE EDITAR EXAME)
+async function obterCodigoUnidadePorNome(empresaCodigo, nomeUnidade) {
+  try {
+    const response = await fetch(`/unidades/${empresaCodigo}`);
+    const unidades = await response.json();
+
+    const normalizar = str => str?.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    const unidade = unidades.find(u =>
+      normalizar(u.nome) === normalizar(nomeUnidade)
+    );
+
+    return unidade?.codigo || null;
+  } catch (erro) {
+    console.error(erro);
+    return null;
+  }
+}
+
+// FUNÇÃO PARA CARREGAR OS SETORES DA UNIDADE
+async function carregarSetores(empresaCodigo, unidadeCodigo, setorSelecionado = "", selectId = "") {
+  const select = document.getElementById(selectId);
+
+  if (!select) return;
+
+  try {
+    const response = await fetch(`/hierarquia/${empresaCodigo}/${unidadeCodigo}`);
+    const setores = await response.json();
+
+    setores.sort((a, b) =>
+      a.nomeSetor.localeCompare(b.nomeSetor, 'pt-BR', { sensitivity: 'base' })
+    );
+
+    setores.forEach(setor => {
+      const option = document.createElement("option");
+
+      option.value = setor.codigoSetor;
+      option.textContent = setor.nomeSetor;
+
+      if (setor.codigoSetor == setorSelecionado) {
+        option.selected = true;
+      }
+
+      select.appendChild(option);
+    });
+
+  } catch (erro) {
+    console.error("Erro ao carregar setores:", erro);
+  }
+}
+
+// FUNÇÃO PARA CARREGAR OS CARGOS DO SETOR SELECIONADO
+async function carregarCargosDoSetorSelecionado(empresaCodigo, unidadeCodigo, setorCodigo, cargoSelecionado = "", selectId = "editCadNomeCargo") {
+  const selectCargo = document.getElementById(selectId);
+
+  if (!selectCargo) return;
+
+  selectCargo.innerHTML = '<option value="">Selecione...</option>';
+
+  try {
+    const response = await fetch(
+      `/hierarquia/${empresaCodigo}/${unidadeCodigo}/${setorCodigo}`
+    );
+
+    const cargos = await response.json();
+
+    cargos.forEach(cargo => {
+      const option = document.createElement("option");
+
+      option.value = cargo.codigoCargo;
+      option.textContent = cargo.nomeCargo;
+
+      if (String(cargo.codigoCargo) === String(cargoSelecionado)) {
+        option.selected = true;
+      }
+
+      selectCargo.appendChild(option);
+    });
+
+  } catch (erro) {
+    console.error(erro);
+  }
+}
+
+// LISTENER PARA QUANDO SELECIONAR UM SETOR NOVO, SER OBRIGATÓRIO SELECIONAR O CARGO NOVAMENTE
+document.getElementById("editCadNomeSetor").addEventListener("change", async function () {
+  const novoSetor = this.value;
+  const selectCargo = document.getElementById("editCadNomeCargo");
+
+  await carregarCargosDoSetorSelecionado(
+    codEmpresaAtual,
+    codUnidadeAtual,
+    novoSetor,
+    "",
+    "editCadNomeCargo"
+  );
+
+  selectCargo.required = true;
+});
 
 // FUNÇÃO PARA FORMATAR RAC
 const RAC_LABELS = {
@@ -701,6 +764,9 @@ document.querySelectorAll('.data-mask').forEach(input => {
 
 // FUNÇÃO PARA PREENCHER OS CAMPOS DO MODAL - NOVO CADASTRO
 function preencherModalEditarCadastro(s) {
+  codEmpresaAtual = s.cod_empresa;
+  codUnidadeAtual = s.cod_unidade;
+
   const tipoFaturamento = s.tipo_faturamento;
 
   document.getElementById("editCadId").value = s.solicitacao_id;
@@ -734,15 +800,17 @@ function preencherModalEditarCadastro(s) {
   }
 
   document.getElementById("editCadEmail").value = s.email;
-  document.getElementById("editCadNomeSetor").value = s.nome_setor;
+  carregarSetores(s.cod_empresa, s.cod_unidade, s.cod_setor, "editCadNomeSetor");
   document.getElementById("editCadNovoSetor").value = s.nome_novo_setor;
+  carregarCargosDoSetorSelecionado(s.cod_empresa, s.cod_unidade, s.cod_setor, s.cod_cargo, "editCadNomeCargo");
   document.getElementById("editCadNomeCargo").value = s.nome_cargo;
   document.getElementById("editCadNovoCargo").value = s.nome_novo_cargo;
   document.getElementById("editCadDescricaoAtividade").value = s.descricao_atividade;
   document.getElementById("editCadRac").value = formatarRac(s.rac),
-    document.getElementById("editCadTiposRac").value = formatarTiposRac(s.tipos_rac);
+  document.getElementById("editCadTiposRac").value = formatarTiposRac(s.tipos_rac);
   document.getElementById("editCadTipoExame").value = s.tipo_exame;
   document.getElementById("editCadDataExame").value = formatarDataParaInput(s.data_exame);
+  document.getElementById("editCadNovaDataExame").value = formatarDataParaInput(s.nova_data_exame);
   document.getElementById("editCadMaisUnidades").innerText = s.mais_unidades;
   document.getElementById("editCadCNH").value = s.cnh;
   document.getElementById("editCadVencimentoCNH").value = formatarDataParaInput(s.vencimento_cnh);
@@ -922,7 +990,21 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // FUNÇÃO PARA PREENHCER OS CAMPOS DO MODAL - NOVO EXAME
-function preencherModalEditarExame(s) {
+async function preencherModalEditarExame(s) {
+  codEmpresaAtual = s.cod_empresa;
+
+  // SE TIVER UNIDADE DESTINO → USA ELA
+  if (s.unidade_destino && s.unidade_destino.trim() !== "") {
+    const codResolvido = await obterCodigoUnidadePorNome(
+      s.cod_empresa,
+      s.unidade_destino
+    );
+
+    codUnidadeAtual = codResolvido || s.cod_unidade;
+  } else {
+    codUnidadeAtual = s.cod_unidade;
+  }
+
   const tipoFaturamento = s.tipo_faturamento;
 
   document.getElementById("editExameId").value = s.solicitacao_id;
@@ -955,6 +1037,7 @@ function preencherModalEditarExame(s) {
   document.getElementById("editExameNomeCargo").value = s.nome_cargo;
   document.getElementById("editExameTipoExame").value = formatarTipoExame(s.tipo_exame);
   document.getElementById("editExameDataExame").value = formatarDataParaInput(s.data_exame);
+  document.getElementById("editExameNovaDataExame").value = formatarDataParaInput(s.nova_data_exame);
   document.getElementById("editExameMaisUnidades").innerText = s.mais_unidades;
   document.getElementById("editExameRac").value = formatarRac(s.rac);
   document.getElementById("editExameTiposRac").value = formatarTiposRac(s.tipos_rac);
@@ -974,6 +1057,61 @@ function preencherModalEditarExame(s) {
   document.getElementById("editExameEstadoCredenciamento").value = s.estado_credenciamento;
   document.getElementById("editExameCidadeCredenciamento").value = s.cidade_credenciamento;
   document.getElementById("editExameObservacao").value = s.observacao;
+
+  (async () => {
+    let codUnidadeParaSetores = s.cod_unidade;
+
+    if (s.unidade_destino && s.unidade_destino.trim() !== "") {
+      const codResolvido = await obterCodigoUnidadePorNome(s.cod_empresa, s.unidade_destino);
+      if (codResolvido) codUnidadeParaSetores = codResolvido;
+    }
+
+    let codSetorParaSelecionar = null;
+
+    if (s.setor_destino && s.setor_destino.trim() !== "") {
+      codSetorParaSelecionar = await obterCodigoSetorPorNome(
+        s.cod_empresa,
+        codUnidadeParaSetores,
+        s.setor_destino
+      );
+    }
+
+    // 🔥 PRIMEIRO: carrega setores
+    await carregarSetores(
+      s.cod_empresa,
+      codUnidadeParaSetores,
+      codSetorParaSelecionar,
+      "editExameSetorDestino"
+    );
+
+    // 🔥 DEPOIS: carrega funções
+    if (codSetorParaSelecionar) {
+      let codFuncaoSelecionada = null;
+
+      if (s.funcao_destino && s.funcao_destino.trim() !== "") {
+        const response = await fetch(
+          `/hierarquia/${s.cod_empresa}/${codUnidadeParaSetores}/${codSetorParaSelecionar}`
+        );
+
+        const funcoes = await response.json();
+
+        const funcao = funcoes.find(f =>
+          (f.nomeFuncao || f.nomeCargo || "").trim().toLowerCase() ===
+          s.funcao_destino.trim().toLowerCase()
+        );
+
+        codFuncaoSelecionada = funcao?.codigoFuncao || funcao?.codigoCargo || null;
+      }
+
+      await carregarFuncoesDoSetorDestino(
+        s.cod_empresa,
+        codUnidadeParaSetores,
+        codSetorParaSelecionar,
+        codFuncaoSelecionada,
+        "editExameFuncaoDestino"
+      );
+    }
+  })();
 
   // MOSTRAR / OCULTAR SEÇÃO DE NOVA UNIDADE
   const blocoUnidade = document.getElementById("divUnidadeDestino");
@@ -1153,6 +1291,88 @@ function preencherModalEditarExame(s) {
   }
 }
 
+async function obterCodigoSetorPorNome(codEmpresa, codUnidade, nomeSetor) {
+  const res = await fetch(`/hierarquia/${codEmpresa}/${codUnidade}`);
+
+  const setores = await res.json();
+
+  const setor = setores.find(s =>
+    (s.nomeSetor || "").trim().toLowerCase() ===
+    nomeSetor.trim().toLowerCase()
+  );
+
+  return setor ? setor.codigoSetor : null;
+}
+
+// FUNÇÃO PARA CARREGAR AS FUNÇÕES DO SETOR_DESTINO
+async function carregarFuncoesDoSetorDestino(empresaCodigo, unidadeCodigo, setorCodigo, funcaoSelecionada = "", selectId = "editExameFuncaoDestino") {
+  const selectFuncao = document.getElementById(selectId);
+
+  if (!selectFuncao) {
+    console.error("❌ SELECT NÃO ENCONTRADO:", selectId);
+    return;
+  }
+
+  // limpa antes
+  selectFuncao.innerHTML = '<option value="">Selecione...</option>';
+
+  try {
+    const url = `/hierarquia/${empresaCodigo}/${unidadeCodigo}/${setorCodigo}`;
+
+    const response = await fetch(url);
+
+
+    if (!response.ok) {
+      console.error("❌ ERRO NA REQUISIÇÃO");
+      return;
+    }
+
+    const funcoes = await response.json();
+
+    if (!Array.isArray(funcoes) || funcoes.length === 0) {
+      console.warn("⚠️ SEM FUNÇÕES PRA ESSE SETOR");
+      return;
+    }
+
+    funcoes.forEach(funcao => {
+      const option = document.createElement("option");
+
+      option.value = funcao.codigoFuncao || funcao.codigoCargo;
+      option.textContent = funcao.nomeFuncao || funcao.nomeCargo;
+
+      if (String(option.value) === String(funcaoSelecionada)) {
+        option.selected = true;
+      }
+
+      selectFuncao.appendChild(option);
+    });
+
+  } catch (erro) {
+    console.error(erro);
+  }
+}
+
+// LISTENER PARA ALTERAÇÃO DO SETOR DESTINO NO EXAME
+document.addEventListener("change", async function (e) {
+  if (e.target && e.target.id === "editExameSetorDestino") {
+
+    const novoSetor = e.target.value;
+
+    if (!novoSetor) {
+      console.warn("Setor vazio!");
+      return;
+    }
+
+    await carregarFuncoesDoSetorDestino(
+      codEmpresaAtual,
+      codUnidadeAtual,
+      novoSetor,
+      "",
+      "editExameFuncaoDestino"
+    );
+  }
+});
+
 // MAPA DAS CATEGORIAS DO ESOCIAL
 const codCategoriaMap = {
   CLT: "101",
@@ -1190,6 +1410,18 @@ async function salvarEdicaoCadastro() {
   const id = document.getElementById("editCadId").value;
   const tipoContratacaoValue = document.getElementById("editCadTipoContratacao").value;
   const tipoFaturamentoSelecionado = document.querySelector('input[name="tipo_faturamento"]:checked')?.value;
+  const selectSetor = document.getElementById("editCadNomeSetor");
+  const codSetor = selectSetor?.value || null;
+  const nomeSetor = selectSetor?.options[selectSetor.selectedIndex]?.text || null;
+  const selectCargo = document.getElementById("editCadNomeCargo");
+  let codCargo = selectCargo?.value || null;
+  let nomeCargo = selectCargo?.options[selectCargo.selectedIndex]?.text || null;
+
+  // PARA O CARGO NÃO VIR COM "Selecione..." COMO VALOR
+  if (nomeCargo === "Selecione...") {
+    nomeCargo = null;
+    codCargo = null;
+  }
 
   const dados = {
     nome_funcionario: document.getElementById("editCadNomeFuncionario").value,
@@ -1214,10 +1446,14 @@ async function salvarEdicaoCadastro() {
     estado: document.getElementById("editCadEstado").value,
     tipo_faturamento: tipoFaturamentoSelecionado,
     email: document.getElementById("editCadEmail").value,
+    cod_setor: codSetor,
+    nome_setor: nomeSetor,
     nome_novo_setor: document.getElementById("editCadNovoSetor").value,
+    cod_cargo: codCargo,
+    nome_cargo: nomeCargo,
     nome_novo_cargo: document.getElementById("editCadNovoCargo").value,
     descricao_atividade: document.getElementById("editCadDescricaoAtividade").value,
-    data_exame: dataParaFormatoBanco(document.getElementById("editCadDataExame").value),
+    nova_data_exame: dataParaFormatoBanco(document.getElementById("editCadNovaDataExame").value),
     cnh: document.getElementById("editCadCNH").value,
     vencimento_cnh: dataParaFormatoBanco(document.getElementById("editCadVencimentoCNH").value),
     lab_toxicologico: document.getElementById("editCadLabToxicologico").value,
@@ -1227,6 +1463,23 @@ async function salvarEdicaoCadastro() {
 
     usuario_id: usuarioLogado.id
   };
+
+  const setorEl = document.getElementById("editCadNomeSetor");
+  const cargoEl = document.getElementById("editCadNomeCargo");
+
+  const setorSelecionado = setorEl.value?.trim();
+  const funcaoSelecionada = cargoEl.value?.trim();
+
+  // regra MAIS SEGURA: só valida se setor foi escolhido
+  const precisaValidarCargo = !!setorSelecionado;
+
+  // mas só se o select realmente está habilitado/ativo
+  const funcaoAtiva = !cargoEl.disabled && cargoEl.offsetParent !== null;
+
+  if (precisaValidarCargo && funcaoAtiva && !funcaoSelecionada) {
+    notify.error("Selecione um cargo para o setor escolhido!");
+    return;
+  }
 
   const res = await fetch(`/solicitacoes/novo-cadastro/${id}/editar`, {
     method: "PUT",
@@ -1319,6 +1572,15 @@ async function salvarEdicaoExame() {
 
   const id = document.getElementById("editExameId").value;
   const tipoFaturamentoSelecionado = document.querySelector('input[name="exame_tipo_faturamento"]:checked')?.value;
+  const selectSetorDestino = document.getElementById("editExameSetorDestino");
+  const nomeSetorDestino = selectSetorDestino?.options[selectSetorDestino.selectedIndex]?.text || null;
+  const selectFuncaoDestino = document.getElementById("editExameFuncaoDestino");
+  let nomeFuncaoDestino = selectFuncaoDestino?.options[selectFuncaoDestino.selectedIndex]?.text || null;
+  
+  // PARA A FUNÇÃO NÃO VIR COM "Selecione..." COMO VALOR
+  if (nomeFuncaoDestino === "Selecione...") {
+    nomeFuncaoDestino = null;
+  }
 
   const dados = {
     nome_fantasia: document.getElementById("editExameNomeFantasia").value,
@@ -1332,11 +1594,13 @@ async function salvarEdicaoExame() {
     estado: document.getElementById("editExameEstado").value,
     tipo_faturamento: tipoFaturamentoSelecionado,
     email: document.getElementById("editExameEmail").value,
+    funcao_destino: nomeFuncaoDestino,
     nome_nova_funcao: document.getElementById("editExameNovaFuncao").value || null,
     descricao_atividade: document.getElementById("editExameDescricaoAtividade").value,
+    setor_destino: nomeSetorDestino,
     nome_novo_setor: document.getElementById("editExameNovoSetor").value || null,
     motivo_consulta: document.getElementById("editExameMotivoConsulta").value || null,
-    data_exame: dataParaFormatoBanco(document.getElementById("editExameDataExame").value),
+    nova_data_exame: dataParaFormatoBanco(document.getElementById("editExameNovaDataExame").value),
     cnh: document.getElementById("editExameCNH").value || null,
     vencimento_cnh: dataParaFormatoBanco(document.getElementById("editExameVencimentoCNH").value),
     lab_toxicologico: document.getElementById("editExameLabToxicologico").value || null,
@@ -1346,6 +1610,23 @@ async function salvarEdicaoExame() {
 
     usuario_id: usuarioLogado.id
   };
+
+  const setorEl = document.getElementById("editExameSetorDestino");
+  const funcaoEl = document.getElementById("editExameFuncaoDestino");
+
+  const setorSelecionado = setorEl.value?.trim();
+  const funcaoSelecionada = funcaoEl.value?.trim();
+
+  // regra MAIS SEGURA: só valida se setor foi escolhido
+  const precisaValidarFuncao = !!setorSelecionado;
+
+  // mas só se o select realmente está habilitado/ativo
+  const funcaoAtiva = !funcaoEl.disabled && funcaoEl.offsetParent !== null;
+
+  if (precisaValidarFuncao && funcaoAtiva && !funcaoSelecionada) {
+    notify.error("Selecione uma função para o setor escolhido!");
+    return;
+  }
 
   const res = await fetch(`/solicitacoes/novo-exame/${id}/editar`, {
     method: "PUT",

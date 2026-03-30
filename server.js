@@ -867,7 +867,6 @@ app.get("/solicitacoes/novo-cadastro/:id", async (req, res) => {
       tipo: "NOVO_CADASTRO",
       dados: rows[0]
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: "Erro ao buscar detalhes do cadastro" });
@@ -1972,20 +1971,24 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
         estado = $20,
         tipo_faturamento = $21,
         email = $22,
-        nome_novo_setor = $23,
-        nome_novo_cargo = $24,
-        descricao_atividade = $25,
-        data_exame = $26,
-        cnh = $27,
-        vencimento_cnh = $28,
-        lab_toxicologico = $29,
-        estado_credenciamento = $30,
-        cidade_credenciamento = $31,
-        observacao = $32
+        cod_setor = $23,
+        nome_setor = $24,
+        nome_novo_setor = $25,
+        cod_cargo = $26,
+        nome_cargo = $27,
+        nome_novo_cargo = $28,
+        descricao_atividade = $29,
+        nova_data_exame = $30,
+        cnh = $31,
+        vencimento_cnh = $32,
+        lab_toxicologico = $33,
+        estado_credenciamento = $34,
+        cidade_credenciamento = $35,
+        observacao = $36
       WHERE id = (
         SELECT novo_cadastro_id
         FROM solicitacoes_novo_cadastro
-        WHERE id = $33
+        WHERE id = $37
       )
     `, [
       f.nome_funcionario,
@@ -2010,10 +2013,14 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
       f.estado,
       f.tipo_faturamento,
       f.email,
+      f.cod_setor,
+      f.nome_setor,
       f.nome_novo_setor,
+      f.cod_cargo,
+      f.nome_cargo,
       f.nome_novo_cargo,
       f.descricao_atividade,
-      f.data_exame,
+      f.nova_data_exame,
       f.cnh,
       f.vencimento_cnh || null,
       f.lab_toxicologico,
@@ -2066,21 +2073,23 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
         estado = $9,
         tipo_faturamento = $10,
         email = $11,
-        nome_nova_funcao = $12,
-        descricao_atividade = $13,
-        nome_novo_setor = $14,
-        motivo_consulta = $15,
-        data_exame = $16,
-        cnh = $17,
-        vencimento_cnh = $18,
-        lab_toxicologico = $19,
-        estado_credenciamento = $20,
-        cidade_credenciamento = $21,
-        observacao = $22
+        funcao_destino = $12,
+        nome_nova_funcao = $13,
+        descricao_atividade = $14,
+        setor_destino = $15,
+        nome_novo_setor = $16,
+        motivo_consulta = $17,
+        nova_data_exame = $18,
+        cnh = $19,
+        vencimento_cnh = $20,
+        lab_toxicologico = $21,
+        estado_credenciamento = $22,
+        cidade_credenciamento = $23,
+        observacao = $24
       WHERE id = (
         SELECT novo_exame_id
         FROM solicitacoes_novo_exame
-        WHERE id = $23
+        WHERE id = $25
       )
     `, [
       f.nome_fantasia,
@@ -2094,11 +2103,13 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
       f.estado,
       f.tipo_faturamento,
       f.email,
+      f.funcao_destino,
       f.nome_nova_funcao,
       f.descricao_atividade,
+      f.setor_destino,
       f.nome_novo_setor,
       f.motivo_consulta,
-      f.data_exame,
+      f.nova_data_exame,
       f.cnh,
       f.vencimento_cnh || null,
       f.lab_toxicologico,
