@@ -72,30 +72,25 @@ document.addEventListener("DOMContentLoaded", () => {
   carregarSolicitacoes();
 });
 
-function temFiltroAtivo(tipo, cpf, status) {
-  return tipo || cpf || status;
-}
-
 // FUNÇÃO PARA APLICAR FILTROS
 function aplicarFiltros() {
   const tipo = document.getElementById("filterTipo").value;
   const cpf = document.getElementById("filterCPF").value.trim();
   const status = document.getElementById("filterStatus").value;
 
-  const filtroAtivo = temFiltroAtivo(tipo, cpf, status);
+  const temStatus = !!status;
+  const temOutrosFiltros = !!tipo || !!cpf;
+
+  const ignorarVisibilidade = temStatus && temOutrosFiltros;
 
   const filtradas = solicitacoes.filter(s => {
     const matchTipo = !tipo || s.tipo === tipo;
     const matchCPF = !cpf || s.cpf.includes(cpf);
     const matchStatus = !status || s.status === status;
 
-    // SE TEM QUALQUER FILTRO → IGNORA VISIBILIDADE
-    if (filtroAtivo) {
-      return matchTipo && matchCPF && matchStatus;
-    }
+    const matchVisibilidade = ignorarVisibilidade ? true : deveExibir(s);
 
-    // SEM FILTRO → aplica regra padrão
-    return matchTipo && matchCPF && matchStatus && deveExibir(s);
+    return matchTipo && matchCPF && matchStatus && matchVisibilidade;
   });
 
   paginaAtual = 1;
@@ -113,20 +108,22 @@ document.getElementById("checkMostrarTudo").addEventListener("change", function 
 // FUNÇÃO PARA ESCONDER SOLICITAÇÕES POR PADRÃO
 let mostrarConcluidos = false;
 
-const statusConcluidos = ["APROVADO", "ENVIADO_SOC"];
+const statusConcluidosPorTipo = { NOVO_EXAME: ["APROVADO"], NOVO_CADASTRO: ["ENVIADO_SOC"] };
 
 function deveExibir(s) {
+  const concluidosDoTipo = statusConcluidosPorTipo[s.tipo] || [];
+
   // MARCADO → mostrar concluídos + cancelados
   if (mostrarConcluidos) {
     return (
-      statusConcluidos.includes(s.status) ||
+      concluidosDoTipo.includes(s.status) ||
       s.status === "CANCELADO"
     );
   }
 
   // DESMARCADO → mostrar somente pendentes
   return (
-    !statusConcluidos.includes(s.status) &&
+    !concluidosDoTipo.includes(s.status) &&
     s.status !== "CANCELADO"
   );
 }
@@ -385,8 +382,8 @@ async function abrirHistorico(id, tipo) {
         case "Cancelado":
           return { icon: "fa-ban fa-lg", color: "#616161" };
 
-        case "Reavaliado":
-          return { icon: "fa-rotate fa-lg", color: "#F1AE33" };
+        case "Editado":
+          return { icon: "fa-pencil fa-lg", color: "#F1AE33" };
 
         case "Enviado ao SOC":
           return { icon: "fa-paper-plane fa-lg", color: "#88A6BB" };

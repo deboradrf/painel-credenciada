@@ -108,48 +108,46 @@
 
             <!-- MODAL DE EMPRESAS -->
             <div class="modal fade" id="modalEmpresas">
-                <div class="modal-dialog modal-lg">
+                <div class="modal-dialog modal-xl modal-dialog-centered">
                     <div class="modal-content">
 
                         <div class="modal-header">
-                            <h5 class="modal-title">Gerenciar Empresas</h5>
-                            <button class="btn-close" data-bs-dismiss="modal"></button>
+                            <h3>Gerenciar Empresas</h3>
+                            <a data-bs-dismiss="modal">
+                                <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
+                            </a>
                         </div>
 
                         <div class="modal-body">
-
-                            <div class="row">
-
-                                <div class="col-md-5">
-                                    <label>Todas as empresas</label>
+                            <div class="row my-3">
+                                <div class="col-5">
+                                    <label class="mb-1">Todas as empresas</label>
                                     <select id="listaTodasEmpresas" multiple class="form-select" size="10"></select>
                                 </div>
 
-                                <div class="col-md-2 d-flex flex-column justify-content-center gap-2">
-
-                                    <button id="btnAddEmpresa" class="btn btn-primary">
-                                        →
+                                <div class="col-2 d-flex flex-column justify-content-center gap-2">
+                                    <button id="btnAddEmpresa">
+                                        <i class="fa-solid fa-arrow-right-long"></i>
                                     </button>
 
-                                    <button id="btnRemoveEmpresa" class="btn btn-secondary">
-                                        ←
+                                    <button id="btnRemoveEmpresa">
+                                        <i class="fa-solid fa-arrow-left-long"></i>
                                     </button>
-
                                 </div>
 
-                                <div class="col-md-5">
-                                    <label>Empresas do usuário</label>
+                                <div class="col-5">
+                                    <label class="mb-1">Empresas que o usuário tem acesso</label>
                                     <select id="listaEmpresasUsuario" multiple class="form-select" size="10"></select>
                                 </div>
-
                             </div>
-
                         </div>
 
                         <div class="modal-footer">
-                            <button class="btn btn-success" onclick="salvarEmpresas()">Salvar</button>
+                            <small id="logEmpresas" class="text-muted"></small>
+                            <button class="btn-salvar" onclick="salvarEmpresas()">
+                                <i class="fa-solid fa-floppy-disk"></i> Salvar
+                            </button>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -160,31 +158,41 @@
                     <div class="modal-content">
 
                         <div class="modal-header">
-                            <h5>Unidades da empresa</h5>
-                            <button class="btn-close" data-bs-dismiss="modal"></button>
+                            <h3>Unidades da empresa</h3>
+                            <a data-bs-dismiss="modal">
+                                <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
+                            </a>
                         </div>
 
                         <div class="modal-body">
-                            <div class="row">
+                            <div class="row my-3">
                                 <div class="col-5">
-                                    <p>Todas as Unidades</p>
+                                    <label class="mb-1">Todas as unidades</label>
                                     <select id="listaUnidadesTodas" class="form-select" multiple size="10"></select>
                                 </div>
 
                                 <div class="col-2 d-flex flex-column justify-content-center gap-2">
-                                    <button id="btnAddUnidade" class="btn btn-primary">→</button>
-                                    <button id="btnRemoveUnidade" class="btn btn-secondary">←</button>
+                                    <button id="btnAddUnidade">
+                                        <i class="fa-solid fa-arrow-right-long"></i>
+                                    </button>
+
+                                    <button id="btnRemoveUnidade">
+                                        <i class="fa-solid fa-arrow-left-long"></i>
+                                    </button>
                                 </div>
 
                                 <div class="col-5">
-                                    <p>Unidades de Acesso</p>
+                                    <label class="mb-1">Unidades que o usuário tem acesso</label>
                                     <select id="listaUnidadesUsuario" class="form-select" multiple size="10"></select>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="modal-footer">
-                            <button class="btn btn-success" onclick="salvarUnidades()">Salvar</button>
+                        <div class="modal-footer d-flex justify-content-between">
+                            <small id="logUnidades" class="text-muted"></small>
+                            <button class="btn-salvar" onclick="salvarUnidades()">
+                                <i class="fa-solid fa-floppy-disk"></i> Salvar
+                            </button>
                         </div>
                     </div>
                 </div>

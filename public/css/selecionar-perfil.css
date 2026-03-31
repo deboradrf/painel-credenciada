@@ -1,51 +1,92 @@
-body {
+* {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #F1F1F1;
-    color: white;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #F1F1F1;
 }
 
 .container {
-    text-align: center;
-    margin-top: 100px;
+    width: 100%;
 }
 
-h1 {
-    font-size: 2.5rem;
-    margin-bottom: 40px;
+.title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 50px;
+}
+
+h2 {
+    position: relative;
+    font-weight: 600;
+    font-size: 28px;
     color: #000000;
+    margin-bottom: 15px;
+}
+
+h2::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #000000;
 }
 
 .profiles {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 35px;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+    justify-items: center;
 }
 
 .profile-card {
-    width: 180px;
-    height: 180px;
-    background: #53A5A6;
-    border-radius: 10px;
+    width: 140px;
     cursor: pointer;
-    transition: 0.3s;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
+    transition: transform 0.2s ease;
+}
+
+.profile-card .icon {
+    width: 140px;
+    height: 140px;
+    border-radius: 10px;
+    background: #88A6BB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    color: #FFFFFF;
+    transition: 0.2s ease;
+    box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
 }
 
 .profile-card:hover {
     transform: scale(1.08);
-    background: #F1AE33;
-    color: black;
-}
-
-.profile-card .icon {
-    font-size: 40px;
 }
 
 .profile-card span {
-    font-size: 16px;
+    font-size: 15px;
+    color: #6B7280;
+    transition: 0.2s;
+}
+
+.profile-card:hover span {
+    color: #000;
+    font-weight: 500;
 }

@@ -104,15 +104,6 @@
             <div class="filter-wrapper mb-4">
                 <div class="filters">
                     <div class="filter-group">
-                        <select id="filterTipo" required>
-                            <option value="" disabled selected></option>
-                            <option value="NOVO_CADASTRO">Solicitação de Cadastro</option>
-                            <option value="NOVO_EXAME">Solicitação de Exame</option>
-                        </select>
-                        <label>Tipo</label>
-                    </div>
-
-                    <div class="filter-group">
                         <input id="filterEmpresa" type="text" placeholder=" " />
                         <label>Empresa</label>
                     </div>
@@ -120,6 +111,11 @@
                     <div class="filter-group">
                         <input id="filterCPF" type="text" placeholder=" " />
                         <label>CPF Funcionário</label>
+                    </div>
+
+                    <div class="filter-group">
+                        <input id="filterCidade" type="text" placeholder=" " />
+                        <label>Cidade</label>
                     </div>
 
                     <div class="filter-group">
@@ -232,10 +228,6 @@
 
                 <div class="modal-body">
                     <div class="row g-3">
-                        <!-- <div class="col-12">
-                            <p id="linha_aprovacao_cadastro" class="text-muted small"></p>
-                        </div> -->
-
                         <div class="col-12">
                             <div class="detail-item email">
                                 <div class="detail-label">
@@ -638,10 +630,19 @@
                             </div>
                         </div>
 
+                        <div class="col-12" id="divObservacaoCredenciamento">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Observações sobre o Credenciamento</span>
+                                </div>
+                                <span id="cadastro_observacao_credenciamento" class="detail-value"></span>
+                            </div>
+                        </div>
+
                         <div class="col-12">
                             <div class="detail-item">
                                 <div class="detail-label">
-                                    <span>Observações</span>
+                                    <span>Observações sobre o Atendimento</span>
                                 </div>
                                 <span id="cadastro_observacao" class="detail-value"></span>
                             </div>
@@ -681,7 +682,7 @@
                             <div class="detail-label">
                                 <span>Observação da consulta</span>
                             </div>
-                            <textarea id="obsConsultaCadastro" class="form-control" rows="2"></textarea>
+                            <textarea id="obsConsultaCadastro" class="form-control" rows="3"></textarea>
                         </div>
                     </div>
 
@@ -690,7 +691,7 @@
                             <div class="detail-label">
                                 <span>Motivo da reprovação</span>
                             </div>
-                            <textarea id="motivoReprovacaoCadastro" class="form-control" rows="2"></textarea>
+                            <textarea id="motivoReprovacaoCadastro" class="form-control" rows="3"></textarea>
                         </div>
                     </div>
 
@@ -731,10 +732,6 @@
 
                 <div class="modal-body">
                     <div class="row g-3">
-                        <!-- <div class="col-12">
-                            <p id="linha_aprovacao_exame" class="text-muted small"></p>
-                        </div> -->
-
                         <div class="col-12">
                             <div class="detail-item email">
                                 <div class="detail-label">
@@ -1128,10 +1125,19 @@
                             </div>
                         </div>
 
+                        <div class="col-12" id="divExameObservacaoCredenciamento">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <span>Observações sobre o Credenciamento</span>
+                                </div>
+                                <span id="exame_observacao_credenciamento" class="detail-value"></span>
+                            </div>
+                        </div>
+
                         <div class="col-12">
                             <div class="detail-item">
                                 <div class="detail-label">
-                                    <span>Observações</span>
+                                    <span>Observações sobre o Atendimento</span>
                                 </div>
                                 <span id="exame_observacao" class="detail-value"></span>
                             </div>

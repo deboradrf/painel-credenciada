@@ -193,7 +193,7 @@ function renderizarLista(tipo) {
 // FUNÇÃO PARA EDITAR O RESPONSÁVEL
 let empresaAtual = {};
 
-function editarEmpresa(id, nome, emails) {
+async function editarEmpresa(id, nome, emails) {
     empresaAtual = { id, nome };
 
     const container = document.getElementById("emailsContainer");
@@ -203,6 +203,18 @@ function editarEmpresa(id, nome, emails) {
         emails.forEach(e => adicionarCampoEmail(e));
     } else {
         adicionarCampoEmail();
+    }
+
+    // 👇 BUSCAR LOG
+    const res = await fetch(`/log-responsavel-empresa/${id}`);
+    const log = await res.json();
+
+    const info = document.getElementById("infoAlteracao");
+
+    if (log) {
+        info.innerText = `Última alteração por ${log.alterado_por} em ${new Date(log.data_alteracao).toLocaleString()}`;
+    } else {
+        info.innerText = "Nenhuma alteração registrada";
     }
 
     const modal = new bootstrap.Modal(document.getElementById("modalResponsavel"));
@@ -219,6 +231,9 @@ document.getElementById("btnSalvarModal").onclick = async () => {
 
     const emailsUnicos = [...new Set(emails)];
 
+    const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
+    const nomeUsuario = usuario?.nome;
+
     const res = await fetch("/empresa/responsavel", {
         method: "POST",
         headers: {
@@ -227,7 +242,8 @@ document.getElementById("btnSalvarModal").onclick = async () => {
         body: JSON.stringify({
             id: empresaAtual.id,
             nome: empresaAtual.nome,
-            emails: emailsUnicos
+            emails: emailsUnicos,
+            alteradoPor: nomeUsuario
         })
     });
 

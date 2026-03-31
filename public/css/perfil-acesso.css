@@ -245,97 +245,202 @@ h3::after {
     margin-top: 4px;
 }
 
-li {
-    margin-bottom: 5px;
-}
-
 .list-group-item {
-    padding: 0;
     border: none;
     background: transparent;
 }
 
 .usuario-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     background: #FFFFFF;
     border-radius: 10px;
-    padding: 16px 20px;
-}
-
-.usuario-info {
+    padding: 18px;
     display: flex;
     flex-direction: column;
 }
 
-.usuario-info b {
-    font-size: 15px;
+.usuario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.usuario-info small {
-    font-size: 12px;
+.usuario-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.usuario-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    background: #F1F1F1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.usuario-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.usuario-text small {
     color: #6B7280;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.empresas-area {
+    margin-top: 12px;
+}
+
+.empresas-label {
+    font-size: .65rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #6B7280;
+    margin-bottom: 7px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.empresas-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #F1F1F1;
 }
 
 .empresas-wrapper {
     margin-top: 10px;
-}
-
-.btn-empresa {
-    border: none;
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-
-.btn-empresa.principal {
-    background: #E6F4FF;
-    border: 1px solid #BFDBFE;
-}
-
-.btn-empresa.extra {
-    background: #F9FAFB;
-    border: 1px solid #E5E7EB;
-}
-
-.btn-empresa:hover {
-    transform: translateY(-1px);
-}
-
-/* EMPRESA PRINCIPAL */
-.btn-empresa.principal {
-    background: #fcffee;
-    border: 1px solid #F1AE33;
-}
-
-/* EMPRESAS EXTRAS */
-.btn-empresa.extra {
-    background: #f0f6fd;
-    border: 1px solid #88A6BB;
-}
-
-.usuario-acoes {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
 .btn-gerenciar {
-    background: #53A5A6;
-    border: none;
-    color: white;
-    width: 180px;
-    height: 30px;
-    border-radius: 8px;
+    display: block;
+    width: 100%;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #000000;
     cursor: pointer;
     font-size: 13px;
-    transition: all 0.15s ease;
+    padding: 0 10px 0 10px;
+    width: 180px;
+    height: 35px;
+    transition: all 0.3s ease;
 }
 
 .btn-gerenciar:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+}
+
+.btn-empresas {
+    border-radius: 10px;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    border: 1px solid #53A5A6;
+    background: #E3F2F4;
+    color: #53A5A6;
+}
+
+.btn-empresas.principal {
+    color: #F1AE33;
+    border-color: #F1AE33;
+    background: #FFF8E6;
+}
+
+.btn-empresas.extra {
+    transition: all 0.3s ease;
+}
+
+.btn-empresas.extra:hover {
+    transform: translateY(-2px);
+}
+
+.modal-content {
+    border-radius: 10px;
+    border: none;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
+    border-bottom: none;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+    padding: 20px;
+}
+
+.modal-header h3 {
+    position: relative;
+    font-weight: 600;
+    font-size: 22px;
+    color: #FFFFFF;
+    margin-bottom: 15px;
+}
+
+.modal-header h3::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 50px;
+    height: 3px;
+    background: #FFFFFF;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    border: none;
+}
+
+.form-select:focus {
+    border-color: #6B7280;
+    box-shadow: 0 0 0 3px rgba(79, 124, 255, .15);
+}
+
+option {
+    font-size: 15px;
+}
+
+#btnAddEmpresa,
+#btnRemoveEmpresa,
+#btnAddUnidade,
+#btnRemoveUnidade {
+    background-color: #F1AE33;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #FFFFFF;
+    height: 30px;
+    transition: all 0.3s ease;
+}
+
+.btn-salvar {
+    display: block;
+    width: 100%;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #000000;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 28px;
+    padding: 0 10px 0 10px;
+    width: 100px;
+    height: 30px;
+    transition: all 0.3s ease;
+}
+
+.btn-salvar:hover {
+    transform: translateY(-2px);
 }
 
 .footer-container {

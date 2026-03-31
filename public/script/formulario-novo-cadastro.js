@@ -1073,6 +1073,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   if (solicitarCredenciamento) {
     dados.estado_credenciamento = document.getElementById("estadoCredenciamento").value;
     dados.cidade_credenciamento = document.getElementById("cidadeCredenciamento").value;
+    dados.observacao_credenciamento = document.getElementById("observacaoCredenciamento").value;
   }
   else {
     dados.estado_clinica = document.getElementById("estadoClinica").value;
@@ -1120,14 +1121,11 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
 
 // FUNÇÃO PARA ENVIAR EMAIL NA HORA DA SOLICITAÇÃO
 async function enviarEmailSolicitacao(dados) {
-  let destinatario = "";
-  let assunto = "";
   let tipoSolicitacao = "";
+  let assunto = "";
 
   if (dados.solicitar_nova_unidade === true) {
     tipoSolicitacao = "UNIDADE";
-    destinatario = "clientes@salubrita.com.br";
-    //destinatario = "fonsecadrf@outlook.com";
     assunto = "Solicitação de Criação de Unidade";
   }
 
@@ -1138,8 +1136,6 @@ async function enviarEmailSolicitacao(dados) {
 
   else if (dados.solicitar_credenciamento === true) {
     tipoSolicitacao = "CREDENCIAMENTO";
-    destinatario = "contratos@salubrita.com.br";
-    //destinatario = "wasidrf@outlook.com";
     assunto = "Solicitação de Credenciamento";
   }
 
@@ -1154,7 +1150,6 @@ async function enviarEmailSolicitacao(dados) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       tipoSolicitacao,
-      destinatario,
       assunto,
       mensagem,
       codigo_empresa: dados.cod_empresa

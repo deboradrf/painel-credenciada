@@ -139,10 +139,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // CONTROLE DA ANIMAÇÃO DOS CARDS DE ACORDO COM O PERFIL LOGADO
 document.addEventListener("DOMContentLoaded", () => {
-  const usuario = getUsuario();
-  if (!usuario) return;
+  if (!usuarioLogado) return;
 
-  const perfil = usuario.perfil?.trim().toLowerCase();
+  const perfil = usuarioLogado.perfil?.trim().toLowerCase();
 
   const cardsVisiveis = document.querySelectorAll(`.card-${perfil}`);
   const cards = cardsVisiveis.length ? cardsVisiveis : document.querySelectorAll(".card");

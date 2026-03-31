@@ -99,7 +99,7 @@ async function carregarUsuarios() {
         // EMPRESA PRINCIPAL
         if (u.cod_empresa) {
             empresasHTML += `
-                <button class="btn-empresa principal"
+                <button class="btn-empresas principal"
                     onclick="abrirModalUnidades(${u.id}, '${u.cod_empresa}', '${u.nome_empresa}')">
                     ${u.nome_empresa}
                 </button>
@@ -110,7 +110,7 @@ async function carregarUsuarios() {
         if (u.empresas_extras) {
             u.empresas_extras.forEach(e => {
                 empresasHTML += `
-                    <button class="btn-empresa extra"
+                    <button class="btn-empresas extra"
                         onclick="abrirModalUnidades(${u.id}, '${e.cod_empresa}', '${e.nome_empresa}')">
                         ${e.nome_empresa}
                     </button>
@@ -119,23 +119,33 @@ async function carregarUsuarios() {
         }
 
         li.innerHTML = `
-            <div class="usuario-card">
-                <div class="usuario-info">
-                    <b>${u.id} - ${u.nome}</b>
-                    <small>CPF: ${u.cpf}</small>
+        <div class="usuario-card shadow-sm">
+            <div class="usuario-header">
+                <div class="usuario-left">
+                    <div class="usuario-avatar">
+                        <i class="fa-solid fa-user fa-lg"></i>
+                    </div>
 
-                    <div class="empresas-wrapper">
-                        ${empresasHTML}
+                    <div class="usuario-text">
+                        <b>${u.nome}</b>
+                        <small>CPF: ${u.cpf}</small>
+                        <small>ID: ${u.id}</small> 
                     </div>
                 </div>
 
-                <div class="usuario-acoes">
-                    <button class="btn-gerenciar" onclick="abrirModalEmpresas(${u.id})">
-                        <i class="fa-solid fa-gear"></i>
-                        Gerenciar empresas
-                    </button>
+                <button class="btn-gerenciar" onclick="abrirModalEmpresas(${u.id})">
+                    <i class="fa-solid fa-gear"></i>
+                    Gerenciar empresas
+                </button>
+            </div>
+
+            <div class="empresas-area">
+                <div class="empresas-label mt-4">Empresas do usuário</div>
+                <div class="empresas-wrapper mt-2">
+                    ${empresasHTML}
                 </div>
             </div>
+        </div>
         `;
 
         listaUsuarios.appendChild(li);
@@ -151,6 +161,8 @@ async function abrirModalEmpresas(idUsuario) {
 
     await carregarTodasEmpresas();
     await carregarEmpresasUsuario(idUsuario);
+
+    await exibirLog(idUsuario, "empresas");
 }
 
 // FUNÇÃO PARA CARREGAR TODAS AS EMPRESAS
@@ -161,11 +173,10 @@ async function carregarTodasEmpresas() {
     listaTodasEmpresas.innerHTML = "";
 
     empresas.forEach(e => {
-
         const opt = document.createElement("option");
 
         opt.value = e.codigo;
-        opt.textContent = `${e.codigo} - ${e.nome}`;
+        opt.textContent = `${e.nome}`;
 
         listaTodasEmpresas.appendChild(opt);
     });
@@ -182,7 +193,7 @@ async function carregarEmpresasUsuario(idUsuario) {
         const opt = document.createElement("option");
 
         opt.value = e.cod_empresa;
-        opt.textContent = `${e.cod_empresa} - ${e.nome_empresa}`;
+        opt.textContent = `${e.nome_empresa}`;
 
         if (e.principal) {
             opt.disabled = true;
@@ -218,30 +229,32 @@ async function salvarEmpresas() {
     const empresas = [...listaEmpresasUsuario.options]
         .filter(o => !o.disabled)
         .map(o => {
-
-            const partes = o.textContent.split(" - ");
-            partes.shift();
-
             return {
                 cod_empresa: o.value,
-                nome_empresa: partes.join(" - ")
+                nome_empresa: o.textContent.trim()
             };
         });
 
+    const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
+    const nomeUsuario = usuario?.nome;
+
     await fetch("/usuarios/salvar-empresas", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             usuario_id: usuarioSelecionado,
-            empresas
+            empresas,
+            alterado_por: nomeUsuario
         })
     });
 
     notify.success("Empresas salvas com sucesso!");
-
     await carregarUsuarios();
+    await exibirLog(usuarioSelecionado, "empresas");
+
+    const modalEl = document.getElementById("modalEmpresas");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
 }
 
 // ABRIR MODAL UNIDADES
@@ -256,6 +269,8 @@ async function abrirModalUnidades(idUsuario, codEmpresa, nomeEmpresa) {
 
     await carregarUnidades(codEmpresa);
     await carregarUnidadesUsuario(idUsuario, codEmpresa);
+
+    await exibirLog(idUsuario, "unidades", codEmpresa);
 }
 
 // FUNÇÃO PARA CARREGAR TODAS UNIDADES DA EMPRESA
@@ -275,7 +290,7 @@ async function carregarUnidades(codEmpresa) {
         const opt = document.createElement("option");
 
         opt.value = u.codigo;
-        opt.textContent = `${u.codigo} - ${u.nome}`;
+        opt.textContent = `${u.nome}`;
 
         listaTodasUnidades.appendChild(opt);
     });
@@ -311,7 +326,7 @@ async function carregarUnidadesUsuario(idUsuario, codEmpresa) {
         const opt = document.createElement("option");
 
         opt.value = u.codigo;
-        opt.textContent = `${u.codigo} - ${u.nome}`;
+        opt.textContent = `${u.nome}`;
 
         listaUnidadesUsuario.appendChild(opt);
     });
@@ -355,40 +370,57 @@ btnRemoverUnidade.addEventListener("click", () => {
 // FUNÇÃO PARA SALVAR AS UNIDADES SELECIONADAS
 async function salvarUnidades() {
     const primeira = listaUnidadesUsuario.options[0];
-
     let unidades = [];
 
-    // SE FOR 'TODAS'
     if (primeira && primeira.value === "TODAS") {
-
-        unidades = [{
-            cod_unidade: "TODAS",
-            nome_unidade: "TODAS"
-        }];
-    }
-    else {
+        unidades = [{ cod_unidade: "TODAS", nome_unidade: "TODAS" }];
+    } else {
         unidades = [...listaUnidadesUsuario.options].map(o => {
-            const partes = o.textContent.split(" - ");
-            partes.shift();
             return {
                 cod_unidade: o.value,
-                nome_unidade: partes.join(" - ")
+                nome_unidade: o.textContent.trim()
             };
         });
     }
 
+    const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
+    const nomeUsuario = usuario?.nome;
+
     await fetch("/usuarios/salvar-unidades", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             usuario_id: usuarioSelecionado,
             cod_empresa: empresaSelecionada,
             nome_empresa: nomeEmpresaSelecionada,
-            unidades
+            unidades,
+            alterado_por: nomeUsuario
         })
     });
 
     notify.success("Unidades salvas com sucesso!");
+    await exibirLog(usuarioSelecionado, "unidades", empresaSelecionada);
+
+    const modalEl = document.getElementById("modalUnidades");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
+}
+
+// HELPER — busca e exibe o log no modal
+async function exibirLog(idUsuario, tipo, codEmpresa = null) {
+    const params = new URLSearchParams({ tipo });
+    if (codEmpresa) params.append("cod_empresa", codEmpresa);
+
+    const res = await fetch(`/usuarios/${idUsuario}/log?${params}`);
+    const log = await res.json();
+
+    const elementId = tipo === "empresas" ? "logEmpresas" : "logUnidades";
+    const el = document.getElementById(elementId);
+
+    if (log) {
+        const data = new Date(log.data_alteracao).toLocaleString("pt-BR");
+        el.textContent = `Última alteração por ${log.alterado_por} em ${data}`;
+    } else {
+        el.textContent = "Nenhuma alteração registrada";
+    }
 }

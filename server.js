@@ -736,11 +736,12 @@ app.post("/novo-cadastro", async (req, res) => {
         solicitar_credenciamento,
         estado_credenciamento,
         cidade_credenciamento,
+        observacao_credenciamento,
         observacao,
         emails_extras )
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,
               $24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,
-              $45,$46,$47,$48,$49,$50,$51,$52,$53)
+              $45,$46,$47,$48,$49,$50,$51,$52,$53,$54)
       RETURNING id
       `,
       [
@@ -795,6 +796,7 @@ app.post("/novo-cadastro", async (req, res) => {
         f.solicitar_credenciamento,
         f.estado_credenciamento,
         f.cidade_credenciamento,
+        f.observacao_credenciamento,
         f.observacao,
         JSON.stringify(f.emails_extras || []),
       ]
@@ -1206,10 +1208,11 @@ app.post("/solicitar-exame", async (req, res) => {
         solicitar_credenciamento,
         estado_credenciamento,
         cidade_credenciamento,
+        observacao_credenciamento,
         observacao,
         emails_extras
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51)
       RETURNING id
       `,
       [
@@ -1261,6 +1264,7 @@ app.post("/solicitar-exame", async (req, res) => {
         f.solicitar_credenciamento,
         f.estado_credenciamento,
         f.cidade_credenciamento,
+        f.observacao_credenciamento,
         f.observacao,
         JSON.stringify(f.emails_extras || [])
       ]
@@ -1718,7 +1722,7 @@ app.post("/solicitacoes/:tipo/:id/analisar", async (req, res) => {
       UPDATE ${tabela}
       SET
         status = $1,
-        motivo_reprovacao = $2,
+        motivo_reprovacao = COALESCE($2, motivo_reprovacao),
         ${camposExtras},
         tipo_consulta = $4,
         observacao_consulta = $5
@@ -1839,7 +1843,7 @@ app.get("/solicitacoes/:tipo/:id/historico", async (req, res) => {
       LEFT JOIN usuarios u_cancelado ON u_cancelado.id = s.cancelado_por
       LEFT JOIN usuarios u_aprovado ON u_aprovado.id = s.aprovado_por
       LEFT JOIN usuarios u_reprovado ON u_reprovado.id = s.reprovado_por
-      LEFT JOIN usuarios u_reavaliado ON u_reavaliado.id = s.reavaliado_por
+      LEFT JOIN usuarios u_editado ON u_editado.id = s.editado_por
     `;
 
     if (tipo !== "NOVO_EXAME") {
@@ -1854,7 +1858,7 @@ app.get("/solicitacoes/:tipo/:id/historico", async (req, res) => {
         u_cancelado.nome AS cancelado_nome,
         u_aprovado.nome AS aprovado_nome,
         u_reprovado.nome AS reprovado_nome,
-        u_reavaliado.nome AS reavaliado_nome
+        u_editado.nome AS editado_nome
         ${tipo !== "NOVO_EXAME" ? ", u_soc.nome AS soc_nome" : ""}
       FROM ${tabela} s
       ${joins}
@@ -1871,8 +1875,8 @@ app.get("/solicitacoes/:tipo/:id/historico", async (req, res) => {
     if (s.solicitado_em) {
       historico.push({ etapa: "Solicitado", usuario: s.solicitado_nome, data: s.solicitado_em });
     }
-    if (s.reavaliado_em) {
-      historico.push({ etapa: "Reavaliado", usuario: s.reavaliado_nome, data: s.reavaliado_em });
+    if (s.editado_em) {
+      historico.push({ etapa: "Editado", usuario: s.editado_nome, data: s.editado_em });
     }
     if (s.aprovado_em) {
       historico.push({ etapa: "Aprovado", usuario: s.aprovado_nome, data: s.aprovado_em });
@@ -2035,8 +2039,8 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
       UPDATE solicitacoes_novo_cadastro
       SET
         status = 'PENDENTE_REAVALIACAO',
-        reavaliado_por = $2,
-        reavaliado_em = NOW()
+        editado_por = $2,
+        editado_em = NOW()
       WHERE id = $1
     `, [id, f.usuario_id]);
 
@@ -2124,8 +2128,8 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
       UPDATE solicitacoes_novo_exame
       SET
         status = 'PENDENTE_REAVALIACAO',
-        reavaliado_por = $2,
-        reavaliado_em = NOW()
+        editado_por = $2,
+        editado_em = NOW()
       WHERE id = $1
     `, [id, f.usuario_id]);
 
@@ -2142,7 +2146,7 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
 
 // ROTA PARA ADICIONAR O RESPONSÁVEL DA EMPRESA
 app.post("/empresa/responsavel", async (req, res) => {
-  const { id, nome, emails } = req.body;
+  const { id, nome, emails, alteradoPor } = req.body;
 
   try {
     const existe = await pool.query(
@@ -2150,32 +2154,72 @@ app.post("/empresa/responsavel", async (req, res) => {
       [id]
     );
 
-    // SE NÃO TEM EMAIL → DELETE
     if (!emails || emails.length === 0) {
       await pool.query(
         "DELETE FROM responsavel_empresa WHERE cod_empresa = $1",
         [id]
       );
 
+      // 👇 UPSERT (não duplica)
+      await pool.query(
+        `INSERT INTO log_responsavel_empresa (item_id, alterado_por)
+         VALUES ($1, $2)
+         ON CONFLICT (item_id)
+         DO UPDATE SET
+           alterado_por = EXCLUDED.alterado_por,
+           data_alteracao = CURRENT_TIMESTAMP`,
+        [id, alteradoPor]
+      );
+
       return res.sendStatus(200);
     }
 
-    // UPDATE
     if (existe.rows.length > 0) {
       await pool.query(
         "UPDATE responsavel_empresa SET emails = $1, nome_empresa = $2 WHERE cod_empresa = $3",
         [JSON.stringify(emails), nome, id]
       );
-    }
-    // INSERT
-    else {
+    } else {
       await pool.query(
         "INSERT INTO responsavel_empresa (cod_empresa, nome_empresa, emails) VALUES ($1, $2, $3)",
         [id, nome, JSON.stringify(emails)]
       );
     }
 
+    // 👇 UPSERT (não duplica)
+    await pool.query(
+      `INSERT INTO log_responsavel_empresa (item_id, alterado_por)
+       VALUES ($1, $2)
+       ON CONFLICT (item_id)
+       DO UPDATE SET
+         alterado_por = EXCLUDED.alterado_por,
+         data_alteracao = CURRENT_TIMESTAMP`,
+      [id, alteradoPor]
+    );
+
     res.sendStatus(200);
+
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+});
+
+// ROTA PARA BUSCAR O LOG
+app.get("/log-responsavel-empresa/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query(
+      `SELECT alterado_por, data_alteracao
+       FROM log_responsavel_empresa
+       WHERE item_id = $1
+       ORDER BY data_alteracao DESC
+       LIMIT 1`,
+      [id]
+    );
+
+    res.json(result.rows[0] || null);
 
   } catch (err) {
     console.error(err);
@@ -2671,38 +2715,74 @@ app.get("/usuarios/:id/unidades/:empresa", async (req, res) => {
 });
 
 // ROTA PARA SALVAR AS UNIDADES DE ACESSO DO USUÁRIO (PERFIL ACESSO)
+// app.post("/usuarios/salvar-unidades", async (req, res) => {
+//   const { usuario_id, cod_empresa, unidades } = req.body;
+
+//   try {
+//     // VERIFICA SE É A EMPRESA PRINCIPAL
+//     const empresaPrincipal = await pool.query(`
+//       SELECT 1
+//       FROM usuarios
+//       WHERE id = $1
+//       AND cod_empresa = $2
+//     `, [usuario_id, cod_empresa]);
+
+//     if (empresaPrincipal.rowCount > 0) {
+
+//       // SALVA NA TABELA USUARIOS
+//       await pool.query(`
+//         UPDATE usuarios
+//         SET unidades = $1
+//         WHERE id = $2
+//         AND cod_empresa = $3
+//       `, [JSON.stringify(unidades), usuario_id, cod_empresa]);
+
+//     } else {
+
+//       // SALVA NA TABELA USUARIOS_EMPRESAS
+//       await pool.query(`
+//         UPDATE usuarios_empresas
+//         SET unidades = $1
+//         WHERE usuario_id = $2
+//         AND cod_empresa = $3
+//       `, [JSON.stringify(unidades), usuario_id, cod_empresa]);
+//     }
+
+//     res.json({ success: true });
+
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Erro ao salvar unidades" });
+//   }
+// });
 app.post("/usuarios/salvar-unidades", async (req, res) => {
-  const { usuario_id, cod_empresa, unidades } = req.body;
+  const { usuario_id, cod_empresa, nome_empresa, unidades, alterado_por } = req.body;
 
   try {
-    // VERIFICA SE É A EMPRESA PRINCIPAL
     const empresaPrincipal = await pool.query(`
-      SELECT 1
-      FROM usuarios
-      WHERE id = $1
-      AND cod_empresa = $2
+      SELECT 1 FROM usuarios WHERE id = $1 AND cod_empresa = $2
     `, [usuario_id, cod_empresa]);
 
     if (empresaPrincipal.rowCount > 0) {
-
-      // SALVA NA TABELA USUARIOS
       await pool.query(`
-        UPDATE usuarios
-        SET unidades = $1
-        WHERE id = $2
-        AND cod_empresa = $3
+        UPDATE usuarios SET unidades = $1 WHERE id = $2 AND cod_empresa = $3
       `, [JSON.stringify(unidades), usuario_id, cod_empresa]);
-
     } else {
-
-      // SALVA NA TABELA USUARIOS_EMPRESAS
       await pool.query(`
-        UPDATE usuarios_empresas
-        SET unidades = $1
-        WHERE usuario_id = $2
-        AND cod_empresa = $3
+        UPDATE usuarios_empresas SET unidades = $1 WHERE usuario_id = $2 AND cod_empresa = $3
       `, [JSON.stringify(unidades), usuario_id, cod_empresa]);
     }
+
+    // SUBSTITUI O LOG — deleta o anterior e insere o novo
+    await pool.query(`
+      DELETE FROM log_perfil_acesso
+      WHERE tipo = 'unidades' AND item_id = $1 AND cod_empresa = $2
+    `, [usuario_id, cod_empresa]);
+
+    await pool.query(`
+      INSERT INTO log_perfil_acesso (tipo, item_id, cod_empresa, alterado_por)
+      VALUES ('unidades', $1, $2, $3)
+    `, [usuario_id, cod_empresa, alterado_por]);
 
     res.json({ success: true });
 
@@ -2711,6 +2791,89 @@ app.post("/usuarios/salvar-unidades", async (req, res) => {
     res.status(500).json({ error: "Erro ao salvar unidades" });
   }
 });
+
+// ROTA PARA BUSCAR O LOG DE UM USUÁRIO (empresas ou unidades)
+app.get("/usuarios/:id/log", async (req, res) => {
+  const { id } = req.params;
+  const { tipo, cod_empresa } = req.query;
+
+  try {
+    let query = `
+      SELECT alterado_por, data_alteracao
+      FROM log_perfil_acesso
+      WHERE item_id = $1 AND tipo = $2
+    `;
+    const params = [id, tipo];
+
+    if (tipo === "unidades" && cod_empresa) {
+      query += ` AND cod_empresa = $3`;
+      params.push(cod_empresa);
+    }
+
+    query += ` ORDER BY data_alteracao DESC LIMIT 1`;
+
+    const result = await pool.query(query, params);
+
+    res.json(result.rows[0] || null);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao buscar log" });
+  }
+});
+
+// app.post("/log-perfil-acesso", async (req, res) => {
+//   try {
+//     const { usuario_id, tipo, cod_empresa, alterado_por } = req.body;
+
+//     await pool.query(`
+//       INSERT INTO log_perfil_acesso 
+//       (usuario_id, tipo, cod_empresa, alterado_por)
+//       VALUES ($1, $2, $3, $4)
+
+//       ON CONFLICT (usuario_id, tipo, cod_empresa)
+//       DO UPDATE SET
+//         alterado_por = EXCLUDED.alterado_por,
+//         data_alteracao = CURRENT_TIMESTAMP
+//     `, [
+//       usuario_id,
+//       tipo,
+//       cod_empresa || null,
+//       alterado_por
+//     ]);
+
+//     res.sendStatus(200);
+
+//   } catch (err) {
+//     console.error("Erro ao salvar log:", err);
+//     res.status(500).json({ erro: "Erro ao salvar log" });
+//   }
+// });
+
+// app.get("/log-perfil-acesso/:id", async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     const { rows } = await pool.query(`
+//       SELECT 
+//         tipo,
+//         cod_empresa,
+//         alterado_por,
+//         data_alteracao
+//       FROM log_perfil_acesso
+//       WHERE usuario_id = $1
+//       ORDER BY data_alteracao DESC
+//     `, [id]);
+
+//     res.json(rows);
+
+//   } catch (err) {
+//     console.error("Erro ao buscar logs:", err);
+//     res.status(500).json({
+//       error: "Erro ao buscar logs"
+//     });
+//   }
+// });
 
 // ROTA PARA BUSCAR AS EMPRESAS DE ACESSO DO USUÁRIO (PERFIL ACESSO)
 app.get("/usuarios/:id/empresas", async (req, res) => {
@@ -2749,24 +2912,56 @@ app.get("/usuarios/:id/empresas", async (req, res) => {
 });
 
 // ROTA PARA SALVAR AS EMPRESAS DE ACESSO DO USUÁRIO (PERFIL ACESSO)
+// app.post("/usuarios/salvar-empresas", async (req, res) => {
+//   const { usuario_id, empresas } = req.body;
+
+//   await pool.query(`
+//     DELETE FROM usuarios_empresas
+//     WHERE usuario_id = $1
+//   `, [usuario_id]);
+
+//   for (const e of empresas) {
+//     await pool.query(`
+//       INSERT INTO usuarios_empresas
+//       (usuario_id, cod_empresa, nome_empresa, unidades)
+//       VALUES ($1,$2,$3,'[]')
+//     `, [usuario_id, e.cod_empresa, e.nome_empresa]);
+
+//   }
+
+//   res.json({ success: true });
+// });
+// ROTA PARA SALVAR AS EMPRESAS DE ACESSO DO USUÁRIO
 app.post("/usuarios/salvar-empresas", async (req, res) => {
-  const { usuario_id, empresas } = req.body;
+  const { usuario_id, empresas, alterado_por } = req.body;
 
-  await pool.query(`
-    DELETE FROM usuarios_empresas
-    WHERE usuario_id = $1
-  `, [usuario_id]);
+  try {
+    await pool.query(`DELETE FROM usuarios_empresas WHERE usuario_id = $1`, [usuario_id]);
 
-  for (const e of empresas) {
+    for (const e of empresas) {
+      await pool.query(`
+        INSERT INTO usuarios_empresas (usuario_id, cod_empresa, nome_empresa, unidades)
+        VALUES ($1, $2, $3, '[]')
+      `, [usuario_id, e.cod_empresa, e.nome_empresa]);
+    }
+
+    // SUBSTITUI O LOG — deleta o anterior e insere o novo
     await pool.query(`
-      INSERT INTO usuarios_empresas
-      (usuario_id, cod_empresa, nome_empresa, unidades)
-      VALUES ($1,$2,$3,'[]')
-    `, [usuario_id, e.cod_empresa, e.nome_empresa]);
+      DELETE FROM log_perfil_acesso
+      WHERE tipo = 'empresas' AND item_id = $1
+    `, [usuario_id]);
 
+    await pool.query(`
+      INSERT INTO log_perfil_acesso (tipo, item_id, alterado_por)
+      VALUES ('empresas', $1, $2)
+    `, [usuario_id, alterado_por]);
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao salvar empresas" });
   }
-
-  res.json({ success: true });
 });
 
 // ROTA PARA MOSTRAR AS PERMISSÕES DE ACESSO DO USUÁRIO (EMPRESAS E UNIDADES)
@@ -2905,15 +3100,21 @@ const transporter = nodemailer.createTransport({
 
 // ROTA PARA ENVIAR E-MAIL NA HORA DA SOLICITAÇÃO
 app.post("/enviar-email-solicitacao", async (req, res) => {
-  const { tipoSolicitacao, destinatario, assunto, mensagem, codigo_empresa } = req.body;
+  const isDev = process.env.NODE_ENV === "development";
+
+  const { tipoSolicitacao, assunto, mensagem, codigo_empresa } = req.body;
 
   try {
     let destinoFinal = "";
     let copia = "";
 
+    if (tipoSolicitacao === "UNIDADE") {
+      destinoFinal = isDev
+        ? "debora.fonseca@salubrita.com.br"
+        : "clientes@salubrita.com.br";
+    }
     // SETOR / CARGO → buscar na tabela
-    if (tipoSolicitacao === "SETOR_CARGO") {
-
+    else if (tipoSolicitacao === "SETOR_CARGO") {
       const result = await pool.query(
         "SELECT emails FROM responsavel_empresa WHERE cod_empresa = $1",
         [codigo_empresa]
@@ -2930,13 +3131,15 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
       }
 
       destinoFinal = emailsArray.join(", ");
-      //copia = "debora.fonseca@salubrita.com.br, wasidrf@outlook.com";
-      copia = "nicolly.rocha@salubrita.com.br, paulina.oliveira@salubrita.com.br, rubia.costa@salubrita.com.br";
-    }
 
-    // UNIDADE ou CREDENCIAMENTO → email fixo
-    else {
-      destinoFinal = destinatario;
+      copia = isDev
+        ? "debora.fonseca@salubrita.com.br, fonsecadrf@outlook.com"
+        : "nicolly.rocha@salubrita.com.br, paulina.oliveira@salubrita.com.br, rubia.costa@salubrita.com.br";
+    }
+    else if (tipoSolicitacao === "CREDENCIAMENTO") {
+      destinoFinal = isDev
+        ? "debora.fonseca@salubrita.com.br"
+        : "contratos@salubrita.com.br";
     }
 
     await transporter.sendMail({
@@ -2963,6 +3166,8 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
 
 // FUNÇÃO PARA ENVIAR E-MAIL DEPOIS DA CRIAÇÃO DE UNIDADE - NOVO EXAME
 async function enviarEmailSetorFuncao(dados) {
+  const isDev = process.env.NODE_ENV === "development";
+
   try {
     const result = await pool.query(
       "SELECT emails FROM responsavel_empresa WHERE cod_empresa = $1",
@@ -2977,16 +3182,9 @@ async function enviarEmailSetorFuncao(dados) {
 
     const destino = emailsArray.join(", ");
 
-    const copia = [
-      "nicolly.rocha@salubrita.com.br",
-      "paulina.oliveira@salubrita.com.br",
-      "rubia.costa@salubrita.com.br"
-    ];
-
-    // const copia = [
-    //   "debora.fonseca@salubrita.com.br",
-    //   "wasidrf@outlook.com"
-    // ];
+    const copia = isDev
+      ? "debora.fonseca@salubrita.com.br, fonsecadrf@outlook.com"
+      : "nicolly.rocha@salubrita.com.br, paulina.oliveira@salubrita.com.br, rubia.costa@salubrita.com.br";
 
     await transporter.sendMail({
       from: "Portal Salubritá <naoresponda@salubrita.com.br>",
@@ -3007,6 +3205,8 @@ async function enviarEmailSetorFuncao(dados) {
 
 // FUNÇÃO PARA ENVIAR E-MAIL DEPOIS DA CRIAÇÃO DE UNIDADE - NOVO CADASTRO
 async function enviarEmailSetorCargo(dados) {
+  const isDev = process.env.NODE_ENV === "development";
+
   try {
     const result = await pool.query(
       "SELECT emails FROM responsavel_empresa WHERE cod_empresa = $1",
@@ -3021,16 +3221,9 @@ async function enviarEmailSetorCargo(dados) {
 
     const destino = emailsArray.join(", ");
 
-    const copia = [
-      "nicolly.rocha@salubrita.com.br",
-      "paulina.oliveira@salubrita.com.br",
-      "rubia.costa@salubrita.com.br"
-    ];
-
-    // const copia = [
-    //   "debora.fonseca@salubrita.com.br",
-    //   "wasidrf@outlook.com"
-    // ];
+    const copia = isDev
+      ? "debora.fonseca@salubrita.com.br, fonsecadrf@outlook.com"
+      : "nicolly.rocha@salubrita.com.br, paulina.oliveira@salubrita.com.br, rubia.costa@salubrita.com.br";
 
     await transporter.sendMail({
       from: "Portal Salubritá <naoresponda@salubrita.com.br>",
@@ -3050,10 +3243,15 @@ async function enviarEmailSetorCargo(dados) {
 
 // FUNÇÃO PARA ENVIAR E-MAIL DEPOIS DA CRIAÇÃO DE SETOR/CARGO/FUNÇÃO
 async function enviarEmailCredenciamento(dados) {
+  const isDev = process.env.NODE_ENV === "development";
+
+  const destino = isDev
+    ? "debora.fonseca@salubrita.com.br"
+    : "contratos@salubrita.com.br";
+
   await transporter.sendMail({
     from: "Portal Salubritá <naoresponda@salubrita.com.br>",
-    to: "contratos@salubrita.com.br",
-    //to: "wasidrf@outlook.com",
+    to: destino,
     subject: "Solicitação de Credenciamento",
     text: `
       Uma solicitação para a Empresa: ${dados.nome_empresa} foi gerada no Portal Salubritá.

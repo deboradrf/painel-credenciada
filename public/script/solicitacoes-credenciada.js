@@ -61,9 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("btnBuscar").addEventListener("click", aplicarFiltros);
   document.getElementById("btnLimpar").addEventListener("click", () => {
-    document.getElementById("filterTipo").value = "";
     document.getElementById("filterEmpresa").value = "";
     document.getElementById("filterCPF").value = "";
+    document.getElementById("filterCidade").value = "";
     document.getElementById("filterStatus").value = "";
     document.getElementById("checkMostrarTudo").checked = false;
 
@@ -105,34 +105,40 @@ function formatarDataHoraSolicitacoes(data) {
   return `${dia}/${mes}/${ano} ${horas}:${minutos}`;
 }
 
-function temFiltroAtivo(tipo, empresa, cpf, status) {
-  return tipo || empresa || cpf || status;
-}
-
 // FUNÇÃO PARA APLICAR FILTROS
 function aplicarFiltros() {
-  const tipo = document.getElementById("filterTipo").value;
   const empresa = document.getElementById("filterEmpresa").value.toLowerCase();
   const cpf = document.getElementById("filterCPF").value.trim();
+  const cidade = document.getElementById("filterCidade").value.toLowerCase();
   const status = document.getElementById("filterStatus").value;
 
-  const filtroAtivo = tipo || empresa || cpf || status;
+  const normalizar = (t) =>
+    (t || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+
+  const cidadeFiltro = normalizar(cidade);
 
   const filtradas = solicitacoes.filter(s => {
-    const matchTipo = !tipo || s.tipo === tipo;
     const matchEmpresa = !empresa || (s.nome_empresa && s.nome_empresa.toLowerCase().includes(empresa));
     const matchCPF = !cpf || s.cpf.includes(cpf);
+    const matchCidade =
+      !cidadeFiltro ||
+      [s.cidade_clinica, s.cidade_credenciamento, s.cidade]
+        .some(c => normalizar(c).includes(cidadeFiltro));
     const matchStatus = !status || s.status === status;
 
-    // SE TEM QUALQUER FILTRO → IGNORA VISIBILIDADE
-    if (filtroAtivo) {
-      return matchTipo && matchEmpresa && matchCPF && matchStatus;
-    }
+    const statusAtivo = !!status;
 
-    // SEM FILTRO → aplica regra padrão
-    const matchVisibilidade = deveExibir(s);
+    const outrosFiltrosAtivos = empresa || cpf || cidade;
 
-    return matchTipo && matchEmpresa && matchCPF && matchStatus && matchVisibilidade;
+    const ignorarVisibilidade = statusAtivo && outrosFiltrosAtivos;
+
+    const matchVisibilidade = ignorarVisibilidade ? true : deveExibir(s);
+
+    return matchEmpresa && matchCPF && matchCidade && matchStatus && matchVisibilidade;
   });
 
   paginaAtual = 1;
@@ -236,12 +242,12 @@ async function renderizarTabela(lista) {
         <td class="actions">
           <div class="actions-wrapper">
             ${estaEmAnalise
-          ? `
+            ? `
                 <small style="opacity:0.6;">
                   Em análise por ${s.em_analise_por_nome?.split(' ')[0]}
                 </small>
                 `
-          : `
+            : `
                 <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
                   Analisar
                 </button>
@@ -251,24 +257,24 @@ async function renderizarTabela(lista) {
                 </button>
 
                 ${podeEnviarSOC
-            ? `
+                ? `
                     <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
                       Enviar SOC
                     </button>
                   `
-            : ""
-          }
+                : ""
+                }
 
                 ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
-            ? `
+                ? `
                     <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
                       Cancelar
                     </button>
                     `
-            : ""
-          }
+                : ""
+                }
               `
-        }
+            }
             </div>
           </td>
         `;
@@ -515,6 +521,7 @@ async function preencherModal(s, tipo) {
     document.getElementById("cadastro_nome_clinica").innerText = s.nome_clinica;
     document.getElementById("cadastro_estado_credenciamento").innerText = s.estado_credenciamento;
     document.getElementById("cadastro_cidade_credenciamento").innerText = s.cidade_credenciamento;
+    document.getElementById("cadastro_observacao_credenciamento").innerText = s.observacao_credenciamento || "-";
     document.getElementById("cadastro_observacao").innerText = s.observacao || "-";
 
     // MOSTRAR / ESCONDER BLOCO DE NOVA UNIDADE
@@ -623,6 +630,7 @@ async function preencherModal(s, tipo) {
 
     const blocoEstadoCredenciamento = document.getElementById("divEstadoCredenciamento");
     const blocoCidadeCredenciamento = document.getElementById("divCidadeCredenciamento");
+    const blocoObservacaoCredenciamento = document.getElementById("divObservacaoCredenciamento");
 
     if (s.solicitar_credenciamento === true) {
       blocoEstadoClinica.classList.add("d-none");
@@ -632,9 +640,11 @@ async function preencherModal(s, tipo) {
       blocoEstadoCredenciamento.classList.remove("d-none");
       blocoCidadeCredenciamento.classList.remove("d-none");
       blocoNomeClinica.classList.remove("d-none");
+      blocoObservacaoCredenciamento.classList.remove("d-none");
 
       document.getElementById("cadastro_estado_credenciamento").innerText = s.estado_credenciamento || "-";
       document.getElementById("cadastro_cidade_credenciamento").innerText = s.cidade_credenciamento || "-";
+      document.getElementById("cadastro_observacao_credenciamento").innerText = s.observacao_credenciamento || "-";
     } else {
       blocoEstadoClinica.classList.remove("d-none");
       blocoCidadeClinica.classList.remove("d-none");
@@ -643,6 +653,7 @@ async function preencherModal(s, tipo) {
       // ESCONDE CREDENCIAMENTO
       blocoEstadoCredenciamento.classList.add("d-none");
       blocoCidadeCredenciamento.classList.add("d-none");
+      blocoObservacaoCredenciamento.classList.add("d-none");
 
       document.getElementById("cadastro_estado_clinica").innerText = s.estado_clinica || "-";
       document.getElementById("cadastro_cidade_clinica").innerText = s.cidade_clinica || "-";
@@ -748,6 +759,7 @@ async function preencherModal(s, tipo) {
     document.getElementById("exame_nome_clinica").innerText = s.nome_clinica;
     document.getElementById("exame_estado_credenciamento").innerText = s.estado_credenciamento;
     document.getElementById("exame_cidade_credenciamento").innerText = s.cidade_credenciamento;
+    document.getElementById("exame_observacao_credenciamento").innerText = s.observacao_credenciamento || "-";
     document.getElementById("exame_observacao").innerText = s.observacao || "-";
 
     // MOSTRAR / ESCONDER BLOCO DE NOVA UNIDADE
@@ -1006,6 +1018,7 @@ async function preencherModal(s, tipo) {
 
     const blocoEstadoCredenciamento = document.getElementById("divExameEstadoCredenciamento");
     const blocoCidadeCredenciamento = document.getElementById("divExameCidadeCredenciamento");
+    const blocoObservacaoCredenciamento = document.getElementById("divExameObservacaoCredenciamento");
 
     if (s.solicitar_credenciamento === true) {
       blocoEstadoClinica.classList.add("d-none");
@@ -1015,9 +1028,11 @@ async function preencherModal(s, tipo) {
       blocoEstadoCredenciamento.classList.remove("d-none");
       blocoCidadeCredenciamento.classList.remove("d-none");
       blocoNomeClinica.classList.remove("d-none");
+      blocoObservacaoCredenciamento.classList.remove("d-none");
 
       document.getElementById("exame_estado_credenciamento").innerText = s.estado_credenciamento || "-";
       document.getElementById("exame_cidade_credenciamento").innerText = s.cidade_credenciamento || "-";
+      document.getElementById("exame_observacao_credenciamento").innerText = s.observacao_credenciamento || "-";
     } else {
       blocoEstadoClinica.classList.remove("d-none");
       blocoCidadeClinica.classList.remove("d-none");
@@ -1026,6 +1041,7 @@ async function preencherModal(s, tipo) {
       // ESCONDE CREDENCIAMENTO
       blocoEstadoCredenciamento.classList.add("d-none");
       blocoCidadeCredenciamento.classList.add("d-none");
+      blocoObservacaoCredenciamento.classList.add("d-none");
 
       document.getElementById("exame_estado_clinica").innerText = s.estado_clinica || "-";
       document.getElementById("exame_cidade_clinica").innerText = s.cidade_clinica || "-";
@@ -1081,94 +1097,6 @@ async function preencherModal(s, tipo) {
   } else {
     textareaMotivo.value = "";
   }
-
-  // STATUS
-  // const alertStatus =
-  //   tipo === "NOVO_EXAME"
-  //     ? document.getElementById("linha_aprovacao_exame")
-  //     : document.getElementById("linha_aprovacao_cadastro");
-
-  // alertStatus.style.display = "none";
-  // alertStatus.innerHTML = "";
-
-  // if (s.status === "ERRO_SOC") {
-  //   alertStatus.style.display = "block";
-  //   alertStatus.innerHTML = `
-  //     <div class="alerts-container mb-2">
-  //       <div class="alert alert-erro">
-  //         <i class="fa-solid fa-circle-check fa-lg" style="color: #F05252"></i>
-  //         <p class="alert-text">
-  //           Erro retornado pelo SOC: ${s.erro_soc}
-  //         </p>
-  //       </div>
-  //     </div>
-  //   `;
-  //   return;
-  // }
-
-  // APROVADO
-  // if (s.status === "APROVADO") {
-  //   alertStatus.style.display = "block";
-  //   alertStatus.innerHTML = `
-  //     <div class="alerts-container mb-2">
-  //       <div class="alert alert-aprovado">
-  //         <i class="fa-solid fa-circle-check fa-lg" style="color: #53A5A6"></i>
-  //         <p class="alert-text">
-  //           Aprovado por ${s.aprovado_por_nome} em ${formatarDataHoraSolicitacoes(s.aprovado_em)}
-  //         </p>
-  //       </div>
-  //     </div>
-  //   `;
-  //   return;
-  // }
-
-  // REPROVADO
-  // if (s.status === "REPROVADO") {
-  //   alertStatus.style.display = "block";
-  //   alertStatus.innerHTML = `
-  //     <div class="alerts-container mb-2">
-  //       <div class="alert alert-reprovado">
-  //         <i class="fa-solid fa-circle-xmark fa-lg" style="color: #DC3545"></i>
-  //         <p class="alert-text">
-  //           Reprovado por ${s.reprovado_por_nome} em ${formatarDataHoraSolicitacoes(s.reprovado_em)}
-  //         </p>
-  //       </div>
-  //     </div>
-  //   `;
-  //   return;
-  // }
-
-  // CANCELADO
-  // if (s.status === "CANCELADO") {
-  //   alertStatus.style.display = "block";
-  //   alertStatus.innerHTML = `
-  //     <div class="alerts-container mb-2">
-  //       <div class="alert alert-cancelado">
-  //         <i class="fa-solid fa-ban fa-lg" style="color: #6C757D"></i>
-  //         <p class="alert-text">
-  //           Cancelado por ${s.cancelado_por_nome} em ${formatarDataHoraSolicitacoes(s.cancelado_em)}
-  //         </p>
-  //       </div>
-  //     </div>
-  //   `;
-  //   return;
-  // }
-
-  // ENVIADO SOC
-  // if (s.status === "ENVIADO_SOC") {
-  //   alertStatus.style.display = "block";
-  //   alertStatus.innerHTML = `
-  //     <div class="alerts-container mb-2">
-  //       <div class="alert alert-enviado">
-  //         <i class="fa-solid fa-paper-plane fa-lg" style="color: #88A6BB"></i>
-  //         <p class="alert-text">
-  //           Enviado ao SOC por ${s.enviado_soc_por_nome} em ${formatarDataHoraSolicitacoes(s.enviado_soc_em)}
-  //         </p>
-  //       </div>
-  //     </div>
-  //   `;
-  //   return;
-  // }
 }
 
 // FUNÇÃO PARA MOSTRAR O HISTÓRICO DAS SOLICITAÇÕES
@@ -1207,8 +1135,8 @@ async function abrirHistorico(id, tipo) {
         case "Cancelado":
           return { icon: "fa-ban fa-lg", color: "#616161" };
 
-        case "Reavaliado":
-          return { icon: "fa-rotate fa-lg", color: "#F1AE33" };
+        case "Editado":
+          return { icon: "fa-pencil fa-lg", color: "#F1AE33" };
 
         case "Enviado ao SOC":
           return { icon: "fa-paper-plane fa-lg", color: "#88A6BB" };
@@ -1601,7 +1529,7 @@ function preencherMaisUnidadesExame(exame) {
 
     exame.unidades_extras.forEach(u => {
       const div = document.createElement("div");
-      div.innerText = `${u.cod_unidade} - ${u.nome_unidade}`;
+      div.innerText = `${u.nome_unidade}`;
       container.appendChild(div);
     });
 

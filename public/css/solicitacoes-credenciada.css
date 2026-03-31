@@ -644,8 +644,10 @@ tr:last-child td {
 
 #divEstadoCredenciamento .detail-item,
 #divCidadeCredenciamento .detail-item,
+#divObservacaoCredenciamento .detail-item,
 #divExameEstadoCredenciamento .detail-item,
-#divExameCidadeCredenciamento .detail-item {
+#divExameCidadeCredenciamento .detail-item,
+#divExameObservacaoCredenciamento .detail-item {
     background-color: #F9FAFB;
     border: 2px dotted #88A6BB;
 }
@@ -699,66 +701,6 @@ tr:last-child td {
     cursor: not-allowed;
     border-bottom-style: dashed;
 }
-
-/* .alert {
-    display: flex;
-    align-items: center;
-}
-
-.alert p {
-    margin-left: 8px;
-}
-
-.alert-text {
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin: 0;
-}
-
-.alert-aprovado {
-    display: flex;
-    align-items: center;
-    padding: 0.8rem;
-    border: 1px solid #53A5A6;
-    border-left: 5px solid #53A5A6;
-    border-radius: 0.6rem;
-    background-color: #E3F2F4;
-    color: #17575B;
-}
-
-.alert-reprovado,
-.alert-erro {
-    display: flex;
-    align-items: center;
-    padding: 0.8rem;
-    border: 1px solid #F05252;
-    border-left: 5px solid #F05252;
-    border-radius: 0.6rem;
-    background-color: #FFE6E6;
-    color: #992525;
-}
-
-.alert-enviado {
-    display: flex;
-    align-items: center;
-    padding: 0.8rem;
-    border: 1px solid #88A6BB;
-    border-left: 6px solid #88A6BB;
-    border-radius: 0.6rem;
-    background-color: #E3F2F4;
-    color: #374151;
-}
-
-.alert-cancelado {
-    display: flex;
-    align-items: center;
-    padding: 0.8rem;
-    border: 1px solid #A0AEC0;
-    border-left: 6px solid #A0AEC0;
-    border-radius: 0.6rem;
-    background-color: #EBEBEB;
-    color: #4A5568;
-} */
 
 .divisor-footer {
     border: none;

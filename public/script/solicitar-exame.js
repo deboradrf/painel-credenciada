@@ -106,7 +106,7 @@ async function buscarCPF() {
       `;
       return;
     }
-
+    
     // ENCONTROU ALGUM CADASTRO
     resultado.innerHTML = `
       <div class="alerts-container mb-3">
@@ -118,7 +118,10 @@ async function buscarCPF() {
         </div>
       </div>
       
-      ${funcionarios.map((f) => `
+      ${funcionarios.map((f) => {
+        const situacao = f.situacao?.toLowerCase();
+        
+        return `
         <div class="funcionario-card shadow-sm text-center my-4">
           <div class="card-header mb-3">
             <div class="detail-value">
@@ -145,7 +148,7 @@ async function buscarCPF() {
                 </div>
               </div>
 
-              <div class="col-6">
+              <div class="col-12">
                 <div class="detail-item horizontal">
                   <div class="detail-label">
                     <span>Setor</span>
@@ -156,7 +159,7 @@ async function buscarCPF() {
                 </div>
               </div>
 
-              <div class="col-6">
+              <div class="col-12">
                 <div class="detail-item horizontal">
                   <div class="detail-label">
                     <span>Cargo</span>
@@ -203,7 +206,7 @@ async function buscarCPF() {
           </div>
 
           <div class="card-footer text-body-secondary mt-4">
-            ${f.situacao?.toLowerCase() === "ativo"
+            ${situacao === "ativo" || situacao === "pendente"
             ? `
                 <div class="d-flex justify-content-center">
                   <button class="btn-solicitar-exame"
@@ -216,7 +219,7 @@ async function buscarCPF() {
             }
           </div>
         </div>
-      `).join("")}
+      `}).join("")}
     `;
 
   } catch (erro) {
