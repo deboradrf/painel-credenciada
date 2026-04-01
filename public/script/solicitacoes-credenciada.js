@@ -298,7 +298,7 @@ function renderizarPaginacao() {
 
   // BOTÃO ANTERIOR
   const btnAnterior = document.createElement("button");
-  btnAnterior.innerHTML = "←";
+  btnAnterior.innerHTML = "← Anterior";
   btnAnterior.classList.add("btn", "btn-sm", "mx-1", "btn-anterior");
 
   if (paginaAtual === 1) {
@@ -314,41 +314,15 @@ function renderizarPaginacao() {
 
   container.appendChild(btnAnterior);
 
-  // TEXTO DAS PÁGINAS
+  // TEXTO DA PÁGINA ATUAL
   const info = document.createElement("small");
-
-  let html = "";
-
-  // primeiras páginas
-  for (let i = 1; i <= Math.min(3, totalPaginas); i++) {
-    html += `<span class="pagina-num" data-pagina="${i}">${i}</span> `;
-  }
-
-  if (totalPaginas > 4) {
-    html += `... `;
-  }
-
-  // última página
-  if (totalPaginas > 3) {
-    html += `<span class="pagina-num" data-pagina="${totalPaginas}">${totalPaginas}</span>`;
-  }
-
-  info.innerHTML = html;
+  info.innerText = `Página ${paginaAtual} de ${totalPaginas}`;
 
   container.appendChild(info);
 
-  info.querySelectorAll(".pagina-num").forEach(el => {
-    el.style.cursor = "pointer";
-
-    el.onclick = () => {
-      paginaAtual = Number(el.dataset.pagina);
-      renderizarTabela(listaFiltradaAtual);
-    };
-  });
-
   // BOTÃO PRÓXIMO
   const btnProximo = document.createElement("button");
-  btnProximo.innerHTML = "→";
+  btnProximo.innerHTML = "Próximo →";
   btnProximo.classList.add("btn", "btn-sm", "mx-1", "btn-proximo");
 
   if (paginaAtual === totalPaginas) {
