@@ -112,33 +112,30 @@
                     <div class="modal-content">
 
                         <div class="modal-header">
-                            <h3>Gerenciar Empresas</h3>
+                            <h3>Gerenciar Empresas de Acesso</h3>
                             <a data-bs-dismiss="modal">
                                 <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
                             </a>
                         </div>
 
                         <div class="modal-body">
-                            <div class="row my-3">
-                                <div class="col-5">
-                                    <label class="mb-1">Todas as empresas</label>
-                                    <select id="listaTodasEmpresas" multiple class="form-select" size="10"></select>
-                                </div>
-
-                                <div class="col-2 d-flex flex-column justify-content-center gap-2">
-                                    <button id="btnAddEmpresa">
-                                        <i class="fa-solid fa-arrow-right-long"></i>
-                                    </button>
-
-                                    <button id="btnRemoveEmpresa">
-                                        <i class="fa-solid fa-arrow-left-long"></i>
+                            <div class="mb-4">
+                                <div class="d-flex gap-2">
+                                    <div class="select-wrapper mt-2">
+                                        <select id="listaTodasEmpresas" class="form-select select-custom"></select>
+                                    </div>
+                                    <button id="btnAddEmpresa" class="mt-2">
+                                        <i class="fa-solid fa-plus"></i> Adicionar
                                     </button>
                                 </div>
+                            </div>
 
-                                <div class="col-5">
-                                    <label class="mb-1">Empresas que o usuário tem acesso</label>
-                                    <select id="listaEmpresasUsuario" multiple class="form-select" size="10"></select>
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mt-5 mb-2">
+                                    <label class="modal-label">Empresas com acesso</label>
+                                    <span id="contadorEmpresas" class="counter">0 empresas</span>
                                 </div>
+                                <ul id="listaEmpresasUsuario"></ul>
                             </div>
                         </div>
 
@@ -158,37 +155,38 @@
                     <div class="modal-content">
 
                         <div class="modal-header">
-                            <h3>Unidades da empresa</h3>
+                            <h3>Gerenciar Unidades da Empresa</h3>
                             <a data-bs-dismiss="modal">
                                 <i class="fa-solid fa-xmark fa-lg" style="color: #FFFFFF; cursor: pointer"></i>
                             </a>
                         </div>
 
                         <div class="modal-body">
-                            <div class="row my-3">
-                                <div class="col-5">
-                                    <label class="mb-1">Todas as unidades</label>
-                                    <select id="listaUnidadesTodas" class="form-select" multiple size="10"></select>
-                                </div>
-
-                                <div class="col-2 d-flex flex-column justify-content-center gap-2">
-                                    <button id="btnAddUnidade">
-                                        <i class="fa-solid fa-arrow-right-long"></i>
-                                    </button>
-
-                                    <button id="btnRemoveUnidade">
-                                        <i class="fa-solid fa-arrow-left-long"></i>
+                            <div class="mb-4">
+                                <div class="d-flex gap-2">
+                                    <div class="select-wrapper flex-grow-1 mt-2">
+                                        <select id="listaTodasUnidades" class="form-select select-custom"></select>
+                                    </div>
+                                    <button id="btnAddUnidade" class="mt-2">
+                                        <i class="fa-solid fa-plus"></i> Adicionar
                                     </button>
                                 </div>
+                            </div>
 
-                                <div class="col-5">
-                                    <label class="mb-1">Unidades que o usuário tem acesso</label>
-                                    <select id="listaUnidadesUsuario" class="form-select" multiple size="10"></select>
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mt-5 mb-2">
+                                    <label class="modal-label">Unidades com acesso</label>
+                                    <span id="contadorUnidades" class="counter">0 unidades</span>
+                                </div>
+                                <ul id="listaUnidadesUsuario"></ul>
+                                <div id="emptyStateUnidades" class="unidade-empty" style="display: none;">
+                                    <i class="fa-solid fa-building-circle-xmark"></i>
+                                    <small>Nenhuma unidade adicionada</small>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="modal-footer d-flex justify-content-between">
+                        <div class="modal-footer">
                             <small id="logUnidades" class="text-muted"></small>
                             <button class="btn-salvar" onclick="salvarUnidades()">
                                 <i class="fa-solid fa-floppy-disk"></i> Salvar

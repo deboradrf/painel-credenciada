@@ -264,8 +264,6 @@ main {
     overflow: hidden;
     transition: all 0.3s ease;
     opacity: 0;
-    transform: translateX(-30px) scale(0.98);
-    opacity: 0;
     animation: fadeIn 0.4s ease forwards;
 }
 

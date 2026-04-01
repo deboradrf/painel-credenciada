@@ -817,6 +817,7 @@ function preencherModalEditarCadastro(s) {
   document.getElementById("editCadNomeClinica").value = s.nome_clinica;
   document.getElementById("editCadEstadoCredenciamento").value = s.estado_credenciamento;
   document.getElementById("editCadCidadeCredenciamento").value = s.cidade_credenciamento;
+  document.getElementById("editCadObservacaoCredenciamento").value = s.observacao_credenciamento;
   document.getElementById("editCadObservacao").value = s.observacao;
 
   // MOSTRAR / OCULTAR SEÇÃO DE NOVA UNIDADE
@@ -1053,6 +1054,7 @@ async function preencherModalEditarExame(s) {
   document.getElementById("editExameNomeClinica").value = s.nome_clinica;
   document.getElementById("editExameEstadoCredenciamento").value = s.estado_credenciamento;
   document.getElementById("editExameCidadeCredenciamento").value = s.cidade_credenciamento;
+  document.getElementById("editExameObservacaoCredenciamento").value = s.observacao_credenciamento;
   document.getElementById("editExameObservacao").value = s.observacao;
 
   (async () => {
@@ -1456,6 +1458,7 @@ async function salvarEdicaoCadastro() {
     lab_toxicologico: document.getElementById("editCadLabToxicologico").value,
     estado_credenciamento: document.getElementById("editCadEstadoCredenciamento").value,
     cidade_credenciamento: document.getElementById("editCadCidadeCredenciamento").value,
+    observacao_credenciamento: document.getElementById("editCadObservacaoCredenciamento").value,
     observacao: document.getElementById("editCadObservacao").value,
 
     usuario_id: usuarioLogado.id
@@ -1592,18 +1595,19 @@ async function salvarEdicaoExame() {
     tipo_faturamento: tipoFaturamentoSelecionado,
     email: document.getElementById("editExameEmail").value,
     funcao_destino: nomeFuncaoDestino,
-    nome_nova_funcao: document.getElementById("editExameNovaFuncao").value || null,
+    nome_nova_funcao: document.getElementById("editExameNovaFuncao").value,
     descricao_atividade: document.getElementById("editExameDescricaoAtividade").value,
     setor_destino: nomeSetorDestino,
-    nome_novo_setor: document.getElementById("editExameNovoSetor").value || null,
-    motivo_consulta: document.getElementById("editExameMotivoConsulta").value || null,
+    nome_novo_setor: document.getElementById("editExameNovoSetor").value,
+    motivo_consulta: document.getElementById("editExameMotivoConsulta").value,
     nova_data_exame: dataParaFormatoBanco(document.getElementById("editExameNovaDataExame").value),
-    cnh: document.getElementById("editExameCNH").value || null,
+    cnh: document.getElementById("editExameCNH").value,
     vencimento_cnh: dataParaFormatoBanco(document.getElementById("editExameVencimentoCNH").value),
-    lab_toxicologico: document.getElementById("editExameLabToxicologico").value || null,
-    estado_credenciamento: document.getElementById("editExameEstadoCredenciamento").value || null,
-    cidade_credenciamento: document.getElementById("editExameCidadeCredenciamento").value || null,
-    observacao: document.getElementById("editExameObservacao").value || null,
+    lab_toxicologico: document.getElementById("editExameLabToxicologico").value,
+    estado_credenciamento: document.getElementById("editExameEstadoCredenciamento").value,
+    cidade_credenciamento: document.getElementById("editExameCidadeCredenciamento").value,
+    observacao_credenciamento: document.getElementById("editExameObservacaoCredenciamento").value,
+    observacao: document.getElementById("editExameObservacao").value,
 
     usuario_id: usuarioLogado.id
   };

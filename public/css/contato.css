@@ -265,8 +265,6 @@ main {
     align-items: center;
     gap: 15px;
     opacity: 0;
-    transform: translateX(-30px) scale(0.98);
-    opacity: 0;
     animation: fadeIn 0.4s ease forwards;
 }
 
@@ -297,32 +295,6 @@ main {
 .contact-info small {
     color: #6B7280;
     font-size: 13px;
-}
-
-.socials {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 30px;
-}
-
-.socials a {
-    width: 50px;
-    height: 50px;
-    background: #53A5A6;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 20px;
-    transition: transform 0.3s, background 0.3s;
-    text-decoration: none;
-}
-
-.socials a:hover {
-    background: #4A8F90;
-    transform: translateY(-3px) scale(1.1);
 }
 
 .footer-container {

@@ -59,7 +59,7 @@ h2::after {
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    transition: transform 0.2s ease;
+    transition: transform 0.3s ease-in-out;
 }
 
 .profile-card .icon {
@@ -72,8 +72,19 @@ h2::after {
     justify-content: center;
     font-size: 42px;
     color: #FFFFFF;
-    transition: 0.2s ease;
+    transition: 0.3s ease-in-out;
     box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .profile-card:hover {
@@ -83,7 +94,7 @@ h2::after {
 .profile-card span {
     font-size: 15px;
     color: #6B7280;
-    transition: 0.2s;
+    transition: 0.3s;
 }
 
 .profile-card:hover span {

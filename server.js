@@ -1988,11 +1988,12 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
         lab_toxicologico = $33,
         estado_credenciamento = $34,
         cidade_credenciamento = $35,
-        observacao = $36
+        observacao_credenciamento = $36,
+        observacao = $37
       WHERE id = (
         SELECT novo_cadastro_id
         FROM solicitacoes_novo_cadastro
-        WHERE id = $37
+        WHERE id = $38
       )
     `, [
       f.nome_funcionario,
@@ -2030,6 +2031,7 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
       f.lab_toxicologico,
       f.estado_credenciamento,
       f.cidade_credenciamento,
+      f.observacao_credenciamento,
       f.observacao,
 
       id
@@ -2089,11 +2091,12 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
         lab_toxicologico = $21,
         estado_credenciamento = $22,
         cidade_credenciamento = $23,
-        observacao = $24
+        observacao_credenciamento = $24,
+        observacao = $25
       WHERE id = (
         SELECT novo_exame_id
         FROM solicitacoes_novo_exame
-        WHERE id = $25
+        WHERE id = $26
       )
     `, [
       f.nome_fantasia,
@@ -2119,6 +2122,7 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
       f.lab_toxicologico,
       f.estado_credenciamento,
       f.cidade_credenciamento,
+      f.observacao_credenciamento,
       f.observacao,
 
       id

@@ -221,7 +221,7 @@ h3::after {
     color: #FFFFFF;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease-in-out;
     width: 50px;
 }
 
@@ -242,7 +242,7 @@ h3::after {
     padding: 0 10px 0 10px;
     width: 200px;
     margin-top: 5px;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease-in-out;
 }
 
 .btn-add-unidade:hover {
@@ -274,7 +274,7 @@ h3::after {
     font-weight: 500;
     margin-top: 20px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease-in-out;
 }
 
 .btn-cadastrar:hover {
@@ -323,7 +323,7 @@ h3::after {
 
 #social-media a {
     color: #FFFFFF;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease-in-out;
 }
 
 #social-media a:hover {

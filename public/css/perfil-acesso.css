@@ -256,6 +256,18 @@ h3::after {
     padding: 18px;
     display: flex;
     flex-direction: column;
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .usuario-header {
@@ -296,7 +308,7 @@ h3::after {
 }
 
 .empresas-label {
-    font-size: .65rem;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -364,15 +376,88 @@ h3::after {
     transform: translateY(-2px);
 }
 
-.modal-content {
-    border-radius: 10px;
-    border: none;
+/*
+
+
+
+.modal-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #6B7280;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
+
+.modal-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #F1F1F1;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+
+
+
+
+#btnAddEmpresa,
+#btnAddUnidade {
+    display: block;
+    width: 100%;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    color: #000000;
+    cursor: pointer;
+    font-size: 13px; 
+    line-height: 28px;
+    padding: 0 18px;
+    width: 160px;
+    height: 40px;
+    transition: all 0.3s ease;
+}
+
+#btnAddEmpresa:hover,
+#btnAddUnidade:hover {
+    transform: translateY(-2px);
+}
+
+
+
+.btn-remove-empresa {
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #F05252;
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+.btn-remove-empresa:hover {
+    transform: translateY(-2px);
+}
+
+
+
+ */
 
 .modal-header {
     background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
     border-bottom: none;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
     padding: 20px;
 }
 
@@ -394,32 +479,193 @@ h3::after {
     background: #FFFFFF;
 }
 
+.modal-content {
+    border-radius: 10px;
+    border: none;
+}
+
+.select-custom {
+    height: 40px;
+    padding: 0 36px 0 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #FFFFFF;
+    font-size: 14px;
+    appearance: none;
+    cursor: pointer;
+    color: #6B7280;
+}
+
+.select-custom:focus {
+    outline: none;
+    border-color: #F1AE33;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+
+.modal-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: #6B7280;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #F1F1F1;
+}
+
+.counter {
+    font-size: 12px;
+    color: #6B7280;
+    background: #F1F1F1;
+    padding: 2px 10px;
+    border-radius: 20px;
+    border: 1px solid #E5E7EB;
+    margin-left: 10px;
+}
+
+#listaEmpresasUsuario,
+#listaUnidadesUsuario {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#listaEmpresasUsuario li,
+#listaUnidadesUsuario li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 1.5px solid #f3f4f6;
+    background: #FFFFFF;
+    animation: slideInItem .18s ease;
+}
+
+#btnAddEmpresa,
+#btnAddUnidade {
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    background: #F1AE33;
+    border: none;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    box-shadow: none;
+    transition: opacity .15s;
+}
+
+#btnAddEmpresa:hover,
+#btnAddUnidade:hover {
+    opacity: .88;
+    transform: none;
+}
+
+.empresa-item-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.empresa-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 6px;
+    background: #F1F1F1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #F1AE33;
+}
+
+.empresa-nome {
+    font-size: 13px;
+    font-weight: 500;
+    color: #111827;
+    margin: 0;
+}
+
+.empresa-sub {
+    font-size: 11px;
+    color: #6B7280;
+    margin: 0;
+}
+
+.empresa-badge {
+    font-size: 11px;
+    background: rgba(26, 26, 46, 0.08);
+    color: #1a1a2e;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.btn-remove-empresa {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1.5px solid #fee2e2;
+    background: #fff5f5;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #F05252;
+    transition: all .15s;
+}
+
+.btn-remove-empresa:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    transform: none;
+}
+
+.unidade-empty {
+    display: flex;
+    align-items: center;
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+}
+
+.unidade-empty i {
+    width: 35px;
+    height: 35px;
+    border-radius: 6px;
+    background: #F1F1F1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #F1AE33;
+}
+
+.unidade-empty small {
+    margin-left: 10px;
+    color: #6B7280;
+}
+
 .modal-footer {
     display: flex;
     justify-content: space-between;
     border: none;
-}
-
-.form-select:focus {
-    border-color: #6B7280;
-    box-shadow: 0 0 0 3px rgba(79, 124, 255, .15);
-}
-
-option {
-    font-size: 15px;
-}
-
-#btnAddEmpresa,
-#btnRemoveEmpresa,
-#btnAddUnidade,
-#btnRemoveUnidade {
-    background-color: #F1AE33;
-    border: 1px solid #E5E7EB;
-    border-radius: 10px;
-    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
-    color: #FFFFFF;
-    height: 30px;
-    transition: all 0.3s ease;
 }
 
 .btn-salvar {
@@ -434,8 +680,8 @@ option {
     font-size: 13px;
     line-height: 28px;
     padding: 0 10px 0 10px;
-    width: 100px;
-    height: 30px;
+    width: 110px;
+    height: 35px;
     transition: all 0.3s ease;
 }
 

@@ -719,6 +719,13 @@ tr:last-child td {
     padding: 16px;
 }
 
+#obsConsultaCadastro,
+#obsConsultaExame,
+#motivoReprovacaoCadastro,
+#motivoReprovacaoExame {
+    font-size: 15px;
+}
+
 .footer-actions {
     display: flex;
     justify-content: flex-end;
