@@ -4,7 +4,7 @@ let solicitacaoAtualId = null;
 let hierarquiaAtual = null;
 
 let paginaAtual = 1;
-const itensPorPagina = 5;
+const itensPorPagina = 20;
 let listaFiltradaAtual = [];
 
 const usuarioLogado = getUsuario();
