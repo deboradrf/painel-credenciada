@@ -4,7 +4,7 @@ let solicitacaoAtualId = null;
 let hierarquiaAtual = null;
 
 let paginaAtual = 1;
-const itensPorPagina = 20;
+const itensPorPagina = 5;
 let listaFiltradaAtual = [];
 
 const usuarioLogado = getUsuario();
@@ -291,51 +291,88 @@ async function renderizarTabela(lista) {
 function renderizarPaginacao() {
   const totalPaginas = Math.ceil(listaFiltradaAtual.length / itensPorPagina);
   const container = document.getElementById("paginacao");
-
   container.innerHTML = "";
 
   if (totalPaginas <= 1) return;
 
   // BOTÃO ANTERIOR
   const btnAnterior = document.createElement("button");
-  btnAnterior.innerHTML = "← Anterior";
+  
+  btnAnterior.innerHTML = "←";
   btnAnterior.classList.add("btn", "btn-sm", "mx-1", "btn-anterior");
-
-  if (paginaAtual === 1) {
-    btnAnterior.disabled = true;
-  }
-
+  btnAnterior.disabled = paginaAtual === 1;
+  
   btnAnterior.onclick = () => {
     if (paginaAtual > 1) {
       paginaAtual--;
       renderizarTabela(listaFiltradaAtual);
     }
   };
-
+  
   container.appendChild(btnAnterior);
 
-  // TEXTO DA PÁGINA ATUAL
+  const paginas = [];
+
+  // Primeira página sempre
+  paginas.push(1);
+
+  let start = Math.max(paginaAtual - 1, 2);
+  let end = Math.min(paginaAtual + 1, totalPaginas - 1);
+
+  // Reticências antes do bloco do meio
+  if (start > 2) {
+    paginas.push("...");
+  }
+
+  // Bloco do meio (até 3 páginas)
+  for (let i = start; i <= end; i++) {
+    paginas.push(i);
+  }
+
+  // Reticências depois do bloco do meio
+  if (end < totalPaginas - 1) {
+    paginas.push("...");
+  }
+
+  // Última página sempre
+  if (totalPaginas > 1) {
+    paginas.push(totalPaginas);
+  }
+
   const info = document.createElement("small");
-  info.innerText = `Página ${paginaAtual} de ${totalPaginas}`;
+  
+  info.innerHTML = paginas
+    .map(p =>
+      p === "..."
+        ? `<span class="pagina-ellipsis">...</span>`
+        : `<span class="pagina-num ${p === paginaAtual ? "active" : ""}" data-pagina="${p}">${p}</span>`
+    )
+    .join(" ");
 
   container.appendChild(info);
 
+  info.querySelectorAll(".pagina-num").forEach(el => {
+    el.style.cursor = "pointer";
+    el.onclick = () => {
+      paginaAtual = Number(el.dataset.pagina);
+      renderizarTabela(listaFiltradaAtual);
+    };
+  });
+
   // BOTÃO PRÓXIMO
   const btnProximo = document.createElement("button");
-  btnProximo.innerHTML = "Próximo →";
+  
+  btnProximo.innerHTML = "→";
   btnProximo.classList.add("btn", "btn-sm", "mx-1", "btn-proximo");
-
-  if (paginaAtual === totalPaginas) {
-    btnProximo.disabled = true;
-  }
-
+  btnProximo.disabled = paginaAtual === totalPaginas;
+  
   btnProximo.onclick = () => {
     if (paginaAtual < totalPaginas) {
       paginaAtual++;
       renderizarTabela(listaFiltradaAtual);
     }
   };
-
+  
   container.appendChild(btnProximo);
 }
 

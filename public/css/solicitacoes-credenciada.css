@@ -828,13 +828,6 @@ tr:last-child td {
   padding: 6px 14px;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-#paginacao button:hover {
-  background: #F9FAFB;
-  border-color: #D1D5DB;
-  transform: translateY(-1px);
 }
 
 #paginacao button.btn-proximo,
@@ -856,6 +849,11 @@ tr:last-child td {
   background: #F9FAFB;
   padding: 6px 12px;
   border-radius: 999px;
+}
+
+#paginacao .pagina-num.active {
+  background-color: #c5c5c5 !important;
+  color: white !important;
 }
 
 .footer-container {
