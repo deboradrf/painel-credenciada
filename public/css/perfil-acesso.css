@@ -245,9 +245,63 @@ h3::after {
     margin-top: 4px;
 }
 
+.form-group label {
+    color: #4F545A;
+    font-weight: 600;
+    font-size: 15px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    border: 2px solid #8A94A6;
+    border-radius: 10px;
+    overflow: hidden;
+    align-items: stretch;
+}
+
+.input-icon {
+    background: #FFFFFF;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #8A94A6;
+    min-width: 55px;
+    position: relative;
+    border-right: none;
+}
+
+.input-icon::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    height: 80%;
+    width: 3%;
+    background-color: #8A94A6;
+}
+
+.input-wrapper input {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    color: #000000;
+    font-size: 15px;
+}
+
+.input-wrapper input:focus {
+    outline: none;
+}
+
 .list-group-item {
     border: none;
     background: transparent;
+    padding: 10px 0px;
 }
 
 .usuario-card {
@@ -376,89 +430,12 @@ h3::after {
     transform: translateY(-2px);
 }
 
-/*
-
-
-
-.modal-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-    min-width: 0;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: #6B7280;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.modal-label::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: #F1F1F1;
-}
-
-.select-wrapper {
-    position: relative;
-}
-
-
-
-
-
-#btnAddEmpresa,
-#btnAddUnidade {
-    display: block;
-    width: 100%;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 10px;
-    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
-    color: #000000;
-    cursor: pointer;
-    font-size: 13px; 
-    line-height: 28px;
-    padding: 0 18px;
-    width: 160px;
-    height: 40px;
-    transition: all 0.3s ease;
-}
-
-#btnAddEmpresa:hover,
-#btnAddUnidade:hover {
-    transform: translateY(-2px);
-}
-
-
-
-.btn-remove-empresa {
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #F05252;
-    background-color: transparent;
-    transition: all 0.3s ease;
-}
-
-.btn-remove-empresa:hover {
-    transform: translateY(-2px);
-}
-
-
-
- */
-
 .modal-header {
     background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
     border-bottom: none;
     padding: 20px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 
 .modal-header h3 {

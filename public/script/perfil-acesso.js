@@ -5,6 +5,8 @@ let usuarioSelecionado = null;
 let empresaSelecionada = null;
 let nomeEmpresaSelecionada = null;
 
+let selecionouTodasUnidades = false;
+
 const listaUsuarios = document.getElementById("usuariosList");
 
 const listaTodasUnidades = document.getElementById("listaTodasUnidades");
@@ -86,15 +88,43 @@ async function carregarUsuarios() {
 
     listaUsuarios.innerHTML = "";
 
-    usuarios.forEach(u => {
+    usuariosLista = usuarios.sort((a, b) =>
+        (a.nome || "").localeCompare(b.nome || "", 'pt-BR', { sensitivity: 'base' })
+    );
 
+    renderizarUsuarios(usuariosLista);
+}
+
+// FUNÇÃO DE FILTRO
+function filtrarUsuarios() {
+    const valor = document.getElementById("filtroUsuario").value.toLowerCase();
+
+    const filtrados = usuariosLista.filter(u =>
+        (u.nome || "").toLowerCase().includes(valor)
+    );
+
+    renderizarUsuarios(filtrados);
+}
+
+function renderizarUsuarios(lista) {
+    listaUsuarios.innerHTML = "";
+
+    if (!lista.length) {
+        listaUsuarios.innerHTML = `
+            <small class="list-group-item text-center text-muted">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                Nenhum usuário encontrado
+            </small>
+        `;
+        return;
+    }
+
+    lista.forEach(u => {
         const li = document.createElement("li");
-
         li.className = "list-group-item";
 
         let empresasHTML = "";
 
-        // EMPRESA PRINCIPAL
         if (u.cod_empresa) {
             empresasHTML += `
                 <button class="btn-empresas principal"
@@ -104,7 +134,6 @@ async function carregarUsuarios() {
             `;
         }
 
-        // EMPRESAS EXTRAS
         if (u.empresas_extras) {
             u.empresas_extras.forEach(e => {
                 empresasHTML += `
@@ -284,6 +313,7 @@ async function abrirModalUnidades(idUsuario, codEmpresa, nomeEmpresa) {
     usuarioSelecionado = idUsuario;
     empresaSelecionada = codEmpresa;
     nomeEmpresaSelecionada = nomeEmpresa;
+    selecionouTodasUnidades = false;
 
     const modal = new bootstrap.Modal(document.getElementById("modalUnidades"));
 
@@ -391,6 +421,8 @@ btnAddUnidade.addEventListener("click", () => {
     if (!opt || !opt.value) return;
 
     if (opt.value === "TODAS") {
+        selecionouTodasUnidades = true;
+
         [...sel.options].forEach(o => {
             if (o.value && o.value !== "TODAS" && o.value !== "") {
                 adicionarUnidadeNaLista(o.value, o.textContent);
@@ -410,9 +442,7 @@ async function salvarUnidades() {
     const itens = [...listaUnidadesUsuario.querySelectorAll("li")];
 
     // VERIFICA SE TODAS AS UNIDADES ESTÃO SELECIONADAS
-    const todasOpts = [...listaTodasUnidades.options]
-        .filter(o => o.value && o.value !== "TODAS" && o.value !== "");
-    const todas = todasOpts.length === 0 && itens.length > 0;
+    const todas = selecionouTodasUnidades;
 
     let unidades;
     if (todas) {

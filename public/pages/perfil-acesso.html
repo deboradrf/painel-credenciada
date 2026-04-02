@@ -102,6 +102,17 @@
                             Gerencie as permissões dos usuários selecionando as unidades que ele terá acesso
                         </p>
                     </div>
+
+                    <div class="mt-5 mb-3">
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </div>
+                            <input type="text" id="filtroUsuario" placeholder="Buscar usuário pelo nome..."
+                                oninput="filtrarUsuarios()" />
+                        </div>
+                    </div>
+
                     <ul id="usuariosList" class="list-group"></ul>
                 </div>
             </div>

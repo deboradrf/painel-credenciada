@@ -1573,7 +1573,7 @@ function preencherMaisUnidadesExame(exame) {
     bloco.classList.remove("d-none");
 
   } else {
-
+    
     bloco.classList.add("d-none");
   }
 }

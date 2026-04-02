@@ -559,14 +559,17 @@ tr:last-child td {
     border-bottom: none;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
     padding: 20px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 
 #modalConsulta .modal-header,
 #modalMotivo .modal-header {
     background: linear-gradient(135deg, #F1AE33 0%, #F8BC3A 40%, #F3B84A 100%);
     border-bottom: none;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
     padding: 20px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 
 #modalHistorico .modal-header h3,

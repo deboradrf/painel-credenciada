@@ -562,6 +562,8 @@ tr:last-child td {
     border-bottom: none;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
     padding: 20px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 
 .modal-header h3 {
