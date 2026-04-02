@@ -264,7 +264,7 @@ async function carregarUnidades(empresaCodigo) {
     }
 }
 
-const MAX_UNIDADES = 3;
+const MAX_UNIDADES = 5;
 
 // Botão adicionar unidade
 document.getElementById("btnAddUnidade").addEventListener("click", () => {
@@ -272,7 +272,7 @@ document.getElementById("btnAddUnidade").addEventListener("click", () => {
     const selects = container.querySelectorAll(".unidade-select");
 
     if (selects.length >= MAX_UNIDADES) {
-        notify.warning("Máximo de 3 unidades permitido");
+        notify.warning("Máximo de 5 unidades permitido");
         return;
     }
 

@@ -30,11 +30,11 @@ document.getElementById("recuperarForm").addEventListener("submit", async (e) =>
             return
         }
 
-        notify.success("Nova senha enviada para o seu e-mail!")
+        const confirmar = await modalConfirm("Uma nova senha foi enviada para o seu e-mail!")
 
-        setTimeout(() => {
+        if (confirmar) {
             window.location.href = "/pages/login.html"
-        }, 1500)
+        }
 
     } catch (erro) {
         console.error(erro)
