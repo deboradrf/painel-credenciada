@@ -27,55 +27,55 @@ app.get("/api/status", (req, res) => {
 });
 
 // SOC – SOAP
-const SOC_EXPORTA_FUNCIONARIOMODELO2 = "https://ws1.soc.com.br/WSSoc/FuncionarioModelo2Ws?wsdl";
-const SOC_USUARIO = process.env.SOC_USUARIO;
-const SOC_TOKEN = process.env.SOC_TOKEN;
+const socExportaFuncionarioModelo2 = process.env.SOC_EXPORTA_FUNCIONARIOMODELO2;
+const socUsuario = process.env.SOC_USUARIO;
+const socToken = process.env.SOC_TOKEN;
 
 // SOC – EXPORTA DADOS
-const SOC_EXPORTA_URL = "https://ws1.soc.com.br/WebSoc/exportadados";
+const socUrlExportaDados = process.env.SOC_URL_EXPORTA_DADOS;
 
 const EXPORTA_EMPRESAS = {
   empresa: "412429",
   codigo: "211215",
-  chave: "23749732f8f23c6b480a",
+  chave: process.env.SOC_CHAVE_EMPRESAS,
   tipoSaida: "xml"
 };
 
 const EXPORTA_UNIDADES = {
   codigo: "211234",
-  chave: "dcae35a7621badc2d93b",
+  chave: process.env.SOC_CHAVE_UNIDADES,
   tipoSaida: "xml"
 };
 
 const EXPORTA_HIERARQUIA = {
   codigo: "212432",
-  chave: "854125036a13e406b5dc",
+  chave: process.env.SOC_CHAVE_HIERARQUIA,
   tipoSaida: "xml"
 };
 
 const EXPORTA_SETORES = {
   codigo: "211373",
-  chave: "a8becfc0b392392557a3",
+  chave: process.env.SOC_CHAVE_SETORES,
   tipoSaida: "xml"
 };
 
 const EXPORTA_CARGOS = {
   codigo: "211242",
-  chave: "f148481826f0664d5958",
+  chave: process.env.SOC_CHAVE_CARGOS,
   tipoSaida: "xml"
 };
 
 const EXPORTA_FUNCIONARIOS = {
   empresa: "412429",
   codigo: "211477",
-  chave: "2849e76b01bbb08b3467",
+  chave: process.env.SOC_CHAVE_FUNCIONARIOS,
   tipoSaida: "json"
 };
 
 const EXPORTA_PRESTADORES = {
   empresa: "412429",
   codigo: "211713",
-  chave: "edc76dff447196a109fe",
+  chave: process.env.SOC_CHAVE_PRESTADORES,
   tipoSaida: "xml",
   codigoPrestador: ""
 };
@@ -83,7 +83,7 @@ const EXPORTA_PRESTADORES = {
 const EXPORTA_DETALHES_PRESTADOR = {
   empresa: "412429",
   codigo: "211707",
-  chave: "d7e76b1761998e246d37",
+  chave: process.env.SOC_CHAVE_DETALHES_PRESTADOR,
   tipoSaida: "json"
 }
 
@@ -98,7 +98,7 @@ app.get("/empresas", async (req, res) => {
   try {
     const parametro = JSON.stringify(EXPORTA_EMPRESAS);
 
-    const response = await axios.get(SOC_EXPORTA_URL, {
+    const response = await axios.get(socUrlExportaDados, {
       params: { parametro },
       responseType: "arraybuffer"
     });
@@ -131,7 +131,7 @@ app.get("/unidades/:empresa", async (req, res) => {
       ...EXPORTA_UNIDADES
     });
 
-    const response = await axios.get(SOC_EXPORTA_URL, {
+    const response = await axios.get(socUrlExportaDados, {
       params: { parametro },
       responseType: "arraybuffer"
     });
@@ -167,7 +167,7 @@ app.get("/hierarquia/:empresa/:unidade", async (req, res) => {
       empresaTrabalho: empresa
     });
 
-    const response = await axios.get(SOC_EXPORTA_URL, {
+    const response = await axios.get(socUrlExportaDados, {
       params: { parametro },
       responseType: "arraybuffer"
     });
@@ -215,7 +215,7 @@ app.get("/hierarquia/:empresa/:unidade/:setor", async (req, res) => {
       empresaTrabalho: empresa
     });
 
-    const response = await axios.get(SOC_EXPORTA_URL, {
+    const response = await axios.get(socUrlExportaDados, {
       params: { parametro },
       responseType: "arraybuffer"
     });
@@ -263,7 +263,7 @@ app.get("/setores/:empresa", async (req, res) => {
       ...EXPORTA_SETORES
     });
 
-    const response = await axios.get(SOC_EXPORTA_URL, {
+    const response = await axios.get(socUrlExportaDados, {
       params: { parametro },
       responseType: "arraybuffer"
     });
@@ -297,7 +297,7 @@ app.get("/cargos/:empresa", async (req, res) => {
       ...EXPORTA_CARGOS
     });
 
-    const response = await axios.get(SOC_EXPORTA_URL, {
+    const response = await axios.get(socUrlExportaDados, {
       params: { parametro },
       responseType: "arraybuffer"
     });
@@ -332,7 +332,7 @@ app.get("/prestadores/:empresa", async (req, res) => {
       empresaTrabalho: req.params.empresa
     });
 
-    const response = await axios.get(SOC_EXPORTA_URL, {
+    const response = await axios.get(socUrlExportaDados, {
       params: { parametro },
       responseType: "arraybuffer"
     });
@@ -374,7 +374,6 @@ app.get("/prestadores/:empresa", async (req, res) => {
 // EXPORTA DADOS - DETALHES DO PRESTADOR - (filtrado pelo codigo)
 app.get("/prestador/:empresa/:codigoPrestador", async (req, res) => {
   try {
-
     const { codigoPrestador } = req.params;
 
     const parametro = JSON.stringify({
@@ -406,7 +405,6 @@ app.get("/prestador/:empresa/:codigoPrestador", async (req, res) => {
         erro: "SOC retornou resposta inválida",
         detalhe: decoded
       });
-
     }
 
     const data = JSON.parse(decoded);
@@ -547,7 +545,8 @@ app.post("/login", async (req, res) => {
         perfil,
         cod_empresa,
         nome_empresa,
-        unidades
+        unidades,
+        ativo
       FROM usuarios
       WHERE cpf = $1
       `,
@@ -560,17 +559,19 @@ app.post("/login", async (req, res) => {
 
     const user = result.rows[0];
 
+    // 🚫 BLOQUEIO DE USUÁRIO INATIVO
+    if (user.ativo === 0) {
+      return res.status(403).json({ erro: "Cadastro inativo" });
+    }
+
     let senhaValida = false;
 
-    // 🔥 DETECTA SE É BCRYPT OU TEXTO
+    // DETECTA SE É BCRYPT OU TEXTO
     if (user.senha.startsWith("$2b$")) {
-      // senha criptografada
       senhaValida = await bcrypt.compare(senha, user.senha);
     } else {
-      // senha antiga (texto puro)
       senhaValida = senha === user.senha;
 
-      // 🔥 BONUS: já atualiza pra bcrypt automaticamente
       if (senhaValida) {
         const novaHash = await bcrypt.hash(senha, 10);
 
@@ -2371,11 +2372,11 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
 
     const cpf = f.cpf.replace(/\D/g, "");
 
-    const client = await soap.createClientAsync(SOC_EXPORTA_FUNCIONARIOMODELO2);
+    const client = await soap.createClientAsync(socExportaFuncionarioModelo2);
 
     const wsSecurity = new soap.WSSecurity(
-      SOC_USUARIO,
-      SOC_TOKEN,
+      socUsuario,
+      socToken,
       { passwordType: "PasswordDigest", hasTimeStamp: true }
     );
 
@@ -2387,7 +2388,7 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
         atualizarFuncionario: false,
 
         identificacaoWsVo: {
-          chaveAcesso: SOC_TOKEN,
+          chaveAcesso: socToken,
           codigoEmpresaPrincipal: "412429",
           codigoResponsavel: "198591",
           codigoUsuario: "3403088",
@@ -2598,7 +2599,7 @@ app.get("/pesquisar-funcionario-soc/:cpf/:empresaUsuario", async (req, res) => {
       cpf
     });
 
-    const response = await axios.get(SOC_EXPORTA_URL, {
+    const response = await axios.get(socUrlExportaDados, {
       params: { parametro },
       responseType: "arraybuffer"
     });
