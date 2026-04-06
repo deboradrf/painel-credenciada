@@ -156,6 +156,7 @@ function renderizarUsuarios(lista) {
                     <div class="usuario-text">
                         <b>${u.nome}</b>
                         <small>CPF: ${u.cpf}</small>
+                        <small>Usuário ${u.ativo ? "Ativo" : "Inativo"}</small>
                         <small>ID: ${u.id}</small> 
                     </div>
                 </div>

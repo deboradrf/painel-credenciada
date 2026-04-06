@@ -559,7 +559,7 @@ app.post("/login", async (req, res) => {
 
     const user = result.rows[0];
 
-    // 🚫 BLOQUEIO DE USUÁRIO INATIVO
+    // BLOQUEIO DE USUÁRIO INATIVO
     if (user.ativo === 0) {
       return res.status(403).json({ erro: "Cadastro inativo" });
     }
@@ -2686,7 +2686,8 @@ app.get("/usuarios", async (req, res) => {
             SELECT json_agg(ue)
             FROM usuarios_empresas ue
             WHERE ue.usuario_id = u.id
-        ) AS empresas_extras
+        ) AS empresas_extras,
+        ativo
     FROM usuarios u
   `);
 
