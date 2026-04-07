@@ -246,7 +246,6 @@ document.getElementById("unidadeSelect").addEventListener("change", async functi
     const setores = await res.json();
 
     setores
-      .sort((a, b) => a.nomeSetor.localeCompare(b.nomeSetor, "pt-BR"))
       .forEach(s => {
         const opt = document.createElement("option");
         opt.value = s.codigoSetor;

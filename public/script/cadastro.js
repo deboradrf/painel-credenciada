@@ -108,7 +108,7 @@ async function carregarEmpresas(perfil) {
     if (!select) return;
 
     try {
-        const res = await fetch("/empresas");
+        const res = await fetch("/api/empresas");
         let empresas = await res.json();
 
         // SE O PERFIL FOR CREDENCIADA, CARREGAR EMPRESAS DA SALUBRITA APENAS
@@ -118,10 +118,6 @@ async function carregarEmpresas(perfil) {
                 e.nome.toLowerCase().startsWith("salubrita")
             );
         }
-
-        empresas.sort((a, b) =>
-            a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
-        );
 
         select.innerHTML = '<option value="">Selecione...</option>';
 

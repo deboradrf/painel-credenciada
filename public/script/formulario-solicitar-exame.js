@@ -194,7 +194,6 @@ async function popularSelectUnidadeDestino() {
     unidadeDestino.innerHTML = `<option value="">Selecione...</option>`;
 
     unidadesParaMostrar.forEach(u => {
-
       const opt = document.createElement("option");
       opt.value = u.codigo;
       opt.textContent = u.nome;

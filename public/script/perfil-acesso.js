@@ -195,7 +195,7 @@ async function abrirModalEmpresas(idUsuario) {
 
 // FUNÇÃO PARA CARREGAR TODAS AS EMPRESAS
 async function carregarTodasEmpresas() {
-    const res = await fetch("/empresas");
+    const res = await fetch("/api/empresas");
     const empresas = await res.json();
     
     listaTodasEmpresas.innerHTML = '<option value="">Selecione uma empresa...</option>';

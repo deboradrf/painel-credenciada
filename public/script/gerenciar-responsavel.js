@@ -80,7 +80,7 @@ async function carregarEmpresas() {
         </small>
     `;
 
-    const res = await fetch("/empresas");
+    const res = await fetch("/api/empresas");
     const empresas = await res.json();
 
     const itens = await Promise.all(empresas.map(async (emp) => {

@@ -94,7 +94,7 @@ const parser = new XMLParser({
 });
 
 // EXPORTA DADOS - TODAS EMPRESAS - (apenas ativos)
-app.get("/empresas", async (req, res) => {
+app.get("/api/empresas", async (req, res) => {
   try {
     const parametro = JSON.stringify(EXPORTA_EMPRESAS);
 
@@ -195,7 +195,8 @@ app.get("/hierarquia/:empresa/:unidade", async (req, res) => {
         }
       });
 
-    const setores = Array.from(setoresMap.values());
+    const setores = Array.from(setoresMap.values())
+      .sort((a, b) => a.nomeSetor.localeCompare(b.nomeSetor, 'pt-BR'));
 
     res.json(setores);
   } catch (err) {
@@ -384,7 +385,7 @@ app.get("/prestador/:empresa/:codigoPrestador", async (req, res) => {
     const payload = new URLSearchParams({ parametro });
 
     const socResponse = await axios.post(
-      "https://ws1.soc.com.br/WebSoc/exportadados",
+      socUrlExportaDados,
       payload,
       {
         headers: {
@@ -601,7 +602,7 @@ app.post("/login", async (req, res) => {
       ...user,
       empresas_extras: empresasExtras.rows
     });
-
+    
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: "Erro no login" });
