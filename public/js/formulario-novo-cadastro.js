@@ -197,7 +197,7 @@ async function carregarUnidades() {
   if (!codigoEmpresa) return;
 
   try {
-    const res = await fetch(`/unidades/${codigoEmpresa}`);
+    const res = await fetch(`/api/unidades/${codigoEmpresa}`);
     const unidadesBackend = await res.json();
 
     let unidadesParaMostrar = [];
@@ -242,7 +242,7 @@ document.getElementById("unidadeSelect").addEventListener("change", async functi
   if (!codUnidade) return;
 
   try {
-    const res = await fetch(`/hierarquia/${codigoEmpresa}/${codUnidade}`);
+    const res = await fetch(`/api/hierarquia/${codigoEmpresa}/${codUnidade}`);
     const setores = await res.json();
 
     setores
@@ -270,9 +270,7 @@ document.getElementById("setorSelect").addEventListener("change", async function
   if (!codSetor || !codUnidade) return;
 
   try {
-    const res = await fetch(
-      `/hierarquia/${codigoEmpresa}/${codUnidade}/${codSetor}`
-    );
+    const res = await fetch(`/api/hierarquia/${codigoEmpresa}/${codUnidade}/${codSetor}`);
 
     const cargos = await res.json();
 
@@ -670,7 +668,7 @@ async function carregarPrestadores() {
   if (!select) return;
 
   try {
-    await fetch(`/prestadores/${codigoEmpresa}`);
+    await fetch(`/api/prestadores/${codigoEmpresa}`);
 
     await listarPrestadores();
 
@@ -681,7 +679,7 @@ async function carregarPrestadores() {
 
 // LISTAR OS PRESTADORES
 async function listarPrestadores() {
-  const res = await fetch(`/prestadores/${codigoEmpresa}`);
+  const res = await fetch(`/api/prestadores/${codigoEmpresa}`);
   const prestadoresBase = await res.json();
 
   const detalhes = [];
@@ -711,7 +709,7 @@ async function listarPrestadores() {
 // PEGAR OS DETALHES DO PRESTADOR
 async function buscarDetalhesPrestador(codigo) {
   try {
-    const res = await fetch(`/prestador/${codigoEmpresa}/${codigo}`);
+    const res = await fetch(`/api/prestador/${codigoEmpresa}/${codigo}`);
     if (!res.ok) throw new Error();
 
     const dados = await res.json();
@@ -1088,7 +1086,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   dados.status = statusInicial;
 
   try {
-    const res = await fetch("/novo-cadastro", {
+    const res = await fetch("/api/novo-cadastro", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados)
@@ -1118,7 +1116,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   }
 });
 
-// FUNÇÃO PARA ENVIAR EMAIL NA HORA DA SOLICITAÇÃO
+// FUNÇÃO PARA ENVIO DE EMAIL NA HORA DA SOLICITAÇÃO
 async function enviarEmailSolicitacao(dados) {
   let tipoSolicitacao = "";
   let assunto = "";

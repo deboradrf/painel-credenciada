@@ -455,11 +455,11 @@ async function verConsulta(id, tipo) {
   let url = "";
 
   if (tipo === "NOVO_EXAME") {
-    url = `/solicitacoes/novo-exame/${id}`;
+    url = `/api/solicitacoes/novo-exame/${id}`;
   }
 
   if (tipo === "NOVO_CADASTRO") {
-    url = `/solicitacoes/novo-cadastro/${id}`;
+    url = `/api/solicitacoes/novo-cadastro/${id}`;
   }
 
   try {
@@ -491,7 +491,7 @@ function formatarTipoExame(tipo) {
 // FUNÇÃO PARA RESOLVER CÓDIGO DA UNIDADE PELO NOME (USADO NO MODAL DE EDITAR EXAME)
 async function obterCodigoUnidadePorNome(empresaCodigo, nomeUnidade) {
   try {
-    const response = await fetch(`/unidades/${empresaCodigo}`);
+    const response = await fetch(`/api/unidades/${empresaCodigo}`);
     const unidades = await response.json();
 
     const normalizar = str => str?.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -514,7 +514,7 @@ async function carregarSetores(empresaCodigo, unidadeCodigo, setorSelecionado = 
   if (!select) return;
 
   try {
-    const response = await fetch(`/hierarquia/${empresaCodigo}/${unidadeCodigo}`);
+    const response = await fetch(`/api/hierarquia/${empresaCodigo}/${unidadeCodigo}`);
     const setores = await response.json();
 
     setores.sort((a, b) =>
@@ -548,9 +548,7 @@ async function carregarCargosDoSetorSelecionado(empresaCodigo, unidadeCodigo, se
   selectCargo.innerHTML = '<option value="">Selecione...</option>';
 
   try {
-    const response = await fetch(
-      `/hierarquia/${empresaCodigo}/${unidadeCodigo}/${setorCodigo}`
-    );
+    const response = await fetch(`/api/hierarquia/${empresaCodigo}/${unidadeCodigo}/${setorCodigo}`);
 
     const cargos = await response.json();
 
@@ -679,7 +677,7 @@ function verMotivo(motivo) {
 
 // ABRIR MODAL DE EDITAR
 async function abrirModalEditar(id, tipo) {
-  const url = tipo === "NOVO_EXAME" ? `/solicitacoes/novo-exame/${id}` : `/solicitacoes/novo-cadastro/${id}`;
+  const url = tipo === "NOVO_EXAME" ? `/api/solicitacoes/novo-exame/${id}` : `/api/solicitacoes/novo-cadastro/${id}`;
 
   const res = await fetch(url);
 
@@ -1088,9 +1086,7 @@ async function preencherModalEditarExame(s) {
       let codFuncaoSelecionada = null;
 
       if (s.funcao_destino && s.funcao_destino.trim() !== "") {
-        const response = await fetch(
-          `/hierarquia/${s.cod_empresa}/${codUnidadeParaSetores}/${codSetorParaSelecionar}`
-        );
+        const response = await fetch(`/api/hierarquia/${s.cod_empresa}/${codUnidadeParaSetores}/${codSetorParaSelecionar}`);
 
         const funcoes = await response.json();
 
@@ -1291,7 +1287,7 @@ async function preencherModalEditarExame(s) {
 }
 
 async function obterCodigoSetorPorNome(codEmpresa, codUnidade, nomeSetor) {
-  const res = await fetch(`/hierarquia/${codEmpresa}/${codUnidade}`);
+  const res = await fetch(`/api/hierarquia/${codEmpresa}/${codUnidade}`);
 
   const setores = await res.json();
 
@@ -1316,7 +1312,7 @@ async function carregarFuncoesDoSetorDestino(empresaCodigo, unidadeCodigo, setor
   selectFuncao.innerHTML = '<option value="">Selecione...</option>';
 
   try {
-    const url = `/hierarquia/${empresaCodigo}/${unidadeCodigo}/${setorCodigo}`;
+    const url = `/api/hierarquia/${empresaCodigo}/${unidadeCodigo}/${setorCodigo}`;
 
     const response = await fetch(url);
 

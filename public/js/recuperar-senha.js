@@ -12,7 +12,7 @@ document.getElementById("recuperarForm").addEventListener("submit", async (e) =>
     `
 
     try {
-        const res = await fetch("/recuperar-senha", {
+        const res = await fetch("/api/recuperar-senha", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

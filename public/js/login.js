@@ -4,7 +4,7 @@ document.getElementById("loginForm").onsubmit = async e => {
     const usuario = document.getElementById("usuario").value;
     const senha = document.getElementById("senha").value.trim();
 
-    const res = await fetch(`/login`, {
+    const res = await fetch(`/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usuario, senha })

@@ -107,7 +107,7 @@ async function preencherUnidadeFuncionario() {
     return;
   }
 
-  const res = await fetch(`/unidades/${empresa}`);
+  const res = await fetch(`/api/unidades/${empresa}`);
   unidadesCache = await res.json();
 
   const unidade = unidadesCache.find(u => String(u.codigo) === String(codUnidade));
@@ -128,7 +128,7 @@ async function preencherSetorFuncionario() {
 
   if (!empresa || !codSetor) return;
 
-  const res = await fetch(`/setores/${empresa}`);
+  const res = await fetch(`/api/setores/${empresa}`);
   const setores = await res.json();
 
   const setor = setores.find(s => String(s.codigo) === String(codSetor));
@@ -144,7 +144,7 @@ async function preencherCargoFuncionario() {
 
   if (!empresa || !codCargo) return;
 
-  const res = await fetch(`/cargos/${empresa}`);
+  const res = await fetch(`/api/cargos/${empresa}`);
   const cargos = await res.json();
 
   const cargo = cargos.find(c => String(c.codigo) === String(codCargo));
@@ -168,7 +168,7 @@ async function popularSelectUnidadeDestino() {
 
   try {
     if (!unidadesCache || unidadesCache.length === 0) {
-      const res = await fetch(`/unidades/${empresa}`);
+      const res = await fetch(`/api/unidades/${empresa}`);
       unidadesCache = await res.json();
     }
 
@@ -238,7 +238,7 @@ async function carregarSetoresDaUnidade() {
     return;
   }
 
-  const res = await fetch(`/hierarquia/${empresa}/${unidade}`);
+  const res = await fetch(`/api/hierarquia/${empresa}/${unidade}`);
   const setores = await res.json();
 
   const setorDestino = document.getElementById("setorDestino");
@@ -275,7 +275,7 @@ async function carregarCargosDoSetor() {
   funcaoDestino.innerHTML = `<option value="">Selecione...</option>`;
 
   try {
-    const res = await fetch(`/hierarquia/${empresa}/${unidade}/${codSetor}`);
+    const res = await fetch(`/api/hierarquia/${empresa}/${unidade}/${codSetor}`);
     const hierarquia = await res.json();
 
     hierarquia.forEach(item => {
@@ -685,7 +685,7 @@ async function carregarPrestadores() {
   if (!select) return;
 
   try {
-    await fetch(`/prestadores/${codigoEmpresa}`);
+    await fetch(`/api/prestadores/${codigoEmpresa}`);
 
     await listarPrestadores();
 
@@ -696,7 +696,7 @@ async function carregarPrestadores() {
 
 // LISTAR OS PRESTADORES
 async function listarPrestadores() {
-  const res = await fetch(`/prestadores/${codigoEmpresa}`);
+  const res = await fetch(`/api/prestadores/${codigoEmpresa}`);
   const prestadoresBase = await res.json();
 
   const detalhes = [];
@@ -726,7 +726,7 @@ async function listarPrestadores() {
 // PEGAR OS DETALHES DO PRESTADOR
 async function buscarDetalhesPrestador(codigo) {
   try {
-    const res = await fetch(`/prestador/${codigoEmpresa}/${codigo}`);
+    const res = await fetch(`/api/prestador/${codigoEmpresa}/${codigo}`);
     if (!res.ok) throw new Error();
 
     const dados = await res.json();
@@ -1190,7 +1190,7 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
   dados.status = statusInicial;
 
   try {
-    const res = await fetch("/solicitar-exame", {
+    const res = await fetch("/api/solicitar-exame", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados)

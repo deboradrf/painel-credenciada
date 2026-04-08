@@ -78,7 +78,7 @@ document.getElementById("btnAtualizar").addEventListener("click", () => { locati
 
 // FUNÇÃO PARA CARREGAR SOLICITAÇÕES E RENDERIZAR A TABELA
 async function carregarSolicitacoes() {
-  const res = await fetch("/solicitacoes");
+  const res = await fetch("/api/solicitacoes");
 
   solicitacoes = await res.json();
 
@@ -413,8 +413,8 @@ async function verDetalhes(id, tipo) {
 
     const url =
       tipo === "NOVO_EXAME"
-        ? `/solicitacoes/novo-exame/${id}`
-        : `/solicitacoes/novo-cadastro/${id}`;
+        ? `/api/solicitacoes/novo-exame/${id}`
+        : `/api/solicitacoes/novo-cadastro/${id}`;
 
     const res = await fetch(url);
     if (!res.ok) throw new Error();
@@ -1240,7 +1240,7 @@ async function abrirHistorico(id, tipo) {
 }
 
 async function obterCodigoUnidadePorNome(codEmpresa, nomeUnidade) {
-  const res = await fetch(`/unidades/${codEmpresa}`);
+  const res = await fetch(`/api/unidades/${codEmpresa}`);
   const unidades = await res.json();
 
   const unidade = unidades.find(u =>
@@ -1306,7 +1306,7 @@ async function carregarUnidades(empresaCodigo, selecionadoNome = "") {
   select.innerHTML = '<option value="">-</option>';
 
   try {
-    const res = await fetch(`/unidades/${empresaCodigo}`);
+    const res = await fetch(`/api/unidades/${empresaCodigo}`);
     const unidades = await res.json();
 
     unidades.forEach(u => {
@@ -1330,7 +1330,7 @@ async function carregarUnidadesNovoExame(empresaCodigo, unidadeSelecionada = "")
   select.innerHTML = '<option value="">-</option>';
 
   try {
-    const res = await fetch(`/unidades/${empresaCodigo}`);
+    const res = await fetch(`/api/unidades/${empresaCodigo}`);
     const unidades = await res.json();
 
     unidades.forEach(u => {
@@ -1352,7 +1352,7 @@ async function carregarUnidadesNovoExame(empresaCodigo, unidadeSelecionada = "")
 
 // BUSCAR CODIGO DO SETOR PELO NOME CASO ESSE CAMPO JÁ VENHA PREENCHIDO
 async function obterCodigoSetorPorNome(codEmpresa, codUnidade, nomeSetor) {
-  const res = await fetch(`/hierarquia/${codEmpresa}/${codUnidade}`);
+  const res = await fetch(`/api/hierarquia/${codEmpresa}/${codUnidade}`);
 
   const setores = await res.json();
 
@@ -1371,7 +1371,7 @@ async function carregarSetores(empresaCodigo, unidadeCodigo, setorSelecionado = 
   select.innerHTML = '<option value="">-</option>';
 
   try {
-    const res = await fetch(`/hierarquia/${empresaCodigo}/${unidadeCodigo}`);
+    const res = await fetch(`/api/hierarquia/${empresaCodigo}/${unidadeCodigo}`);
     const data = await res.json();
 
     hierarquiaAtual = data;
@@ -1426,9 +1426,7 @@ async function carregarCargosDoSetorSelecionado(
   selectCargo.innerHTML = '<option value="">-</option>';
 
   try {
-    const response = await fetch(
-      `/hierarquia/${empresaCodigo}/${unidadeCodigo}/${setorCodigo}`
-    );
+    const response = await fetch(`/api/hierarquia/${empresaCodigo}/${unidadeCodigo}/${setorCodigo}`);
 
     const cargos = await response.json();
 
@@ -1468,28 +1466,28 @@ document.getElementById("exameSetorDestinoSelect").addEventListener("change", fu
 });
 
 // FUNÇÃO PARA POPULAR O SELECT DE FUNÇÃO ATUAL NO MODAL DE NOVO EXAME
-async function carregarFuncao(empresaCodigo, selecionadoNome = "") {
-  if (!empresaCodigo) return;
+// async function carregarFuncao(empresaCodigo, selecionadoNome = "") {
+//   if (!empresaCodigo) return;
 
-  const selectFuncaoDestino = document.getElementById("exameFuncaoDestinoSelect");
-  selectFuncaoDestino.innerHTML = '<option value="">-</option>';
+//   const selectFuncaoDestino = document.getElementById("exameFuncaoDestinoSelect");
+//   selectFuncaoDestino.innerHTML = '<option value="">-</option>';
 
-  try {
-    const res = await fetch(`/cargos/${empresaCodigo}`);
-    const funcoes = await res.json();
+//   try {
+//     const res = await fetch(`/api/cargos/${empresaCodigo}`);
+//     const funcoes = await res.json();
 
-    funcoes.forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = c.codigo;
-      opt.textContent = c.nome;
+//     funcoes.forEach(c => {
+//       const opt = document.createElement("option");
+//       opt.value = c.codigo;
+//       opt.textContent = c.nome;
 
-      if (c.nome === selecionadoNome) opt.selected = true;
-      selectFuncaoDestino.appendChild(opt);
-    });
-  } catch (erro) {
-    console.error(erro);
-  }
-}
+//       if (c.nome === selecionadoNome) opt.selected = true;
+//       selectFuncaoDestino.appendChild(opt);
+//     });
+//   } catch (erro) {
+//     console.error(erro);
+//   }
+// }
 
 // FUNÇÃO PARA FORMATAR TIPO DE EXAME
 const TIPO_EXAME_LABELS = {
@@ -1585,14 +1583,14 @@ async function carregarPrestadoresPreferenciais(codEmpresa, selectId, clinicaSel
   const select = document.getElementById(selectId);
   if (!select) return;
 
-  const res = await fetch(`/prestadores/${codEmpresa}`);
+  const res = await fetch(`/api/prestadores/${codEmpresa}`);
   const prestadores = await res.json();
 
   select.innerHTML = '<option value="">-</option>';
 
   for (const p of prestadores) {
     try {
-      const detalheRes = await fetch(`/prestador/${codEmpresa}/${p.codigo}`);
+      const detalheRes = await fetch(`/api/prestador/${codEmpresa}/${p.codigo}`);
 
       if (!detalheRes.ok) {
         console.warn("Erro ao buscar detalhe:", p.codigo);

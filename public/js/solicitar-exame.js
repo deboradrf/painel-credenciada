@@ -65,7 +65,7 @@ async function buscarCPF() {
       <div class="alerts-container mb-4">
         <div class="alert alert-invalido">
           <i class="fa-solid fa-circle-exclamation fa-lg" style="color: #F1AE33"></i>
-          <p class="alert-text">CPF inválido. Tente novamente.</p>
+          <p class="alert-text">CPF inválido</p>
         </div>
       </div>
     `;
@@ -73,7 +73,7 @@ async function buscarCPF() {
   }
 
   try {
-    const res = await fetch(`/pesquisar-funcionario-soc/${cpf}/${empresaUsuario}`);
+    const res = await fetch(`/api/buscar-cadastro/${cpf}/${empresaUsuario}`);
     const data = await res.json();
 
     let funcionarios = [];
@@ -84,18 +84,15 @@ async function buscarCPF() {
       funcionarios = [data.funcionario];
     }
 
-    // BUSCA O FUNCIONÁRIO ATIVO (se existir)
-    const funcionarioAtivo = funcionarios.find(
-      f => f.situacao?.toLowerCase() === "ativo"
-    );
-
-    // NÃO EXISTE NENHUM CADASTRO ATIVO
-    if (!funcionarioAtivo) {
+    // NÃO ENCONTROU NENHUM CADASTRO
+    if (!data.existe || funcionarios.length === 0) {
       resultado.innerHTML = `
         <div class="alerts-container mb-3">
-          <div class="alert alert-encontrou-ativo">
-            <i class="fa-solid fa-circle-check fa-lg" style="color: #53A5A6"></i>
-            <p class="alert-text">Nenhum cadastro ativo encontrado para este CPF.</p>
+          <div class="alert alert-nao-encontrou">
+            <i class="fa-solid fa-circle-xmark fa-lg" style="color: #F05252"></i>
+            <p class="alert-text">
+              Nenhum cadastro encontrado para este CPF.
+            </p>
           </div>
         </div>
 
@@ -109,87 +106,130 @@ async function buscarCPF() {
       `;
       return;
     }
-
-    const f = funcionarioAtivo;
-
+    
+    // ENCONTROU ALGUM CADASTRO
     resultado.innerHTML = `
-      <div class="alerts-container mb-4">
-        <div class="alert alert-erro">
-          <i class="fa-solid fa-circle-xmark fa-lg" style="color: #F05252"></i>
-          <p class="alert-text">CPF ativo encontrado. Não é possível solicitar novo cadastro.</p>
+      <div class="alerts-container mb-3">
+        <div class="alert alert-encontrou-ativo">
+          <i class="fa-solid fa-circle-check fa-lg" style="color: #53A5A6"></i>
+          <p class="alert-text">
+            Foi encontrado ${funcionarios.length} cadastro(s) para este CPF.
+          </p>
         </div>
       </div>
-
-      <div class="funcionario-card shadow-sm text-center my-4">
-        <div class="card-header mb-3">
-          <div class="detail-value">
-            <i class="fa-solid fa-user" style="color: #88A6BB"></i>
-            ${f.nome}
+      
+      ${funcionarios.map((f) => {
+        const situacao = f.situacao?.toLowerCase();
+        
+        return `
+        <div class="funcionario-card shadow-sm text-center my-4">
+          <div class="card-header mb-3">
+            <div class="detail-value">
+              <i class="fa-solid fa-user" style="color: #88A6BB"></i>
+              ${f.nome}
+            </div>
+            <div class="ms-auto">
+              <span class="${f.situacao?.toLowerCase() === "ativo" ? "badge badge-ativo" : "badge badge-inativo"}">
+                ${f.situacao}
+              </span>
+            </div>
           </div>
-          <div class="ms-auto">
-            <span class="badge badge-ativo">ATIVO</span>
+
+          <div class="card-body">
+            <div class="row g-2">
+              <div class="col-12">
+                <div class="detail-item horizontal">
+                  <div class="detail-label">
+                    <span>Unidade</span>
+                  </div>
+                  <div class="detail-value">
+                    ${f.unidade?.nome}
+                    </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="detail-item horizontal">
+                  <div class="detail-label">
+                    <span>Setor</span>
+                  </div>
+                  <div class="detail-value">
+                    ${f.setor?.nome}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="detail-item horizontal">
+                  <div class="detail-label">
+                    <span>Cargo</span>
+                  </div>
+                  <div class="detail-value">
+                    ${f.cargo?.nome}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="detail-item horizontal">
+                  <div class="detail-label">
+                    <span>Data de Admissão</span>
+                  </div>
+                  <div class="detail-value">
+                    ${f.data_admissao || "-"}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="detail-item horizontal">
+                  <div class="detail-label">
+                    <span>Data de Demissão</span>
+                  </div>
+                  <div class="detail-value">
+                    ${f.data_demissao || "-"}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="detail-item horizontal">
+                  <div class="detail-label">
+                    <span>Matrícula eSocial</span>
+                  </div>
+                  <div class="detail-value">
+                    ${f.matricula || "-"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-footer text-body-secondary mt-4">
+            ${situacao === "ativo" || situacao === "pendente"
+            ? `
+                <div class="d-flex justify-content-center">
+                  <button class="btn-solicitar-exame"
+                    onclick="salvarFuncionario(${JSON.stringify(f).replace(/"/g, '&quot;')}); window.location.href='formulario-solicitar-exame.html'">
+                    <i class="fa-solid fa-file-circle-plus" style="color: #88A6BB"></i>
+                    Solicitar exame para este funcionário
+                  </button>
+                </div> `
+            : ` <small>Não é possível solicitar exame para este funcionário</small> `
+            }
           </div>
         </div>
-
-        <div class="card-body">
-          <div class="row g-2">
-            <div class="col-12">
-              <div class="detail-item horizontal">
-                <div class="detail-label"><span>Unidade</span></div>
-                <div class="detail-value">${f.unidade?.nome}</div>
-              </div>
-            </div>
-
-            <div class="col-12">
-              <div class="detail-item horizontal">
-                <div class="detail-label"><span>Setor</span></div>
-                <div class="detail-value">${f.setor?.nome}</div>
-              </div>
-            </div>
-
-            <div class="col-12">
-              <div class="detail-item horizontal">
-                <div class="detail-label"><span>Cargo</span></div>
-                <div class="detail-value">${f.cargo?.nome}</div>
-              </div>
-            </div>
-
-            <div class="col-6">
-              <div class="detail-item horizontal">
-                <div class="detail-label"><span>Data de Admissão</span></div>
-                <div class="detail-value">${f.data_admissao}</div>
-              </div>
-            </div>
-
-            <div class="col-6">
-              <div class="detail-item horizontal">
-                <div class="detail-label"><span>Matrícula eSocial</span></div>
-                <div class="detail-value">${f.matricula || "-"}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-footer text-body-secondary mt-4">
-          <div class="d-flex justify-content-center">
-            <button class="btn-solicitar-exame"
-              onclick="salvarFuncionario(${JSON.stringify(f).replace(/"/g, '&quot;')}); window.location.href='formulario-solicitar-exame.html'">
-              <i class="fa-solid fa-file-circle-plus" style="color: #88A6BB"></i>
-              Solicitar exame para este funcionário
-            </button>
-          </div>
-        </div>
-      </div>
+      `}).join("")}
     `;
 
   } catch (erro) {
     console.error(erro);
-    
+
     resultado.innerHTML = `
       <div class="alerts-container mb-4">
         <div class="alert alert-erro">
           <i class="fa-solid fa-circle-xmark fa-lg" style="color: #F05252"></i>
-          <p class="alert-text">Erro ao consultar CPF. Tente novamente.</p>
+          <p class="alert-text">Erro ao consultar CPF. Tente novamente</p>
         </div>
       </div>
     `;

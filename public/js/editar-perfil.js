@@ -71,7 +71,7 @@ async function carregarPerfil() {
         return;
     }
 
-    const res = await fetch(`/usuarios/${usuarioLogado.id}`);
+    const res = await fetch(`/api/usuarios/${usuarioLogado.id}`);
     const user = await res.json();
 
     if (!res.ok) {
@@ -188,7 +188,7 @@ async function salvarEdicao() {
         body.senha = senha;
     }
 
-    const res = await fetch(`/usuarios/${usuarioLogado.id}`, {
+    const res = await fetch(`/api/usuarios/${usuarioLogado.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)

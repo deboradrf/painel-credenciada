@@ -202,7 +202,7 @@ async function carregarUnidades(empresaCodigo) {
 
     try {
         // Se empresa "TODAS" estiver selecionada, buscar todas as unidades
-        let url = empresaCodigo === "TODAS" ? `/unidades` : `/unidades/${empresaCodigo}`;
+        let url = empresaCodigo === "TODAS" ? `/unidades` : `/api/unidades/${empresaCodigo}`;
         const res = await fetch(url);
         const unidades = await res.json();
 
@@ -339,7 +339,7 @@ document.getElementById("cadastroForm").addEventListener("submit", async e => {
         unidades
     };
 
-    const res = await fetch(`/cadastro`, {
+    const res = await fetch(`/api/cadastro`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)

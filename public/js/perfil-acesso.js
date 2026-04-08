@@ -83,7 +83,7 @@ async function dropdownPerfil() {
 
 // FUNÇÃO PARA CARREGAR TODOS OS USUÁRIOS
 async function carregarUsuarios() {
-    const res = await fetch("/usuarios");
+    const res = await fetch("/api/usuarios");
     const usuarios = await res.json();
 
     listaUsuarios.innerHTML = "";
@@ -210,7 +210,7 @@ async function carregarTodasEmpresas() {
 
 // FUNÇÃO PARA CARREGAR AS EMPRESAS DO USUÁRIO
 async function carregarEmpresasUsuario(idUsuario) {
-    const res = await fetch(`/usuarios/${idUsuario}/empresas`);
+    const res = await fetch(`/api/usuarios/${idUsuario}/empresas`);
     const empresas = await res.json();
     
     listaEmpresasUsuario.innerHTML = "";
@@ -292,7 +292,7 @@ async function salvarEmpresas() {
 
     const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
 
-    await fetch("/usuarios/salvar-empresas", {
+    await fetch("/api/usuarios/salvar-empresas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -328,7 +328,7 @@ async function abrirModalUnidades(idUsuario, codEmpresa, nomeEmpresa) {
 
 // FUNÇÃO PARA CARREGAR TODAS UNIDADES DA EMPRESA
 async function carregarUnidades(codEmpresa) {
-    const res = await fetch(`/unidades/${codEmpresa}`);
+    const res = await fetch(`/api/unidades/${codEmpresa}`);
     const unidades = await res.json();
 
     listaTodasUnidades.innerHTML = '<option value="">Escolha uma unidade...</option>';
@@ -348,7 +348,7 @@ async function carregarUnidades(codEmpresa) {
 
 // FUNÇÃO PARA CARREGAR AS UNIDADES DO USUÁRIO
 async function carregarUnidadesUsuario(idUsuario, codEmpresa) {
-    const res = await fetch(`/usuarios/${idUsuario}/unidades/${codEmpresa}`);
+    const res = await fetch(`/api/usuarios/${idUsuario}/unidades/${codEmpresa}`);
     const unidades = await res.json();
 
     listaUnidadesUsuario.innerHTML = "";
@@ -457,7 +457,7 @@ async function salvarUnidades() {
 
     const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
 
-    await fetch("/usuarios/salvar-unidades", {
+    await fetch("/api/usuarios/salvar-unidades", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -480,7 +480,7 @@ async function exibirLog(idUsuario, tipo, codEmpresa = null) {
     const params = new URLSearchParams({ tipo });
     if (codEmpresa) params.append("cod_empresa", codEmpresa);
 
-    const res = await fetch(`/usuarios/${idUsuario}/log?${params}`);
+    const res = await fetch(`/api/usuarios/${idUsuario}/log?${params}`);
     const log = await res.json();
 
     const elementId = tipo === "empresas" ? "logEmpresas" : "logUnidades";
