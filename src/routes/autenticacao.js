@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const pool = require("../../db/pool");
+const pool = require("../config/database");
 const { enviarEmailRecuperacao } = require("../services/email");
 
 // ROTA DE LOGIN DE USUÁRIO

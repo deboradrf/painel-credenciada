@@ -276,6 +276,10 @@ function adicionarCampoEmail(valor = "") {
             <input type="email" class="email-input" value="${valor}">
         </div>
 
+        <button type="button" class="btn-add" onclick="adicionarCampoEmail()">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+
         <button type="button" class="btn-excluir"
             onclick="
                 const container = document.getElementById('emailsContainer');

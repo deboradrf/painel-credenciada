@@ -595,23 +595,23 @@ h3::after {
 }
 
 .btn-remove-empresa {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    border: 1.5px solid #fee2e2;
-    background: #fff5f5;
+    background: none;
+    border: none;
+    padding: 4px;
     cursor: pointer;
+    color: #F05252;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #F05252;
-    transition: all .15s;
+    transition: 0.3s ease-in-out;
+}
+
+.btn-remove-empresa i {
+    font-size: 14px;
 }
 
 .btn-remove-empresa:hover {
-    background: #fee2e2;
-    border-color: #fca5a5;
-    transform: none;
+    transform: scale(1.2);
 }
 
 .unidade-empty {
@@ -727,4 +727,13 @@ h3::after {
     margin: 0;
     font-size: 14px;
     font-weight: 500;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+    box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+    -webkit-text-fill-color: #000000 !important;
+    transition: background-color 9999s ease-in-out 0s;
 }

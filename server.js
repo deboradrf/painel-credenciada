@@ -1,4 +1,4 @@
-const pool = require("./db/pool");
+const pool = require("./src/config/database");
 const express = require("express");
 const cors = require("cors");
 const path = require("path");

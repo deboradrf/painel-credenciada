@@ -589,3 +589,12 @@ h3::after {
     transform: translateY(-50%);
     cursor: pointer;
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #F9F9F9 inset !important;
+    box-shadow: 0 0 0 1000px #F9F9F9 inset !important;
+    -webkit-text-fill-color: #000000 !important;
+    transition: background-color 9999s ease-in-out 0s;
+}

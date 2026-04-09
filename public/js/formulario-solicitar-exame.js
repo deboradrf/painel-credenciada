@@ -379,13 +379,11 @@ const limiteUnidades = 10;
 
 function ativarUnidades(ativar) {
   const container = document.getElementById("unidadesContainer");
-  const btnAdd = document.getElementById("btnAddUnidade");
   const hidden = document.getElementById("solicitarMaisUnidades");
 
   if (ativar) {
     hidden.value = "true";
     container.classList.remove("d-none");
-    btnAdd.classList.remove("d-none");
 
     if (contadorUnidades === 0) {
       adicionarUnidade();
@@ -393,7 +391,6 @@ function ativarUnidades(ativar) {
   } else {
     hidden.value = "false";
     container.classList.add("d-none");
-    btnAdd.classList.add("d-none");
     container.innerHTML = "";
     contadorUnidades = 0;
   }
@@ -421,20 +418,33 @@ function adicionarUnidade() {
   `).join("");
 
   container.insertAdjacentHTML("beforeend", `
-    <div class="form-group mt-2 unidade-extra">
-      <div class="input-wrapper">
+    <div class="form-group mt-2 unidade-extra d-flex align-items-center gap-2">
+      <div class="input-wrapper flex-grow-1">
         <div class="input-icon">
           <i class="fa-solid fa-building"></i>
         </div>
         <select class="form-control unidade-extra-select" required>
           <option value="" disabled selected>
-            Selecione a unidade adicional ${contadorUnidades}
+            Selecione a unidade adicional
           </option>
           ${options}
         </select>
       </div>
+
+      <button type="button" class="btn-add" onclick="adicionarUnidade()">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+
+      <button type="button" class="btn-remove" onclick="removerUnidade(this)">
+        <i class="fa-solid fa-trash"></i>
+      </button>
     </div>
   `);
+}
+
+function removerUnidade(btn) {
+  btn.closest(".unidade-extra").remove();
+  contadorUnidades--;
 }
 
 // MOSTRAR / OCULTAR SEÇÃO DE MUDANÇA DE FUNÇÃO E COLOCAR REQUIRED NOS CAMPOS
@@ -963,25 +973,19 @@ let contadorEmails = 0;
 const limiteEmails = 2;
 
 function ativarEmails(valor) {
-
   const inputHidden = document.getElementById("enviarMaisEmails");
   const container = document.getElementById("emailsContainer");
-  const btnAdd = document.getElementById("btnAddEmail");
 
   inputHidden.value = valor;
 
   if (valor) {
     container.classList.remove("d-none");
-    btnAdd.classList.remove("d-none");
 
     if (contadorEmails === 0) {
       adicionarEmail();
     }
-
   } else {
     container.classList.add("d-none");
-    btnAdd.classList.add("d-none");
-
     container.innerHTML = "";
     contadorEmails = 0;
   }
@@ -998,17 +1002,31 @@ function adicionarEmail() {
   const container = document.getElementById("emailsContainer");
 
   const div = document.createElement("div");
-  div.classList.add("form-group", "mt-2");
+  div.classList.add("form-group", "mt-2", "d-flex", "align-items-center", "gap-2", "email-extra");
+
   div.innerHTML = `
-        <div class="input-wrapper">
+        <div class="input-wrapper flex-grow-1">
             <div class="input-icon">
                 <i class="fa-solid fa-envelope"></i>
             </div>
             <input type="email" name="emailsExtras[]" placeholder="Digite o e-mail adicional" required>
         </div>
+
+        <button type="button" class="btn-add" onclick="adicionarEmail()">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+
+        <button type="button" class="btn-remove" onclick="removerEmail(this)">
+            <i class="fa-solid fa-trash"></i>
+        </button>
     `;
 
   container.appendChild(div);
+}
+
+function removerEmail(btn) {
+  btn.closest(".email-extra").remove();
+  contadorEmails--;
 }
 
 // FUNÇÃO PARA ENVIAR EMAIL NA HORA DA SOLICITAÇÃO

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const pool = require("../../db/pool");
+const pool = require("../config/database");
 
 // LISTAR TODOS OS USUÁRIOS (PERFIL ACESSO)
 router.get("/usuarios", async (req, res) => {

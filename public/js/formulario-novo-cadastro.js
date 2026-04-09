@@ -96,8 +96,7 @@ rgInput.addEventListener("input", function () {
 
   if (numerosAntesTraco.length > 5) {
     numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{3})(\d{1,3})/, "$1.$2.$3");
-  }
-  else if (numerosAntesTraco.length > 2) {
+  } else if (numerosAntesTraco.length > 2) {
     numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{1,3})/, "$1.$2");
   }
 
@@ -107,7 +106,36 @@ rgInput.addEventListener("input", function () {
   if (ultimoDigito) finalValue += "-" + ultimoDigito;
 
   rgInput.value = finalValue;
+
+  this.setCustomValidity("");
+  this.classList.remove("is-invalid");
 });
+
+rgInput.addEventListener("blur", function () {
+  if (!this.value.trim()) return;
+
+  const resultado = validarRG(this.value);
+
+  if (!resultado.valido) {
+    this.setCustomValidity(resultado.msg);
+    this.classList.add("is-invalid");
+    this.reportValidity();
+  } else {
+    this.setCustomValidity("");
+    this.classList.remove("is-invalid");
+  }
+});
+
+// FUNÇÃO PARA VALIDAR O RG
+function validarRG(valor) {
+  const digitos = valor.slice(2).replace(/\D/g, "");
+
+  if (digitos.length < 8) {
+    return { valido: false, msg: "RG incompleto" };
+  }
+
+  return { valido: true, msg: "" };
+}
 
 // MÁSCARA DE CPF
 const cpfInput = document.getElementById("cpf");
@@ -123,45 +151,43 @@ cpfInput.addEventListener("input", function () {
 
   this.value = value;
 
-  // VALIDAÇÃO
-  const cpfLimpo = value.replace(/\D/g, "");
+  this.setCustomValidity("");
+  this.classList.remove("is-invalid");
+});
 
-  if (cpfLimpo.length === 11) {
-    if (!validarCPF(cpfLimpo)) {
-      notify.error("CPF inválido");
-    }
+cpfInput.addEventListener("blur", function () {
+  const cpfLimpo = this.value.replace(/\D/g, "");
+
+  if (cpfLimpo === "") return;
+
+  if (!validarCPF(this.value)) {
+    this.setCustomValidity("CPF inválido ou incompleto");
+    this.classList.add("is-invalid");
+    this.reportValidity();
+  } else {
+    this.setCustomValidity("");
+    this.classList.remove("is-invalid");
   }
 });
 
-// FUNÃO PARA VALIDAR O CPF
+// FUNÇÃO PARA VALIDAR O CPF
 function validarCPF(cpf) {
   cpf = cpf.replace(/\D/g, "");
 
   if (cpf.length !== 11) return false;
-
-  if (/^(\d)\1+$/.test(cpf)) return false;
+  if (/^(\d)\1{10}$/.test(cpf)) return false;
 
   let soma = 0;
-  let resto;
-
-  for (let i = 0; i < 9; i++)
-    soma += parseInt(cpf.charAt(i)) * (10 - i);
-
-  resto = (soma * 10) % 11;
-  if (resto === 10) resto = 0;
-
-  if (resto !== parseInt(cpf.charAt(9)))
-    return false;
+  for (let i = 0; i < 9; i++) soma += parseInt(cpf[i]) * (10 - i);
+  let resto = (soma * 10) % 11;
+  if (resto === 10 || resto === 11) resto = 0;
+  if (resto !== parseInt(cpf[9])) return false;
 
   soma = 0;
-  for (let i = 0; i < 10; i++)
-    soma += parseInt(cpf.charAt(i)) * (11 - i);
-
+  for (let i = 0; i < 10; i++) soma += parseInt(cpf[i]) * (11 - i);
   resto = (soma * 10) % 11;
-  if (resto === 10) resto = 0;
-
-  if (resto !== parseInt(cpf.charAt(10)))
-    return false;
+  if (resto === 10 || resto === 11) resto = 0;
+  if (resto !== parseInt(cpf[10])) return false;
 
   return true;
 }
@@ -603,13 +629,11 @@ const limiteUnidades = 10;
 
 function ativarUnidades(ativar) {
   const container = document.getElementById("unidadesContainer");
-  const btnAdd = document.getElementById("btnAddUnidade");
   const hidden = document.getElementById("solicitarMaisUnidades");
 
   if (ativar) {
     hidden.value = "true";
     container.classList.remove("d-none");
-    btnAdd.classList.remove("d-none");
 
     if (contadorUnidades === 0) {
       adicionarUnidade();
@@ -617,7 +641,6 @@ function ativarUnidades(ativar) {
   } else {
     hidden.value = "false";
     container.classList.add("d-none");
-    btnAdd.classList.add("d-none");
     container.innerHTML = "";
     contadorUnidades = 0;
   }
@@ -644,20 +667,33 @@ function adicionarUnidade() {
     ).join("");
 
   container.insertAdjacentHTML("beforeend", `
-    <div class="form-group mt-2 unidade-extra">
-      <div class="input-wrapper">
+    <div class="form-group mt-2 unidade-extra d-flex align-items-center gap-2">
+      <div class="input-wrapper flex-grow-1">
         <div class="input-icon">
           <i class="fa-solid fa-building"></i>
         </div>
         <select class="form-control unidade-extra-select" required>
           <option value="" disabled selected>
-            Selecione a unidade adicional ${contadorUnidades}
+            Selecione a unidade adicional
           </option>
           ${options}
         </select>
       </div>
+
+      <button type="button" class="btn-add" onclick="adicionarUnidade()">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+
+      <button type="button" class="btn-remove" onclick="removerUnidade(this)">
+        <i class="fa-solid fa-trash"></i>
+      </button>
     </div>
   `);
+}
+
+function removerUnidade(btn) {
+  btn.closest(".unidade-extra").remove();
+  contadorUnidades--;
 }
 
 // FUNÇÃO PARA CARREGAR OS PRESTADORES VINCULADOS À EMPRESA LOGADA
@@ -907,16 +943,13 @@ let contadorEmails = 0;
 const limiteEmails = 2;
 
 function ativarEmails(valor) {
-
   const inputHidden = document.getElementById("enviarMaisEmails");
   const container = document.getElementById("emailsContainer");
-  const btnAdd = document.getElementById("btnAddEmail");
 
   inputHidden.value = valor;
 
   if (valor) {
     container.classList.remove("d-none");
-    btnAdd.classList.remove("d-none");
 
     if (contadorEmails === 0) {
       adicionarEmail();
@@ -924,7 +957,6 @@ function ativarEmails(valor) {
 
   } else {
     container.classList.add("d-none");
-    btnAdd.classList.add("d-none");
 
     container.innerHTML = "";
     contadorEmails = 0;
@@ -942,17 +974,31 @@ function adicionarEmail() {
   const container = document.getElementById("emailsContainer");
 
   const div = document.createElement("div");
-  div.classList.add("form-group", "mt-2");
+  div.classList.add("form-group", "mt-2", "d-flex", "align-items-center", "gap-2", "email-extra");
+
   div.innerHTML = `
-        <div class="input-wrapper">
+        <div class="input-wrapper flex-grow-1">
             <div class="input-icon">
                 <i class="fa-solid fa-envelope"></i>
             </div>
             <input type="email" name="emailsExtras[]" placeholder="Digite o e-mail adicional" required>
         </div>
+
+        <button type="button" class="btn-add" onclick="adicionarEmail()">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+
+        <button type="button" class="btn-remove" onclick="removerEmail(this)">
+            <i class="fa-solid fa-trash"></i>
+        </button>
     `;
 
   container.appendChild(div);
+}
+
+function removerEmail(btn) {
+  btn.closest(".email-extra").remove();
+  contadorEmails--;
 }
 
 // MAPA DAS CATEGORIAS DO ESOCIAL
@@ -970,13 +1016,6 @@ const codCategoriaMap = {
 // ENVIO DO FORMULÁRIO
 document.getElementById("formCadastro").addEventListener("submit", async function (e) {
   e.preventDefault();
-
-  const cpf = document.getElementById("cpf").value.replace(/\D/g, "");
-
-  if (!validarCPF(cpf)) {
-    notify.error("CPF inválido!");
-    return;
-  }
 
   const unidadeSelect = document.getElementById("unidadeSelect");
   const solicitarNovaUnidade = document.getElementById("solicitarNovaUnidade")?.checked === true;
