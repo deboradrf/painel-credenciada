@@ -1229,6 +1229,7 @@ function interpretarRetornoSOC(retorno) {
     };
   }
 
+  // ❌ erro real do SOC
   if (retorno.encontrouErro === true) {
     return {
       tipo: "INCONSISTENCIA",
@@ -1236,9 +1237,22 @@ function interpretarRetornoSOC(retorno) {
     };
   }
 
+  // ✅ SUCESSO (CRIAÇÃO OU ATUALIZAÇÃO)
+  if (
+    retorno.incluiuFuncionario === true ||
+    retorno.atualizouFuncionario === true
+  ) {
+    return {
+      tipo: "SUCESSO",
+      mensagem: null
+    };
+  }
+
+  // ⚠️ CPF duplicado (SÓ PARA CRIAÇÃO)
   if (
     retorno.encontrouFuncionario === true &&
-    retorno.incluiuFuncionario === false
+    retorno.incluiuFuncionario === false &&
+    retorno.atualizouFuncionario === false
   ) {
     return {
       tipo: "CPF_DUPLICADO",
@@ -1246,16 +1260,10 @@ function interpretarRetornoSOC(retorno) {
     };
   }
 
-  if (retorno.incluiuFuncionario !== true) {
-    return {
-      tipo: "INCONSISTENCIA",
-      mensagem: "SOC não confirmou a inclusão do funcionário"
-    };
-  }
-
+  // ❌ fallback
   return {
-    tipo: "SUCESSO",
-    mensagem: null
+    tipo: "INCONSISTENCIA",
+    mensagem: "SOC não confirmou a operação"
   };
 }
 
@@ -1321,7 +1329,7 @@ function parseRG(doc) {
 }
 
 // ENVIO AO SOC
-app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
+app.post("/enviar-cadastro-soc/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -1491,6 +1499,78 @@ app.post("/soc/funcionarios/:id/enviar", async (req, res) => {
 
     return res.status(500).json({
       erro: "Erro técnico ao enviar funcionário ao SOC",
+      detalhe: err.message
+    });
+  }
+});
+
+app.put("/inativar-cadastro-soc", async (req, res) => {
+  try {
+    const { cpf, cod_empresa } = req.body;
+
+    if (!cpf || !cod_empresa) {
+      return res.status(400).json({ erro: "CPF ou empresa não informado" });
+    }
+
+    const cpfLimpo = cpf.replace(/\D/g, "");
+
+    const client = await soap.createClientAsync(socExportaFuncionarioModelo2);
+
+    const wsSecurity = new soap.WSSecurity(
+      socUsuario,
+      socToken,
+      { passwordType: "PasswordDigest", hasTimeStamp: true }
+    );
+
+    client.setSecurity(wsSecurity);
+
+    const dataBody = {
+      Funcionario: {
+        criarFuncionario: false,
+        atualizarFuncionario: true,
+
+        identificacaoWsVo: {
+          chaveAcesso: socToken,
+          codigoEmpresaPrincipal: "412429",
+          codigoResponsavel: "198591",
+          codigoUsuario: "3403088",
+          homologacao: false
+        },
+
+        funcionarioWsVo: {
+          cpf: cpfLimpo,
+          codigoEmpresa: cod_empresa,
+          tipoBuscaEmpresa: "CODIGO_SOC",
+
+          situacao: "INATIVO",
+          chaveProcuraFuncionario: "CPF_ATIVO"
+        }
+      }
+    };
+
+    const [result] = await client.importacaoFuncionarioAsync(dataBody);
+    const retorno = result?.FuncionarioRetorno;
+
+    const resultadoSOC = interpretarRetornoSOC(retorno);
+
+    if (resultadoSOC.tipo !== "SUCESSO") {
+      return res.status(400).json({
+        erro: "Falha ao inativar no SOC",
+        detalhe: resultadoSOC.mensagem
+      });
+    }
+
+    return res.json({
+      sucesso: true,
+      mensagem: "Funcionário inativado com sucesso",
+      retornoSOC: retorno
+    });
+
+  } catch (err) {
+    console.error("❌ ERRO GERAL:", err);
+
+    return res.status(500).json({
+      erro: "Erro técnico ao inativar funcionário",
       detalhe: err.message
     });
   }
@@ -1694,6 +1774,12 @@ app.post("/enviar-email-solicitacao", async (req, res) => {
       destinoFinal = isDev
         ? "debora.fonseca@salubrita.com.br"
         : "contratos@salubrita.com.br";
+    }
+    else {
+      return res.json({
+        ok: true,
+        enviado: false
+      });
     }
 
     await transporter.sendMail({

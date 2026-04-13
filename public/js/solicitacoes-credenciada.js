@@ -2238,7 +2238,7 @@ async function enviarSOC(id) {
   if (!confirmar) return;
 
   try {
-    const res = await fetch(`/soc/funcionarios/${id}/enviar`,
+    const res = await fetch(`/enviar-cadastro-soc/${id}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

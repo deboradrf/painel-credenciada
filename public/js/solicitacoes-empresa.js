@@ -298,19 +298,16 @@ function renderizarTabela(lista) {
 function renderizarPaginacao() {
   const totalPaginas = Math.ceil(listaFiltradaAtual.length / itensPorPagina);
   const container = document.getElementById("paginacao");
-
   container.innerHTML = "";
 
   if (totalPaginas <= 1) return;
 
   // BOTÃO ANTERIOR
   const btnAnterior = document.createElement("button");
-  btnAnterior.innerHTML = "← Anterior";
-  btnAnterior.classList.add("btn", "btn-sm", "mx-1", "btn-anterior");
 
-  if (paginaAtual === 1) {
-    btnAnterior.disabled = true;
-  }
+  btnAnterior.innerHTML = "←";
+  btnAnterior.classList.add("btn", "btn-sm", "mx-1", "btn-anterior");
+  btnAnterior.disabled = paginaAtual === 1;
 
   btnAnterior.onclick = () => {
     if (paginaAtual > 1) {
@@ -321,20 +318,60 @@ function renderizarPaginacao() {
 
   container.appendChild(btnAnterior);
 
-  // TEXTO DA PÁGINA ATUAL
+  const paginas = [];
+
+  // Primeira página sempre
+  paginas.push(1);
+
+  let start = Math.max(paginaAtual - 1, 2);
+  let end = Math.min(paginaAtual + 1, totalPaginas - 1);
+
+  // Reticências antes do bloco do meio
+  if (start > 2) {
+    paginas.push("...");
+  }
+
+  // Bloco do meio (até 3 páginas)
+  for (let i = start; i <= end; i++) {
+    paginas.push(i);
+  }
+
+  // Reticências depois do bloco do meio
+  if (end < totalPaginas - 1) {
+    paginas.push("...");
+  }
+
+  // Última página sempre
+  if (totalPaginas > 1) {
+    paginas.push(totalPaginas);
+  }
+
   const info = document.createElement("small");
-  info.innerText = `Página ${paginaAtual} de ${totalPaginas}`;
+
+  info.innerHTML = paginas
+    .map(p =>
+      p === "..."
+        ? `<span class="pagina-ellipsis">...</span>`
+        : `<span class="pagina-num ${p === paginaAtual ? "active" : ""}" data-pagina="${p}">${p}</span>`
+    )
+    .join(" ");
 
   container.appendChild(info);
 
+  info.querySelectorAll(".pagina-num").forEach(el => {
+    el.style.cursor = "pointer";
+    el.onclick = () => {
+      paginaAtual = Number(el.dataset.pagina);
+      renderizarTabela(listaFiltradaAtual);
+    };
+  });
+
   // BOTÃO PRÓXIMO
   const btnProximo = document.createElement("button");
-  btnProximo.innerHTML = "Próximo →";
-  btnProximo.classList.add("btn", "btn-sm", "mx-1", "btn-proximo");
 
-  if (paginaAtual === totalPaginas) {
-    btnProximo.disabled = true;
-  }
+  btnProximo.innerHTML = "→";
+  btnProximo.classList.add("btn", "btn-sm", "mx-1", "btn-proximo");
+  btnProximo.disabled = paginaAtual === totalPaginas;
 
   btnProximo.onclick = () => {
     if (paginaAtual < totalPaginas) {
@@ -394,57 +431,56 @@ async function abrirHistorico(id, tipo) {
     };
 
     const html = `
-      <div class="timeline">
-        ${historico.map(h => {
+        <div class="timeline">
+          ${historico.map(h => {
       const dataFormatada = h.data ? new Date(h.data).toLocaleString() : "-";
       const { icon, color } = getIcon(h.etapa);
 
       return `
-            <div class="timeline-item">
-              <div class="timeline-icon">
-                <i class="fa-solid ${icon}" style="color: ${color}"></i>
-              </div>
-
-              <div class="timeline-content">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                  <h6>${h.etapa}</h6>
+              <div class="timeline-item">
+                <div class="timeline-icon">
+                  <i class="fa-solid ${icon}" style="color: ${color}"></i>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center text-muted small">
-                  <div>
-                    <i class="fa-solid fa-user me-1"></i>
-                    ${h.usuario || "-"}
+                <div class="timeline-content">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6>${h.etapa}</h6>
                   </div>
 
-                  <div>
-                    <i class="fa-regular fa-clock me-1"></i>
-                    ${dataFormatada}
+                  <div class="d-flex justify-content-between align-items-center text-muted small">
+                    <div>
+                      <i class="fa-solid fa-user me-1"></i>
+                      ${h.usuario || "-"}
+                    </div>
+
+                    <div>
+                      <i class="fa-regular fa-clock me-1"></i>
+                      ${dataFormatada}
+                    </div>
                   </div>
+
+                  ${h.motivo ? `
+                    <div class="text-danger small mt-1">
+                      <i class="fa-solid fa-ban me-1"></i>
+                      ${h.motivo}
+                    </div>
+                  ` : ""}
+
+                  ${h.erro ? `
+                    <div class="text-warning small mt-1">
+                      <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                      ${h.erro}
+                    </div>
+                  ` : ""}
                 </div>
-
-                ${h.motivo ? `
-                  <div class="text-danger small mt-1">
-                    <i class="fa-solid fa-ban me-1"></i>
-                    ${h.motivo}
-                  </div>
-                ` : ""}
-
-                ${h.erro ? `
-                  <div class="text-warning small mt-1">
-                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
-                    ${h.erro}
-                  </div>
-                ` : ""}
               </div>
-            </div>
-          `;
+            `;
     }).join("")}
-      </div>
-    `;
+        </div>
+      `;
 
     container.innerHTML = html;
     new bootstrap.Modal(document.getElementById("modalHistorico")).show();
-
   } catch (erro) {
     console.error(erro);
   }
@@ -636,6 +672,16 @@ async function cancelarSolicitacao(id, tipo, usuarioLogadoId, status, solicitarN
     statusComAviso.includes(status) || (status === "PENDENTE" && flagEspecial);
 
   try {
+    if (precisaAviso) {
+      const confirmar = await modalConfirm(
+        "Para esta solicitação, o cancelamento deve ser formalizado por e-mail, pois a solicitação já se encontra em andamento"
+      );
+
+      if (!confirmar) {
+        return;
+      }
+    }
+
     const response = await fetch(`/solicitacoes/${tipo}/${id}/cancelar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -647,16 +693,9 @@ async function cancelarSolicitacao(id, tipo, usuarioLogadoId, status, solicitarN
     const data = await response.json();
 
     if (data.sucesso) {
-      if (precisaAviso) {
-        notify.warning("Para esta solicitação, o cancelamento deve ser formalizado por e-mail");
-      }
-      else {
-        notify.success("Solicitação cancelada com sucesso!");
-      }
-
+      notify.success("Solicitação cancelada com sucesso!");
       carregarSolicitacoes();
-    }
-    else {
+    } else {
       notify.error(data.erro || "Não foi possível cancelar a solicitação");
     }
   } catch (erro) {
@@ -802,7 +841,7 @@ function preencherModalEditarCadastro(s) {
   document.getElementById("editCadNovoCargo").value = s.nome_novo_cargo;
   document.getElementById("editCadDescricaoAtividade").value = s.descricao_atividade;
   document.getElementById("editCadRac").value = formatarRac(s.rac),
-  document.getElementById("editCadTiposRac").value = formatarTiposRac(s.tipos_rac);
+    document.getElementById("editCadTiposRac").value = formatarTiposRac(s.tipos_rac);
   document.getElementById("editCadTipoExame").value = s.tipo_exame;
   document.getElementById("editCadDataExame").value = formatarDataParaInput(s.data_exame);
   document.getElementById("editCadNovaDataExame").value = formatarDataParaInput(s.nova_data_exame);
@@ -1572,7 +1611,7 @@ async function salvarEdicaoExame() {
   const nomeSetorDestino = selectSetorDestino?.options[selectSetorDestino.selectedIndex]?.text || null;
   const selectFuncaoDestino = document.getElementById("editExameFuncaoDestino");
   let nomeFuncaoDestino = selectFuncaoDestino?.options[selectFuncaoDestino.selectedIndex]?.text || null;
-  
+
   // PARA A FUNÇÃO NÃO VIR COM "Selecione..." COMO VALOR
   if (nomeFuncaoDestino === "Selecione...") {
     nomeFuncaoDestino = null;

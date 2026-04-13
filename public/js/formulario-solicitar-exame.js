@@ -619,6 +619,25 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+// SE EXAME DEMISSIONAL, MOSTRAR AVISO DE INATIVAÇÃO NA TELA
+document.addEventListener("DOMContentLoaded", () => {
+  const tipoExame = document.getElementById("tipoExame");
+
+  tipoExame.addEventListener("change", async function () {
+    if (tipoExame.value === "DEMISSIONAL") {
+
+      const confirmar = await modalConfirm(
+        "Ao enviar a solicitação de DEMISSIONAL, o cadastro do colaborador será automaticamente INATIVADO. Caso o desligamento seja suspenso, gentileza informar o setor responsável através do e-mail: credenciada@salubrita.com.br para que sejam adotadas as devidas tratativas"
+      );
+
+      if (!confirmar) {
+        tipoExame.value = "";
+        return;
+      }
+    }
+  });
+});
+
 // MOSTRAR / OCULTAR AVISO DE RETORNO AO TRABALHO
 document.addEventListener("DOMContentLoaded", () => {
   const tipoExame = document.getElementById("tipoExame");
@@ -1217,8 +1236,26 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     if (!res.ok) {
       throw new Error("Erro no envio");
     }
+
     else {
-      notify.success("Solicitação enviada com sucesso!");
+      if (dados.tipo_exame === "DEMISSIONAL") {
+        let sucessoInativacao = false;
+
+        try {
+          sucessoInativacao = await inativarFuncionarioSOC();
+        } catch (e) {
+          console.error("Erro ao inativar:", e);
+        }
+
+        if (sucessoInativacao) {
+          notify.success("Solicitação enviada e funcionário inativado com sucesso!");
+        } else {
+          notify.warning("Solicitação enviada, mas não foi possível inativar o funcionário no SOC");
+        }
+
+      } else {
+        notify.success("Solicitação enviada com sucesso!");
+      }
 
       window.scrollTo({
         top: 0,
@@ -1240,3 +1277,44 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     console.error(erro);
   }
 });
+
+async function inativarFuncionarioSOC() {
+  try {
+    const funcionario = JSON.parse(localStorage.getItem("funcionario"));
+    const empresa = getEmpresaCodigo();
+
+    if (!funcionario) {
+      console.warn("Funcionário não encontrado no localStorage");
+      return false;
+    }
+
+    const response = await fetch(`/inativar-cadastro-soc`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        cpf: funcionario.cpf,
+        cod_empresa: empresa
+      })
+    });
+
+    if (!response.ok) {
+      console.warn("Erro HTTP:", response.status);
+      return false;
+    }
+
+    const data = await response.json();
+
+    if (data?.sucesso === true) {
+      return true;
+    }
+
+    console.warn("Erro retornado:", data);
+    return false;
+
+  } catch (erro) {
+    console.error("Erro ao inativar funcionário:", erro);
+    return false;
+  }
+}
