@@ -242,38 +242,33 @@ async function renderizarTabela(lista) {
         <td class="actions">
           <div class="actions-wrapper">
             ${estaEmAnalise
-            ? `
-                <small style="opacity:0.6;">
-                  Em análise por ${s.em_analise_por_nome?.split(' ')[0]}
-                </small>
-                `
-            : `
-                <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
-                  Analisar
-                </button>
-
-                <button onclick="abrirHistorico(${s.solicitacao_id}, '${s.tipo}')">
-                  Histórico
-                </button>
-
-                ${podeEnviarSOC
-                ? `
-                    <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
-                      Enviar SOC
-                    </button>
+              ? `
+                  <small style="opacity:0.6;">
+                    Em análise por ${s.em_analise_por_nome?.split(' ')[0]}
+                  </small>
                   `
-                : ""
-                }
+              : `
+                  <button onclick="verDetalhes(${s.solicitacao_id}, '${s.tipo}')">
+                    Analisar
+                  </button>
 
-                ${["PENDENTE_UNIDADE", "PENDENTE_SC", "PENDENTE_CREDENCIAMENTO", "PENDENTE", "PENDENTE_REAVALIACAO"].includes(s.status)
-                ? `
-                    <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
-                      Cancelar
-                    </button>
+                  <button onclick="abrirHistorico(${s.solicitacao_id}, '${s.tipo}')">
+                    Histórico
+                  </button>
+
+                  ${podeEnviarSOC
+                    ? `
+                      <button type="button" onclick="enviarSOC(${s.solicitacao_id})">
+                        Enviar SOC
+                      </button>
                     `
-                : ""
-                }
-              `
+                    : ""
+                  }
+
+                  <button onclick="cancelarSolicitacao(${s.solicitacao_id}, '${s.tipo}', ${usuarioLogado.id})">
+                    Cancelar
+                  </button>
+                `
             }
             </div>
           </td>
@@ -297,18 +292,18 @@ function renderizarPaginacao() {
 
   // BOTÃO ANTERIOR
   const btnAnterior = document.createElement("button");
-  
+
   btnAnterior.innerHTML = "←";
   btnAnterior.classList.add("btn", "btn-sm", "mx-1", "btn-anterior");
   btnAnterior.disabled = paginaAtual === 1;
-  
+
   btnAnterior.onclick = () => {
     if (paginaAtual > 1) {
       paginaAtual--;
       renderizarTabela(listaFiltradaAtual);
     }
   };
-  
+
   container.appendChild(btnAnterior);
 
   const paginas = [];
@@ -340,7 +335,7 @@ function renderizarPaginacao() {
   }
 
   const info = document.createElement("small");
-  
+
   info.innerHTML = paginas
     .map(p =>
       p === "..."
@@ -361,18 +356,18 @@ function renderizarPaginacao() {
 
   // BOTÃO PRÓXIMO
   const btnProximo = document.createElement("button");
-  
+
   btnProximo.innerHTML = "→";
   btnProximo.classList.add("btn", "btn-sm", "mx-1", "btn-proximo");
   btnProximo.disabled = paginaAtual === totalPaginas;
-  
+
   btnProximo.onclick = () => {
     if (paginaAtual < totalPaginas) {
       paginaAtual++;
       renderizarTabela(listaFiltradaAtual);
     }
   };
-  
+
   container.appendChild(btnProximo);
 }
 
@@ -919,11 +914,12 @@ async function preencherModal(s, tipo) {
 
     }
 
-    if (s.unidade_destino && s.setor_destino) {
-      const codigoUnidade = await obterCodigoUnidadePorNome(
-        s.cod_empresa,
-        s.unidade_destino
-      );
+    if (s.setor_destino) {
+
+      const codigoUnidade =
+        (s.unidade_destino && s.unidade_destino.trim() !== "")
+          ? await obterCodigoUnidadePorNome(s.cod_empresa, s.unidade_destino)
+          : s.cod_unidade;
 
       window.unidadeDestinoCodigo = codigoUnidade;
 
@@ -934,7 +930,6 @@ async function preencherModal(s, tipo) {
       );
 
       if (codigoSetor) {
-
         await carregarCargosDoSetorSelecionado(
           s.cod_empresa,
           codigoUnidade,
@@ -942,7 +937,6 @@ async function preencherModal(s, tipo) {
           s.funcao_destino || "",
           "exameFuncaoDestinoSelect"
         );
-
       } else {
         console.warn("SETOR NÃO ENCONTRADO NA UNIDADE");
       }
@@ -985,7 +979,6 @@ async function preencherModal(s, tipo) {
     const selectFuncaoDestino = document.getElementById("exameFuncaoDestinoSelect");
 
     if (s.solicitar_nova_funcao === true) {
-
       spanFuncaoDestino.style.display = "none";
       selectFuncaoDestino.style.display = "block";
 
@@ -1571,7 +1564,7 @@ function preencherMaisUnidadesExame(exame) {
     bloco.classList.remove("d-none");
 
   } else {
-    
+
     bloco.classList.add("d-none");
   }
 }

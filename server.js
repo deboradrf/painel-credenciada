@@ -956,14 +956,17 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
         cnh = $31,
         vencimento_cnh = $32,
         lab_toxicologico = $33,
-        estado_credenciamento = $34,
-        cidade_credenciamento = $35,
-        observacao_credenciamento = $36,
-        observacao = $37
+        estado_clinica = $34,
+        cidade_clinica = $35,
+        nome_clinica = $36,
+        estado_credenciamento = $37,
+        cidade_credenciamento = $38,
+        observacao_credenciamento = $39,
+        observacao = $40
       WHERE id = (
         SELECT novo_cadastro_id
         FROM solicitacoes_novo_cadastro
-        WHERE id = $38
+        WHERE id = $41
       )
     `, [
       f.nome_funcionario,
@@ -999,6 +1002,9 @@ app.put("/solicitacoes/novo-cadastro/:id/editar", async (req, res) => {
       f.cnh,
       f.vencimento_cnh || null,
       f.lab_toxicologico,
+      f.estado_clinica,
+      f.cidade_clinica,
+      f.nome_clinica,
       f.estado_credenciamento,
       f.cidade_credenciamento,
       f.observacao_credenciamento,
@@ -1059,14 +1065,17 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
         cnh = $19,
         vencimento_cnh = $20,
         lab_toxicologico = $21,
-        estado_credenciamento = $22,
-        cidade_credenciamento = $23,
-        observacao_credenciamento = $24,
-        observacao = $25
+        estado_clinica = $22,
+        cidade_clinica = $23,
+        nome_clinica = $24,
+        estado_credenciamento = $25,
+        cidade_credenciamento = $26,
+        observacao_credenciamento = $27,
+        observacao = $28
       WHERE id = (
         SELECT novo_exame_id
         FROM solicitacoes_novo_exame
-        WHERE id = $26
+        WHERE id = $29
       )
     `, [
       f.nome_fantasia,
@@ -1090,6 +1099,9 @@ app.put("/solicitacoes/novo-exame/:id/editar", async (req, res) => {
       f.cnh,
       f.vencimento_cnh || null,
       f.lab_toxicologico,
+      f.estado_clinica,
+      f.cidade_clinica,
+      f.nome_clinica,
       f.estado_credenciamento,
       f.cidade_credenciamento,
       f.observacao_credenciamento,

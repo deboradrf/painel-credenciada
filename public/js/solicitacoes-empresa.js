@@ -1,3 +1,4 @@
+let prestadoresCache = [];
 let solicitacoes = [];
 
 let paginaAtual = 1;
@@ -67,6 +68,18 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("checkMostrarTudo").checked = false;
 
     aplicarFiltros();
+  });
+
+  configurarEventosClinica({
+    estado: "editCadEstadoClinica",
+    cidade: "editCadCidadeClinica",
+    clinica: "editCadNomeClinica"
+  });
+
+  configurarEventosClinica({
+    estado: "editExameEstadoClinica",
+    cidade: "editExameCidadeClinica",
+    clinica: "editExameNomeClinica"
   });
 
   carregarSolicitacoes();
@@ -728,15 +741,121 @@ async function abrirModalEditar(id, tipo) {
   const { dados: s } = await res.json();
 
   if (tipo === "NOVO_EXAME") {
-    preencherModalEditarExame(s);
+    // 1. Abre o modal já mostrando o spinner
+    const modal = new bootstrap.Modal(document.getElementById("modalEditarExame"));
+    document.getElementById("loadingModalEditarExame").style.display = "block";
+    document.getElementById("conteudoModalEditarExame").style.display = "none";
+    modal.show();
 
-    new bootstrap.Modal(document.getElementById("modalEditarExame")).show();
+    // 2. Preenche e carrega tudo em paralelo
+    preencherModalEditarExame(s);
+    await carregarPrestadores();
+    preencherPrestadorNoSelect(s, {
+      estado: "editExameEstadoClinica",
+      cidade: "editExameCidadeClinica",
+      clinica: "editExameNomeClinica"
+    });
+
+    // 3. Só agora exibe o conteúdo
+    document.getElementById("loadingModalEditarExame").style.display = "none";
+    document.getElementById("conteudoModalEditarExame").style.display = "block";
   }
   else {
-    preencherModalEditarCadastro(s);
+    // 1. Abre o modal já mostrando o spinner
+    const modal = new bootstrap.Modal(document.getElementById("modalEditarCadastro"));
+    document.getElementById("loadingModalEditarCadastro").style.display = "block";
+    document.getElementById("conteudoModalEditarCadastro").style.display = "none";
+    modal.show();
 
-    new bootstrap.Modal(document.getElementById("modalEditarCadastro")).show();
+    // 2. Preenche e carrega tudo em paralelo
+    preencherModalEditarCadastro(s);
+    await carregarPrestadores();
+    preencherPrestadorNoSelect(s, {
+      estado: "editCadEstadoClinica",
+      cidade: "editCadCidadeClinica",
+      clinica: "editCadNomeClinica"
+    });
+
+    // 3. Só agora exibe o conteúdo
+    document.getElementById("loadingModalEditarCadastro").style.display = "none";
+    document.getElementById("conteudoModalEditarCadastro").style.display = "block";
   }
+}
+
+// function preencherClinicaSelecionada(s) {
+//   const estado = s.estado_clinica;
+//   const cidade = s.cidade_clinica;
+//   const nomeClinica = s.nome_clinica;
+
+//   const selectEstado = document.getElementById("editCadEstadoClinica");
+//   const selectCidade = document.getElementById("editCadCidadeClinica");
+//   const selectClinica = document.getElementById("editCadNomeClinica");
+
+//   if (!estado) return;
+
+//   // 1. Seleciona estado
+//   selectEstado.value = estado.toUpperCase();
+
+//   // 2. Dispara o change manualmente pra carregar cidades
+//   selectEstado.dispatchEvent(new Event("change"));
+
+//   // Pequeno delay pra garantir DOM atualizado
+//   setTimeout(() => {
+//     if (cidade) {
+//       selectCidade.value = cidade;
+
+//       // dispara change pra carregar clínicas
+//       selectCidade.dispatchEvent(new Event("change"));
+
+//       setTimeout(() => {
+//         if (nomeClinica) {
+//           // seleciona pelo texto (nome)
+//           const option = [...selectClinica.options].find(
+//             opt => opt.textContent === nomeClinica
+//           );
+
+//           if (option) {
+//             selectClinica.value = option.value;
+//           }
+//         }
+//       }, 100);
+//     }
+//   }, 100);
+// }
+
+function preencherPrestadorNoSelect(s, ids) {
+  const estado = s.estado_clinica;
+  const cidade = s.cidade_clinica;
+  const nomeClinica = s.nome_clinica;
+
+  const selectEstado = document.getElementById(ids.estado);
+  const selectCidade = document.getElementById(ids.cidade);
+  const selectClinica = document.getElementById(ids.clinica);
+
+  if (!selectEstado || !estado) return;
+
+  // 1. Estado
+  selectEstado.value = estado.toUpperCase();
+  selectEstado.dispatchEvent(new Event("change"));
+
+  setTimeout(() => {
+    if (cidade) {
+      selectCidade.value = cidade;
+      selectCidade.dispatchEvent(new Event("change"));
+
+      setTimeout(() => {
+        if (nomeClinica) {
+          const option = [...selectClinica.options].find(
+            opt => opt.textContent === nomeClinica
+          );
+
+          if (option) {
+            selectClinica.value = option.value;
+          }
+        }
+      }, 100);
+    }
+  }, 100);
 }
 
 // MÁSCARA DE CEP CADASTRO
@@ -1457,6 +1576,31 @@ async function salvarEdicaoCadastro() {
     codCargo = null;
   }
 
+  const blocoClinicaCad = document.getElementById("blocoCadClinica");
+  const clinicaCadVisivel = !blocoClinicaCad.classList.contains("d-none");
+
+  const estadoClinica = document.getElementById("editCadEstadoClinica").value;
+  const cidadeClinica = document.getElementById("editCadCidadeClinica").value;
+  const selectClinica = document.getElementById("editCadNomeClinica");
+  const nomeClinica = selectClinica.options[selectClinica.selectedIndex]?.text || null;
+
+  const invalidos = ["", "Selecione..."];
+
+  if (clinicaCadVisivel) {
+    if (invalidos.includes(estadoClinica)) {
+      notify.warning("Selecione o estado da clínica!");
+      return;
+    }
+    if (invalidos.includes(cidadeClinica)) {
+      notify.warning("Selecione a cidade da clínica!");
+      return;
+    }
+    if (!nomeClinica || invalidos.includes(nomeClinica)) {
+      notify.warning("Selecione a clínica!");
+      return;
+    }
+  }
+
   const dados = {
     nome_funcionario: document.getElementById("editCadNomeFuncionario").value,
     data_nascimento: dataParaFormatoBanco(document.getElementById("editCadDataNascimento").value),
@@ -1491,6 +1635,9 @@ async function salvarEdicaoCadastro() {
     cnh: document.getElementById("editCadCNH").value,
     vencimento_cnh: dataParaFormatoBanco(document.getElementById("editCadVencimentoCNH").value),
     lab_toxicologico: document.getElementById("editCadLabToxicologico").value,
+    estado_clinica: clinicaCadVisivel ? estadoClinica : null,
+    cidade_clinica: clinicaCadVisivel ? cidadeClinica : null,
+    nome_clinica: clinicaCadVisivel ? nomeClinica : null,
     estado_credenciamento: document.getElementById("editCadEstadoCredenciamento").value,
     cidade_credenciamento: document.getElementById("editCadCidadeCredenciamento").value,
     observacao_credenciamento: document.getElementById("editCadObservacaoCredenciamento").value,
@@ -1512,7 +1659,7 @@ async function salvarEdicaoCadastro() {
   const funcaoAtiva = !cargoEl.disabled && cargoEl.offsetParent !== null;
 
   if (precisaValidarCargo && funcaoAtiva && !funcaoSelecionada) {
-    notify.error("Selecione um cargo para o setor escolhido!");
+    notify.warning("Selecione um cargo para o setor escolhido!");
     return;
   }
 
@@ -1617,6 +1764,31 @@ async function salvarEdicaoExame() {
     nomeFuncaoDestino = null;
   }
 
+  const blocoClinicaExame = document.getElementById("blocoExameClinica");
+  const clinicaExameVisivel = !blocoClinicaExame.classList.contains("d-none");
+
+  const estadoClinica = document.getElementById("editExameEstadoClinica").value;
+  const cidadeClinica = document.getElementById("editExameCidadeClinica").value;
+  const selectClinica = document.getElementById("editExameNomeClinica");
+  const nomeClinica = selectClinica.options[selectClinica.selectedIndex]?.text || null;
+
+  const invalidos = ["", "Selecione..."];
+
+  if (clinicaExameVisivel) {
+    if (invalidos.includes(estadoClinica)) {
+      notify.warning("Selecione o estado da clínica!");
+      return;
+    }
+    if (invalidos.includes(cidadeClinica)) {
+      notify.warning("Selecione a cidade da clínica!");
+      return;
+    }
+    if (!nomeClinica || invalidos.includes(nomeClinica)) {
+      notify.warning("Selecione a clínica!");
+      return;
+    }
+  }
+
   const dados = {
     nome_fantasia: document.getElementById("editExameNomeFantasia").value,
     razao_social: document.getElementById("editExameRazaoSocial").value,
@@ -1639,6 +1811,9 @@ async function salvarEdicaoExame() {
     cnh: document.getElementById("editExameCNH").value,
     vencimento_cnh: dataParaFormatoBanco(document.getElementById("editExameVencimentoCNH").value),
     lab_toxicologico: document.getElementById("editExameLabToxicologico").value,
+    estado_clinica: clinicaExameVisivel ? estadoClinica : null,
+    cidade_clinica: clinicaExameVisivel ? cidadeClinica : null,
+    nome_clinica: clinicaExameVisivel ? nomeClinica : null,
     estado_credenciamento: document.getElementById("editExameEstadoCredenciamento").value,
     cidade_credenciamento: document.getElementById("editExameCidadeCredenciamento").value,
     observacao_credenciamento: document.getElementById("editExameObservacaoCredenciamento").value,
@@ -1660,7 +1835,7 @@ async function salvarEdicaoExame() {
   const funcaoAtiva = !funcaoEl.disabled && funcaoEl.offsetParent !== null;
 
   if (precisaValidarFuncao && funcaoAtiva && !funcaoSelecionada) {
-    notify.error("Selecione uma função para o setor escolhido!");
+    notify.warning("Selecione uma função para o setor escolhido!");
     return;
   }
 
@@ -1734,8 +1909,7 @@ rgInput.addEventListener("input", function () {
 
   if (numerosAntesTraco.length > 5) {
     numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{3})(\d{1,3})/, "$1.$2.$3");
-  }
-  else if (numerosAntesTraco.length > 2) {
+  } else if (numerosAntesTraco.length > 2) {
     numerosFormatados = numerosAntesTraco.replace(/(\d{2})(\d{1,3})/, "$1.$2");
   }
 
@@ -1745,7 +1919,36 @@ rgInput.addEventListener("input", function () {
   if (ultimoDigito) finalValue += "-" + ultimoDigito;
 
   rgInput.value = finalValue;
+
+  this.setCustomValidity("");
+  this.classList.remove("is-invalid");
 });
+
+rgInput.addEventListener("blur", function () {
+  if (!this.value.trim()) return;
+
+  const resultado = validarRG(this.value);
+
+  if (!resultado.valido) {
+    this.setCustomValidity(resultado.msg);
+    this.classList.add("is-invalid");
+    this.reportValidity();
+  } else {
+    this.setCustomValidity("");
+    this.classList.remove("is-invalid");
+  }
+});
+
+// FUNÇÃO PARA VALIDAR O RG
+function validarRG(valor) {
+  const digitos = valor.slice(2).replace(/\D/g, "");
+
+  if (digitos.length < 8) {
+    return { valido: false, msg: "RG incompleto" };
+  }
+
+  return { valido: true, msg: "" };
+}
 
 // CAMPO DE NOME SEMPRE MAIÚSCULO E SEM CARACTERES ESPECIAIS
 const nomeInput = document.getElementById("editCadNomeFuncionario");
@@ -1764,3 +1967,148 @@ nomeInput.addEventListener("input", function () {
 
   this.value = valor;
 });
+
+// FUNÇÃO PARA CARREGAR OS PRESTADORES VINCULADOS À EMPRESA LOGADA
+async function carregarPrestadores() {
+  const codigoEmpresa = usuarioLogado?.cod_empresa;
+
+  if (!codigoEmpresa) {
+    console.warn("⚠️ Código da Empresa não encontrado");
+    return;
+  }
+
+  try {
+    await listarPrestadores(codigoEmpresa);
+  } catch (erro) {
+    console.error("❌ erro carregarPrestadores:", erro);
+  }
+}
+
+// LISTAR OS PRESTADORES
+async function listarPrestadores(codigoEmpresa) {
+  const res = await fetch(`/api/prestadores/${codigoEmpresa}`);
+  const prestadoresBase = await res.json();
+
+  const detalhes = [];
+
+  for (const p of prestadoresBase) {
+    const prestador = await buscarDetalhesPrestador(codigoEmpresa, p.codigo);
+
+    if (prestador && prestador.nivelClassificacao?.toUpperCase() === "PREFERENCIAL") {
+      detalhes.push(prestador);
+    }
+  }
+
+  prestadoresCache = detalhes;
+
+  const estados = extrairEstados(prestadoresCache);
+
+  popularSelectEstados(estados, "editCadEstadoClinica");
+  popularSelectEstados(estados, "editExameEstadoClinica");
+}
+
+// PEGAR OS DETALHES DO PRESTADOR
+async function buscarDetalhesPrestador(codigoEmpresa, codigo) {
+  try {
+    const url = `/api/prestador/${codigoEmpresa}/${codigo}`;
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      console.warn("❌ erro status:", res.status);
+      return null;
+    }
+
+    const dados = await res.json();
+
+    return {
+      codigo,
+      nome: dados.nomePrestador || dados.nome || "",
+      cidade: dados.cidade || "",
+      estado: dados.estado || "",
+      nivelClassificacao: dados.nivelClassificacao || ""
+    };
+
+  } catch (err) {
+    console.error("❌ erro fetch:", err);
+    return null;
+  }
+}
+
+// EXTRAÍR TODOS OS ESTADOS DAS CLÍNICAS
+function extrairEstados(prestadores) {
+  return [...new Set(
+    prestadores
+      .map(p => p.estado?.trim().toUpperCase())
+      .filter(estado => estado)
+  )].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+}
+
+// POPULAR O SELECT DE ESTADOS
+function popularSelectEstados(estados, idEstado) {
+  const select = document.getElementById(idEstado);
+
+  if (!select) return;
+
+  select.innerHTML = '<option value="">Selecione...</option>';
+
+  estados.forEach(estado => {
+    const opt = document.createElement("option");
+    opt.value = estado;
+    opt.textContent = estado;
+    select.appendChild(opt);
+  });
+}
+
+function configurarEventosClinica(ids) {
+  const selectEstado = document.getElementById(ids.estado);
+  const selectCidade = document.getElementById(ids.cidade);
+  const selectClinica = document.getElementById(ids.clinica);
+
+  if (!selectEstado || !selectCidade || !selectClinica) return;
+
+  // ESTADO → CIDADE
+  selectEstado.addEventListener("change", function () {
+    selectCidade.innerHTML = '<option value="">Selecione...</option>';
+    selectClinica.innerHTML = '<option value="">Selecione...</option>';
+
+    if (!this.value) return;
+
+    const cidadesUnicas = [...new Set(
+      prestadoresCache
+        .filter(p =>
+          p.estado?.trim().toUpperCase() === this.value.trim().toUpperCase()
+        )
+        .map(p => p.cidade)
+        .filter(Boolean)
+    )];
+
+    cidadesUnicas.forEach(cidade => {
+      const opt = document.createElement("option");
+      opt.value = cidade;
+      opt.textContent = cidade;
+      selectCidade.appendChild(opt);
+    });
+  });
+
+  // CIDADE → CLÍNICA
+  selectCidade.addEventListener("change", function () {
+    const estado = selectEstado.value;
+
+    selectClinica.innerHTML = '<option value="">Selecione...</option>';
+
+    if (!estado || !this.value) return;
+
+    const clinicas = prestadoresCache.filter(p =>
+      p.estado?.trim().toUpperCase() === estado.trim().toUpperCase() &&
+      p.cidade?.trim().toUpperCase() === this.value.trim().toUpperCase()
+    );
+
+    clinicas.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.codigo;
+      opt.textContent = p.nome;
+      selectClinica.appendChild(opt);
+    });
+  });
+}
