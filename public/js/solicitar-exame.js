@@ -24,15 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO
-  if (usuarioLogado.perfil === "CREDENCIADA") {
-    avatarIcon.classList.add("fa-hospital");
-    avatarIconDropdown.classList.add("fa-hospital");
-
-    avatarBtn.classList.add("credenciada");
-    avatarDrop.classList.add("credenciada");
-  }
-
-  if (usuarioLogado.perfil === "EMPRESA") {
+  if (usuarioLogado.perfil === "EMPRESA" || usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
     avatarIcon.classList.add("fa-city");
     avatarIconDropdown.classList.add("fa-city");
 
@@ -86,6 +78,8 @@ async function buscarCPF() {
 
     // NÃO ENCONTROU NENHUM CADASTRO
     if (!data.existe || funcionarios.length === 0) {
+      const isIntegracao = usuarioLogado.perfil === "EMPRESA_INTEGRACAO";
+
       resultado.innerHTML = `
         <div class="alerts-container mb-3">
           <div class="alert alert-nao-encontrou">
@@ -96,13 +90,15 @@ async function buscarCPF() {
           </div>
         </div>
 
-        <div class="d-flex justify-content-center my-3">
-          <button class="btn-cadastrar-funcionario"
-            onclick="window.location.href='formulario-novo-cadastro.html'">
-            <i class="fa-solid fa-user-plus" style="color: #88A6BB"></i>
-            Solicitar cadastro
-          </button>
-        </div>
+        ${!isIntegracao ? `
+          <div class="d-flex justify-content-center my-3">
+            <button class="btn-cadastrar-funcionario"
+              onclick="window.location.href='formulario-novo-cadastro.html'">
+              <i class="fa-solid fa-user-plus" style="color: #88A6BB"></i>
+              Solicitar cadastro
+            </button>
+          </div>
+        ` : ``}
       `;
       return;
     }

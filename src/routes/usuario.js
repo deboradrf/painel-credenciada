@@ -114,6 +114,32 @@ router.get("/usuarios/:id/unidades/:empresa", async (req, res) => {
     res.json(rows);
 });
 
+// POST /api/usuarios/salvar-empresa-principal
+router.post("/usuarios/salvar-empresa-principal", async (req, res) => {
+    try {
+        const { usuario_id, cod_empresa, nome_empresa, alterado_por } = req.body;
+
+        await pool.query(
+            `UPDATE usuarios
+             SET cod_empresa = $1, nome_empresa = $2
+             WHERE id = $3`,
+            [cod_empresa, nome_empresa, usuario_id]
+        );
+
+        await pool.query(
+            `INSERT INTO log_perfil_acesso (tipo, item_id, alterado_por)
+            VALUES ('empresa_principal', $1, $2)`,
+            [usuario_id, alterado_por]
+        );
+
+        res.json({ ok: true });
+
+    } catch (err) {
+        console.error("ERRO AO SALVAR EMPRESA PRINCIPAL:", err);
+        res.status(500).json({ error: "Erro ao salvar empresa principal" });
+    }
+});
+
 // SALVAR AS UNIDADES DE ACESSO DO USUÁRIO (PERFIL ACESSO)
 router.post("/usuarios/salvar-unidades", async (req, res) => {
     const { usuario_id, cod_empresa, nome_empresa, unidades, alterado_por } = req.body;

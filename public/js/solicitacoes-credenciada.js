@@ -40,14 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
     avatarDrop.classList.add("credenciada");
   }
 
-  if (usuarioLogado.perfil === "EMPRESA") {
-    avatarIcon.classList.add("fa-city");
-    avatarIconDropdown.classList.add("fa-city");
-
-    avatarBtn.classList.add("empresa");
-    avatarDrop.classList.add("empresa");
-  }
-
   // BLUR
   const profileBtn = document.querySelector(".profile-trigger");
 

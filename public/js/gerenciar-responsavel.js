@@ -33,22 +33,6 @@ async function dropdownPerfil() {
     `;
 
     // LÓGICA DOS PERFIS DE ACESSO
-    if (usuarioLogado.perfil === "CREDENCIADA") {
-        avatarIcon.classList.add("fa-hospital");
-        avatarIconDropdown.classList.add("fa-hospital");
-
-        avatarBtn.classList.add("credenciada");
-        avatarDrop.classList.add("credenciada");
-    }
-
-    if (usuarioLogado.perfil === "EMPRESA") {
-        avatarIcon.classList.add("fa-city");
-        avatarIconDropdown.classList.add("fa-city");
-
-        avatarBtn.classList.add("empresa");
-        avatarDrop.classList.add("empresa");
-    }
-
     if (usuarioLogado.perfil === "ADMINISTRADOR") {
         avatarIcon.classList.add("fa-users-gear");
         avatarIconDropdown.classList.add("fa-users-gear");

@@ -24,14 +24,6 @@ document.addEventListener("DOMContentLoaded", () => {
   `;
 
   // LÓGICA DOS PERFIS DE ACESSO
-  if (usuarioLogado.perfil === "CREDENCIADA") {
-    avatarIcon.classList.add("fa-hospital");
-    avatarIconDropdown.classList.add("fa-hospital");
-
-    avatarBtn.classList.add("credenciada");
-    avatarDrop.classList.add("credenciada");
-  }
-
   if (usuarioLogado.perfil === "EMPRESA") {
     avatarIcon.classList.add("fa-city");
     avatarIconDropdown.classList.add("fa-city");

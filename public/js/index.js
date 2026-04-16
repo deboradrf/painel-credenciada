@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
         avatarDrop.classList.add("credenciada");
     }
 
-    if (usuarioLogado.perfil === "EMPRESA") {
+    if (usuarioLogado.perfil === "EMPRESA" || usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
         cardsEmpresa.forEach(card => card.style.display = "flex");
         cardsCredenciada.forEach(card => card.style.display = "none");
         cardsAdministrador.forEach(card => card.style.display = "none");
@@ -125,6 +125,22 @@ document.addEventListener("DOMContentLoaded", () => {
         avatarDrop.classList.add("administrador");
     }
 
+    const btnNovoCadastroAdmissional = document.getElementById("btnNovoCadastroAdmissional");
+
+    if (usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
+        btnNovoCadastroAdmissional.style.opacity = "0.5";
+    }
+
+    btnNovoCadastroAdmissional.addEventListener("click", (e) => {
+        if (usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
+            e.preventDefault();
+            notify.warning("Seu perfil não tem acesso a este formulário");
+            return;
+        }
+
+        window.location.href = "solicitar-cadastro.html";
+    });
+
     // BLUR
     const profileBtn = document.querySelector(".profile-trigger");
 
@@ -139,20 +155,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // CONTROLE DA ANIMAÇÃO DOS CARDS DE ACORDO COM O PERFIL LOGADO
 document.addEventListener("DOMContentLoaded", () => {
-  if (!usuarioLogado) return;
+    if (!usuarioLogado) return;
 
-  const perfil = usuarioLogado.perfil?.trim().toLowerCase();
+    const perfil = usuarioLogado.perfil?.trim().toLowerCase();
 
-  const cardsVisiveis = document.querySelectorAll(`.card-${perfil}`);
-  const cards = cardsVisiveis.length ? cardsVisiveis : document.querySelectorAll(".card");
+    const cardsVisiveis = document.querySelectorAll(`.card-${perfil}`);
+    const cards = cardsVisiveis.length ? cardsVisiveis : document.querySelectorAll(".card");
 
-  cards.forEach((card, index) => {
-    const delay = Math.min(index * 0.1, 0.3);
+    cards.forEach((card, index) => {
+        const delay = Math.min(index * 0.1, 0.3);
 
-    card.style.animationDelay = `${delay}s`;
-    
-    card.classList.add("animate");
-  });
+        card.style.animationDelay = `${delay}s`;
+
+        card.classList.add("animate");
+    });
 });
 
 // MODAL DE AVISO

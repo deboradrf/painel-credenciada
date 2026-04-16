@@ -160,6 +160,41 @@
                 </div>
             </div>
 
+            <div class="modal fade" id="modalEmpresaPrincipal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fa-solid fa-building me-2"></i>
+                                Alterar Empresa Principal
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <label class="form-label fw-semibold">Nova empresa principal</label>
+                            <select id="selectEmpresaPrincipal" class="form-select">
+                                <option value="">Selecione uma empresa...</option>
+                            </select>
+                            <small class="text-muted mt-2 d-block">
+                                <i class="fa-solid fa-triangle-exclamation me-1 text-warning"></i>
+                                Isso substituirá a empresa principal atual do usuário.
+                            </small>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button class="btn btn-primary" onclick="salvarEmpresaPrincipal()">
+                                <i class="fa-solid fa-floppy-disk me-1"></i>
+                                Salvar
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
             <!-- MODAL DE UNIDADES -->
             <div class="modal fade" id="modalUnidades">
                 <div class="modal-dialog modal-xl modal-dialog-centered">

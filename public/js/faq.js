@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
         avatarDrop.classList.add("credenciada");
     }
 
-    if (usuarioLogado.perfil === "EMPRESA") {
+    if (usuarioLogado.perfil === "EMPRESA" || usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
         avatarIcon.classList.add("fa-city");
         avatarIconDropdown.classList.add("fa-city");
 

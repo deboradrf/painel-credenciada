@@ -45,22 +45,6 @@ async function dropdownPerfil() {
     `;
 
     // LÓGICA DOS PERFIS DE ACESSO
-    if (usuarioLogado.perfil === "CREDENCIADA") {
-        avatarIcon.classList.add("fa-hospital");
-        avatarIconDropdown.classList.add("fa-hospital");
-
-        avatarBtn.classList.add("credenciada");
-        avatarDrop.classList.add("credenciada");
-    }
-
-    if (usuarioLogado.perfil === "EMPRESA") {
-        avatarIcon.classList.add("fa-city");
-        avatarIconDropdown.classList.add("fa-city");
-
-        avatarBtn.classList.add("empresa");
-        avatarDrop.classList.add("empresa");
-    }
-
     if (usuarioLogado.perfil === "ADMINISTRADOR") {
         avatarIcon.classList.add("fa-users-gear");
         avatarIconDropdown.classList.add("fa-users-gear");
@@ -197,9 +181,9 @@ async function abrirModalEmpresas(idUsuario) {
 async function carregarTodasEmpresas() {
     const res = await fetch("/api/empresas");
     const empresas = await res.json();
-    
+
     listaTodasEmpresas.innerHTML = '<option value="">Selecione uma empresa...</option>';
-    
+
     empresas.forEach(e => {
         const opt = document.createElement("option");
         opt.value = e.codigo;
@@ -212,11 +196,11 @@ async function carregarTodasEmpresas() {
 async function carregarEmpresasUsuario(idUsuario) {
     const res = await fetch(`/api/usuarios/${idUsuario}/empresas`);
     const empresas = await res.json();
-    
+
     listaEmpresasUsuario.innerHTML = "";
-    
+
     empresas.forEach(e => adicionarEmpresaNaLista(e.cod_empresa, e.nome_empresa, e.principal));
-    
+
     atualizarEstadoLista();
 }
 
@@ -241,15 +225,75 @@ function adicionarEmpresaNaLista(cod, nome, principal = false) {
             </div>
         </div>
         ${principal
-            ? ""
+            ? `<button class="btn-editar-principal" onclick="abrirModalEmpresaPrincipal(${usuarioSelecionado}, '${cod}')">
+                    <i class="fa-solid fa-pen"></i>
+                </button>`
             : `<button class="btn-remove-empresa" onclick="removerEmpresaDaLista(this)">
-                   <i class="fa-solid fa-trash"></i>
+                    <i class="fa-solid fa-trash"></i>
                </button>`
         }
     `;
 
     listaEmpresasUsuario.appendChild(li);
     atualizarEstadoLista();
+}
+
+async function abrirModalEmpresaPrincipal(idUsuario, codAtual) {
+    usuarioSelecionado = idUsuario;
+
+    // 👉 FECHA o modal de empresas antes
+    const modalEmpresasEl = document.getElementById("modalEmpresas");
+    const modalEmpresas = bootstrap.Modal.getInstance(modalEmpresasEl);
+    if (modalEmpresas) modalEmpresas.hide();
+
+    // 👉 ABRE o modal de empresa principal
+    const modal = new bootstrap.Modal(document.getElementById("modalEmpresaPrincipal"));
+    modal.show();
+
+    // Carrega empresas
+    const res = await fetch("/api/empresas");
+    const empresas = await res.json();
+
+    const sel = document.getElementById("selectEmpresaPrincipal");
+    sel.innerHTML = '<option value="">Selecione uma empresa...</option>';
+
+    empresas.forEach(e => {
+        const opt = document.createElement("option");
+        opt.value = e.codigo;
+        opt.textContent = e.nome;
+        if (e.codigo === codAtual) opt.selected = true;
+        sel.appendChild(opt);
+    });
+}
+
+async function salvarEmpresaPrincipal() {
+    const sel = document.getElementById("selectEmpresaPrincipal");
+    const cod = sel.value;
+    const nome = sel.options[sel.selectedIndex]?.textContent?.trim();
+
+    if (!cod) return notify.error("Selecione uma empresa.");
+
+    const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
+
+    const res = await fetch("/api/usuarios/salvar-empresa-principal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            usuario_id: usuarioSelecionado,
+            cod_empresa: cod,
+            nome_empresa: nome,
+            alterado_por: usuario?.nome
+        })
+    });
+
+    if (!res.ok) return notify.error("Erro ao salvar empresa principal.");
+
+    notify.success("Empresa principal atualizada com sucesso!");
+    await carregarUsuarios();
+
+    bootstrap.Modal.getInstance(
+        document.getElementById("modalEmpresaPrincipal")
+    ).hide();
 }
 
 // FUNÇÃO PARA REMOVER EMPRESA DA LISTA
@@ -266,13 +310,13 @@ function removerEmpresaDaLista(btn) {
 // BOTÃO DE ADICIONAR EMPRESA
 btnAddEmpresa.addEventListener("click", () => {
     const opt = listaTodasEmpresas.selectedOptions[0];
-    
+
     if (!opt || !opt.value) return;
-    
+
     adicionarEmpresaNaLista(opt.value, opt.textContent.trim());
-    
+
     listaTodasEmpresas.remove(listaTodasEmpresas.selectedIndex);
-    
+
     listaTodasEmpresas.value = "";
 });
 

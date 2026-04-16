@@ -81,7 +81,7 @@ document.getElementById("perfil").addEventListener("change", async function () {
 
         // Esconder botão de adicionar unidade
         btnAddUnidade.style.display = "none";
-    } else if (perfil === "EMPRESA" || perfil === "CREDENCIADA") {
+    } else if (perfil === "EMPRESA" || perfil === "EMPRESA_INTEGRACAO" || perfil === "CREDENCIADA") {
         // Mostrar campo empresa normalmente
         empresaGroup.style.display = "block";
         selectEmpresa.required = true;

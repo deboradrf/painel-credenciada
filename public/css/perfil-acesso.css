@@ -614,6 +614,22 @@ h3::after {
     transform: scale(1.2);
 }
 
+.btn-editar-principal {
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+    font-size: 0.8rem;
+    vertical-align: middle;
+}
+
+.btn-editar-principal:hover {
+    color: #F1AE33;
+}
+
 .unidade-empty {
     display: flex;
     align-items: center;
