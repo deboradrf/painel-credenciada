@@ -46,8 +46,8 @@ async function dropdownPerfil() {
 
     // LÓGICA DOS PERFIS DE ACESSO
     if (usuarioLogado.perfil === "ADMINISTRADOR") {
-        avatarIcon.classList.add("fa-users-gear");
-        avatarIconDropdown.classList.add("fa-users-gear");
+        avatarIcon.classList.add("fa-user-gear");
+        avatarIconDropdown.classList.add("fa-user-gear");
 
         avatarBtn.classList.add("administrador");
         avatarDrop.classList.add("administrador");
@@ -129,18 +129,28 @@ function renderizarUsuarios(lista) {
             });
         }
 
+        const iconesPorPerfil = {
+            CREDENCIADA: "fa-hospital",
+            EMPRESA: "fa-building",
+            EMPRESA_INTEGRACAO: "fa-building-shield",
+            ADMINISTRADOR: "fa-user-gear"
+        };
+
+        const iconePerfil = iconesPorPerfil[u.perfil];
+
+        const corStatus = u.ativo ? "#53A5A6" : "#F1AE33";
+
         li.innerHTML = `
         <div class="usuario-card shadow-sm">
             <div class="usuario-header">
                 <div class="usuario-left">
                     <div class="usuario-avatar">
-                        <i class="fa-solid fa-user fa-lg"></i>
+                        <i class="fa-solid ${iconePerfil} fa-lg" style="color: ${corStatus};"></i>
                     </div>
 
                     <div class="usuario-text">
                         <b>${u.nome}</b>
                         <small>CPF: ${u.cpf}</small>
-                        <small>Usuário ${u.ativo ? "Ativo" : "Inativo"}</small>
                         <small>ID: ${u.id}</small> 
                     </div>
                 </div>
@@ -241,12 +251,10 @@ function adicionarEmpresaNaLista(cod, nome, principal = false) {
 async function abrirModalEmpresaPrincipal(idUsuario, codAtual) {
     usuarioSelecionado = idUsuario;
 
-    // 👉 FECHA o modal de empresas antes
     const modalEmpresasEl = document.getElementById("modalEmpresas");
     const modalEmpresas = bootstrap.Modal.getInstance(modalEmpresasEl);
     if (modalEmpresas) modalEmpresas.hide();
 
-    // 👉 ABRE o modal de empresa principal
     const modal = new bootstrap.Modal(document.getElementById("modalEmpresaPrincipal"));
     modal.show();
 

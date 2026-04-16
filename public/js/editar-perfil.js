@@ -33,17 +33,25 @@ document.addEventListener("DOMContentLoaded", () => {
         avatarDrop.classList.add("credenciada");
     }
 
-    if (usuarioLogado.perfil === "EMPRESA" || usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
-        avatarIcon.classList.add("fa-city");
-        avatarIconDropdown.classList.add("fa-city");
+    if (usuarioLogado.perfil === "EMPRESA") {
+        avatarIcon.classList.add("fa-building");
+        avatarIconDropdown.classList.add("fa-building");
+
+        avatarBtn.classList.add("empresa");
+        avatarDrop.classList.add("empresa");
+    }
+
+    if (usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
+        avatarIcon.classList.add("fa-building-shield");
+        avatarIconDropdown.classList.add("fa-building-shield");
 
         avatarBtn.classList.add("empresa");
         avatarDrop.classList.add("empresa");
     }
 
     if (usuarioLogado.perfil === "ADMINISTRADOR") {
-        avatarIcon.classList.add("fa-users-gear");
-        avatarIconDropdown.classList.add("fa-users-gear");
+        avatarIcon.classList.add("fa-user-gear");
+        avatarIconDropdown.classList.add("fa-user-gear");
 
         avatarBtn.classList.add("administrador");
         avatarDrop.classList.add("administrador");
@@ -117,8 +125,13 @@ function ajustarIcone(perfil) {
     iconCard.className = "fa-solid";
     avatarCard.classList.remove("empresa", "credenciada", "administrador");
 
-    if (perfil === "EMPRESA" || perfil === "EMPRESA_INTEGRACAO") {
-        iconCard.classList.add("fa-city");
+    if (perfil === "EMPRESA") {
+        iconCard.classList.add("fa-building");
+        avatarCard.classList.add("empresa");
+    }
+
+    if (perfil === "EMPRESA_INTEGRACAO") {
+        iconCard.classList.add("fa-building-shield");
         avatarCard.classList.add("empresa");
     }
 
@@ -128,7 +141,7 @@ function ajustarIcone(perfil) {
     }
 
     if (perfil === "ADMINISTRADOR") {
-        iconCard.classList.add("fa-users-gear");
+        iconCard.classList.add("fa-user-gear");
         avatarCard.classList.add("administrador");
     }
 }

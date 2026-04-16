@@ -34,8 +34,8 @@ async function dropdownPerfil() {
 
     // LÓGICA DOS PERFIS DE ACESSO
     if (usuarioLogado.perfil === "ADMINISTRADOR") {
-        avatarIcon.classList.add("fa-users-gear");
-        avatarIconDropdown.classList.add("fa-users-gear");
+        avatarIcon.classList.add("fa-user-gear");
+        avatarIconDropdown.classList.add("fa-user-gear");
 
         avatarBtn.classList.add("administrador");
         avatarDrop.classList.add("administrador");

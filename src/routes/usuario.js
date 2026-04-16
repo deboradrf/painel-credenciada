@@ -10,6 +10,7 @@ router.get("/usuarios", async (req, res) => {
             u.id,
             u.nome,
             u.cpf,
+            u.perfil,
             u.cod_empresa,
             u.nome_empresa,
             (

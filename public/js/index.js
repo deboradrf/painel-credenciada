@@ -101,13 +101,25 @@ document.addEventListener("DOMContentLoaded", () => {
         avatarDrop.classList.add("credenciada");
     }
 
-    if (usuarioLogado.perfil === "EMPRESA" || usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
+    if (usuarioLogado.perfil === "EMPRESA") {
         cardsEmpresa.forEach(card => card.style.display = "flex");
         cardsCredenciada.forEach(card => card.style.display = "none");
         cardsAdministrador.forEach(card => card.style.display = "none");
 
-        avatarIcon.classList.add("fa-city");
-        avatarIconDropdown.classList.add("fa-city");
+        avatarIcon.classList.add("fa-building");
+        avatarIconDropdown.classList.add("fa-building");
+
+        avatarBtn.classList.add("empresa");
+        avatarDrop.classList.add("empresa");
+    }
+
+    if (usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
+        cardsEmpresa.forEach(card => card.style.display = "flex");
+        cardsCredenciada.forEach(card => card.style.display = "none");
+        cardsAdministrador.forEach(card => card.style.display = "none");
+
+        avatarIcon.classList.add("fa-building-shield");
+        avatarIconDropdown.classList.add("fa-building-shield");
 
         avatarBtn.classList.add("empresa");
         avatarDrop.classList.add("empresa");
@@ -118,8 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cardsEmpresa.forEach(card => card.style.display = "none");
         cardsCredenciada.forEach(card => card.style.display = "none");
 
-        avatarIcon.classList.add("fa-users-gear");
-        avatarIconDropdown.classList.add("fa-users-gear");
+        avatarIcon.classList.add("fa-user-gear");
+        avatarIconDropdown.classList.add("fa-user-gear");
 
         avatarBtn.classList.add("administrador");
         avatarDrop.classList.add("administrador");
