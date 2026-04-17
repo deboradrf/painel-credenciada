@@ -106,20 +106,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cardsCredenciada.forEach(card => card.style.display = "none");
         cardsAdministrador.forEach(card => card.style.display = "none");
 
-        avatarIcon.classList.add("fa-building");
-        avatarIconDropdown.classList.add("fa-building");
-
-        avatarBtn.classList.add("empresa");
-        avatarDrop.classList.add("empresa");
-    }
-
-    if (usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
-        cardsEmpresa.forEach(card => card.style.display = "flex");
-        cardsCredenciada.forEach(card => card.style.display = "none");
-        cardsAdministrador.forEach(card => card.style.display = "none");
-
-        avatarIcon.classList.add("fa-building-shield");
-        avatarIconDropdown.classList.add("fa-building-shield");
+        avatarIcon.classList.add("fa-city");
+        avatarIconDropdown.classList.add("fa-city");
 
         avatarBtn.classList.add("empresa");
         avatarDrop.classList.add("empresa");
@@ -139,17 +127,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const btnNovoCadastroAdmissional = document.getElementById("btnNovoCadastroAdmissional");
 
-    if (usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
-        btnNovoCadastroAdmissional.style.opacity = "0.5";
-    }
-
     btnNovoCadastroAdmissional.addEventListener("click", (e) => {
-        if (usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
+        // BLOQUEIO POR CÓDIGO DA EMPRESA
+        if (empresasBloqueadas[codigoEmpresa]) {
             e.preventDefault();
-            notify.warning("Seu perfil não tem acesso a este formulário");
+            notify.warning("Sua empresa não tem permissão para acessar este formulário");
             return;
         }
 
+        // LIBERADO
         window.location.href = "solicitar-cadastro.html";
     });
 
@@ -164,6 +150,24 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.classList.remove("blur-main");
     });
 });
+
+// MAPA DE EMPRESAS BLOQUEADAS
+const empresasBloqueadas = {
+    "1478760": true,
+    "427755": true,
+    "1631807": true,
+    "1934538": true,
+    "1990616": true,
+    "1583990": true,
+    "1941936": true,
+    "1940507": true,
+    "2075521": true,
+    "1669275": true,
+    "1618703": true,
+    "2046293": true,
+    "1452450": true,
+    "1963847": true
+};
 
 // CONTROLE DA ANIMAÇÃO DOS CARDS DE ACORDO COM O PERFIL LOGADO
 document.addEventListener("DOMContentLoaded", () => {

@@ -131,8 +131,7 @@ function renderizarUsuarios(lista) {
 
         const iconesPorPerfil = {
             CREDENCIADA: "fa-hospital",
-            EMPRESA: "fa-building",
-            EMPRESA_INTEGRACAO: "fa-building-shield",
+            EMPRESA: "fa-city",
             ADMINISTRADOR: "fa-user-gear"
         };
 

@@ -38,16 +38,8 @@ async function dropdownPerfil() {
     }
 
     if (usuarioLogado.perfil === "EMPRESA") {
-        avatarIcon.classList.add("fa-building");
-        avatarIconDropdown.classList.add("fa-building");
-
-        avatarBtn.classList.add("empresa");
-        avatarDrop.classList.add("empresa");
-    }
-
-    if (usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
-        avatarIcon.classList.add("fa-building-shield");
-        avatarIconDropdown.classList.add("fa-building-shield");
+        avatarIcon.classList.add("fa-city");
+        avatarIconDropdown.classList.add("fa-city");
 
         avatarBtn.classList.add("empresa");
         avatarDrop.classList.add("empresa");

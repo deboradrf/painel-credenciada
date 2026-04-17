@@ -34,16 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (usuarioLogado.perfil === "EMPRESA") {
-        avatarIcon.classList.add("fa-building");
-        avatarIconDropdown.classList.add("fa-building");
-
-        avatarBtn.classList.add("empresa");
-        avatarDrop.classList.add("empresa");
-    }
-
-    if (usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
-        avatarIcon.classList.add("fa-building-shield");
-        avatarIconDropdown.classList.add("fa-building-shield");
+        avatarIcon.classList.add("fa-city");
+        avatarIconDropdown.classList.add("fa-city");
 
         avatarBtn.classList.add("empresa");
         avatarDrop.classList.add("empresa");
@@ -97,10 +89,6 @@ function preencherTela(user) {
         document.getElementById("perfilTipo").innerText = "Perfil Empresa";
     }
 
-    if (user.perfil === "EMPRESA_INTEGRACAO") {
-        document.getElementById("perfilTipo").innerText = "Perfil Empresa Integração";
-    }
-
     if (user.perfil === "CREDENCIADA") {
         document.getElementById("perfilTipo").innerText = "Perfil Credenciada";
     }
@@ -126,12 +114,7 @@ function ajustarIcone(perfil) {
     avatarCard.classList.remove("empresa", "credenciada", "administrador");
 
     if (perfil === "EMPRESA") {
-        iconCard.classList.add("fa-building");
-        avatarCard.classList.add("empresa");
-    }
-
-    if (perfil === "EMPRESA_INTEGRACAO") {
-        iconCard.classList.add("fa-building-shield");
+        iconCard.classList.add("fa-city");
         avatarCard.classList.add("empresa");
     }
 

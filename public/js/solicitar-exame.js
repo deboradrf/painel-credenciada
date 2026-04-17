@@ -25,16 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // LÓGICA DOS PERFIS DE ACESSO
   if (usuarioLogado.perfil === "EMPRESA") {
-    avatarIcon.classList.add("fa-building");
-    avatarIconDropdown.classList.add("fa-building");
-
-    avatarBtn.classList.add("empresa");
-    avatarDrop.classList.add("empresa");
-  }
-
-  if (usuarioLogado.perfil === "EMPRESA_INTEGRACAO") {
-    avatarIcon.classList.add("fa-building-shield");
-    avatarIconDropdown.classList.add("fa-building-shield");
+    avatarIcon.classList.add("fa-city");
+    avatarIconDropdown.classList.add("fa-city");
 
     avatarBtn.classList.add("empresa");
     avatarDrop.classList.add("empresa");
@@ -84,9 +76,27 @@ async function buscarCPF() {
       funcionarios = [data.funcionario];
     }
 
+    // MAPA DE EMPRESAS BLOQUEADAS
+    const empresasBloqueadas = {
+      "1478760": true,
+      "427755": true,
+      "1631807": true,
+      "1934538": true,
+      "1990616": true,
+      "1583990": true,
+      "1941936": true,
+      "1940507": true,
+      "2075521": true,
+      "1669275": true,
+      "1618703": true,
+      "2046293": true,
+      "1452450": true,
+      "1963847": true
+    };
+
     // NÃO ENCONTROU NENHUM CADASTRO
     if (!data.existe || funcionarios.length === 0) {
-      const isIntegracao = usuarioLogado.perfil === "EMPRESA_INTEGRACAO";
+      const isEmpresaBloqueada = empresasBloqueadas[empresaUsuario];
 
       resultado.innerHTML = `
         <div class="alerts-container mb-3">
@@ -98,7 +108,7 @@ async function buscarCPF() {
           </div>
         </div>
 
-        ${!isIntegracao ? `
+        ${(!isEmpresaBloqueada) ? `
           <div class="d-flex justify-content-center my-3">
             <button class="btn-cadastrar-funcionario"
               onclick="window.location.href='formulario-novo-cadastro.html'">
@@ -110,7 +120,7 @@ async function buscarCPF() {
       `;
       return;
     }
-    
+
     // ENCONTROU ALGUM CADASTRO
     resultado.innerHTML = `
       <div class="alerts-container mb-3">
@@ -123,9 +133,9 @@ async function buscarCPF() {
       </div>
       
       ${funcionarios.map((f) => {
-        const situacao = f.situacao?.toLowerCase();
-        
-        return `
+      const situacao = f.situacao?.toLowerCase();
+
+      return `
         <div class="funcionario-card shadow-sm text-center my-4">
           <div class="card-header mb-3">
             <div class="detail-value">
@@ -211,7 +221,7 @@ async function buscarCPF() {
 
           <div class="card-footer text-body-secondary mt-4">
             ${situacao === "ativo" || situacao === "pendente"
-            ? `
+          ? `
                 <div class="d-flex justify-content-center">
                   <button class="btn-solicitar-exame"
                     onclick="salvarFuncionario(${JSON.stringify(f).replace(/"/g, '&quot;')}); window.location.href='formulario-solicitar-exame.html'">
@@ -219,8 +229,8 @@ async function buscarCPF() {
                     Solicitar exame para este funcionário
                   </button>
                 </div> `
-            : ` <small>Não é possível solicitar exame para este funcionário</small> `
-            }
+          : ` <small>Não é possível solicitar exame para este funcionário</small> `
+        }
           </div>
         </div>
       `}).join("")}

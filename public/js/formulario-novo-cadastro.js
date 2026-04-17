@@ -32,8 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // LÓGICA DOS PERFIS DE ACESSO
   if (usuarioLogado.perfil === "EMPRESA") {
-    avatarIcon.classList.add("fa-building");
-    avatarIconDropdown.classList.add("fa-building");
+    avatarIcon.classList.add("fa-city");
+    avatarIconDropdown.classList.add("fa-city");
 
     avatarBtn.classList.add("empresa");
     avatarDrop.classList.add("empresa");
@@ -997,7 +997,7 @@ function removerEmail(btn) {
 const codCategoriaMap = {
   CLT: "101",
   COOPERADO: "741",
-  TERCEIRIZADO: "102",
+  TERCERIZADO: "701",
   AUTONOMO: "701",
   TEMPORARIO: "106",
   PESSOA_JURIDICA: "701",
