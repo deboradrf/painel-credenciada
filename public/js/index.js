@@ -166,7 +166,8 @@ const empresasBloqueadas = {
     "1618703": true,
     "2046293": true,
     "1452450": true,
-    "1963847": true
+    "1963847": true,
+    "751836": true
 };
 
 // CONTROLE DA ANIMAÇÃO DOS CARDS DE ACORDO COM O PERFIL LOGADO

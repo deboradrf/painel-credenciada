@@ -91,7 +91,8 @@ async function buscarCPF() {
       "1618703": true,
       "2046293": true,
       "1452450": true,
-      "1963847": true
+      "1963847": true,
+      "751836": true,
     };
 
     // NÃO ENCONTROU NENHUM CADASTRO
