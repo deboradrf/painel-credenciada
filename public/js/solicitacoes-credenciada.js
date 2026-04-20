@@ -1573,30 +1573,45 @@ async function carregarPrestadoresPreferenciais(codEmpresa, selectId, clinicaSel
 
   select.innerHTML = '<option value="">-</option>';
 
-  for (const p of prestadores) {
+  const preferenciais = [];
+
+  // Busca todos os detalhes em paralelo (bem mais rápido)
+  const promessas = prestadores.map(async (p) => {
     try {
       const detalheRes = await fetch(`/api/prestador/${codEmpresa}/${p.codigo}`);
 
-      if (!detalheRes.ok) {
-        console.warn("Erro ao buscar detalhe:", p.codigo);
-        continue;
-      }
+      if (!detalheRes.ok) return;
 
       const detalhe = await detalheRes.json();
 
-      if (!detalhe.nivelClassificacao || detalhe.nivelClassificacao.toUpperCase() !== "PREFERENCIAL") continue;
-
-      const option = document.createElement("option");
-      option.value = p.codigo;
-      option.textContent = p.nome;
-
-      if (p.nome === clinicaSelecionada)
-        option.selected = true;
-
-      select.appendChild(option);
+      if (
+        detalhe.nivelClassificacao &&
+        detalhe.nivelClassificacao.toUpperCase() === "PREFERENCIAL"
+      ) {
+        preferenciais.push(p);
+      }
     } catch (erro) {
       console.error(erro);
     }
+  });
+
+  await Promise.all(promessas);
+
+  // Ordena alfabeticamente pelo nome
+  preferenciais.sort((a, b) =>
+    a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
+  );
+
+  // Renderiza
+  for (const p of preferenciais) {
+    const option = document.createElement("option");
+    option.value = p.codigo;
+    option.textContent = p.nome;
+
+    if (p.nome === clinicaSelecionada)
+      option.selected = true;
+
+    select.appendChild(option);
   }
 }
 
