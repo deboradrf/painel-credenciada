@@ -1568,35 +1568,28 @@ async function carregarPrestadoresPreferenciais(codEmpresa, selectId, clinicaSel
   const select = document.getElementById(selectId);
   if (!select) return;
 
-  const res = await fetch(`/api/prestadores/${codEmpresa}`);
-  const prestadores = await res.json();
+  select.innerHTML = '<option value="">Carregando...</option>';
 
-  select.innerHTML = '<option value="">-</option>';
+  try {
+    const res = await fetch(`/api/prestadores/${codEmpresa}/detalhes`);
+    const prestadores = await res.json();
 
-  for (const p of prestadores) {
-    try {
-      const detalheRes = await fetch(`/api/prestador/${codEmpresa}/${p.codigo}`);
+    select.innerHTML = '<option value="">-</option>';
 
-      if (!detalheRes.ok) {
-        console.warn("Erro ao buscar detalhe:", p.codigo);
-        continue;
-      }
-
-      const detalhe = await detalheRes.json();
-
-      if (!detalhe.nivelClassificacao || detalhe.nivelClassificacao.toUpperCase() !== "PREFERENCIAL") continue;
-
+    for (const p of prestadores) {
       const option = document.createElement("option");
       option.value = p.codigo;
       option.textContent = p.nome;
 
-      if (p.nome === clinicaSelecionada)
+      if (p.nome === clinicaSelecionada) {
         option.selected = true;
+      }
 
       select.appendChild(option);
-    } catch (erro) {
-      console.error(erro);
     }
+
+  } catch (erro) {
+    console.error("Erro ao carregar prestadores:", erro);
   }
 }
 

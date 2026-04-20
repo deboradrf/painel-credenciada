@@ -741,7 +741,7 @@ async function abrirModalEditar(id, tipo) {
 
     // 2. Preenche e carrega tudo em paralelo
     preencherModalEditarExame(s);
-    await carregarPrestadores();
+    await carregarPrestadores(s.cod_empresa);
     preencherPrestadorNoSelect(s, {
       estado: "editExameEstadoClinica",
       cidade: "editExameCidadeClinica",
@@ -761,7 +761,7 @@ async function abrirModalEditar(id, tipo) {
 
     // 2. Preenche e carrega tudo em paralelo
     preencherModalEditarCadastro(s);
-    await carregarPrestadores();
+    await carregarPrestadores(s.cod_empresa);
     preencherPrestadorNoSelect(s, {
       estado: "editCadEstadoClinica",
       cidade: "editCadCidadeClinica",
@@ -1961,9 +1961,7 @@ nomeInput.addEventListener("input", function () {
 });
 
 // FUNÇÃO PARA CARREGAR OS PRESTADORES VINCULADOS À EMPRESA LOGADA
-async function carregarPrestadores() {
-  const codigoEmpresa = usuarioLogado?.cod_empresa;
-
+async function carregarPrestadores(codigoEmpresa) {
   if (!codigoEmpresa) {
     console.warn("⚠️ Código da Empresa não encontrado");
     return;
@@ -1978,18 +1976,8 @@ async function carregarPrestadores() {
 
 // LISTAR OS PRESTADORES
 async function listarPrestadores(codigoEmpresa) {
-  const res = await fetch(`/api/prestadores/${codigoEmpresa}`);
-  const prestadoresBase = await res.json();
-
-  const detalhes = [];
-
-  for (const p of prestadoresBase) {
-    const prestador = await buscarDetalhesPrestador(codigoEmpresa, p.codigo);
-
-    if (prestador && prestador.nivelClassificacao?.toUpperCase() === "PREFERENCIAL") {
-      detalhes.push(prestador);
-    }
-  }
+  const res = await fetch(`/api/prestadores/${codigoEmpresa}/detalhes`);
+  const detalhes = await res.json();
 
   prestadoresCache = detalhes;
 
@@ -1997,34 +1985,6 @@ async function listarPrestadores(codigoEmpresa) {
 
   popularSelectEstados(estados, "editCadEstadoClinica");
   popularSelectEstados(estados, "editExameEstadoClinica");
-}
-
-// PEGAR OS DETALHES DO PRESTADOR
-async function buscarDetalhesPrestador(codigoEmpresa, codigo) {
-  try {
-    const url = `/api/prestador/${codigoEmpresa}/${codigo}`;
-
-    const res = await fetch(url);
-
-    if (!res.ok) {
-      console.warn("❌ erro status:", res.status);
-      return null;
-    }
-
-    const dados = await res.json();
-
-    return {
-      codigo,
-      nome: dados.nomePrestador || dados.nome || "",
-      cidade: dados.cidade || "",
-      estado: dados.estado || "",
-      nivelClassificacao: dados.nivelClassificacao || ""
-    };
-
-  } catch (err) {
-    console.error("❌ erro fetch:", err);
-    return null;
-  }
 }
 
 // EXTRAÍR TODOS OS ESTADOS DAS CLÍNICAS
@@ -2073,7 +2033,8 @@ function configurarEventosClinica(ids) {
         )
         .map(p => p.cidade)
         .filter(Boolean)
-    )];
+    )]
+    .sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
 
     cidadesUnicas.forEach(cidade => {
       const opt = document.createElement("option");
