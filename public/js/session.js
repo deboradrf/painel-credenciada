@@ -112,6 +112,8 @@ async function logout(expirada = false) {
   sessionStorage.removeItem("empresaUnidades");
   sessionStorage.removeItem("usuarioLogado");
 
+  localStorage.removeItem("funcionario");
+
   if (expirada) {
     await modalConfirm("Sessão expirada. Faça login novamente.");
   }
