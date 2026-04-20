@@ -297,9 +297,10 @@ router.get("/hierarquia/:empresa/:unidade/:setor", async (req, res) => {
   }
 });
 
-// EXPORTA DADOS - PRESTADORES DE UMA EMPRESA
-router.get("/prestadores/:empresa", async (req, res) => {
+// RETORNA PRESTADORES PREFERENCIAIS JÁ COM DETALHES
+router.get("/prestadores/:empresa/detalhes", async (req, res) => {
   try {
+    // 1. Busca lista base
     const parametro = JSON.stringify({
       empresa: req.params.empresa,
       ...EXPORTA_PRESTADORES,
@@ -315,95 +316,68 @@ router.get("/prestadores/:empresa", async (req, res) => {
     let xml = iconv.decode(response.data, "ISO-8859-1");
     xml = xml.replace(/&(?!(amp|lt|gt|quot|apos);)/g, "&amp;");
 
-    const parser = new XMLParser({ ignoreAttributes: false });
     const json = parser.parse(xml);
 
     const registros = json?.root?.record
-      ? Array.isArray(json.root.record)
-        ? json.root.record
-        : [json.root.record]
+      ? Array.isArray(json.root.record) ? json.root.record : [json.root.record]
       : [];
 
-    // APENAS PRESTADORES ATIVOS (EXCLUIR PRESTADOR REAVALIADO)
-    const prestadores = registros
-      .filter(p =>
-        p.statusPrestador === "Ativo" &&
-        p.nomePrestador?.trim().toUpperCase() !== "REAVALIADO"
-      )
-      .map(p => ({
-        codigo: p.codigoPrestador,
-        nome: p.nomePrestador,
-        cnpj: p.cnpjPrestador,
-        cpf: p.cpfPrestador,
-        status: p.statusPrestador
+    const prestadoresAtivos = registros.filter(p =>
+      p.statusPrestador === "Ativo" &&
+      p.nomePrestador?.trim().toUpperCase() !== "REAVALIADO"
+    );
+
+    // 2. Busca detalhes em paralelo — no backend o limite do SOC pode ser diferente,
+    //    mas mantemos lotes de 5 por segurança
+    const LOTE = 5;
+    const detalhes = [];
+
+    for (let i = 0; i < prestadoresAtivos.length; i += LOTE) {
+      const lote = prestadoresAtivos.slice(i, i + LOTE);
+
+      const resultados = await Promise.all(lote.map(async (p) => {
+        try {
+          const parametroDetalhe = JSON.stringify({
+            ...EXPORTA_DETALHES_PRESTADOR,
+            codigoPrestador: p.codigoPrestador
+          });
+
+          const payload = new URLSearchParams({ parametro: parametroDetalhe });
+
+          const socResponse = await axios.post(socUrlExportaDados, payload, {
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            responseType: "arraybuffer"
+          });
+
+          const decoded = iconv.decode(socResponse.data, "ISO-8859-1");
+          if (!decoded.trim().startsWith("[") && !decoded.trim().startsWith("{")) return null;
+
+          const data = JSON.parse(decoded);
+          const lista = Array.isArray(data) ? data : [];
+          const prestador = lista.find(d => String(d.codigoPrestador) === String(p.codigoPrestador));
+
+          if (!prestador || prestador.nivelClassificacao?.toUpperCase() !== "PREFERENCIAL") return null;
+
+          return {
+            codigo: p.codigoPrestador,
+            nome: prestador.nomePrestador || prestador.nome || "",
+            cidade: prestador.cidade || "",
+            estado: prestador.estado || "",
+            nivelClassificacao: prestador.nivelClassificacao || ""
+          };
+        } catch {
+          return null;
+        }
       }));
 
-    res.json(prestadores);
-
-  } catch (err) {
-    console.error("Erro ao buscar prestadores:", err);
-    res.status(500).json({ erro: "Erro ao buscar prestadores" });
-  }
-});
-
-// EXPORTA DADOS - DETALHES DE UM PRESTADOR
-router.get("/prestador/:empresa/:codigoPrestador", async (req, res) => {
-  try {
-    const { codigoPrestador } = req.params;
-
-    const parametro = JSON.stringify({
-      ...EXPORTA_DETALHES_PRESTADOR,
-      codigoPrestador
-    });
-
-    const payload = new URLSearchParams({ parametro });
-
-    const socResponse = await axios.post(
-      socUrlExportaDados,
-      payload,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        responseType: "arraybuffer"
-      }
-    );
-
-    const decoded = iconv.decode(socResponse.data, "ISO-8859-1");
-
-    // 🔎 verifica se o retorno parece JSON
-    if (!decoded.trim().startsWith("[") && !decoded.trim().startsWith("{")) {
-
-      console.warn("SOC retornou texto:", decoded);
-
-      return res.status(500).json({
-        erro: "SOC retornou resposta inválida",
-        detalhe: decoded
-      });
+      detalhes.push(...resultados.filter(Boolean));
     }
 
-    const data = JSON.parse(decoded);
-
-    const lista = Array.isArray(data) ? data : [];
-
-    const prestador = lista.find(
-      p => String(p.codigoPrestador) === String(codigoPrestador)
-    );
-
-    if (!prestador) {
-      return res.status(404).json({
-        erro: "Prestador não encontrado"
-      });
-    }
-
-    res.json(prestador);
+    res.json(detalhes);
 
   } catch (err) {
-    console.error("Erro SOC:", err.response?.data || err.message);
-
-    res.status(500).json({
-      erro: "Erro ao consultar SOC"
-    });
+    console.error("Erro ao buscar detalhes dos prestadores:", err);
+    res.status(500).json({ erro: "Erro ao buscar detalhes dos prestadores" });
   }
 });
 

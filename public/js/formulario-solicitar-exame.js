@@ -706,8 +706,6 @@ async function carregarPrestadores() {
   if (!select) return;
 
   try {
-    await fetch(`/api/prestadores/${codigoEmpresa}`);
-
     await listarPrestadores();
 
   } catch (erro) {
@@ -717,51 +715,10 @@ async function carregarPrestadores() {
 
 // LISTAR OS PRESTADORES
 async function listarPrestadores() {
-  const res = await fetch(`/api/prestadores/${codigoEmpresa}`);
-  const prestadoresBase = await res.json();
-
-  const detalhes = [];
-
-  for (const p of prestadoresBase) {
-    const prestador = await buscarDetalhesPrestador(p.codigo);
-
-    if (prestador && prestador.nivelClassificacao?.toUpperCase() === "PREFERENCIAL") {
-      detalhes.push(prestador);
-    }
-  }
-
-  prestadoresCache = detalhes;
-
-  // console.table(
-  //   prestadoresCache.map(p => ({
-  //     codigo: p.codigo,
-  //     estado: p.estado,
-  //     cidade: p.cidade,
-  //     nivel: p.nivelClassificacao
-  //   }))
-  // );
+  const res = await fetch(`/api/prestadores/${codigoEmpresa}/detalhes`);
+  prestadoresCache = await res.json();
 
   popularSelectEstados(extrairEstados(prestadoresCache));
-}
-
-// PEGAR OS DETALHES DO PRESTADOR
-async function buscarDetalhesPrestador(codigo) {
-  try {
-    const res = await fetch(`/api/prestador/${codigoEmpresa}/${codigo}`);
-    if (!res.ok) throw new Error();
-
-    const dados = await res.json();
-
-    return {
-      codigo,
-      nome: dados.nomePrestador || dados.nome || "",
-      cidade: dados.cidade || "",
-      estado: dados.estado || "",
-      nivelClassificacao: dados.nivelClassificacao || ""
-    };
-  } catch {
-    return null;
-  }
 }
 
 // EXTRAÍR TODOS OS ESTADOS DAS CLÍNICAS
