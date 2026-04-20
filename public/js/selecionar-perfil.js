@@ -44,27 +44,33 @@ function entrar(permissao) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById("btnGerenciarAcessos");
+    const btnGerenciarAcessos = document.getElementById("btnGerenciarAcessos");
+    const btnCadastrar = document.getElementById("btnCadastrar");
 
     const usuarioLogado = JSON.parse(sessionStorage.getItem("usuarioLogado"));
 
-    if (!btn || !usuarioLogado) return;
+    if (!usuarioLogado) return;
 
     const permissao = usuarioLogado.permissao;
 
-    if (permissao === "engenharia") {
-        btn.disabled = true;
-        btn.style.opacity = "0.5";
-        btn.style.cursor = "not-allowed";
+    const botoes = [btnGerenciarAcessos, btnCadastrar];
 
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
-        });
-    }
-    else {
-        btn.disabled = false;
-        btn.style.opacity = "1";
-        btn.style.cursor = "pointer";
-        btn.title = "";
-    }
+    botoes.forEach(btn => {
+        if (!btn) return;
+
+        if (permissao === "engenharia") {
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+            btn.style.cursor = "not-allowed";
+
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+            });
+        } else {
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            btn.style.cursor = "pointer";
+            btn.title = "";
+        }
+    });
 });

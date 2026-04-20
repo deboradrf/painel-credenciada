@@ -1,3 +1,20 @@
+(async function verificarPermissao() {
+    const sessao = sessionStorage.getItem("usuarioLogado");
+
+    let dados;
+    try {
+        dados = JSON.parse(sessao);
+    } catch (e) {
+        window.location.href = "/pages/login.html";
+        return;
+    }
+
+    if (!dados || dados.permissao !== "adm") {
+        await modalConfirm("Você não tem permissão para acessar esta página. Faça login como ADM");
+        window.location.href = "/pages/login.html";
+    }
+})();
+
 // MÁSCARA DE CPF
 const cpfInput = document.getElementById("cpf");
 

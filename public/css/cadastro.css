@@ -334,21 +334,6 @@ h3::after {
     color: red;
 }
 
-.possui-cadastro {
-    display: flex;
-    justify-content: center;
-    margin-top: 30px;
-}
-
-.possui-cadastro span {
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-.possui-cadastro span a {
-    color: #000000;
-}
-
 input:-webkit-autofill,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
