@@ -83,10 +83,6 @@ router.post("/login", async (req, res) => {
 
 // ROTA DE CADASTRO DE USUÁRIO
 router.post("/cadastro", async (req, res) => {
-  if (usuario.permissao !== "adm") {
-    return res.status(403).json({ erro: "Sem permissão" });
-  }
-
   try {
     const { nome, cpf, email, senha, perfil, cod_empresa, nome_empresa, unidades } = req.body;
 
